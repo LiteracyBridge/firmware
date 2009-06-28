@@ -1,0 +1,616 @@
+Version: 3.0
+Options: m37
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\Resource.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\NAND_SD_USB_Test.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\mainLoop.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\parsing.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\startup.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\timeline.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\util.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\device.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\files.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\lists.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\audio.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\macro.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\containers.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\pkg_ops.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\sys_counters.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\SD.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\FS_user_nos.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\nls_ascii.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\DrvStruct.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\NAND2.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\NAND.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\FS_DS.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\SCSI_Table.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\IOKeyScan.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\startup_Data.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\ServiceLoop.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\SysWaitMode.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\SysOn2OffHook.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\SysIntoHighSpeed.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\SysIntorWaitMode.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\SysOff2OnHook.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\SysIntoHaltMode.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\SysException.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\ExtMemOper.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\ucBS_Hook.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\main.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\BodyInit.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\USBD.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\USBD_Drv.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\USB_ID.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\USB_Flash_reprog.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\Flash_reprog_boot.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\Flash_reprog_Drv.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\SystemIntoUSB.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\isr.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\USBD_Export.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\Space.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\SD_reprog_finish.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\SD_reprog.obj"
+Obj: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\libgloss.obj"
+Lib: "C:\Program Files\Generalplus\unSPIDE 3.0.1\library\CLib32\lib\CLib1232.lib"
+Lib: "C:\USB_JUNK\ghana4\Ghana4Mem\.\Component\Lib\GPL162002_RecordPen_v001.lib"
+Lib: "C:\USB_JUNK\ghana4\Ghana4Mem\.\Component\Lib\SPL162002FS.lib"
+Lib: "C:\Program Files\Generalplus\unSPIDE 3.0.1\library\CMacro\CMacro1232.lib"
+Lib: "C:\USB_JUNK\ghana4\Ghana4Mem\.\Driver\Lib\GPL162002SDDrv_far_V0_2.4.6.lib"
+Lib: "C:\USB_JUNK\ghana4\Ghana4Mem\.\System\Lib\ucBSBudocc0.0.9.lib"
+Output: "C:\USB_JUNK\ghana4\Ghana4Mem\Debug\System.S37"
+SetLoadAdr: MS01TEXT_INRAM_BEGIN_LABLE in "MS01_K~1" of "MS01_NoText_V0002_071218.lib" 
+SetLoadAdr: MS01TEXT_INRAM_END_LABLE in "MS01_K~1" of "MS01_NoText_V0002_071218.lib" 
+SetLoadAdr: S320TextSection_BEGIN_LABLE in "S320_K~1" of "S320_20070917.lib" 
+SetLoadAdr: S320TextSection_END_LABLE in "S320_K~1" of "S320_20070917.lib" 
+SetLoadAdr: DVR520_TEXT_BEGIN_LOAD_Adr in "DVR520~1" of "DVR520_NoText_V0126_071022.lib" 
+SetLoadAdr: DVR520_TEXT_END_LOAD_Adr in "DVR520~1" of "DVR520_NoText_V0126_071022.lib" 
+SetLoadAdr: S320TextSection_BEGIN_LABLE in "S320_K~1" of "S320_20070917.lib" 
+SetLoadAdr: S320TextSection_END_LABLE in "S320_K~1" of "S320_20070917.lib" 
+SetLoadAdr: DVR520_TEXT_BEGIN_LOAD_Adr in "DVR520~1" of "DVR520_NoText_V0126_071022.lib" 
+SetLoadAdr: DVR520_TEXT_END_LOAD_Adr in "DVR520~1" of "DVR520_NoText_V0126_071022.lib" 
+Locate: CODE in "Flash_reprog_boot.obj" at AC000
+;Align: CODE in "Flash_reprog_boot.obj" with 0 
+Locate: CODE in "Flash_reprog_Drv.obj" at AD600
+;Align: CODE in "Flash_reprog_Drv.obj" with 0 
+Locate: FP_USB_Code_ROM in "Flash_reprog_Drv.obj" at AD620
+;Align: FP_USB_Code_ROM in "Flash_reprog_Drv.obj" with 0 
+Locate: NB_DATA in "Flash_reprog_boot.obj" at ADE00
+;Align: NB_DATA in "Flash_reprog_boot.obj" with 0 
+Locate: CODE in "main.obj" at 9C800
+;Align: CODE in "main.obj" with 0 
+Locate: CODE in "audio.obj" at 9CD00
+;Align: CODE in "audio.obj" with 0 
+Locate: CODE in "containers.obj" at 9D300
+;Align: CODE in "containers.obj" with 0 
+Locate: CODE in "device.obj" at 9C900
+;Align: CODE in "device.obj" with 0 
+Locate: CODE in "files.obj" at 9DC00
+;Align: CODE in "files.obj" with 0 
+Locate: CODE in "lists.obj" at 9E500
+;Align: CODE in "lists.obj" with 0 
+Locate: CODE in "macro.obj" at 9EC00
+;Align: CODE in "macro.obj" with 0 
+Locate: CODE in "parsing.obj" at A0800
+;Align: CODE in "parsing.obj" with 0 
+Locate: CODE in "pkg_ops.obj" at 9F380
+;Align: CODE in "pkg_ops.obj" with 0 
+Locate: CODE in "startup.obj" at A57C0
+;Align: CODE in "startup.obj" with 0 
+Locate: CODE in "sys_counters.obj" at A2F00
+;Align: CODE in "sys_counters.obj" with 0 
+Locate: CODE in "timeline.obj" at A2900
+;Align: CODE in "timeline.obj" with 0 
+Locate: CODE in "util.obj" at 9F500
+;Align: CODE in "util.obj" with 0 
+Locate: NB_DATA in "containers.obj" at A6740
+;Align: NB_DATA in "containers.obj" with 0 
+Locate: NB_DATA in "device.obj" at A3000
+;Align: NB_DATA in "device.obj" with 0 
+Locate: NB_DATA in "files.obj" at A3710
+;Align: NB_DATA in "files.obj" with 0 
+Locate: NB_DATA in "lists.obj" at A3720
+;Align: NB_DATA in "lists.obj" with 0 
+Locate: NB_DATA in "macro.obj" at A3730
+;Align: NB_DATA in "macro.obj" with 0 
+Locate: NB_DATA in "parsing.obj" at A3800
+;Align: NB_DATA in "parsing.obj" with 0 
+Locate: NB_DATA in "pkg_ops.obj" at A3880
+;Align: NB_DATA in "pkg_ops.obj" with 0 
+Locate: NB_DATA in "startup.obj" at A0400
+;Align: NB_DATA in "startup.obj" with 0 
+Locate: NB_DATA in "Space.obj" at A3890
+;Align: NB_DATA in "Space.obj" with 0 
+Locate: CODE in "mainLoop.obj" at A3A00
+;Align: CODE in "mainLoop.obj" with 0 
+Locate: NB_DATA in "mainLoop.obj" at A9E00
+;Align: NB_DATA in "mainLoop.obj" with 0 
+Locate: IRAM in "containers.obj" at A6C60
+;Align: IRAM in "containers.obj" with 0 
+Locate: IRAM in "Flash_reprog_boot.obj" at ADF00
+;Align: IRAM in "Flash_reprog_boot.obj" with 0 
+Locate: IRAM in "Space.obj" at AA000 linkat 3081
+;Align: IRAM in "Space.obj" with 0 
+Locate: CODE in "SD_reprog.obj" at 9FB00
+;Align: CODE in "SD_reprog.obj" with 0 
+Locate: NB_DATA in "SD_reprog.obj" at 9FA00
+;Align: NB_DATA in "SD_reprog.obj" with 0 
+Locate: CODE in "SD_reprog_finish.obj" at AE000
+;Align: CODE in "SD_reprog_finish.obj" with 0 
+;Locate: unSP_StartUp in "startup_Data.obj" at F800 
+;Align: unSP_StartUp in "startup_Data.obj" with 0 
+;Locate: Reserved_SpeechRAM in "Snd_Init" of "GPL162002_RecordPen_v001.lib" at B70 
+;Align: Reserved_SpeechRAM in "Snd_Init" of "GPL162002_RecordPen_v001.lib" with 0 
+;Locate: MP3InfoORAM in "Snd_Init" of "GPL162002_RecordPen_v001.lib" at 16B0 
+;Align: MP3InfoORAM in "Snd_Init" of "GPL162002_RecordPen_v001.lib" with 0 
+;Locate: RecordFATRAM in "Snd_Init" of "GPL162002_RecordPen_v001.lib" at 2881 
+;Align: RecordFATRAM in "Snd_Init" of "GPL162002_RecordPen_v001.lib" with 0 
+;Locate: TEMP_RAM_SECTION in "Snd_Init" of "GPL162002_RecordPen_v001.lib" at 40 
+;Align: TEMP_RAM_SECTION in "Snd_Init" of "GPL162002_RecordPen_v001.lib" with 0 
+;Locate: MS02_SongEvent in "user_sacm" of "GPL162002_RecordPen_v001.lib" at FC54 
+;Align: MS02_SongEvent in "user_sacm" of "GPL162002_RecordPen_v001.lib" with 0 
+;Locate: DAC_Out_Buffer_RAM in "SACM_Decode" of "GPL162002_RecordPen_v001.lib" at 4B0 
+;Align: DAC_Out_Buffer_RAM in "SACM_Decode" of "GPL162002_RecordPen_v001.lib" with 0 
+;Locate: DAC_Out_Buffer_RAM_1 in "SACM_Decode" of "GPL162002_RecordPen_v001.lib" at 730 
+;Align: DAC_Out_Buffer_RAM_1 in "SACM_Decode" of "GPL162002_RecordPen_v001.lib" with 0 
+;Locate: Decode_Out_Buffer in "SACM_Decode" of "GPL162002_RecordPen_v001.lib" at A30 
+;Align: Decode_Out_Buffer in "SACM_Decode" of "GPL162002_RecordPen_v001.lib" with 0 
+;Locate: OVERLAP_SACM_RAM_BLOCK in "SACM_Decode" of "GPL162002_RecordPen_v001.lib" at 60 
+;Align: OVERLAP_SACM_RAM_BLOCK in "SACM_Decode" of "GPL162002_RecordPen_v001.lib" with 0 
+;Locate: LB_OSIRQ in "isr.obj" at F878 
+;Align: LB_OSIRQ in "isr.obj" with 0 
+;Locate: IRAM in "FS_user_nos.obj" at 40F7D  linkat 1184 
+;Align: IRAM in "FS_user_nos.obj" with 0 
+;Locate: GLOBAL_System_SRAM in "IOKeyScan.obj" at 1B 
+;Align: GLOBAL_System_SRAM in "IOKeyScan.obj" with 0 
+;Locate: MP3_Var_RAM in "SACM_API" of "GPL162002_RecordPen_v001.lib"  at 1F 
+;Align: MP3_Var_RAM in "SACM_API" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: MSG_Var_RAM in "SACM_API" of "GPL162002_RecordPen_v001.lib"  at 24 
+;Align: MSG_Var_RAM in "SACM_API" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: RAM in "fsglobalvar" of "SPL162002FS.lib"  at 1AB0 
+;Align: RAM in "fsglobalvar" of "SPL162002FS.lib"  with 0 
+;Locate: SDC_RAM in "SDC_DRV" of "GPL162002SDDrv_far_V0_2.4.6.lib"  at 2C 
+;Align: SDC_RAM in "SDC_DRV" of "GPL162002SDDrv_far_V0_2.4.6.lib"  with 0 
+;Locate: USB_RAM_Section in "USBD_Drv.obj" at F3C 
+;Align: USB_RAM_Section in "USBD_Drv.obj" with 0 
+;Locate: SD_GlobalValue in "DrvSDCInitial" of "GPL162002SDDrv_far_V0_2.4.6.lib"  at 1 
+;Align: SD_GlobalValue in "DrvSDCInitial" of "GPL162002SDDrv_far_V0_2.4.6.lib"  with 0 
+;Locate: CODE in "USBD.obj" at 30000 
+;Align: CODE in "USBD.obj" with 0 
+;Locate: CODE in "./libm/ef_pow" of "CLib1232.lib"  at 31128 
+;Align: CODE in "./libm/ef_pow" of "CLib1232.lib"  with 0 
+;Locate: CODE in "api_fs_speedup" of "SPL162002FS.lib"  at 31F40 
+;Align: CODE in "api_fs_speedup" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "FS_DS.obj" at 32AC6 
+;Align: CODE in "FS_DS.obj" with 0 
+;Locate: CODE in "./../../debug/ucBS_List" of "ucBSBudocc0.0.9.lib"  at 346CF 
+;Align: CODE in "./../../debug/ucBS_List" of "ucBSBudocc0.0.9.lib"  with 0 
+;Locate: CODE in "USBD_Export.obj" at 35377 
+;Align: CODE in "USBD_Export.obj" with 0 
+;Locate: CODE in "api_fs_LoadFatTable" of "SPL162002FS.lib"  at 3595D 
+;Align: CODE in "api_fs_LoadFatTable" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "swapbyte" of "SPL162002FS.lib"  at 35F26 
+;Align: CODE in "swapbyte" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "fsl_find_fat_free" of "SPL162002FS.lib"  at 36463 
+;Align: CODE in "fsl_find_fat_free" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "fsl_link_fat" of "SPL162002FS.lib"  at 36989 
+;Align: CODE in "fsl_link_fat" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "lfn_readdir" of "SPL162002FS.lib"  at 36E8F 
+;Align: CODE in "lfn_readdir" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "fsl_map_cluster" of "SPL162002FS.lib"  at 37378 
+;Align: CODE in "fsl_map_cluster" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "api_fs_lfnmkdir" of "SPL162002FS.lib"  at 377E4 
+;Align: CODE in "api_fs_lfnmkdir" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "fsl_rwblock" of "SPL162002FS.lib"  at 37C12 
+;Align: CODE in "fsl_rwblock" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "api_fs_lfnopen" of "SPL162002FS.lib"  at 3803D 
+;Align: CODE in "api_fs_lfnopen" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./../../debug/ucBS" of "ucBSBudocc0.0.9.lib"  at 38413 
+;Align: CODE in "./../../debug/ucBS" of "ucBSBudocc0.0.9.lib"  with 0 
+;Locate: CODE in "fsl_ReadDBR" of "SPL162002FS.lib"  at 387E7 
+;Align: CODE in "fsl_ReadDBR" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "api_fs_lfnfindnext" of "SPL162002FS.lib"  at 38BB8 
+;Align: CODE in "api_fs_lfnfindnext" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "DrvSDCInitial" of "GPL162002SDDrv_far_V0_2.4.6.lib"  at 392CD 
+;Align: CODE in "DrvSDCInitial" of "GPL162002SDDrv_far_V0_2.4.6.lib"  with 0 
+;Locate: CODE in "lfn_fd32_gen_short_fname" of "SPL162002FS.lib"  at 3964A 
+;Align: CODE in "lfn_fd32_gen_short_fname" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "api_fs_lfncd" of "SPL162002FS.lib"  at 3999D 
+;Align: CODE in "api_fs_lfncd" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "api_fs_lfnrename" of "SPL162002FS.lib"  at 39CEB 
+;Align: CODE in "api_fs_lfnrename" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "lbl_truename" of "SPL162002FS.lib"  at FCCF 
+;Align: CODE in "lbl_truename" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "fsl_bpb_to_dpb" of "SPL162002FS.lib"  at 3A2E6 
+;Align: CODE in "fsl_bpb_to_dpb" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "lfn_dir_lfnwrite" of "SPL162002FS.lib"  at F9BA 
+;Align: CODE in "lfn_dir_lfnwrite" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "lfn_fd32_build_fcb_name" of "SPL162002FS.lib"  at 3A588 
+;Align: CODE in "lfn_fd32_build_fcb_name" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "lbl_misc" of "SPL162002FS.lib"  at 3A9F4 
+;Align: CODE in "lbl_misc" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "api_fs_sfnchangedir" of "SPL162002FS.lib"  at 3AC19 
+;Align: CODE in "api_fs_sfnchangedir" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "api_fs_init" of "SPL162002FS.lib"  at 3AE33 
+;Align: CODE in "api_fs_init" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "lfn_descend_path" of "SPL162002FS.lib"  at 3B04B 
+;Align: CODE in "lfn_descend_path" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "api_fs_lfndel" of "SPL162002FS.lib"  at 3B253 
+;Align: CODE in "api_fs_lfndel" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "lfn_split_lfn" of "SPL162002FS.lib"  at 3B44F 
+;Align: CODE in "lfn_split_lfn" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "lfn_fetch_lfn" of "SPL162002FS.lib"  at 3B64A 
+;Align: CODE in "lfn_fetch_lfn" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "USB_ID.obj" at 3B81B 
+;Align: CODE in "USB_ID.obj" with 0 
+;Locate: CODE in "uni_case" of "SPL162002FS.lib"  at 3B9EC 
+;Align: CODE in "uni_case" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "SystemIntoUSB.obj" at 3BB84 
+;Align: CODE in "SystemIntoUSB.obj" with 0 
+;Locate: CODE in "USB_Flash_reprog.obj" at 3BD03 
+;Align: CODE in "USB_Flash_reprog.obj" with 0 
+;Locate: CODE in "./addsubf2" of "CMacro1232.lib"  at 3BE67 
+;Align: CODE in "./addsubf2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "uni_utf8_to_oemcp" of "SPL162002FS.lib"  at 3BFC7 
+;Align: CODE in "uni_utf8_to_oemcp" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "api_fs_lfnfindfirst" of "SPL162002FS.lib"  at 3C11E 
+;Align: CODE in "api_fs_lfnfindfirst" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "api_fs_mount" of "SPL162002FS.lib"  at 3C26B 
+;Align: CODE in "api_fs_mount" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./libm/ef_sqrt" of "CLib1232.lib"  at 3C646 
+;Align: CODE in "./libm/ef_sqrt" of "CLib1232.lib"  with 0 
+;Locate: CODE in "lfn_allocate_lfn_dir_entries" of "SPL162002FS.lib"  at 3C500 
+;Align: CODE in "lfn_allocate_lfn_dir_entries" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./../../debug/ucBS_Record" of "ucBSBudocc0.0.9.lib"  at 3C78C 
+;Align: CODE in "./../../debug/ucBS_Record" of "ucBSBudocc0.0.9.lib"  with 0 
+;Locate: CODE in "uni_fd32_utf8to32" of "SPL162002FS.lib"  at 3C8CA 
+;Align: CODE in "uni_fd32_utf8to32" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./mulf2" of "CMacro1232.lib"  at 3CA06 
+;Align: CODE in "./mulf2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "fsl_extend" of "SPL162002FS.lib"  at 3CC78 
+;Align: CODE in "fsl_extend" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "lfn_gen_short_fname" of "SPL162002FS.lib"  at 3CB40 
+;Align: CODE in "lfn_gen_short_fname" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "copy" of "SPL162002FS.lib"  at 3CDB0 
+;Align: CODE in "copy" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "lfn_dir_lfnread" of "SPL162002FS.lib"  at 3CEE3 
+;Align: CODE in "lfn_dir_lfnread" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./divf2" of "CMacro1232.lib"  at 3D00A 
+;Align: CODE in "./divf2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "fsl_dir_read" of "SPL162002FS.lib"  at 3D12D 
+;Align: CODE in "fsl_dir_read" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "fsl_searchblock" of "SPL162002FS.lib"  at 3D24C 
+;Align: CODE in "fsl_searchblock" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./libm/sf_scalbn" of "CLib1232.lib"  at 3D359 
+;Align: CODE in "./libm/sf_scalbn" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./../../debug/ucBS_Assert" of "ucBSBudocc0.0.9.lib"  at 3D45D 
+;Align: CODE in "./../../debug/ucBS_Assert" of "ucBSBudocc0.0.9.lib"  with 0 
+;Locate: CODE in "uni_nls_base" of "SPL162002FS.lib"  at 3D556 
+;Align: CODE in "uni_nls_base" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "uni_fd32_utf16to8" of "SPL162002FS.lib"  at 3D73B 
+;Align: CODE in "uni_fd32_utf16to8" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "fsl_ParseDosName" of "SPL162002FS.lib"  at 3D821 
+;Align: CODE in "fsl_ParseDosName" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "uni_fd32_utf32to8" of "SPL162002FS.lib"  at 3D8F6 
+;Align: CODE in "uni_fd32_utf32to8" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "lfn_fd32_expand_fcb_name" of "SPL162002FS.lib"  at 3D9C4 
+;Align: CODE in "lfn_fd32_expand_fcb_name" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "lbl_flush_buffers" of "SPL162002FS.lib"  at 3DA91 
+;Align: CODE in "lbl_flush_buffers" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "lbl_flush1" of "SPL162002FS.lib"  at 3DB5B 
+;Align: CODE in "lbl_flush1" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "api_fs_unmount" of "SPL162002FS.lib"  at 3DC25 
+;Align: CODE in "api_fs_unmount" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "lbl_wipe_out_clusters" of "SPL162002FS.lib"  at 3DCE7 
+;Align: CODE in "lbl_wipe_out_clusters" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "SysException.obj" at 3DDA7 
+;Align: CODE in "SysException.obj" with 0 
+;Locate: CODE in "SysWaitMode.obj" at 3DE67 
+;Align: CODE in "SysWaitMode.obj" with 0 
+;Locate: CODE in "api_fs_fseek" of "SPL162002FS.lib"  at 3DF1D 
+;Align: CODE in "api_fs_fseek" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "lbl_dskxfer" of "SPL162002FS.lib"  at 3DFD3 
+;Align: CODE in "lbl_dskxfer" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "uni_utf8_strupr" of "SPL162002FS.lib"  at 3E083 
+;Align: CODE in "uni_utf8_strupr" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "lfn_split_path_LFN" of "SPL162002FS.lib"  at 3E12C 
+;Align: CODE in "lfn_split_path_LFN" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "lfn_itoa" of "SPL162002FS.lib"  at 3E1D3 
+;Align: CODE in "lfn_itoa" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./divi2" of "CMacro1232.lib"  at 3E272 
+;Align: CODE in "./divi2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "lfn_fat_find" of "SPL162002FS.lib"  at 3E311 
+;Align: CODE in "lfn_fat_find" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./modi2" of "CMacro1232.lib"  at 3E3AF 
+;Align: CODE in "./modi2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "fsl_remove_lfn_entries" of "SPL162002FS.lib"  at 3E44C 
+;Align: CODE in "fsl_remove_lfn_entries" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "fsl_init_direntry" of "SPL162002FS.lib"  at 3E4E4 
+;Align: CODE in "fsl_init_direntry" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "fsl_read_fsinfo" of "SPL162002FS.lib"  at 3E570 
+;Align: CODE in "fsl_read_fsinfo" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "ExtMemOper.obj" at 3E5F8 
+;Align: CODE in "ExtMemOper.obj" with 0 
+;Locate: CODE in "fsl_write_fsinfo" of "SPL162002FS.lib"  at 3E67A 
+;Align: CODE in "fsl_write_fsinfo" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "read" of "SPL162002FS.lib"  at 3E6FB 
+;Align: CODE in "read" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "write" of "SPL162002FS.lib"  at 3E77A 
+;Align: CODE in "write" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "fsl_getFATblock" of "SPL162002FS.lib"  at 3E7F9 
+;Align: CODE in "fsl_getFATblock" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "lfn_find_empty_dir_entries" of "SPL162002FS.lib"  at 3E877 
+;Align: CODE in "lfn_find_empty_dir_entries" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "fsl_DeleteBlockInBufferCache" of "SPL162002FS.lib"  at 3E8F5 
+;Align: CODE in "fsl_DeleteBlockInBufferCache" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "fsl_delete_dir_entry" of "SPL162002FS.lib"  at 3E972 
+;Align: CODE in "fsl_delete_dir_entry" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./divu2" of "CMacro1232.lib"  at 3E9ED 
+;Align: CODE in "./divu2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./modu2" of "CMacro1232.lib"  at 3EA64 
+;Align: CODE in "./modu2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./modi1" of "CMacro1232.lib"  at 3EADA 
+;Align: CODE in "./modi1" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "FS_user_nos.obj" at 3EB4F 
+;Align: CODE in "FS_user_nos.obj" with 0 
+;Locate: CODE in "api_fs_fclose" of "SPL162002FS.lib"  at 3EBC3 
+;Align: CODE in "api_fs_fclose" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "fsl_getblk" of "SPL162002FS.lib"  at 3EC37 
+;Align: CODE in "fsl_getblk" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./cvi2f2" of "CMacro1232.lib"  at 3ECAA 
+;Align: CODE in "./cvi2f2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "lfn_checksum" of "SPL162002FS.lib"  at 3ED8F 
+;Align: CODE in "lfn_checksum" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "fsl_get_cds" of "SPL162002FS.lib"  at 3EE01 
+;Align: CODE in "fsl_get_cds" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "uni_toupper" of "SPL162002FS.lib"  at 3ED1D 
+;Align: CODE in "uni_toupper" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "fsl_get_f_node" of "SPL162002FS.lib"  at 3EE73 
+;Align: CODE in "fsl_get_f_node" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "api_fs_sfnreaddir" of "SPL162002FS.lib"  at 3EF50 
+;Align: CODE in "api_fs_sfnreaddir" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "rename" of "SPL162002FS.lib"  at 3EFBE 
+;Align: CODE in "rename" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./string/strstr" of "CLib1232.lib"  at 3EEE2 
+;Align: CODE in "./string/strstr" of "CLib1232.lib"  with 0 
+;Locate: CODE in "fsl_clus2phys" of "SPL162002FS.lib"  at 3F02C 
+;Align: CODE in "fsl_clus2phys" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "MemPackCopy" of "SPL162002FS.lib"  at 3F098 
+;Align: CODE in "MemPackCopy" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "uni_fd32_utf8to16" of "SPL162002FS.lib"  at 3F167 
+;Align: CODE in "uni_fd32_utf8to16" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "fsl_dir_close" of "SPL162002FS.lib"  at 3F1CD 
+;Align: CODE in "fsl_dir_close" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "fsl_release_f_node" of "SPL162002FS.lib"  at 3F101 
+;Align: CODE in "fsl_release_f_node" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "lfn_fat_creat" of "SPL162002FS.lib"  at 3F233 
+;Align: CODE in "lfn_fat_creat" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "uni_utf8_stricmp" of "SPL162002FS.lib"  at 3F297 
+;Align: CODE in "uni_utf8_stricmp" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "open" of "SPL162002FS.lib"  at 3F2FA 
+;Align: CODE in "open" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "fsl_dir_init_fnode" of "SPL162002FS.lib"  at 3F35C 
+;Align: CODE in "fsl_dir_init_fnode" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./gthf2" of "CMacro1232.lib"  at 3F3BC 
+;Align: CODE in "./gthf2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./lthf2" of "CMacro1232.lib"  at 3F41B 
+;Align: CODE in "./lthf2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./modu1" of "CMacro1232.lib"  at 3F47A 
+;Align: CODE in "./modu1" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "fsl_getblock_from_off" of "SPL162002FS.lib"  at 3F4D7 
+;Align: CODE in "fsl_getblock_from_off" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "uni_oemcp_to_utf8" of "SPL162002FS.lib"  at 3F52C 
+;Align: CODE in "uni_oemcp_to_utf8" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./divu1" of "CMacro1232.lib"  at 3F580 
+;Align: CODE in "./divu1" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./cvu2f2" of "CMacro1232.lib"  at 3F624 
+;Align: CODE in "./cvu2f2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "lbl_move_buffer" of "SPL162002FS.lib"  at 3F675 
+;Align: CODE in "lbl_move_buffer" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "findfirst" of "SPL162002FS.lib"  at 3F5D3 
+;Align: CODE in "findfirst" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./string/strcspn" of "CLib1232.lib"  at 3F6C6 
+;Align: CODE in "./string/strcspn" of "CLib1232.lib"  with 0 
+;Locate: CODE in "SD.obj" at 40000 
+;Align: CODE in "SD.obj" with 0 
+;Locate: CODE in "lfn_allocate_sfn_dir_entry" of "SPL162002FS.lib"  at 3F766 
+;Align: CODE in "lfn_allocate_sfn_dir_entry" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "uni_fd32_utf16to32" of "SPL162002FS.lib"  at 4004E 
+;Align: CODE in "uni_fd32_utf16to32" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "uni_fd32_utf32to16" of "SPL162002FS.lib"  at 3F7B4 
+;Align: CODE in "uni_fd32_utf32to16" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "fsl_dos_extend" of "SPL162002FS.lib"  at 400E1 
+;Align: CODE in "fsl_dos_extend" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./string/strncmp" of "CLib1232.lib"  at 4009A 
+;Align: CODE in "./string/strncmp" of "CLib1232.lib"  with 0 
+;Locate: CODE in "unlink" of "SPL162002FS.lib"  at 40128 
+;Align: CODE in "unlink" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "chdir" of "SPL162002FS.lib"  at 4016E 
+;Align: CODE in "chdir" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "mkdir" of "SPL162002FS.lib"  at 401B4 
+;Align: CODE in "mkdir" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "api_fs_fwrite" of "SPL162002FS.lib"  at 401FA 
+;Align: CODE in "api_fs_fwrite" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./__divi32_i32_27" of "CMacro1232.lib"  at 4023C 
+;Align: CODE in "./__divi32_i32_27" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "lfn_copy_char_in_lfn_slot" of "SPL162002FS.lib"  at 4027B 
+;Align: CODE in "lfn_copy_char_in_lfn_slot" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./string/strcat" of "CLib1232.lib"  at 402B9 
+;Align: CODE in "./string/strcat" of "CLib1232.lib"  with 0 
+;Locate: CODE in "nls_ascii.obj" at 402F6 
+;Align: CODE in "nls_ascii.obj" with 0 
+;Locate: CODE in "./string/strrchr" of "CLib1232.lib"  at 40332 
+;Align: CODE in "./string/strrchr" of "CLib1232.lib"  with 0 
+;Locate: CODE in "lseek" of "SPL162002FS.lib"  at 403A5 
+;Align: CODE in "lseek" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "lbl_dos_getdate" of "SPL162002FS.lib"  at 4036C 
+;Align: CODE in "lbl_dos_getdate" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./cvf2u2" of "CMacro1232.lib"  at 40416 
+;Align: CODE in "./cvf2u2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "ServiceLoop.obj" at 403DE 
+;Align: CODE in "ServiceLoop.obj" with 0 
+;Locate: CODE in "api_fs_fread" of "SPL162002FS.lib"  at FC1D 
+;Align: CODE in "api_fs_fread" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./cvf2u1" of "CMacro1232.lib"  at 4044E 
+;Align: CODE in "./cvf2u1" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "lbl_dos_gettime" of "SPL162002FS.lib"  at 40483 
+;Align: CODE in "lbl_dos_gettime" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./string/memcmp" of "CLib1232.lib"  at 404B6 
+;Align: CODE in "./string/memcmp" of "CLib1232.lib"  with 0 
+;Locate: CODE in "lfn_fd32_compare_fcb_names" of "SPL162002FS.lib"  at 404E9 
+;Align: CODE in "lfn_fd32_compare_fcb_names" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./string/strspn" of "CLib1232.lib"  at 4051C 
+;Align: CODE in "./string/strspn" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./cvi1f2" of "CMacro1232.lib"  at 4054B 
+;Align: CODE in "./cvi1f2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./string/memcpy" of "CLib1232.lib"  at 4057A 
+;Align: CODE in "./string/memcpy" of "CLib1232.lib"  with 0 
+;Locate: CODE in "api_fs_changedsk" of "SPL162002FS.lib"  at 405A9 
+;Align: CODE in "api_fs_changedsk" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./string/strpbrk" of "CLib1232.lib"  at 40603 
+;Align: CODE in "./string/strpbrk" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./__modi32_n" of "CMacro1232.lib"  at 405D7 
+;Align: CODE in "./__modi32_n" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./__divi32_n" of "CMacro1232.lib"  at 4062F 
+;Align: CODE in "./__divi32_n" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "lbl_xlt_fd" of "SPL162002FS.lib"  at 40657 
+;Align: CODE in "lbl_xlt_fd" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "SysOn2OffHook.obj" at 4067E 
+;Align: CODE in "SysOn2OffHook.obj" with 0 
+;Locate: CODE in "SysOff2OnHook.obj" at 406A5 
+;Align: CODE in "SysOff2OnHook.obj" with 0 
+;Locate: CODE in "SysIntorWaitMode.obj" at 406F2 
+;Align: CODE in "SysIntorWaitMode.obj" with 0 
+;Locate: CODE in "fsl_getdstart" of "SPL162002FS.lib"  at 4075F 
+;Align: CODE in "fsl_getdstart" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "sacm" of "GPL162002_RecordPen_v001.lib"  at 40717 
+;Align: CODE in "sacm" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: CODE in "fsl_get_dpb" of "SPL162002FS.lib"  at 4073B 
+;Align: CODE in "fsl_get_dpb" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./cvu1f2" of "CMacro1232.lib"  at 407C9 
+;Align: CODE in "./cvu1f2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "deviceunmount" of "SPL162002FS.lib"  at 407EC 
+;Align: CODE in "deviceunmount" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./string/strcmp" of "CLib1232.lib"  at 4080F 
+;Align: CODE in "./string/strcmp" of "CLib1232.lib"  with 0 
+;Locate: CODE in "SysIntoHighSpeed.obj" at 40832 
+;Align: CODE in "SysIntoHighSpeed.obj" with 0 
+;Locate: CODE in "close" of "SPL162002FS.lib"  at 40783 
+;Align: CODE in "close" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "devicemount" of "SPL162002FS.lib"  at 407A6 
+;Align: CODE in "devicemount" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./string/memset" of "CLib1232.lib"  at 40855 
+;Align: CODE in "./string/memset" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./string/strchr" of "CLib1232.lib"  at 40876 
+;Align: CODE in "./string/strchr" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./string/strlen" of "CLib1232.lib"  at 40897 
+;Align: CODE in "./string/strlen" of "CLib1232.lib"  with 0 
+;Locate: CODE in "fsl_media_check" of "SPL162002FS.lib"  at 408B5 
+;Align: CODE in "fsl_media_check" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "SysIntoHaltMode.obj" at 408D2 
+;Align: CODE in "SysIntoHaltMode.obj" with 0 
+;Locate: CODE in "lbl_time_encode" of "SPL162002FS.lib"  at 40924 
+;Align: CODE in "lbl_time_encode" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./string/strcpy" of "CLib1232.lib"  at 408EE 
+;Align: CODE in "./string/strcpy" of "CLib1232.lib"  with 0 
+;Locate: CODE in "lbl_swap_deleted" of "SPL162002FS.lib"  at 40909 
+;Align: CODE in "lbl_swap_deleted" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "lbl_next_cluster" of "SPL162002FS.lib"  at 4093F 
+;Align: CODE in "lbl_next_cluster" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "fsl_setdstart" of "SPL162002FS.lib"  at 40959 
+;Align: CODE in "fsl_setdstart" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "ucBS_Hook.obj" at 40973 
+;Align: CODE in "ucBS_Hook.obj" with 0 
+;Locate: CODE in "fsl_dir_write" of "SPL162002FS.lib"  at 4098B 
+;Align: CODE in "fsl_dir_write" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "libgloss.obj" at 409A1 
+;Align: CODE in "libgloss.obj" with 0 
+;Locate: CODE in "./ctype/isspace" of "CLib1232.lib"  at 409B7 
+;Align: CODE in "./ctype/isspace" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./__rshu2_r" of "CMacro1232.lib"  at 409F4 
+;Align: CODE in "./__rshu2_r" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./__clz32" of "CMacro1232.lib"  at 409CC 
+;Align: CODE in "./__clz32" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./libm/wf_pow" of "CLib1232.lib"  at 409E0 
+;Align: CODE in "./libm/wf_pow" of "CLib1232.lib"  with 0 
+;Locate: CODE in "lbl_xlt_fnp" of "SPL162002FS.lib"  at 40A08 
+;Align: CODE in "lbl_xlt_fnp" of "SPL162002FS.lib"  with 0 
+;Locate: CODE in "./muliu2" of "CMacro1232.lib"  at 40A1B 
+;Align: CODE in "./muliu2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "DrvStruct.obj" at 40A2D 
+;Align: CODE in "DrvStruct.obj" with 0 
+;Locate: CODE in "BodyInit.obj" at 40A3E 
+;Align: CODE in "BodyInit.obj" with 0 
+;Locate: CODE in "./ctype/isdigit" of "CLib1232.lib"  at 40A4E 
+;Align: CODE in "./ctype/isdigit" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./libm/copysignf" of "CLib1232.lib"  at 40A5B 
+;Align: CODE in "./libm/copysignf" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./__clz16" of "CMacro1232.lib"  at 40A66 
+;Align: CODE in "./__clz16" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./__divi16_n" of "CMacro1232.lib"  at 40A85 
+;Align: CODE in "./__divi16_n" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./rshu2" of "CMacro1232.lib"  at 40A71 
+;Align: CODE in "./rshu2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./lshiu2" of "CMacro1232.lib"  at 40A7B 
+;Align: CODE in "./lshiu2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./lshiu1" of "CMacro1232.lib"  at 40A8F 
+;Align: CODE in "./lshiu1" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./rshu1" of "CMacro1232.lib"  at 40A97 
+;Align: CODE in "./rshu1" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "NAND_SD_USB_Test.obj" at FFE9 
+;Align: CODE in "NAND_SD_USB_Test.obj" with 0 
+;Locate: DrvSDCSection in "SDC_DRV" of "GPL162002SDDrv_far_V0_2.4.6.lib"  at 335C4 
+;Align: DrvSDCSection in "SDC_DRV" of "GPL162002SDDrv_far_V0_2.4.6.lib"  with 0 
+;Locate: LIB_FAT16_CODE in "basedrive" of "SPL162002FS.lib"  at 3A01A 
+;Align: LIB_FAT16_CODE in "basedrive" of "SPL162002FS.lib"  with 0 
+;Locate: NB_DATA in "uni_case" of "SPL162002FS.lib"  at 40A9F 
+;Align: NB_DATA in "uni_case" of "SPL162002FS.lib"  with 0 
+;Locate: NB_DATA in "lfn_fd32_build_fcb_name" of "SPL162002FS.lib"  at 411BF 
+;Align: NB_DATA in "lfn_fd32_build_fcb_name" of "SPL162002FS.lib"  with 0 
+;Locate: NB_DATA in "lfn_fd32_gen_short_fname" of "SPL162002FS.lib"  at 4127A 
+;Align: NB_DATA in "lfn_fd32_gen_short_fname" of "SPL162002FS.lib"  with 0 
+;Locate: NB_DATA in "./libm/ef_pow" of "CLib1232.lib"  at 41334 
+;Align: NB_DATA in "./libm/ef_pow" of "CLib1232.lib"  with 0 
+;Locate: NB_DATA in "USB_ID.obj" at 41376 
+;Align: NB_DATA in "USB_ID.obj" with 0 
+;Locate: NB_DATA in "SD.obj" at 413B6 
+;Align: NB_DATA in "SD.obj" with 0 
+;Locate: NB_DATA in "nls_ascii.obj" at 413C9 
+;Align: NB_DATA in "nls_ascii.obj" with 0 
+;Locate: NB_DATA in "lbl_misc" of "SPL162002FS.lib"  at 413DA 
+;Align: NB_DATA in "lbl_misc" of "SPL162002FS.lib"  with 0 
+;Locate: NB_DATA in "fsl_ParseDosName" of "SPL162002FS.lib"  at 413EA 
+;Align: NB_DATA in "fsl_ParseDosName" of "SPL162002FS.lib"  with 0 
+;Locate: NB_DATA in "SysException.obj" at 413F9 
+;Align: NB_DATA in "SysException.obj" with 0 
+;Locate: NB_DATA in "./libm/sf_scalbn" of "CLib1232.lib"  at 41401 
+;Align: NB_DATA in "./libm/sf_scalbn" of "CLib1232.lib"  with 0 
+;Locate: NB_DATA in "api_fs_init" of "SPL162002FS.lib"  at 41409 
+;Align: NB_DATA in "api_fs_init" of "SPL162002FS.lib"  with 0 
+;Locate: NB_DATA in "lfn_descend_path" of "SPL162002FS.lib"  at 4140E 
+;Align: NB_DATA in "lfn_descend_path" of "SPL162002FS.lib"  with 0 
+;Locate: NB_DATA in "./libm/ef_sqrt" of "CLib1232.lib"  at 41413 
+;Align: NB_DATA in "./libm/ef_sqrt" of "CLib1232.lib"  with 0 
+;Locate: NB_DATA in "api_fs_lfnfindnext" of "SPL162002FS.lib"  at 41417 
+;Align: NB_DATA in "api_fs_lfnfindnext" of "SPL162002FS.lib"  with 0 
+;Locate: NB_DATA in "lbl_truename" of "SPL162002FS.lib"  at 4141B 
+;Align: NB_DATA in "lbl_truename" of "SPL162002FS.lib"  with 0 
+;Locate: NB_DATA in "api_fs_lfncd" of "SPL162002FS.lib"  at 4141D 
+;Align: NB_DATA in "api_fs_lfncd" of "SPL162002FS.lib"  with 0 
+;Locate: SACM_API_ROM_BLOCK in "SACM_API" of "GPL162002_RecordPen_v001.lib"  at 38F47 
+;Align: SACM_API_ROM_BLOCK in "SACM_API" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: SACM_DECODE_ROM_BLOCK in "SACM_Decode" of "GPL162002_RecordPen_v001.lib"  at 3C3B6 
+;Align: SACM_DECODE_ROM_BLOCK in "SACM_Decode" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: SACM_ISR_Service_Section in "SACM_API" of "GPL162002_RecordPen_v001.lib"  at 3A7C5 
+;Align: SACM_ISR_Service_Section in "SACM_API" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: SACM_Mask_InitCode in "Snd_Init" of "GPL162002_RecordPen_v001.lib"  at 406CC 
+;Align: SACM_Mask_InitCode in "Snd_Init" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: SACM_ROM_Block in "sacm" of "GPL162002_RecordPen_v001.lib"  at 34D4B 
+;Align: SACM_ROM_Block in "sacm" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: SCSI_Table_Setion in "SCSI_Table.obj" at 4141F 
+;Align: SCSI_Table_Setion in "SCSI_Table.obj" with 0 
+;Locate: System_CODE in "IOKeyScan.obj" at 3F716 
+;Align: System_CODE in "IOKeyScan.obj" with 0 
+;Locate: USB_Code_ROM in "USBD_Drv.obj" at 33F3A 
+;Align: USB_Code_ROM in "USBD_Drv.obj" with 0 
+;Locate: User_SACM in "user_sacm" of "GPL162002_RecordPen_v001.lib"  at 3D64D 
+;Align: User_SACM in "user_sacm" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: __sn_init_table at F863 

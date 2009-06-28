@@ -1,0 +1,231 @@
+/*-------------------------------------------------*
+* Function		:
+* Usage         :
+* Version		:
+* Return Code   :
+* Revision      :
+* Remark        :
+*--------------------------------------------------*/
+#define CREATEUSBVAR				
+#define	USB_TIME_OUT	10			// timeout was 3s
+
+//for USB head file
+#include "./system/include/system_head.h"
+#include "./component/include/component_head.h"
+#include ".\driver\include\USB\USBD_Define.h"
+#include ".\driver\include\USB\USBD.h"
+
+#include ".\Component\FS\usb_host\USB_Host_Constant.h"
+#include ".\Component\FS\usb_host\USBHostMSDC.h"
+//#include ".\Driver\Include\SD\SDCDriver.h"
+#include ".\Application\TalkingBook\Include\device.h"
+#include ".\Application\TalkingBook\Include\d2d_copy.h"
+
+//unsigned int R_Write_protect = 0;//add by haoyu for no err
+extern unsigned int	_Nand_ErasePhysicalBlock(unsigned long BlockAddr);
+extern void USB_Reset(void);
+//extern void Sound_Stop( void );
+extern void USB_ServiceLoop(unsigned int unUseLoop);
+void USB_TimeOut_Disable(void);
+void USB_TimeOut_Enable(void);
+extern unsigned int	SetBadBlock(unsigned long BlockAddr);
+unsigned int R_USB_DisplayTime;
+extern void USB_ISR(void);
+extern void USB_Insert_TimeOut(void);
+//key add by haoyu 2007.4.19
+//extern void EnableKeyChangInt(void);
+extern void DisableKeyChangeProcess(void);
+//RTC add by haoyu 2007.4.19
+extern void DrvRTCIntEnable( void );
+extern void DrvRTCIntDisable( void );
+extern void DrvEnableReminderISR( void );
+extern void DrvDisableReminderISR( void );
+
+
+#if SIMULATOR  //add by haoyu for no err 2006.2.6
+int _NAND_ReadSector_USB(unsigned long  LABAddr, unsigned int blkcnt, unsigned long StoreAddr, unsigned int DMA_Channel) {};
+int _NAND_WriteSector_USB(unsigned long  LABAddr, unsigned int blkcnt, unsigned long StoreAddr, unsigned int DMA_Channel,unsigned int DMA_RB_Flag) {};
+
+#else
+#endif
+unsigned long  usb_time_out;
+/////////////////////////////User setting initial value start//////////////////////////////////////////
+//要与main.c中配置相同  
+//#define USB_Nand_Part0_Offset	0x00002800
+//#define USB_Nand_Part0_Size 	0x0000C800
+//#define USB_Nand_Part1_Offset	0x0002F000
+//#define USB_Nand_Part1_Size 	0x0004BE00
+//#define USB_Nand_Part2_Offset	0x00000000
+//#define USB_Nand_Part2_Size 	0x00000000
+
+
+//要与main.c中配置相同
+#define USB_Nand_Part0_Offset	0x00000000
+#define USB_Nand_Part0_Size 	0x0003C000
+#define USB_Nand_Part1_Offset	0x0003C000
+#define USB_Nand_Part1_Size 	0x0003C000
+#define USB_Nand_Part2_Offset	0x00000000
+#define USB_Nand_Part2_Size 	0x00000000
+
+#define C_USBDiskPlugIn 		0x01
+#define C_USBDiskPlugOut  		0x02
+#define C_USBPlugInTimeOut		0x03
+#define C_USBDevicesmountOK    	0x00
+#define C_USBDevicesUnmount    	0x05
+#define C_USBHUnsearchDevices	0xfffe
+#define C_USBHostError  		0xffff
+typedef enum 
+{
+		USBDiskPlugIn  	= 		C_USBDiskPlugIn,
+		USBDiskPlugOut 	=		C_USBDiskPlugOut,
+		USBPlugInTimeOut = 		C_USBPlugInTimeOut,
+		USBDevicesUnmount	= 	C_USBDevicesUnmount,
+		USBDevicesmountOK		= C_USBDevicesmountOK,
+		USBHUnsearchDevices = 	C_USBHUnsearchDevices,
+		USBHostError	=		C_USBHostError
+}USBHostType ;
+
+USBHostType  USBHost_Flag;
+//
+
+str_USB_Lun_Info USB_Lun_Define[]=
+{
+//	{0x00, LunType_NandDrive	, USB_Nand_Part0_Offset,	USB_Nand_Part0_Size, 	LunStatus_Normal},
+//	{0x01, LunType_NandDrive	, USB_Nand_Part1_Offset,	USB_Nand_Part1_Size, 	LunStatus_Normal},	
+	{0x00, LunType_SDCardReader	, 0,	0, 	LunStatus_Normal},
+};
+//
+
+
+
+int SystemIntoUDisk()
+{
+
+	int ret,i;
+	SysDisableWaitMode(3);
+//	SysIntoHighSpeed();
+
+	MaxLUN = -1;
+	R_NAND_Present=0;
+	R_SDC_Present=0;     //no have SD modify by haoyu 2007.1.29	
+
+	for(i=0 ; i<10 ; i++)
+	{
+		ret = DrvSDCInitial();	
+		if(ret==0)
+		{
+			R_SDC_Present=1;		// SD Card Initial Success
+			MaxLUN++;  
+			_deviceunmount(0);
+			break;		
+		}
+	}
+	USB_TimeOut_Enable();		
+	USB_Initial();
+	USB_Reset();
+	USB_ServiceLoop(1);
+
+	*P_USBD_Config=0x00;
+	*P_USBD_INTEN=0x00;	
+
+    if(1 == R_SDC_Present)
+    {
+	    _devicemount(0);
+	}
+	SysEnableWaitMode( 3 );
+
+	return 0;
+}
+
+void USB_TimeOut_Enable(void)
+{
+	usb_time_out = 0;	
+	*P_TimeBaseA_Ctrl = 0xE001;	// 1HZ
+}
+
+void USB_Insert_TimeOut(void)
+{
+	int temp;
+
+	usb_time_out += 1;
+	temp=*P_TimeBaseA_Ctrl;
+	*P_TimeBaseA_Ctrl=temp;	//clear timerA int flag	
+	
+	if( usb_time_out > USB_TIME_OUT ) {
+		if(USBHost_Flag == C_USBDiskPlugIn){			
+		   USBHost_Flag = C_USBPlugInTimeOut;					
+		}else if (!USBD_PlugIn){		//Check USB plug in		
+			R_USB_Suspend = 1;
+		}
+	*P_TimeBaseA_Ctrl = 0x0000;
+	}
+}
+
+///////////////////////////////////////////////////////////
+
+int SystemIntoUSB(unsigned int USBHorD_Flag)
+{
+	int trials, x;
+	const int maxTrials = 20;
+		
+	if(USBHorD_Flag == USB_Host){		
+		setLED(LED_GREEN,FALSE);
+		for (trials = 0; trials < maxTrials; trials++) {
+			setLED(LED_RED,TRUE);
+			x = _devicemount(1); 
+			setLED(LED_RED,FALSE);
+			if (x == C_USBDevicesmountOK)
+				break;
+			wait (1000);			
+		}
+		if (trials < maxTrials) {
+			setLED(LED_GREEN,TRUE);
+			wait(1000);
+			USBHost_Flag = C_USBDevicesmountOK;
+			//  cbs:USB_HostProcess();
+			//  unmount USB devices;  
+			if(_deviceunmount(1) != 0x00)
+				USBHost_Flag = C_USBDiskPlugOut;
+			else
+				USBHost_Flag = C_USBDevicesUnmount;
+			*P_USBH_Config = 0;
+			*P_USBH_INTEN  = 0;		
+		}	
+	}else if(USBHorD_Flag == USB_Device){
+		SystemIntoUDisk();	
+	}
+
+	return 0;
+}
+
+int setUSBHost(BOOL enter) {
+	int trials, x;
+	const int maxTrials = 20;
+
+	if (enter){		
+		setLED(LED_GREEN,FALSE);
+		for (trials = 0; trials < maxTrials; trials++) {
+			setLED(LED_RED,TRUE);
+			x = _devicemount(1); 
+			setLED(LED_RED,FALSE);
+			if (x == C_USBDevicesmountOK)
+				break;
+			wait (1000);			
+		}
+		if (trials < maxTrials) {
+			setLED(LED_GREEN,TRUE);
+			wait(1000);
+			USBHost_Flag = C_USBDevicesmountOK;
+		}
+	} else {
+			//  unmount USB devices;  
+			if(_deviceunmount(1) != 0x00)
+				USBHost_Flag = C_USBDiskPlugOut;
+			else
+				USBHost_Flag = C_USBDevicesUnmount;
+			*P_USBH_Config = 0;
+			*P_USBH_INTEN  = 0;		
+	}
+
+	return 0;
+}

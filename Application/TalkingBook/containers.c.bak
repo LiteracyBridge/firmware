@@ -1,0 +1,482 @@
+#include "Include/talkingbook.h"
+#include "Include/containers.h"
+
+static const int REWIND[] = {0,500,1000,1500,2000,3000,5000,10000};
+
+Context context;
+CtnrPackage pkgSystem; 
+CtnrPackage pkgUser; 
+
+typedef struct StackFrame StackFrame;
+struct StackFrame {
+	// This struct could be compressed more, but there should be very few stackFrames in memory at once.
+	CtnrPackage *package;
+	CtnrFile *file;
+	int offset; 
+};
+
+static StackFrame stack[MAX_HYPERLINK_STACK];
+static int stackCount = 0;
+static BOOL isStackEmpty(void);
+static BOOL isLastAction(Action *);
+
+static BOOL isStackEmpty(void) {
+	return (BOOL)(stackCount == 0);
+}
+
+BOOL stackPush (CtnrPackage *pkg, CtnrFile *file, int offset) {
+	int ret;
+	if (stackCount < MAX_HYPERLINK_STACK) {
+		stack[stackCount].package = pkg;
+		stack[stackCount].file = file;
+		stack[stackCount].offset = offset;
+		stackCount++;
+		ret = TRUE;
+	}
+	else 
+		ret = FALSE;
+	return ret;	
+}
+
+BOOL stackPop(CtnrPackage **pkg, CtnrFile **file, int *offset) {
+	BOOL ret;
+	if (stackCount > 0) {
+		stackCount--;
+		*offset = stack[stackCount].offset;
+		*file = stack[stackCount].file;
+		*pkg = stack[stackCount].package;
+		ret = TRUE;
+	}
+	else
+		ret = FALSE;
+	return ret;
+}
+
+void setRewind(int *actionAux, int rewindAmount) {
+	int bitPattern;
+	int absRewindAmount;
+	int i;
+	
+	//math is more intuitive using abs values
+	absRewindAmount = abs(rewindAmount);
+
+	//can't jump forward, so use zero
+	if (rewindAmount >=	0 || absRewindAmount < REWIND[1]/2) 
+		bitPattern = 0x0;
+	else 
+		for (i=1;i<7;i++) {
+			// find closest preset rewind amount
+			if (absRewindAmount < (REWIND[i] + REWIND[i+1]) / 2) {
+				bitPattern = i;
+				break;
+			}
+			bitPattern = 7;
+		}
+	*actionAux &= 0x1FFF;	// zero out highest three bits
+	*actionAux |= (bitPattern << 13); // set highest three bits with bitPattern
+}
+
+int getRewind(unsigned int actionAux) {
+	int bitPattern;
+	int ret;
+	
+	bitPattern = actionAux >> 13;
+	ret = compressTime(REWIND[bitPattern],context.package->timePrecision);
+	return ret;
+}
+
+int getSoundInsertIdxFromAux(int aux) {
+	// return bits 0-10 only
+	return aux & 0x07FF;
+}
+
+void setStartCode(int *startEndCode, EnumAction codeAction) {
+	// see bit map for CtnrBlock.actionStartEnd
+	int startCode;
+	// we're only using 4bits of each byte right now	
+	if (codeAction >= 0 && codeAction < START_END_MARKER) {
+		startCode = *startEndCode & 0x00FF;
+		if (codeAction == INSERT_SOUND)
+			startCode |= 0x08;  // set bit 3
+		else if (codeAction == RETURN)
+			startCode |= 0x04;  // set bit 2
+		else {
+			startCode &= 0x0C;  // clear bits 0&1
+			startCode |= codeAction; // bits 0&1 equals code
+		}
+		*startEndCode &= 0xFF00; // clear bits to set
+		*startEndCode |= startCode; // set bits
+	}
+}
+
+void setEndCode(int *startEndCode, EnumAction codeAction) {
+	// see bit map for CtnrBlock.actionStartEnd
+	int endCode;
+	// we're only using 4bits of each byte right now
+	if (codeAction >= 0 && codeAction < START_END_MARKER) {
+		endCode = *startEndCode >> 8;
+		if (codeAction == INSERT_SOUND)
+			endCode |= 0x08;  // set bit 3
+		else if (codeAction == RETURN)
+			endCode |= 0x04;  // set bit 2
+		else {
+			endCode &= 0x0C;  // clear bits 0&1
+			endCode |= codeAction; // bits 0&1 equals code
+		}
+		*startEndCode &= 0x00FF; // clear bits to set
+		*startEndCode |= (endCode << 8); // set bits
+	}
+}
+
+struct CtnrBlock *getStartInsert(int actionStartEnd, int idxFirstAction) {
+	CtnrBlock *ret;
+	Action *actions, *action;
+	int idxBlock;
+	
+	ret = 0;
+	if (actionStartEnd & 0x08) { // check INSERT_SOUND bit is set
+		actions = context.package->actions;
+		action = &actions[idxFirstAction];
+		while (!isEventInAction(action,START,context.isPaused) && !hasSoundInsert(action)) {
+			if (!isLastAction(action))
+				action = getNextAction(action);
+			else
+				action = 0;
+				break;
+		}
+		if (action) {
+			idxBlock = getSoundInsertIdxFromAux(action->aux);
+			ret = &context.package->blocks[idxBlock];
+		}
+	}	
+	return ret;	 	
+}
+
+struct CtnrBlock *getEndInsert(int actionStartEnd, int idxFirstAction) {
+	CtnrBlock *ret;
+	Action *actions,*action;
+	int idxBlock;
+	
+	ret = 0;
+	if (actionStartEnd & 0x0800) { // check INSERT_SOUND bit is set
+		actions = context.package->actions;
+		action = &actions[idxFirstAction];
+		while (!isEventInAction(action,END,context.isPaused) && getActionCode(action) != INSERT_SOUND) {
+			if (!isLastAction(action))
+				action = getNextAction(action);
+			else
+				action = 0;
+				break;
+		}
+		if (action) {
+			idxBlock = getSoundInsertIdxFromAux(action->aux);
+			ret = &context.package->blocks[idxBlock];
+		}
+	}	
+	return ret;	 	
+}
+
+CtnrBlock* getNextStartBlock(CtnrBlock *block) {
+	CtnrBlock *ret;
+	int idx = block->idxNextStart & MASK_IDX_NEXT_START;
+	if (idx == MASK_IDX_NEXT_START)  // highest possible block id (similar to -1) means last start block
+		ret = 0;
+	else
+		ret = &context.package->blocks[idx];
+	return ret;
+}
+
+void setNextStartBlock(int idxCurrentBlock, int idxNextBlock) {
+	CtnrBlock *block;
+	
+	// todo: log this error if (idxNextBlock >= MASK_IDX_NEXT_START || idxCurrentBlock >= MASK_IDX_NEXT_START)
+	if (idxNextBlock == -1)  // last start block
+		idxNextBlock = MASK_IDX_NEXT_START;  // use MASK_IDX_NEXT_START since masked with block-type
+	block = &context.package->blocks[idxCurrentBlock];
+    block->idxNextStart =  (block->idxNextStart & ~MASK_IDX_NEXT_START) | idxNextBlock;
+}
+
+CtnrBlock* getNextEndBlock(CtnrBlock *block) {
+	CtnrBlock *ret;
+	int idx = block->idxNextEnd;
+	if (idx == -1)
+		ret = 0;
+	else
+		ret = &context.package->blocks[idx];
+	return ret;
+}
+
+CtnrBlock* getNextStartBlockFromTime(unsigned int elapsedFileTime) {
+	CtnrBlock *cursorBlock;
+
+	cursorBlock = getStartBlockFromFile(context.file);
+	while (cursorBlock && (cursorBlock->startTime <= elapsedFileTime)) 
+		cursorBlock = getNextStartBlock(cursorBlock);	
+	return cursorBlock;	
+}
+ 
+CtnrBlock* getNextEndBlockFromTime(unsigned int elapsedFileTime) {
+	CtnrBlock *cursorBlock;
+	
+	cursorBlock = getEndBlockFromFile(context.file);
+	while (cursorBlock && (cursorBlock->endTime <= elapsedFileTime)) 
+		cursorBlock = getNextEndBlock(cursorBlock);	
+	return cursorBlock;	
+}
+
+CtnrBlock* getStartBlockFromFile(CtnrFile *file) {
+	CtnrBlock *ret;
+	
+	if (file->idxFirstBlockStart != -1)
+		ret = &context.package->blocks[file->idxFirstBlockStart];
+	else
+		ret = 0;
+	return ret;
+}
+
+CtnrBlock* getEndBlockFromFile(CtnrFile *file) {
+	CtnrBlock *ret;
+	
+	if (file->idxFirstBlockEnd != -1)
+		ret = &context.package->blocks[file->idxFirstBlockEnd];
+	else
+		ret = 0;
+	return ret;
+}
+
+CtnrPackage* getPackageFromFile (CtnrFile *file) {
+	CtnrPackage *ret;
+	
+	if (file >= pkgSystem.files && file < (pkgSystem.files + pkgSystem.countFiles))
+		ret = &pkgSystem;
+	else if (file >= pkgUser.files && file < (pkgUser.files + pkgUser.countFiles))
+		ret = &pkgUser;
+	else if (file == &context.package->tempFile)
+		ret = context.package;
+	else
+		logException(18,0,RESET); //file address doen't match pkgSystem or pkgUser
+	return ret;
+}
+
+CtnrFile* getFileFromBlock (CtnrBlock *block) {
+	int idxFile;
+	int idxBlock;
+	int filesInPackage;
+	
+	filesInPackage = context.package->countFiles;	
+	idxBlock = block - context.package->blocks;
+	
+	for (idxFile = filesInPackage-1; idxFile >= 0; idxFile--) {
+		if (idxBlock >= context.package->files[idxFile].idxFirstBlockInFile) {
+			break;
+		}
+	}
+	//todo:error if not idxBlock < files[0].idxFirstBlockInFile
+	return &context.package->files[idxFile];
+}
+
+void setBlockHyperlinked(CtnrBlock *block) {
+	int code;
+	
+	code = block->actionEnterExit;
+	code &= 0xFFF0; //clear bits 0-3
+	code |= 0x04;   //set hyperlink code (see CtnrBlock definition)
+	block->actionEnterExit = code;
+} 
+
+BOOL isBlockHyperlinked(CtnrBlock *block) {
+	int code;
+	BOOL ret;
+	
+	code = block->actionEnterExit;
+	code &= 0x000F; //clear all but bits 0-3
+	ret = (code == 0x04); //hyperlink code (see CtnrBlock definition)
+	return ret;
+} 
+
+
+Action* getNextAction(Action *action) {
+	Action *ret;
+	int isLastOne = isLastAction(action);
+	if (isLastOne)
+		ret = 0;
+	else		
+		ret = action + 1;
+	return ret;
+}
+
+EnumAction getStartCode(CtnrBlock *block, int *idxAction, EnumBorderCrossing approach) {
+	// This function returns an action based on a particular block, how its start event is being
+	// approached (playing, forward/backward jumping, and some rules embedded in the function.
+
+	int startEnd, ret;
+	EnumAction startCode;
+	BOOL returnAction;
+	Action *actions, *cursor;
+	ret = 0;
+	*idxAction = -1;
+
+	if (approach == BACKWARD_JUMPING) {
+		// Start event is never triggered when playing or jumping forward.
+		// Inserted sound may still occur, but there is a separate fct for checking that.
+		startEnd = block->actionStartEnd;
+		startCode = startEnd & 0x00FF;
+		returnAction = (startCode & 0x04);  // check bit 2 is set
+		if (returnAction && !isStackEmpty())  // only give return if there's something to pop from the stack
+			ret = RETURN;
+		else {	
+			ret = startCode & 0x03; // just bits 0 and 1
+			if (ret == JUMP_BLOCK) {
+				// find action index for JUMP_BLOCK
+				actions =(Action *)&context.package->actions;
+				cursor = &actions[block->idxFirstAction];
+				while (!isEventInAction(cursor,START,context.isPaused) && getActionCode(cursor) != JUMP_BLOCK) {
+					if (!isLastAction(cursor))
+						cursor= getNextAction(cursor);
+					else {
+						cursor = 0;
+						break;
+					}
+				}
+				if (cursor)
+					*idxAction = cursor - actions;
+				else
+					*idxAction = -1; 
+			}
+		}
+	}
+	return ret;
+}
+
+EnumAction getEndCode(CtnrBlock *block, int *idxAction, EnumBorderCrossing approach) {
+	// This function returns an action based on a particular block, how its end event is being
+	// approached (playing, forward/backward jumping, and some rules embedded in the function.
+
+	int startEnd, ret;
+	EnumAction endCode;
+	BOOL returnAction;
+	Action *actions, *cursor;
+	ret = 0;
+	*idxAction = -1;
+
+	if (approach != BACKWARD_JUMPING) {
+		// End event is never triggered when jumping backward.
+		startEnd = block->actionStartEnd;
+		endCode = startEnd >> 8;
+		returnAction = (endCode & 0x04);  // check bit 2 is set
+		if (returnAction && !isStackEmpty())  // only give return if there's something to pop from the stack
+			ret = RETURN;
+		else {	
+			ret = endCode & 0x03; // just bits 0 and 1
+			if (ret == PAUSE) {
+				*idxAction = -1;
+				if (approach != PLAYING)
+					ret = NOP;
+			}
+			else {
+				if (ret == JUMP_BLOCK) {
+					// find action index for JUMP_BLOCK
+					actions = context.package->actions;
+					cursor = &actions[block->idxFirstAction];
+					while (!isEventInAction(cursor,END,context.isPaused) && getActionCode(cursor) != JUMP_BLOCK) {
+						if (!isLastAction(cursor))
+							cursor= getNextAction(cursor);
+						else {
+							cursor = 0;
+							break;
+						}
+					}
+					if (cursor)
+						*idxAction = cursor - actions;
+					else
+						*idxAction = -1; 
+				}
+			}
+		}
+	}
+	return ret;
+}
+
+void setSoundInsert(Action *action, BOOL flagSoundInsert) {
+	if (flagSoundInsert) 
+		// set bit 14 of eventAction -- see struct definition for action
+		action->eventAction = action->eventAction | 0x4000;
+	else
+		action->eventAction = action->eventAction & 0xBFFF;
+}
+		
+BOOL hasSoundInsert(Action *action) {
+	return (action->eventAction >> 14) & 0x01;
+}
+
+BOOL isEventInAction(Action *action, EnumEvent checkEvent, BOOL whenPaused) {
+	// events are LSB; see bit map for Action
+	unsigned int eventAction;
+	EnumEvent eventCode;
+	BOOL ret;
+	
+	eventAction = action->eventAction;
+	eventCode = eventAction & 0x00FF; 
+	ret = ((eventCode & 0x0F) == checkEvent);
+	if (ret && !whenPaused) // device is playing or stopped (not paused)
+		ret = !(eventCode & 0x10); // event does not apply if set only for paused state
+	return ret;
+}
+
+EnumAction getActionCode(Action *action) {
+	// action is MSB; see bit map for Action
+	unsigned int eventAction;
+	EnumAction actionCode;
+
+	eventAction = action->eventAction;
+	actionCode = eventAction >> 8;
+	return (actionCode & 0x3F);  // removes highest two bits
+}
+
+void setActionCode(Action *action, EnumAction actionCode) {
+	int eventActionCode = action->eventAction;
+	eventActionCode = eventActionCode & 0xC0FF; //zero everything in high byte besides bits 14 and 15
+	eventActionCode = eventActionCode | (actionCode << 8);
+	action->eventAction = eventActionCode;	
+}
+
+void setEventCodes(Action *action, EnumEvent eventCode, BOOL whenPaused) {
+	int eventActionCode = action->eventAction;
+	eventActionCode = eventActionCode & 0xFF00;
+	eventActionCode = eventActionCode | eventCode | (whenPaused << 4);
+	action->eventAction = eventActionCode;	
+}
+
+void setEndOfActions(Action *action, BOOL flagEndOfList) {
+	if (flagEndOfList) 
+		action->eventAction = action->eventAction | 0x8000;
+	else
+		action->eventAction = action->eventAction & 0x7FFF;
+}
+
+static BOOL isLastAction(Action *action) {
+	return (action->eventAction >> 15);
+}
+
+Action* getBlockActions(CtnrBlock *block) {
+	Action *ret;
+	int idx = block->idxFirstAction;
+	if (idx == -1)
+		ret = 0;
+	else
+		ret = &context.package->actions[idx];
+	return ret;
+}	
+
+Action* getListActions(ListItem *list) {
+	Action *ret;
+	int idx = list->idxFirstAction;
+	if (idx == -1)
+		ret = 0;
+	else
+		ret = &context.package->actions[idx];
+	return ret;
+}	
+
+
+

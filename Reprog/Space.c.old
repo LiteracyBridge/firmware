@@ -1,0 +1,106 @@
+#define SYS_CREATEVAR
+#define CREATE_BS_VAR
+#define CREATGUIVAR
+#define CREATEKEYDECODEVAR
+
+#include "./system/include/system_head.h"
+#include "./driver/include/driver_head.h"
+#include "./component/include/component_head.h"
+#include "./Application/TalkingBook/Include/mainloop.h"
+
+#include "./Application/TalkingBook/include/sys_counters.h"
+SystemCounts systemCounts;
+
+#include "./Application/TalkingBook/Include/macro.h"
+MacroInstr macro[MAX_MACRO_ITEMS];
+MacroLoop loop[MAX_MACRO_LOOPS];
+int idxMacro = 0;
+long secLastMacro = 0;
+int idxLoop = 0;
+int countLoop = 0;
+
+#include "./Application/TalkingBook/Include/talkingbook.h"
+#include "./Application/TalkingBook/Include/files.h"
+#include "./Application/TalkingBook/Include/device.h"
+#include "./Application/TalkingBook/Include/containers.h"
+#include "./Application/TalkingBook/Include/audio.h"
+
+BOOL firstBuffer = TRUE;
+BOOL lastBuffer = FALSE;
+BOOL done = FALSE;
+char * cursor;
+char lastFilenameRecorded[40];
+int iFileHandle;
+long filePosition;
+
+
+int volume, speed;
+unsigned long voltage; // voltage sample 
+int oldVolume;
+
+
+long timeLastSample = -1;
+long timeInitialized = -1;
+BOOL wasSampleStarted = FALSE;
+
+#include "./Application/TalkingBook/Include/timeline.h"
+BlockTimeline blockTimeline[MAX_STATES];
+
+#include "./Application/TalkingBook/Include/startup.h"
+// These capitalized variables are set in the config file.
+int KEY_PLAY, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_SELECT, KEY_STAR, KEY_HOME, KEY_PLUS, KEY_MINUS;	
+int LED_GREEN, LED_RED, LED_ALL;
+int MAX_SPEED, NORMAL_SPEED, SPEED_INCREMENT;
+int NORMAL_VOLUME, MAX_VOLUME, VOLUME_INCREMENT;
+char *BOOT_PACKAGE, *SYSTEM_PATH, *USER_PATH, *LIST_PATH;
+int MAX_PWR_CYCLES_IN_LOG, LOG_CARRYOVER_BYTES;
+char *SYSTEM_VARIABLE_FILE, *LOG_FILE;
+char *LIST_MASTER;
+char *PKG_NUM_PREFIX;
+char *LIST_NUM_PREFIX;
+char *AUDIO_FILE_EXT;
+char *CONTROL_EXT;
+char *AUDIO_TITLE_SUFFIX;
+int DEFAULT_TIME_PRECISION;
+int DEFAULT_REWIND;
+int INSERT_SOUND_REWIND_MS;
+int HYPERLINK_SOUND_FILE_IDX, DELETED_FILE_IDX, BEEP_SOUND_FILE_IDX, BIP_SOUND_FILE_IDX, SPEAK_SOUND_FILE_IDX, 
+    INACTIVITY_SOUND_FILE_IDX, ERROR_SOUND_FILE_IDX, EMPTY_LIST_FILE_IDX;
+int BLOCK_START_LEADER, BLOCK_END_LEADER;
+long BIT_RATE;
+int GREEN_LED_WHEN_PLAYING;
+int INACTIVITY_SECONDS;
+int MIC_GAIN_NORMAL, MIC_GAIN_HEADPHONE;
+char *CONTROL_TEMPLATE;
+char *MACRO_FILE;
+int VOLTAGE_SAMPLE_FREQ_SEC;
+
+char systemHeap [SYSTEM_HEAP_SIZE];
+char *cursorSystemHeap = systemHeap;
+
+unsigned int enteringVolume;
+
+long lastActivity = 0;
+BOOL warnedUser = FALSE;
+BOOL firstRun = TRUE;
+
+
+#include "./Application/TalkingBook/Include/containers.h"
+
+int REWIND[] = {0,500,1000,1500,2000,3000,5000,10000};
+
+Context context;
+CtnrPackage pkgSystem; 
+CtnrPackage pkgUser; 
+
+typedef struct StackFrame StackFrame;
+struct StackFrame {
+	// This struct could be compressed more, but there should be very few stackFrames in memory at once.
+	CtnrPackage *package;
+	CtnrFile *file;
+	int offset; 
+};
+StackFrame stack[MAX_HYPERLINK_STACK];
+int stackCount = 0;
+
+
