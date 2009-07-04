@@ -20,14 +20,14 @@ void resetRTC(void) {
 }
 
 long getRTCinSeconds(void) {
-	long ret, secH;
-	int secM, sec;
+	unsigned long ret, secH;
+	unsigned int secM, sec;
 	
-	sec = (int)*P_Second;
-	secM = (int)*P_Minute * 60;
-	secH = (int)*P_Hour * 3600;
+	sec = (unsigned int)*P_Second;
+	secM = (unsigned int)*P_Minute * 60;
+	secH = (unsigned int)*P_Hour * 3600;
 	ret = sec + secM + secH;
-	return ret;
+	return (long)ret;
 }
 
 void setLED(unsigned int color, BOOL on) {

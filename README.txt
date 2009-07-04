@@ -46,3 +46,5 @@ v1.32
       with a 0byte file; LEDs were off -- might be hung on close()
 - changed RED LED to go out after closing recorded file
 
+v1.33
+- fixed problem with recordings freezing up the device when device powered on for 9+ hours
