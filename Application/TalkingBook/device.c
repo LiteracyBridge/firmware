@@ -25,7 +25,7 @@ long getRTCinSeconds(void) {
 	
 	sec = (unsigned int)*P_Second;
 	secM = (unsigned int)*P_Minute * 60;
-	secH = (unsigned int)*P_Hour * 3600;
+	secH = (unsigned long)*P_Hour * 3600;
 	ret = sec + secM + secH;
 	return (long)ret;
 }
