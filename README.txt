@@ -48,3 +48,4 @@ v1.32
 
 v1.33
 - fixed problem with recordings freezing up the device when device powered on for 9+ hours
+- added code to change clock rate in config.txt (12MHz to 96MHz possible)
