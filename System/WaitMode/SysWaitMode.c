@@ -104,3 +104,26 @@ unsigned int SysGetState()
 {
 	return gState;
 }
+
+unsigned int
+SetSystemClockRate(unsigned int plln_val)
+{
+	unsigned int clk_state;
+	
+	if(plln_val < 4) plln_val = 4;  //clock rate == 12MHz  (4 * 3)
+	if(plln_val > 32) plln_val = 32; //CLOCK RATE == 96MHz (32 * 3)
+		
+	clk_state = *P_Clock_Ctrl;
+	
+	*P_Clock_Ctrl = clk_state & 0x7fff; // turn off fast clock bit
+	while ((*P_Power_State & 0x7) == 0) ; // wait for clock src to "settle"
+
+//  see page 18 of programmers guide
+
+	*P_PLLN = plln_val;   //clock rate = plln_val * 3;
+
+	*P_Clock_Ctrl = clk_state;  // restore clock state 
+	while ((*P_Power_State & 0x7) == 0) ; // wait for clock src to "settle"
+
+	return(*P_PLLN);
+}

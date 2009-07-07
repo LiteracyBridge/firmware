@@ -51,6 +51,7 @@ void startUp(void) {
 		setUSBDevice(TRUE);  // allows USB device mode no matter what is on memory card
 
 	loadConfigFile();
+	
 	SysDisableWaitMode(WAITMODE_CHANNEL_A);
 	adjustVolume(NORMAL_VOLUME,FALSE,FALSE);
 	adjustSpeed(NORMAL_SPEED,FALSE);
@@ -174,6 +175,11 @@ static void loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"VOLTAGE_SAMPLE_FREQ_SEC")) VOLTAGE_SAMPLE_FREQ_SEC=strToInt(value);
 				else if (!strcmp(name,(char *)"LOG_WARNINGS")) LOG_WARNINGS=strToInt(value);
 				else if (!strcmp(name,(char *)"LOG_KEYS")) LOG_KEYS=strToInt(value);
+				else if (!strcmp(name,(char *)"CLOCK_RATE")) {
+					unsigned int clk_rate;
+					clk_rate = strToInt(value);
+					SetSystemClockRate(clk_rate);
+				}
 		}
 	}
 	if (!goodPass)
