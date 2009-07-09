@@ -42,7 +42,7 @@ extern void DrvRTCIntEnable( void );
 extern void DrvRTCIntDisable( void );
 extern void DrvEnableReminderISR( void );
 extern void DrvDisableReminderISR( void );
-
+extern unsigned int CLOCK_RATE;
 
 #if SIMULATOR  //add by haoyu for no err 2006.2.6
 int _NAND_ReadSector_USB(unsigned long  LABAddr, unsigned int blkcnt, unsigned long StoreAddr, unsigned int DMA_Channel) {};
@@ -84,8 +84,8 @@ unsigned long  usb_time_out;
 #define C_USBHostError  		0xffff
 typedef enum 
 {
-		USBDiskPlugIn  	= 		C_USBDiskPlugIn,
-		USBDiskPlugOut 	=		C_USBDiskPlugOut,
+		T_USBDiskPlugIn  	= 		C_USBDiskPlugIn,
+		T_USBDiskPlugOut 	=		C_USBDiskPlugOut,
 		USBPlugInTimeOut = 		C_USBPlugInTimeOut,
 		USBDevicesUnmount	= 	C_USBDevicesUnmount,
 		USBDevicesmountOK		= C_USBDevicesmountOK,
@@ -151,6 +151,9 @@ int SystemIntoUDisk()
 	}	
 #endif
 	SysDisableWaitMode(3);
+
+	SetSystemClockRate(32);
+
 //	SysIntoHighSpeed();
 
 	RHM_FlashPtr = &FL;
@@ -204,6 +207,9 @@ int SystemIntoUDisk()
 	}
 	SysEnableWaitMode( 3 );
 	
+	SetSystemClockRate(CLOCK_RATE);
+
+	
 	RHM_FlashPtr = 0;
 
 	return 0;
@@ -240,8 +246,11 @@ int SystemIntoUSB(unsigned int USBHorD_Flag)
 {
 	int trials, x;
 	const int maxTrials = 20;
+	
+	if(USBHorD_Flag == USB_Host){
 		
-	if(USBHorD_Flag == USB_Host){		
+		SysIntoHighSpeed();
+
 		setLED(LED_GREEN,FALSE);
 		for (trials = 0; trials < maxTrials; trials++) {
 			setLED(LED_RED,TRUE);
@@ -264,6 +273,9 @@ int SystemIntoUSB(unsigned int USBHorD_Flag)
 			*P_USBH_Config = 0;
 			*P_USBH_INTEN  = 0;		
 		}	
+		
+		SetSystemClockRate(CLOCK_RATE);
+
 	}else if(USBHorD_Flag == USB_Device){
 		SystemIntoUDisk();	
 	}
@@ -301,4 +313,26 @@ int setUSBHost(BOOL enter) {
 	}
 
 	return 0;
+}
+
+void
+HandleHostISR()
+{
+	extern void USBDiskPlugOut();
+	extern void USBDiskPlugIn();
+
+	unsigned int r1;
+	
+	r1 = *P_USBH_INT;
+	
+	if(r1 & 0x800) {
+		*P_USBH_INT = r1;
+		USBDiskPlugOut();
+	} else if( r1 & 0x1) {
+		*P_USBH_INT = r1;
+		USBDiskPlugIn();
+	} else {
+		USBHostISR();
+	}
+	
 }

@@ -40,6 +40,7 @@ APP_IRAM char *CONTROL_TEMPLATE;
 APP_IRAM char *MACRO_FILE;
 APP_IRAM int VOLTAGE_SAMPLE_FREQ_SEC;
 APP_IRAM int LOG_WARNINGS, LOG_KEYS;
+APP_IRAM unsigned int CLOCK_RATE;
 
 
 void startUp(void) {
@@ -176,9 +177,8 @@ static void loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"LOG_WARNINGS")) LOG_WARNINGS=strToInt(value);
 				else if (!strcmp(name,(char *)"LOG_KEYS")) LOG_KEYS=strToInt(value);
 				else if (!strcmp(name,(char *)"CLOCK_RATE")) {
-					unsigned int clk_rate;
-					clk_rate = strToInt(value);
-					SetSystemClockRate(clk_rate);
+					CLOCK_RATE = strToInt(value);
+					SetSystemClockRate(CLOCK_RATE);
 				}
 		}
 	}

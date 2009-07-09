@@ -15,6 +15,7 @@ extern long USB_INSERT_PTR;
 extern void USB_ISR(), USB_Insert_TimeOut();
 
 void BodyInit(void);
+extern unsigned int CLOCK_RATE;
 
 int main (void)
 {
@@ -35,6 +36,10 @@ int main (void)
 #ifdef USBRP
 	
 	check_new_sd_flash();
+
+	CLOCK_RATE = 8;  // start with 24MHz clock
+	SetSystemClockRate(CLOCK_RATE);
+
 	
 //	SystemIntoUDisk();
 	

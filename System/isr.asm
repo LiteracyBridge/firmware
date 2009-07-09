@@ -10,6 +10,10 @@
 //========================================================================================
 .INCLUDE ./system/include/system_head.inc
 
+
+.define C_USBDiskPlugIn   	0x01
+.define C_USBDiskPlugOut 	0x02
+.define C_USBHostError		0xffff
 //*****************************************************************************
 //*****************************************************************************
 // Variable Publication and External function & variable declaration Area
@@ -18,7 +22,11 @@
 .external	ExecuteIF_AUDIOA
 .external	ExecuteIF_AUDIOB
 .external	ExecuteIF_ADC_AUTO
-
+.external	_USBHostISR
+.external _USBDiskPlugIn
+.external _USBDiskPlugOut
+.external _USBHost_Flag
+.external _HandleHostISR;
 //********************************************************
 .PUBLIC	_BREAK
 .PUBLIC	_FIQ
@@ -378,8 +386,23 @@ ExecuteIF_DMA:
 
 .EXTERNAL _USB_ISR
 ExecuteIF_USB:
-	call _USB_ISR
+
+		r1=[P_USBH_INTEN]
+		cmp r1, 0
+		jnz ?L_USBHost
+
+		jmp ?USB_Dvice
+
+	?L_USBHost:
+		call _HandleHostISR		
+		jmp End_USB?
+		
+?USB_Dvice:
+		call _USB_ISR
+
+End_USB?:
 	RETF
+
 
 ExecuteIF_SPI:
 	RETF
