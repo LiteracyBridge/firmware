@@ -44,7 +44,7 @@ void Cmd_ReadTOC();
 void ReadDriveInfoTable();
 void GetDriveStatus();
 void GetICVersion();
-void CheckCDRomValid(void);
+//void CheckCDRomValid(void);
 int SetVenderID();
 extern tra_end;
 
@@ -1052,7 +1052,7 @@ void USB_ServiceLoop(unsigned int unUseLoop)
 			RHM_USBreprogBuf_Full = 0;
 		}
 #endif	
-		Check_SDC_Present();
+//		Check_SDC_Present();
 		if (!unUseLoop)
 			break;
 	}
@@ -1061,6 +1061,7 @@ void USB_ServiceLoop(unsigned int unUseLoop)
 #endif
 }		
 
+#if 0
 void CheckCDRomValid(void)
 {
 	int i, *USB_RW_Buffer_PTR;
@@ -1083,7 +1084,7 @@ void CheckCDRomValid(void)
 		}			
 	}			
 }
-
+#endif
 void Setup_Token(void)
 {
 	unsigned int i;

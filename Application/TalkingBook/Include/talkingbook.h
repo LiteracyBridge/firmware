@@ -77,6 +77,16 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 #define TEXT_ACTION_LED_GREEN		'G'
 #define TEXT_ACTION_LED_ALL			'A'
 
+// try to become a usb client after USB_CLIENT_POLL_INTERVAL seconds of inactivity
+#define USB_CLIENT_POLL_INTERVAL       5
+
+// initialize usb hardware & software to become a client but return without running usb serviceloop
+#define USB_CLIENT_SETUP_ONLY          2
+// run usb serviceloop continuously until usb is inactiove
+#define USB_CLIENT_SVC_LOOP_CONTINUOUS 1
+// run usb serviceloop[ once and return
+#define USB_CLIENT_SVC_LOOP_ONCE       0
+
 typedef enum EnumStartOrEnd EnumStartOrEnd;
 enum EnumStartOrEnd {NONE, STARTING, ENDING, BOTH};
 

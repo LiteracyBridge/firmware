@@ -129,7 +129,7 @@ void Read_Format_Capacities(unsigned long ulCapacity);
 void Prevent_Allow_Medium_removal(void);
 void fUSB_SDCardPlugIn();
 void fUSB_SDCardPullOut();
-void CheckCDRomValid(void);
+//void CheckCDRomValid(void);
 ////////////////////////////////USB Commands call back///////////////////////////////////////////
 unsigned int TestUnitReady_CallBack(void);
 unsigned int ModeSense6_CallBack(void);

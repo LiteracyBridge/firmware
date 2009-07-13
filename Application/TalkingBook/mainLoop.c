@@ -25,7 +25,7 @@ static void processIntoBlock(int);
 static EnumAction processEndBlock(int);
 static void endOfTimeframe(int, BOOL);
 static void keyResponse(void);
-static int checkInactivity(BOOL);
+int checkInactivity(BOOL);
 static void takeAction (Action *, EnumAction);
 static void loadPackage(int, const char *);
 
@@ -431,7 +431,7 @@ static void keyResponse(void) {
 	}
 }
 
-static int checkInactivity(BOOL resetTimer) {
+int checkInactivity(BOOL resetTimer) {
 	long currentTime;
 	APP_IRAM static BOOL warnedUser;
 	APP_IRAM static long lastActivity;
@@ -455,6 +455,15 @@ static int checkInactivity(BOOL resetTimer) {
 		//setLED(LED_RED,FALSE);
 		//warnedUser = TRUE;
 	} 
+	
+// this tries each pass after USB_CLIENT_POLL_INTERVAL second of inactivity, too frequent??
+	if(currentTime - lastActivity > USB_CLIENT_POLL_INTERVAL) {
+		int usbret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY);
+		while(usbret == 1) {
+			usbret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_ONCE);
+		}
+	}
+
 	/*
 	else if (warnedUser && currentTime - lastActivity > 10) {	
 		setLED(LED_RED,TRUE);
@@ -469,17 +478,22 @@ void mainLoop (void) {
 	CtnrBlock *insertBlock;
 	ListItem *list;
 	int inactivityCheckCounter = 0;
-
+	unsigned int usbret;
+	
+	
 	startUp();
 /*
 	ret = tbOpen((LPSTR)"a:\\\\user\\africa-my-africa.a18",O_RDWR);		
 	SACMGet_A1800FAT_Mode(ret,100);
 	Snd_SACM_PlayFAT(ret, C_CODEC_AUDIO1800);	
 */
-	loadPackage(PKG_SYSTEM,BOOT_PACKAGE);	
+
+	loadPackage(PKG_SYSTEM,BOOT_PACKAGE);
+	
 	insertSound(&pkgSystem.files[BEEP_SOUND_FILE_IDX],NULL,TRUE); 
 
 	while(1) {
+		
 		// check if need to load in a new package
 		if (context.queuedPackageType > PKG_NONE) {
 			if (context.queuedPackageNameIndex != -1)
@@ -517,6 +531,7 @@ void mainLoop (void) {
 			checkInactivity(!context.isStopped && !context.isPaused);
 			inactivityCheckCounter = 0;
 		}
+
 	} // end of while(1) loop
 }
 

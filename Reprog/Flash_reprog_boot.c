@@ -1137,6 +1137,7 @@ void  FP_USB_ServiceLoop(unsigned int unUseLoop)
 //	RHM_FlashBuf = 0;
 }		
 
+#if 0
 void FP_CheckCDRomValid(void)
 {
 	int i, *USB_RW_Buffer_PTR;
@@ -1159,6 +1160,7 @@ void FP_CheckCDRomValid(void)
 		}			
 	}			
 }
+#endif
 
 void FP_Setup_Token(void)
 {

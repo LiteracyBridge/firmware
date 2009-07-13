@@ -22,6 +22,7 @@
 
 #include ".\Component\FS\usb_host\USB_Host_Constant.h"
 #include ".\Component\FS\usb_host\USBHostMSDC.h"
+#include ".\Application\Talkingbook\Include\talkingbook.h"
 
 
 //unsigned int R_Write_protect = 0;//add by haoyu for no err
@@ -138,7 +139,7 @@ str_USB_Lun_Info USB_Lun_Define[]=
 str_USB_Lun_Info 	*FP_USB_Lun_Define[N_USB_LUN];
 #endif
 
-int SystemIntoUDisk()
+int SystemIntoUDisk(unsigned int serviceloop)
 {
 	extern flash *RHM_FlashPtr; //RHM , *FP_RHM_FlashPtr;
 	int ret,i;
@@ -146,56 +147,64 @@ int SystemIntoUDisk()
 	int fl_size = USB_Flash_init((flash *)0, 0);
 	flash FL;
 	int flash_execution_buf[fl_size];
+	RHM_FlashPtr = &FL;
+
 	for(i=0; i<N_USB_LUN; i++) {
 		FP_USB_Lun_Define[i] = &USB_Lun_Define[i];
-	}	
+		if( USB_Lun_Define[i].unLunType == LunType_NOR) {
+			USB_Lun_Define[i].rhmLunData = (unsigned long) RHM_FlashPtr;
+		}
+	}
+	FL.flash_exe_buf = (void *) &flash_execution_buf[0];
+	USB_Flash_init(&FL, 1);
+	
 #endif
 	SysDisableWaitMode(3);
 
 	SetSystemClockRate(32);
 
-//	SysIntoHighSpeed();
 
-	RHM_FlashPtr = &FL;
-	FL.flash_exe_buf = (void *) &flash_execution_buf[0];
-	USB_Flash_init(&FL, 1);
-
-
-	MaxLUN = -1;
-	R_NAND_Present=0;
-	R_SDC_Present=0;     //no have SD modify by haoyu 2007.1.29	
-
-	for(i=0 ; i<10 ; i++)
-	{
-		ret = DrvSDCInitial();	
-		if(ret==0)
-		{
-			R_SDC_Present=1;		// SD Card Initial Success
-			MaxLUN++;  
-			_deviceunmount(0);
-			break;		
-		}
-	} 
-	
-/*typedef struct {
-	unsigned int	unLunNum;			//Lun number.
-	unsigned int	unLunType;			//Lun type.
-	unsigned long 	ulNandStartAddr;	//Indicate any operation on this lun should be offset ulNandStartAddr sector, only for LunType_NandDrive or LunType_CDROM.
-	unsigned long 	ulNandSizeSec;		//Nand flash size sector
-	unsigned int 	unStatus;			//Status, write protect, no media, media change.
-	unsigned long   rhmLunData;         //for Nor flash, point to struct flash
-} str_USB_Lun_Info;*/
-
-	for(i=0 ; i<10 ; i++) {
-		if( USB_Lun_Define[i].unLunType == LunType_NOR) {
-			USB_Lun_Define[i].rhmLunData = (unsigned long) RHM_FlashPtr;
-			break;
+	if(serviceloop) {
+		int j;
+		R_NAND_Present=0;
+		MaxLUN = 0;
+		R_SDC_Present=1;
 		_deviceunmount(0);
+	
+		USB_TimeOut_Enable();		
+		USB_Initial();
+		USB_Reset();
+		
+		if(serviceloop == USB_CLIENT_SETUP_ONLY) {
+			return(1);
 		}
 	}
-	USB_TimeOut_Enable();		
-	USB_Initial();
-	USB_Reset();
+	
+	if(!serviceloop) {
+		int tmp;
+		long j;
+		tmp = R_USB_State_Machine;
+		for(j=0; j<100000; j++) {
+			USB_ServiceLoop(0);
+			if(R_USB_State_Machine > 0 && R_USB_State_Machine <= SCSI_CSW_Stage) {
+				goto xxx;
+			}
+		}
+		if (tmp == 0 && R_USB_State_Machine == 0) {
+			return(2);
+		}
+
+		if(R_USB_State_Machine == 0xf5f5) {
+			return(2);
+		}
+		if(!(R_USB_State_Machine > 0 && R_USB_State_Machine <= SCSI_CSW_Stage)) {
+			SysEnableWaitMode(3);
+			SetSystemClockRate(CLOCK_RATE);
+			RHM_FlashPtr = 0;
+			return 1;
+		}
+	}
+xxx:
 	USB_ServiceLoop(1);
 
 	*P_USBD_Config=0x00;
@@ -209,8 +218,10 @@ int SystemIntoUDisk()
 	
 	SetSystemClockRate(CLOCK_RATE);
 
-	
+	R_USB_State_Machine == 0xf5f5; //debug
 	RHM_FlashPtr = 0;
+	
+	checkInactivity(TRUE); // count being in usb as acrive ??
 
 	return 0;
 }
@@ -277,7 +288,7 @@ int SystemIntoUSB(unsigned int USBHorD_Flag)
 		SetSystemClockRate(CLOCK_RATE);
 
 	}else if(USBHorD_Flag == USB_Device){
-		SystemIntoUDisk();	
+		SystemIntoUDisk(1);	
 	}
 
 	return 0;

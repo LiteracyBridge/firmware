@@ -50,3 +50,4 @@ v1.33
 - fixed problem with recordings freezing up the device when device powered on for 9+ hours
 - added code to change clock rate in config.txt (12MHz to 96MHz possible)
 - set default clock rate, add isr processing for USB host interrupts
+- try to become a usb client after 5(?) seconds of inactivity

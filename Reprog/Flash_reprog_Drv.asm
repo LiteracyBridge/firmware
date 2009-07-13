@@ -1471,7 +1471,7 @@ FP_F_USB_Initial:
 		r1 = 1
 		[_CDROMDelay] = r1	
 
-		call _FP_CheckCDRomValid
+//		call _FP_CheckCDRomValid
 //		call main
 				
 		retf
