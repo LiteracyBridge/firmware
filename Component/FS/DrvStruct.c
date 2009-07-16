@@ -33,7 +33,7 @@ void FS_LoadDriver(void)
 {	
 	FileSysDrv[0] =&FS_SD_driver;//&FS_SD_driver;
 	FileSysDrv[1] =&FS_USB_driver;
-#ifndef USBRP
+#if 0
 	FileSysDrv[2] =&FS_NAND_driver;
 #endif
 //	bNandInit = -1;

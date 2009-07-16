@@ -141,9 +141,9 @@ str_USB_Lun_Info 	*FP_USB_Lun_Define[N_USB_LUN];
 
 int SystemIntoUDisk(unsigned int serviceloop)
 {
-	extern flash *RHM_FlashPtr; //RHM , *FP_RHM_FlashPtr;
 	int ret,i;
 #ifdef USBRP
+	extern flash *RHM_FlashPtr; //RHM , *FP_RHM_FlashPtr;
 	int fl_size = USB_Flash_init((flash *)0, 0);
 	flash FL;
 	int flash_execution_buf[fl_size];
@@ -200,7 +200,9 @@ int SystemIntoUDisk(unsigned int serviceloop)
 		if(!(R_USB_State_Machine > 0 && R_USB_State_Machine <= SCSI_CSW_Stage)) {
 			SysEnableWaitMode(3);
 			SetSystemClockRate(CLOCK_RATE);
+#ifdef USBRP
 			RHM_FlashPtr = 0;
+#endif
 			return 1;
 		}
 	}
@@ -219,7 +221,9 @@ xxx:
 	SetSystemClockRate(CLOCK_RATE);
 
 	R_USB_State_Machine == 0xf5f5; //debug
+#ifdef USBRP
 	RHM_FlashPtr = 0;
+#endif
 	
 	checkInactivity(TRUE); // count being in usb as acrive ??
 
@@ -252,7 +256,7 @@ void USB_Insert_TimeOut(void)
 }
 
 ///////////////////////////////////////////////////////////
-
+#if 0
 int SystemIntoUSB(unsigned int USBHorD_Flag)
 {
 	int trials, x;
@@ -260,7 +264,8 @@ int SystemIntoUSB(unsigned int USBHorD_Flag)
 	
 	if(USBHorD_Flag == USB_Host){
 		
-		SysIntoHighSpeed();
+//		SysIntoHighSpeed();
+		SetSystemClockRate(16);
 
 		setLED(LED_GREEN,FALSE);
 		for (trials = 0; trials < maxTrials; trials++) {
@@ -275,7 +280,9 @@ int SystemIntoUSB(unsigned int USBHorD_Flag)
 			setLED(LED_GREEN,TRUE);
 			wait(1000);
 			USBHost_Flag = C_USBDevicesmountOK;
-			//  cbs:USB_HostProcess();
+			return(1);
+		}
+//			USB_HostProcess();
 			//  unmount USB devices;  
 			if(_deviceunmount(1) != 0x00)
 				USBHost_Flag = C_USBDiskPlugOut;
@@ -293,12 +300,14 @@ int SystemIntoUSB(unsigned int USBHorD_Flag)
 
 	return 0;
 }
-
+#endif
 int setUSBHost(BOOL enter) {
 	int trials, x;
-	const int maxTrials = 20;
+	const int maxTrials = 10;
+	long l1;
 
-	if (enter){		
+	if (enter){	
+		SetSystemClockRate(16);	
 		setLED(LED_GREEN,FALSE);
 		for (trials = 0; trials < maxTrials; trials++) {
 			setLED(LED_RED,TRUE);
@@ -312,6 +321,8 @@ int setUSBHost(BOOL enter) {
 			setLED(LED_GREEN,TRUE);
 			wait(1000);
 			USBHost_Flag = C_USBDevicesmountOK;
+		} else {
+			SetSystemClockRate(CLOCK_RATE);
 		}
 	} else {
 			//  unmount USB devices;  
@@ -319,13 +330,45 @@ int setUSBHost(BOOL enter) {
 				USBHost_Flag = C_USBDiskPlugOut;
 			else
 				USBHost_Flag = C_USBDevicesUnmount;
+			SetSystemClockRate(CLOCK_RATE);
 			*P_USBH_Config = 0;
 			*P_USBH_INTEN  = 0;		
 	}
 
 	return 0;
 }
+#if 0
+void USB_HostProcess(void) {
+	int keystroke, i;
+	char from[30], to[30], num[2];
+	int maxTrials = 10;
 
+	i = 0;		
+	do {
+//		key = getKey();
+		keystroke = keyCheck(0);
+		if(keystroke == KEY_LEFT) {
+//			case KEY_LEFT:/*0x01*/:
+			  // copy test file from device to host
+			  strcpy(from,"b:\\\\test");
+			  strcpy(to,"a:\\\\test");
+			  intToString(i++,num,2);
+			  strcat(to,num);
+			  testCopy(from,to,maxTrials);
+//			  break;
+		} else if (keystroke == KEY_RIGHT) {
+//			case 0x10/*0x02*/:
+			  // copy test file from host to device
+			  strcpy(from,"a:\\\\test");
+			  strcpy(to,"b:\\\\test");
+			  intToString(i++,num,2);
+			  strcat(to,num);
+			  testCopy(from,to,maxTrials);
+//			  break;
+		}
+	} while (keystroke != 0x04);
+}
+#endif
 void
 HandleHostISR()
 {

@@ -20,24 +20,25 @@ int d2dCopy(const char * filenameList, const char * package) {
 	// copy test file from device to host
 	strcpy(from,package);
 	strcat(from,AUDIO_FILE_EXT);
-	strcpy(to,USER_PATH);
-	to[0] = 'b'; //change a:\\ drive to b:\\ drive
+	strcpy(to,"b:\\\\Inbox\\");
+//	to[0] = 'b'; //change a:\\ drive to b:\\ drive
 	strcat(to,from);
 	testCopy(from,to,maxTrials);
 
 	strcpy(from,package);
 	strcat(from,(const char *)".txt");
-	strcpy(to,USER_PATH);
-	to[0] = 'b'; //change a:\\ drive to b:\\ drive
+	strcpy(to,"b:\\\\Inbox\\");
+//	to[0] = 'b'; //change a:\\ drive to b:\\ drive
 	strcat(to,from);
 	testCopy(from,to,maxTrials);
 	
-	strcpy(to,LIST_PATH);
-	to[0] = 'b'; //change a:\\ drive to b:\\ drive
-	strcat(to,filenameList);
-	strcpy(temp,package); // since appendStringToFile destroys string
-	appendStringToFile(to,temp); //destroys temp
-
+	if(filenameList[0]) {
+		strcpy(to,LIST_PATH);
+		to[0] = 'b'; //change a:\\ drive to b:\\ drive
+		strcat(to,filenameList);
+		strcpy(temp,package); // since appendStringToFile destroys string
+		appendStringToFile(to,temp); //destroys temp
+	}
 	setUSBHost(FALSE);
 }
 

@@ -4,7 +4,7 @@
 #include "Include/macro.h"
 #include "Include/device.h"
 
-extern int SystemIntoUDisk(void);
+extern int SystemIntoUDisk(unsigned int);
 extern void KeyScan_ServiceLoop(void);
 extern int SP_GetCh(void);
 static void logKeystroke(int);
@@ -111,7 +111,8 @@ void setUSBDevice (BOOL set) {
 			setLED(LED_RED,TRUE);
 		else // for USB before reading config file, or if config corrupted
 			setLED(0x200,TRUE);		
-		SystemIntoUSB(USB_Device);	
+//		SystemIntoUSB(USB_Device);
+		SystemIntoUDisk(1);	
 		if (LED_RED)
 			setLED(LED_RED,FALSE);
 		else // for USB before reading config file, or if config corrupted
@@ -205,7 +206,8 @@ int waitForButton(int targetedButton) {
 void wait(int t) { //t=time in msec
 	unsigned int i;
 	unsigned long j;
-	const unsigned long int cyclesPerMilliSecond = 96000; // cycles per millisecond at 96 MHz
+//	const unsigned long int cyclesPerMilliSecond = 96000; // cycles per millisecond at 96 MHz
+	unsigned long int cyclesPerMilliSecond = (long)(*P_PLLN & 0x3f) * 3000L; // 96000 at 96MHz
 	const unsigned int cyclesPerNOP = 70; // cycles for each no-operation instruction
 	const unsigned int NOPsPerMilliSecond = cyclesPerMilliSecond / cyclesPerNOP; // loop count per millisecond
 	for (i = 0; i < t; i++) 

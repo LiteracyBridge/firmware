@@ -1,3 +1,5 @@
+#ifdef USBRP
+
 #define const
 
 #include "GPL162002.h"
@@ -746,11 +748,15 @@ void FP_RHMWrite()
 	length |= FP_GetCMDValueEx(23);
 	
 	s = length;
-	
+
+#ifdef USBRP	
 	if(memtype == LunType_RAM)
 		lun = 1;
 	else
 		lun = 2;  //nor flash
+#else
+	lun = 0;
+#endif
 	
 	if (FP_Write_10((unsigned long)FP_USB_Lun_Define[lun]))
 		FP_CommandFail(Sense_Code);	
@@ -1901,6 +1907,7 @@ int FP_Write_10(unsigned long	lUSB_LUN_Write)
 			CSW_Residue=0;
 #endif
 	}
+#ifdef USBRP
 	else if(ptr_USB_LUN_Write->unLunType == LunType_NOR) {  //rhm
 	
 		flash *pflash = (flash *)ptr_USB_LUN_Write->rhmLunData;
@@ -2056,8 +2063,9 @@ int FP_Write_10(unsigned long	lUSB_LUN_Write)
 		}
 		else
 			CSW_Residue=0;
-//RHM #endif
+//RHM#endif
 	}
+#endif
 
 End:	
 #ifdef OS_vension
@@ -2070,5 +2078,6 @@ End:
 	return ret;	
 }
 
+#endif
 
 					

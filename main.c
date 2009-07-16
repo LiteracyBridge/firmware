@@ -37,7 +37,7 @@ int main (void)
 	
 	check_new_sd_flash();
 
-	CLOCK_RATE = 8;  // start with 24MHz clock
+	CLOCK_RATE = 16;  // start with 48MHz clock
 	SetSystemClockRate(CLOCK_RATE);
 
 	

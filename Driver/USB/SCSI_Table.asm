@@ -19,7 +19,11 @@
 .public	_String2_Descriptor
 .public	_String3_Descriptor
 .public	_String4_Descriptor
-//.public _DeviceVersionInfo
+.comment @
+.ifndef USBRP
+.public _DeviceVersionInfo
+.endif
+@
 .public _ScsiFlexPage
 .public _ScsiFlexPage_End
 	
@@ -396,22 +400,23 @@ _ScsiFlexPage:
 	.dw     0x00, 0x00												
 _ScsiFlexPage_End:
 ////////////////Table//////////////////////////////////////////////////////
-
-//_DeviceVersionInfo:
-//	.dw		0x00	//0~3: IC body
-//	.dw		0x16
-//	.dw		0x20
-//	.dw		0x02
-//	.dw		0xFF	//4~7: IC Version, 0xFFFFFF means mask rom
-//	.dw		0x00
-//	.dw		0x00
-//	.dw		0x00
-//	.dw		0x09	//Year
-//	.dw		0x05	//Month
-//	.dw		0x10	//Day
-//_DeviceVersionInfo_End:
-
-
+.comment @
+.ifndef USBRP
+_DeviceVersionInfo:
+	.dw		0x00	//0~3: IC body
+	.dw		0x16
+	.dw		0x20
+	.dw		0x02
+	.dw		0xFF	//4~7: IC Version, 0xFFFFFF means mask rom
+	.dw		0x00
+	.dw		0x00
+	.dw		0x00
+	.dw		0x09	//Year
+	.dw		0x05	//Month
+	.dw		0x10	//Day
+_DeviceVersionInfo_End:
+.endif
+@
 
 _SCSISENSE:
         //  SK   ASC  ASCQ

@@ -34,10 +34,10 @@ _RESET:
 	r1 &= 0x07
 	jz ?WaitPll1
 
-	r1=96/3					// PLL clock =48MHz
+	r1=48/3					// PLL clock =48MHz
 	[P_PLLChange]=r1
 
-	r1=0x8418
+	r1=0x8410
 	[P_Clock_Ctrl]=r1		// pll enable, system clock=PLL clock
 
 ?chk_pws:
