@@ -213,7 +213,10 @@ int findDeleteStringFromFile(char *path, char *filename, char * string, BOOL sho
 		*(string + ret) = '\0';
 
 	ret = -1;
-	tbChdir((LPSTR)path);
+	if(path != NULL) {
+		// warning - no chdir back before exit ????
+		tbChdir((LPSTR)path);
+	}
 	if (shouldDelete) {
 		strcpy(tempFilename,"temp.txt");	
 		wHandle = tbOpen((LPSTR)tempFilename,O_CREAT|O_TRUNC|O_WRONLY);
@@ -237,8 +240,9 @@ int findDeleteStringFromFile(char *path, char *filename, char * string, BOOL sho
 			close(wHandle);
 			i = unlink((LPSTR)filename);
 			if (i != -1) {
-				i = _copy((LPSTR)tempFilename,(LPSTR)filename);
-				if (i != -1)
+				i = rename((LPSTR)tempFilename,(LPSTR)filename);
+//				i = _copy((LPSTR)tempFilename,(LPSTR)filename);
+				if (i != 0)
 					i = unlink((LPSTR)tempFilename);
 			}
 			ret = i;

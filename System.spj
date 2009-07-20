@@ -75,6 +75,13 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
+SOURCE=Application\TalkingBook\Inbox.c
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
 SOURCE=Application\TalkingBook\lists.c
 USEPARAM=FALSE
 PARAM=
