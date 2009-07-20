@@ -385,10 +385,15 @@ INT16 tbChdir(LPSTR path) {
 
 int fileExists(LPSTR name) {
 	int ret;
+	struct stat_t statbuf;
 	struct f_info f_info; 
 	
-	ret = _findfirst(name, &f_info, D_FILE);
-	if (ret >= 0)
+	ret = stat(name, &statbuf);
+//	ret = _findfirst(name, &f_info, D_FILE);
+//	if (ret >= 0)
+// 	dup original code with line below
+//	if((ret == 0) && !(statbuf.st_mode & 0x10)) //exists and not a dir
+	if(ret == 0)  // it exists - could be a directory - use line above for file only test
 		ret = 1;
 	else 
 		ret = 0;
@@ -397,12 +402,16 @@ int fileExists(LPSTR name) {
 
 int dirExists(LPSTR name) {
 	int ret;
-	struct f_info f_info; 
+	struct stat_t statbuf;
+//	struct f_info f_info; 
 	
-	ret = _findfirst(name, &f_info, D_DIR);
-	if (ret >= 0)
+//	ret = _findfirst(name, &f_info, D_DIR);
+//	if (ret >= 0)
+	ret = stat(name, &statbuf);
+	if((ret == 0) && (statbuf.st_mode & 0x10)) // exists and is a directory
 		ret = 1;
 	else 
 		ret = 0;
 	return ret;
 }
+
