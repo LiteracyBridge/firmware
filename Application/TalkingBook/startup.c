@@ -19,7 +19,7 @@ APP_IRAM int KEY_PLAY, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_SELECT, KEY_ST
 APP_IRAM int LED_GREEN, LED_RED, LED_ALL;
 APP_IRAM int MAX_SPEED, NORMAL_SPEED, SPEED_INCREMENT;
 APP_IRAM int NORMAL_VOLUME, MAX_VOLUME, VOLUME_INCREMENT;
-APP_IRAM char *BOOT_PACKAGE, *SYSTEM_PATH, *USER_PATH, *LIST_PATH;
+APP_IRAM char *BOOT_PACKAGE, *SYSTEM_PATH, *USER_PATH, *LIST_PATH, *INBOX_PATH;
 APP_IRAM int MAX_PWR_CYCLES_IN_LOG;
 APP_IRAM char *SYSTEM_VARIABLE_FILE, *LOG_FILE;
 APP_IRAM char *LIST_MASTER;
@@ -144,6 +144,7 @@ static void loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"SYSTEM_PATH")) SYSTEM_PATH=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"USER_PATH")) USER_PATH=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"LIST_PATH")) LIST_PATH=addTextToSystemHeap(value);
+				else if (!strcmp(name,(char *)"INBOX_PATH")) INBOX_PATH=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"LOG_FILE")) LOG_FILE=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"LIST_MASTER")) LIST_MASTER=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"MAX_PWR_CYCLES_IN_LOG")) MAX_PWR_CYCLES_IN_LOG=strToInt(value);

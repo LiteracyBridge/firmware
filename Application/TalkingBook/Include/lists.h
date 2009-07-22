@@ -22,7 +22,7 @@ extern char *getNextList(ListItem *, BOOL);
 extern char *getPreviousList(ListItem *);
 extern void setListRotation(int *, int);
 extern int getListRotation(unsigned int);
-extern int getListFilename(char *, int);
+extern int getListFilename(char *, int, BOOL);
 extern int insertIntoList(ListItem *, long, char *);
 
 #endif

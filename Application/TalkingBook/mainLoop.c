@@ -594,8 +594,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 					if (0 == strncmp(filename,CUSTOM_PKG_PREFIX,strlen(CUSTOM_PKG_PREFIX))) {
 						destination = replaceStack(filename+strlen(CUSTOM_PKG_PREFIX),&pkgSystem);
 						context.queuedPackageType = PKG_USER;
-					}
-					if (0 == strncmp(filename,QUIZ_PKG_PREFIX,strlen(QUIZ_PKG_PREFIX))) {
+					} else if (0 == strncmp(filename,QUIZ_PKG_PREFIX,strlen(QUIZ_PKG_PREFIX))) {
 						destination = replaceStack(filename+strlen(QUIZ_PKG_PREFIX),&pkgSystem);
 						context.queuedPackageType = PKG_QUIZ;
 					} else {
@@ -624,15 +623,17 @@ static void takeAction (Action *action, EnumAction actionCode) {
 		case COPY:
 			stop();
 			tempList = &context.package->lists[destination];
-			getListFilename((char *)filename,destination);
+			getListFilename(filename,destination,FALSE);
 			cursor = getCurrentList(tempList);			
 			d2dCopy((const char *)filename,(const char *)cursor);
-			loadPackage(PKG_SYSTEM,BOOT_PACKAGE);
+			newBlock = &context.package->blocks[aux];
+			newTime = newBlock->startTime;
+			reposition = TRUE;
 			break;		
 		case DELETE:
 			stop();
 			tempList = &context.package->lists[destination];
-			getListFilename(filename,destination);
+			getListFilename(filename,destination,TRUE);
 			cursor = getCurrentList(tempList);			
 			ret = findDeleteStringFromFile(LIST_PATH,filename,cursor,TRUE);
 			tempList->currentFilePosition = -1; // forces next list action to reload

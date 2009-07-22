@@ -69,7 +69,7 @@ char *getNextList(ListItem *list, BOOL shouldAdvance) {
 	char *ret;
 	char buffer[READ_LENGTH+1];
 	int fileHandle;
-	char *line;
+	char *line, *tempCursor;
 	int cursor;
 	long position, bytesToRead;
 	int attempt, goodPass;
@@ -106,6 +106,9 @@ char *getNextList(ListItem *list, BOOL shouldAdvance) {
 		}		
 		if (buffer[0] && (shouldAdvance || (position == -1 || position == 0))) {
 			for (;cursor > 0 && buffer[cursor-1] != 0x0a && buffer[cursor-1] != 0x0d; cursor--);		
+			for (tempCursor = &buffer[cursor];*tempCursor != 0x0a && *tempCursor != 0x0d && *tempCursor != 0x00;tempCursor++);
+			*tempCursor = 0x00;
+
 			strcpy(list->currentString,&buffer[cursor]);
 			goodString(list->currentString,1);
 			position += cursor;
@@ -130,7 +133,7 @@ char *getPreviousList(ListItem *list) {
 	char *ret;
 	char buffer[READ_LENGTH+1];
 	int fileHandle;
-	char *line;
+	char *line, *tempCursor;
 	int attempt,goodPass;
 	const int MAX_ATTEMPTS = 3;
 	
@@ -160,6 +163,8 @@ char *getPreviousList(ListItem *list) {
 				list->currentFilePosition += getFilePosition();
 			}
 			close(fileHandle);
+			for (tempCursor = line;*tempCursor != 0x0a && *tempCursor != 0x0d && *tempCursor != 0x00;tempCursor++);
+			*tempCursor = 0x00;
 			strcpy(list->currentString,line);
 			ret = list->currentString;
 			if ((goodPass = goodString(ret,1)))
@@ -207,7 +212,7 @@ int getListRotation(unsigned int actionAux) {
 	return ret;
 }	
 
-int getListFilename(char * filename, int idList) {
+int getListFilename(char * filename, int idList, BOOL addExtension) {
 	ListItem *tempList, *listMaster;
 	int i;
 	char *cursor;
@@ -222,7 +227,8 @@ int getListFilename(char * filename, int idList) {
 		strcpy(filename,cursor);
 		tempList->posListWithFilename = listMaster->currentFilePosition; 
 	}
-	strcat(filename,".txt"); //todo: move to config file	
+	if (addExtension)
+		strcat(filename,".txt"); //todo: move to config file	
 
 	return 0;	
 }

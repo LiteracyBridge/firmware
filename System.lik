@@ -1,675 +1,66 @@
 Version: 3.0
 Options: m37
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\Resource.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\app_exception.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\audio.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\containers.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\d2d_copy.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\device.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\files.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\lists.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\macro.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\mainLoop.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\parsing.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\pkg_ops.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\startup.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\sys_counters.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\timeline.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\util.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SD.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\FS_user_nos.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\nls_ascii.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\DrvStruct.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\nls_codepage.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\MemPackCopy.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\USB.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\FS_DS.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SCSI_Table.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SystemIntoUSB.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\IOKeyScan.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\startup_Data.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\isr.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\ServiceLoop.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SysWaitMode.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SysOn2OffHook.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SysIntoHighSpeed.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SysIntorWaitMode.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SysOff2OnHook.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SysIntoHaltMode.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SysException.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\ExtMemOper.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\ucBS_Hook.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\main.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\BodyInit.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\libgloss.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\USBD.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\USBD_Drv.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\USB_ID.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\USB_Flash_reprog.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\Flash_reprog_Drv.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\Flash_reprog_boot.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SD_reprog.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SD_reprog_finish.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\USBD_Export.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\Space.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\Resource.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\app_exception.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\audio.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\containers.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\d2d_copy.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\device.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\files.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\Inbox.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\lists.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\macro.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\mainLoop.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\parsing.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\pkg_ops.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\startup.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\sys_counters.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\timeline.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\util.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SD.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\FS_user_nos.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\nls_ascii.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\DrvStruct.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\nls_codepage.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\MemPackCopy.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\USB.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\FS_DS.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SCSI_Table.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SystemIntoUSB.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\IOKeyScan.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\startup_Data.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\isr.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\ServiceLoop.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SysWaitMode.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SysOn2OffHook.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SysIntoHighSpeed.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SysIntorWaitMode.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SysOff2OnHook.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SysIntoHaltMode.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SysException.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\ExtMemOper.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\ucBS_Hook.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\main.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\BodyInit.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\libgloss.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\USBD.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\USBD_Drv.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\USB_ID.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\USB_Flash_reprog.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\Flash_reprog_Drv.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\Flash_reprog_boot.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SD_reprog.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SD_reprog_finish.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\USBD_Export.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\Space.obj"
 Lib: "C:\Program Files\Generalplus\unSPIDE 3.0.1\library\CLib32\lib\CLib1232.lib"
-Lib: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\.\Component\Lib\GPL162002_RecordPen_v001.lib"
-Lib: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\.\Component\Lib\GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"
+Lib: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\.\Component\Lib\GPL162002_RecordPen_v001.lib"
+Lib: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\.\Component\Lib\GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"
 Lib: "C:\Program Files\Generalplus\unSPIDE 3.0.1\library\CMacro\CMacro1232.lib"
-Lib: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\.\Driver\Lib\GPL162002SDDrv_far_V0_2.4.6.lib"
-Lib: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\.\Driver\USB_Host_MSDC\2002_USBH_NOS_FAR_V6_11.lib"
-Lib: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\.\System\Lib\ucBSBudocc0.0.9.lib"
-Output: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\System.S37"
-Locate: CODE in "Flash_reprog_boot.obj" at AC000
-;Align: CODE in "Flash_reprog_boot.obj" with 0 
-Locate: CODE in "Flash_reprog_Drv.obj" at AD600
-;Align: CODE in "Flash_reprog_Drv.obj" with 0 
-Locate: FP_USB_Code_ROM in "Flash_reprog_Drv.obj" at AD620
-;Align: FP_USB_Code_ROM in "Flash_reprog_Drv.obj" with 0 
-Locate: NB_DATA in "Flash_reprog_boot.obj" at ADE00
-;Align: NB_DATA in "Flash_reprog_boot.obj" with 0 
-Locate: CODE in "main.obj" at 9C800
-;Align: CODE in "main.obj" with 0 
-Locate: CODE in "audio.obj" at 9CD00
-;Align: CODE in "audio.obj" with 0 
-Locate: CODE in "containers.obj" at 80000
-;Align: CODE in "containers.obj" with 0 
-Locate: CODE in "device.obj" at 81000
-;Align: CODE in "device.obj" with 0 
-Locate: CODE in "files.obj" at 9DC00
-;Align: CODE in "files.obj" with 0 
-Locate: CODE in "lists.obj" at 9E500
-;Align: CODE in "lists.obj" with 0 
-Locate: CODE in "macro.obj" at 81800
-;Align: CODE in "macro.obj" with 0 
-Locate: CODE in "parsing.obj" at A0800
-;Align: CODE in "parsing.obj" with 0 
-Locate: CODE in "pkg_ops.obj" at 9F380
-;Align: CODE in "pkg_ops.obj" with 0 
-Locate: CODE in "startup.obj" at A57C0
-;Align: CODE in "startup.obj" with 0 
-Locate: CODE in "sys_counters.obj" at A2F00
-;Align: CODE in "sys_counters.obj" with 0 
-Locate: CODE in "timeline.obj" at 82800
-;Align: CODE in "timeline.obj" with 0 
-Locate: CODE in "util.obj" at 82000
-;Align: CODE in "util.obj" with 0 
-Locate: NB_DATA in "containers.obj" at A6740
-;Align: NB_DATA in "containers.obj" with 0 
-Locate: NB_DATA in "device.obj" at A3000
-;Align: NB_DATA in "device.obj" with 0 
-Locate: NB_DATA in "files.obj" at A3710
-;Align: NB_DATA in "files.obj" with 0 
-Locate: NB_DATA in "lists.obj" at A3720
-;Align: NB_DATA in "lists.obj" with 0 
-Locate: NB_DATA in "macro.obj" at 83000
-;Align: NB_DATA in "macro.obj" with 0 
-Locate: NB_DATA in "parsing.obj" at A3800
-;Align: NB_DATA in "parsing.obj" with 0 
-Locate: NB_DATA in "pkg_ops.obj" at A38A0
-;Align: NB_DATA in "pkg_ops.obj" with 0 
-Locate: NB_DATA in "startup.obj" at A0400
-;Align: NB_DATA in "startup.obj" with 0 
-Locate: CODE in "mainLoop.obj" at A3A00
-;Align: CODE in "mainLoop.obj" with 0 
-Locate: NB_DATA in "mainLoop.obj" at A9E00
-;Align: NB_DATA in "mainLoop.obj" with 0 
-Locate: NB_DATA in "SD_reprog.obj" at 9FA00
-;Align: NB_DATA in "SD_reprog.obj" with 0 
-Locate: CODE in "SD_reprog_finish.obj" at AE000
-;Align: CODE in "SD_reprog_finish.obj" with 0 
-Locate: CODE in "USBD_Export.obj" at 83400
-;Align: CODE in "USBD_Export.obj" with 0 
-Locate: CODE in "USBD.obj" at 85000
-;Align: CODE in "USBD.obj" with 0 
-Locate: CODE in "SD_reprog.obj" at 9FB00
-;Align: CODE in "SD_reprog.obj" with 0 
-Locate: CODE in "USB.obj" at 87E00
-;Align: CODE in "USB.obj" with 0 
-Locate: CODE in "SystemIntoUSB.obj" at 88600
-;Align: CODE in "SystemIntoUSB.obj" with 0 
-Locate: CODE in "FS_DS.obj" at 88C00
-;Align: CODE in "FS_DS.obj" with 0 
-Locate: USB_Code_ROM in "USBD_Drv.obj" at 89C00
-;Align: USB_Code_ROM in "USBD_Drv.obj" with 0 
-Locate: CODE in "SysWaitMode.obj" at 8A800
-;Align: CODE in "SysWaitMode.obj" with 0 
-Locate: CODE in "SysOn2OffHook.obj" at 8AA00
-;Align: CODE in "SysOn2OffHook.obj" with 0 
-Locate: CODE in "SysOff2OnHook.obj" at 8AC00
-;Align: CODE in "SysOff2OnHook.obj" with 0 
-Locate: CODE in "SysIntorWaitMode.obj" at 8AE00
-;Align: CODE in "SysIntorWaitMode.obj" with 0 
-Locate: CODE in "USB_ID.obj" at 8B000
-;Align: CODE in "USB_ID.obj" with 0 
-Locate: CODE in "d2d_copy.obj" at 8B300
-;Align: CODE in "d2d_copy.obj" with 0 
-Locate: CODE in "nls_ascii.obj" at 8B800
-;Align: CODE in "nls_ascii.obj" with 0 
-Locate: CODE in "nls_codepage.obj" at 8BA00
-;Align: CODE in "nls_codepage.obj" with 0 
-Locate: CODE in "ExtMemOper.obj" at 8BE00
-;Align: CODE in "ExtMemOper.obj" with 0 
-Locate: CODE in "MemPackCopy.obj" at 8C000
-;Align: CODE in "MemPackCopy.obj" with 0 
-Locate: CODE in "ServiceLoop.obj" at 8BC00
-;Align: CODE in "ServiceLoop.obj" with 0 
-Locate: CODE in "app_exception.obj" at 8C200
-;Align: CODE in "app_exception.obj" with 0 
-Locate: CODE in "USB_Flash_reprog.obj" at 8C400
-;Align: CODE in "USB_Flash_reprog.obj" with 0 
-Locate: CODE in "FS_user_nos.obj" at 8C800
-;Align: CODE in "FS_user_nos.obj" with 0 
-Locate: CODE in "SysException.obj" at 8CA00
-;Align: CODE in "SysException.obj" with 0 
-Locate: System_CODE in "IOKeyScan.obj" at 8CC00
-;Align: System_CODE in "IOKeyScan.obj" with 0 
-Locate: CODE in "SD.obj" at 8CE00
-;Align: CODE in "SD.obj" with 0 
-Locate: CODE in "SysIntoHighSpeed.obj" at 8D000
-;Align: CODE in "SysIntoHighSpeed.obj" with 0 
-Locate: CODE in "ucBS_Hook.obj" at 8D400
-;Align: CODE in "ucBS_Hook.obj" with 0 
-Locate: CODE in "libgloss.obj" at 8D200
-;Align: CODE in "libgloss.obj" with 0 
-Locate: CODE in "DrvStruct.obj" at 8D600
-;Align: CODE in "DrvStruct.obj" with 0 
-Locate: CODE in "SysIntoHaltMode.obj" at 8D800
-;Align: CODE in "SysIntoHaltMode.obj" with 0 
-Locate: CODE in "BodyInit.obj" at 8DA00
-;Align: CODE in "BodyInit.obj" with 0 
-Locate: NB_DATA in "app_exception.obj" at 8DC00
-;Align: NB_DATA in "app_exception.obj" with 0 
-Locate: NB_DATA in "USB_ID.obj" at 8DE00
-;Align: NB_DATA in "USB_ID.obj" with 0 
-Locate: NB_DATA in "Space.obj" at 91000
-;Align: NB_DATA in "Space.obj" with 0 
-Locate: NB_DATA in "audio.obj" at 8EA00
-;Align: NB_DATA in "audio.obj" with 0 
-Locate: NB_DATA in "d2d_copy.obj" at 8E800
-;Align: NB_DATA in "d2d_copy.obj" with 0 
-Locate: SCSI_Table_Setion in "SCSI_Table.obj" at 8E200
-;Align: SCSI_Table_Setion in "SCSI_Table.obj" with 0 
-Locate: NB_DATA in "SD.obj" at 8EE00
-;Align: NB_DATA in "SD.obj" with 0 
-Locate: NB_DATA in "nls_ascii.obj" at 8EC00
-;Align: NB_DATA in "nls_ascii.obj" with 0 
-Locate: GLOBAL_System_SRAM in "IOKeyScan.obj" at 1B
-;Align: GLOBAL_System_SRAM in "IOKeyScan.obj" with 0 
-Locate: MP3_Var_RAM in "SACM_API" of "GPL162002_RecordPen_v001.lib" at 1F
-;Align: MP3_Var_RAM in "SACM_API" of "GPL162002_RecordPen_v001.lib" with 0 
-Locate: MSG_Var_RAM in "SACM_API" of "GPL162002_RecordPen_v001.lib" at 24
-;Align: MSG_Var_RAM in "SACM_API" of "GPL162002_RecordPen_v001.lib" with 0 
-Locate: SDC_RAM in "SDC_DRV" of "GPL162002SDDrv_far_V0_2.4.6.lib" at 2C
-;Align: SDC_RAM in "SDC_DRV" of "GPL162002SDDrv_far_V0_2.4.6.lib" with 0 
-Locate: USB_RAM_Section in "USBD_Drv.obj" at F3C
-;Align: USB_RAM_Section in "USBD_Drv.obj" with 0 
-Locate: SD_GlobalValue in "DrvSDCInitial" of "GPL162002SDDrv_far_V0_2.4.6.lib" at 1
-;Align: SD_GlobalValue in "DrvSDCInitial" of "GPL162002SDDrv_far_V0_2.4.6.lib" with 0 
-Locate: CODE in "./libm/e_pow" of "CLib1232.lib" at 30000
-;Align: CODE in "./libm/e_pow" of "CLib1232.lib" with 0 
-Locate: CODE in "./libm/ef_pow" of "CLib1232.lib" at 3158B
-;Align: CODE in "./libm/ef_pow" of "CLib1232.lib" with 0 
-Locate: CODE in "api_fs_speedup" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 323A3
-;Align: CODE in "api_fs_speedup" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "OS_USB_Host_Control" of "2002_USBH_NOS_FAR_V6_11.lib" at 34008
-;Align: CODE in "OS_USB_Host_Control" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-Locate: CODE in "./../../debug/ucBS_List" of "ucBSBudocc0.0.9.lib" at 346A2
-;Align: CODE in "./../../debug/ucBS_List" of "ucBSBudocc0.0.9.lib" with 0 
-Locate: CODE in "api_fs_LoadFatTable" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3534A
-;Align: CODE in "api_fs_LoadFatTable" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "swapbyte" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 358C8
-;Align: CODE in "swapbyte" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "fsl_link_fat" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 35DFB
-;Align: CODE in "fsl_link_fat" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "fsl_find_fat_free" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 362D2
-;Align: CODE in "fsl_find_fat_free" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lfn_readdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 36786
-;Align: CODE in "lfn_readdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "fsl_map_cluster" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 36C3A
-;Align: CODE in "fsl_map_cluster" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./../../debug/ucBS" of "ucBSBudocc0.0.9.lib" at 37076
-;Align: CODE in "./../../debug/ucBS" of "ucBSBudocc0.0.9.lib" with 0 
-Locate: CODE in "api_fs_lfnmkdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3744A
-;Align: CODE in "api_fs_lfnmkdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "fsl_ReadDBR" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 37BB4
-;Align: CODE in "fsl_ReadDBR" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "api_fs_lfnopen" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 382D0
-;Align: CODE in "api_fs_lfnopen" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "DrvSDCInitial" of "GPL162002SDDrv_far_V0_2.4.6.lib" at 3864D
-;Align: CODE in "DrvSDCInitial" of "GPL162002SDDrv_far_V0_2.4.6.lib" with 0 
-Locate: CODE in "api_fs_lfnfindnext" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 389CA
-;Align: CODE in "api_fs_lfnfindnext" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "fsl_rwblock" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 38D2C
-;Align: CODE in "fsl_rwblock" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "OS_USB_Host_SCSI" of "2002_USBH_NOS_FAR_V6_11.lib" at FCCF
-;Align: CODE in "OS_USB_Host_SCSI" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-Locate: CODE in "api_fs_lfncd" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 39050
-;Align: CODE in "api_fs_lfncd" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lbl_truename" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 39360
-;Align: CODE in "lbl_truename" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./libm/e_sqrt" of "CLib1232.lib" at 39659
-;Align: CODE in "./libm/e_sqrt" of "CLib1232.lib" with 0 
-Locate: CODE in "api_fs_lfnrename" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 39937
-;Align: CODE in "api_fs_lfnrename" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "api_fs_sfnchangedir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 39C10
-;Align: CODE in "api_fs_sfnchangedir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lfn_fd32_gen_short_fname" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3A1A9
-;Align: CODE in "lfn_fd32_gen_short_fname" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "DrvUSBHWriteMultiSector" of "2002_USBH_NOS_FAR_V6_11.lib" at 3A474
-;Align: CODE in "DrvUSBHWriteMultiSector" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-Locate: CODE in "DrvUSBHReadMultiSector" of "2002_USBH_NOS_FAR_V6_11.lib" at 3A726
-;Align: CODE in "DrvUSBHReadMultiSector" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-Locate: CODE in "fsl_bpb_to_dpb" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3A999
-;Align: CODE in "fsl_bpb_to_dpb" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lfn_dir_lfnwrite" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3AC0B
-;Align: CODE in "lfn_dir_lfnwrite" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lbl_misc" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3AE5F
-;Align: CODE in "lbl_misc" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "api_fs_lfnrmdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3B09E
-;Align: CODE in "api_fs_lfnrmdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lfn_fd32_build_fcb_name" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3B501
-;Align: CODE in "lfn_fd32_build_fcb_name" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./addsubd4" of "CMacro1232.lib" at 3B71B
-;Align: CODE in "./addsubd4" of "CMacro1232.lib" with 0 
-Locate: CODE in "lfn_descend_path" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3B920
-;Align: CODE in "lfn_descend_path" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "api_fs_init" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3BB20
-;Align: CODE in "api_fs_init" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "api_fs_lfndel" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3BCFF
-;Align: CODE in "api_fs_lfndel" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lfn_split_lfn" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3BEDD
-;Align: CODE in "lfn_split_lfn" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lfn_fetch_lfn" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3C0A4
-;Align: CODE in "lfn_fetch_lfn" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./muld4" of "CMacro1232.lib" at 3C26A
-;Align: CODE in "./muld4" of "CMacro1232.lib" with 0 
-Locate: CODE in "./divd4" of "CMacro1232.lib" at 3C3F9
-;Align: CODE in "./divd4" of "CMacro1232.lib" with 0 
-Locate: CODE in "OS_USB_Host_EP0_CMD" of "2002_USBH_NOS_FAR_V6_11.lib" at 3C583
-;Align: CODE in "OS_USB_Host_EP0_CMD" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-Locate: CODE in "./addsubf2" of "CMacro1232.lib" at 3C6F6
-;Align: CODE in "./addsubf2" of "CMacro1232.lib" with 0 
-Locate: CODE in "uni_case" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3C856
-;Align: CODE in "uni_case" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "DrvUSBHMSDCInitial" of "2002_USBH_NOS_FAR_V6_11.lib" at 3C9AA
-;Align: CODE in "DrvUSBHMSDCInitial" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-Locate: CODE in "./libm/ef_sqrt" of "CLib1232.lib" at 3CC3F
-;Align: CODE in "./libm/ef_sqrt" of "CLib1232.lib" with 0 
-Locate: CODE in "api_fs_lfnfindfirst" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3CD85
-;Align: CODE in "api_fs_lfnfindfirst" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./../../debug/ucBS_Record" of "ucBSBudocc0.0.9.lib" at 3CEC4
-;Align: CODE in "./../../debug/ucBS_Record" of "ucBSBudocc0.0.9.lib" with 0 
-Locate: CODE in "uni_utf8_to_oemcp" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3D002
-;Align: CODE in "uni_utf8_to_oemcp" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "api_fs_mount" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3D13E
-;Align: CODE in "api_fs_mount" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./mulf2" of "CMacro1232.lib" at 3D279
-;Align: CODE in "./mulf2" of "CMacro1232.lib" with 0 
-Locate: CODE in "uni_fd32_utf8to32" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3D3B3
-;Align: CODE in "uni_fd32_utf8to32" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lfn_allocate_lfn_dir_entries" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3D4EA
-;Align: CODE in "lfn_allocate_lfn_dir_entries" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./libm/s_scalbn" of "CLib1232.lib" at 3D61E
-;Align: CODE in "./libm/s_scalbn" of "CLib1232.lib" with 0 
-Locate: CODE in "uni_nls_base" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3D752
-;Align: CODE in "uni_nls_base" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "fsl_extend" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3D882
-;Align: CODE in "fsl_extend" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lfn_gen_short_fname" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3D9B2
-;Align: CODE in "lfn_gen_short_fname" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./divf2" of "CMacro1232.lib" at 3DADE
-;Align: CODE in "./divf2" of "CMacro1232.lib" with 0 
-Locate: CODE in "lfn_dir_lfnread" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3DC01
-;Align: CODE in "lfn_dir_lfnread" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "copy" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3DD22
-;Align: CODE in "copy" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "fsl_dir_read" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3DE43
-;Align: CODE in "fsl_dir_read" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./libm/sf_scalbn" of "CLib1232.lib" at 3DF58
-;Align: CODE in "./libm/sf_scalbn" of "CLib1232.lib" with 0 
-Locate: CODE in "./../../debug/ucBS_Assert" of "ucBSBudocc0.0.9.lib" at 3E05C
-;Align: CODE in "./../../debug/ucBS_Assert" of "ucBSBudocc0.0.9.lib" with 0 
-Locate: CODE in "fsl_searchblock" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3E155
-;Align: CODE in "fsl_searchblock" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "api_fs_unmount" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3E426
-;Align: CODE in "api_fs_unmount" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "uni_fd32_utf16to8" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3E50C
-;Align: CODE in "uni_fd32_utf16to8" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "fsl_ParseDosName" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3E5E8
-;Align: CODE in "fsl_ParseDosName" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lfn_fd32_expand_fcb_name" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3E6B6
-;Align: CODE in "lfn_fd32_expand_fcb_name" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lbl_flush1" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3E777
-;Align: CODE in "lbl_flush1" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lbl_wipe_out_clusters" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3E837
-;Align: CODE in "lbl_wipe_out_clusters" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lbl_dskxfer" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3E8E6
-;Align: CODE in "lbl_dskxfer" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lbl_flush_buffers" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3E990
-;Align: CODE in "lbl_flush_buffers" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "api_fs_fseek" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3EA39
-;Align: CODE in "api_fs_fseek" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "uni_fd32_utf32to8" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3EAE2
-;Align: CODE in "uni_fd32_utf32to8" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "uni_utf8_strupr" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3EB89
-;Align: CODE in "uni_utf8_strupr" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./divi2" of "CMacro1232.lib" at 3EC2D
-;Align: CODE in "./divi2" of "CMacro1232.lib" with 0 
-Locate: CODE in "./modi2" of "CMacro1232.lib" at 3ECCC
-;Align: CODE in "./modi2" of "CMacro1232.lib" with 0 
-Locate: CODE in "lfn_split_path_LFN" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3ED69
-;Align: CODE in "lfn_split_path_LFN" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lfn_fat_find" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3EE05
-;Align: CODE in "lfn_fat_find" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "fsl_remove_lfn_entries" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3EE9E
-;Align: CODE in "fsl_remove_lfn_entries" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lfn_itoa" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3EF35
-;Align: CODE in "lfn_itoa" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./__mul_u32_u128" of "CMacro1232.lib" at 3EFC8
-;Align: CODE in "./__mul_u32_u128" of "CMacro1232.lib" with 0 
-Locate: CODE in "fsl_init_direntry" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3F05B
-;Align: CODE in "fsl_init_direntry" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "api_fs_safexit" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3F0E6
-;Align: CODE in "api_fs_safexit" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./ltsf2" of "CMacro1232.lib" at 3F168
-;Align: CODE in "./ltsf2" of "CMacro1232.lib" with 0 
-Locate: CODE in "./gtsf2" of "CMacro1232.lib" at 3F1E9
-;Align: CODE in "./gtsf2" of "CMacro1232.lib" with 0 
-Locate: CODE in "fsl_write_fsinfo" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3F26A
-;Align: CODE in "fsl_write_fsinfo" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "fsl_getFATblock" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3F2E7
-;Align: CODE in "fsl_getFATblock" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lfn_find_empty_dir_entries" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3F363
-;Align: CODE in "lfn_find_empty_dir_entries" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./divu2" of "CMacro1232.lib" at 3F3DE
-;Align: CODE in "./divu2" of "CMacro1232.lib" with 0 
-Locate: CODE in "fsl_delete_dir_entry" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3F455
-;Align: CODE in "fsl_delete_dir_entry" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./modu2" of "CMacro1232.lib" at 3F4CB
-;Align: CODE in "./modu2" of "CMacro1232.lib" with 0 
-Locate: CODE in "./modi1" of "CMacro1232.lib" at 3F541
-;Align: CODE in "./modi1" of "CMacro1232.lib" with 0 
-Locate: CODE in "./cvi2f2" of "CMacro1232.lib" at 3F69C
-;Align: CODE in "./cvi2f2" of "CMacro1232.lib" with 0 
-Locate: CODE in "read" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3F70F
-;Align: CODE in "read" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "fsl_DeleteBlockInBufferCache" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3F5B6
-;Align: CODE in "fsl_DeleteBlockInBufferCache" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "write" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3F629
-;Align: CODE in "write" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "api_fs_fclose" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 3F782
-;Align: CODE in "api_fs_fclose" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lfn_checksum" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40000
-;Align: CODE in "lfn_checksum" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "fsl_getblk" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40071
-;Align: CODE in "fsl_getblk" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "uni_toupper" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 400E2
-;Align: CODE in "uni_toupper" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "fsl_clus2phys" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40152
-;Align: CODE in "fsl_clus2phys" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./string/strstr" of "CLib1232.lib" at 401C0
-;Align: CODE in "./string/strstr" of "CLib1232.lib" with 0 
-Locate: CODE in "api_fs_sfnreaddir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 4022E
-;Align: CODE in "api_fs_sfnreaddir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "fsl_dir_close" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 4029B
-;Align: CODE in "fsl_dir_close" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "fsl_get_cds" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40304
-;Align: CODE in "fsl_get_cds" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "rename" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 4036D
-;Align: CODE in "rename" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./__divi64_i64_53" of "CMacro1232.lib" at 403D5
-;Align: CODE in "./__divi64_i64_53" of "CMacro1232.lib" with 0 
-Locate: CODE in "fsl_get_f_node" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 4043B
-;Align: CODE in "fsl_get_f_node" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "uni_fd32_utf8to16" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 404A0
-;Align: CODE in "uni_fd32_utf8to16" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "uni_utf8_stricmp" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40502
-;Align: CODE in "uni_utf8_stricmp" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./lthf2" of "CMacro1232.lib" at 40621
-;Align: CODE in "./lthf2" of "CMacro1232.lib" with 0 
-Locate: CODE in "lfn_fat_creat" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40563
-;Align: CODE in "lfn_fat_creat" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./gthf2" of "CMacro1232.lib" at 405C2
-;Align: CODE in "./gthf2" of "CMacro1232.lib" with 0 
-Locate: CODE in "./modu1" of "CMacro1232.lib" at 40680
-;Align: CODE in "./modu1" of "CMacro1232.lib" with 0 
-Locate: CODE in "fsl_dir_init_fnode" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 406DD
-;Align: CODE in "fsl_dir_init_fnode" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "fsl_getblock_from_off" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40735
-;Align: CODE in "fsl_getblock_from_off" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "fsl_release_f_node" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40789
-;Align: CODE in "fsl_release_f_node" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./divu1" of "CMacro1232.lib" at 407DC
-;Align: CODE in "./divu1" of "CMacro1232.lib" with 0 
-Locate: CODE in "uni_oemcp_to_utf8" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 408D1
-;Align: CODE in "uni_oemcp_to_utf8" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lbl_move_buffer" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40922
-;Align: CODE in "lbl_move_buffer" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "open" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 4082F
-;Align: CODE in "open" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./cvu2f2" of "CMacro1232.lib" at 40880
-;Align: CODE in "./cvu2f2" of "CMacro1232.lib" with 0 
-Locate: CODE in "./string/strcspn" of "CLib1232.lib" at 40973
-;Align: CODE in "./string/strcspn" of "CLib1232.lib" with 0 
-Locate: CODE in "./cvi2d4" of "CMacro1232.lib" at 409C3
-;Align: CODE in "./cvi2d4" of "CMacro1232.lib" with 0 
-Locate: CODE in "./cvf2d4" of "CMacro1232.lib" at 40A13
-;Align: CODE in "./cvf2d4" of "CMacro1232.lib" with 0 
-Locate: CODE in "findfirst" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40A61
-;Align: CODE in "findfirst" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lfn_allocate_sfn_dir_entry" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40AAE
-;Align: CODE in "lfn_allocate_sfn_dir_entry" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "uni_fd32_utf16to32" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40AFB
-;Align: CODE in "uni_fd32_utf16to32" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./__rshu4_r" of "CMacro1232.lib" at 40B45
-;Align: CODE in "./__rshu4_r" of "CMacro1232.lib" with 0 
-Locate: CODE in "./string/strncmp" of "CLib1232.lib" at 40B8E
-;Align: CODE in "./string/strncmp" of "CLib1232.lib" with 0 
-Locate: CODE in "fsl_dos_extend" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40BD5
-;Align: CODE in "fsl_dos_extend" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "rmdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40C9C
-;Align: CODE in "rmdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "mkdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40CDE
-;Align: CODE in "mkdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "unlink" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40C18
-;Align: CODE in "unlink" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "chdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40C5A
-;Align: CODE in "chdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./__divi32_i32_27" of "CMacro1232.lib" at 40D20
-;Align: CODE in "./__divi32_i32_27" of "CMacro1232.lib" with 0 
-Locate: CODE in "api_fs_fwrite" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40D5F
-;Align: CODE in "api_fs_fwrite" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lfn_copy_char_in_lfn_slot" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40D9D
-;Align: CODE in "lfn_copy_char_in_lfn_slot" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./string/strcat" of "CLib1232.lib" at 40DDB
-;Align: CODE in "./string/strcat" of "CLib1232.lib" with 0 
-Locate: CODE in "uni_fd32_utf32to16" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40E18
-;Align: CODE in "uni_fd32_utf32to16" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./string/strrchr" of "CLib1232.lib" at 40E55
-;Align: CODE in "./string/strrchr" of "CLib1232.lib" with 0 
-Locate: CODE in "lbl_dos_getdate" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40E8F
-;Align: CODE in "lbl_dos_getdate" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./lshiu4" of "CMacro1232.lib" at 40EC8
-;Align: CODE in "./lshiu4" of "CMacro1232.lib" with 0 
-Locate: CODE in "./cvf2u2" of "CMacro1232.lib" at 40F01
-;Align: CODE in "./cvf2u2" of "CMacro1232.lib" with 0 
-Locate: CODE in "./rshu4" of "CMacro1232.lib" at 40F39
-;Align: CODE in "./rshu4" of "CMacro1232.lib" with 0 
-Locate: CODE in "api_fs_fread" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40F6F
-;Align: CODE in "api_fs_fread" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./cvf2u1" of "CMacro1232.lib" at 40FA5
-;Align: CODE in "./cvf2u1" of "CMacro1232.lib" with 0 
-Locate: CODE in "lseek" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40FDA
-;Align: CODE in "lseek" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lbl_dos_gettime" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 4100D
-;Align: CODE in "lbl_dos_gettime" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./cvu2d4" of "CMacro1232.lib" at 41040
-;Align: CODE in "./cvu2d4" of "CMacro1232.lib" with 0 
-Locate: CODE in "lfn_fd32_compare_fcb_names" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 41072
-;Align: CODE in "lfn_fd32_compare_fcb_names" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./cvi1d4" of "CMacro1232.lib" at 410A4
-;Align: CODE in "./cvi1d4" of "CMacro1232.lib" with 0 
-Locate: CODE in "./cvd4u2" of "CMacro1232.lib" at 410D5
-;Align: CODE in "./cvd4u2" of "CMacro1232.lib" with 0 
-Locate: CODE in "./string/memcpy" of "CLib1232.lib" at 41106
-;Align: CODE in "./string/memcpy" of "CLib1232.lib" with 0 
-Locate: CODE in "./string/strspn" of "CLib1232.lib" at 41135
-;Align: CODE in "./string/strspn" of "CLib1232.lib" with 0 
-Locate: CODE in "api_fs_changedsk" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 411BC
-;Align: CODE in "api_fs_changedsk" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./__modi32_n" of "CMacro1232.lib" at 41164
-;Align: CODE in "./__modi32_n" of "CMacro1232.lib" with 0 
-Locate: CODE in "./string/strpbrk" of "CLib1232.lib" at 41190
-;Align: CODE in "./string/strpbrk" of "CLib1232.lib" with 0 
-Locate: CODE in "./__divi32_n" of "CMacro1232.lib" at 411E8
-;Align: CODE in "./__divi32_n" of "CMacro1232.lib" with 0 
-Locate: CODE in "lbl_xlt_fd" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 41236
-;Align: CODE in "lbl_xlt_fd" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "sacm" of "GPL162002_RecordPen_v001.lib" at 4125B
-;Align: CODE in "sacm" of "GPL162002_RecordPen_v001.lib" with 0 
-Locate: CODE in "./string/strcmp" of "CLib1232.lib" at 412A2
-;Align: CODE in "./string/strcmp" of "CLib1232.lib" with 0 
-Locate: CODE in "./cvu1f2" of "CMacro1232.lib" at 412C5
-;Align: CODE in "./cvu1f2" of "CMacro1232.lib" with 0 
-Locate: CODE in "findnext" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 4127F
-;Align: CODE in "findnext" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "fsl_get_dpb" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 412E8
-;Align: CODE in "fsl_get_dpb" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "deviceunmount" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 4132B
-;Align: CODE in "deviceunmount" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "devicemount" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 4134C
-;Align: CODE in "devicemount" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./string/strchr" of "CLib1232.lib" at 4136D
-;Align: CODE in "./string/strchr" of "CLib1232.lib" with 0 
-Locate: CODE in "./libm/w_pow" of "CLib1232.lib" at 4138E
-;Align: CODE in "./libm/w_pow" of "CLib1232.lib" with 0 
-Locate: CODE in "./string/memset" of "CLib1232.lib" at 413AF
-;Align: CODE in "./string/memset" of "CLib1232.lib" with 0 
-Locate: CODE in "close" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 4130A
-;Align: CODE in "close" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "fsl_getdstart" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 413D0
-;Align: CODE in "fsl_getdstart" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./string/strlen" of "CLib1232.lib" at 413F0
-;Align: CODE in "./string/strlen" of "CLib1232.lib" with 0 
-Locate: CODE in "getfserrcode" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 4140E
-;Align: CODE in "getfserrcode" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lbl_time_encode" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 41445
-;Align: CODE in "lbl_time_encode" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lbl_swap_deleted" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 41460
-;Align: CODE in "lbl_swap_deleted" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./string/strcpy" of "CLib1232.lib" at 4142A
-;Align: CODE in "./string/strcpy" of "CLib1232.lib" with 0 
-Locate: CODE in "fsl_setdstart" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 41495
-;Align: CODE in "fsl_setdstart" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "lbl_next_cluster" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 4147B
-;Align: CODE in "lbl_next_cluster" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "fsl_media_check" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 414AF
-;Align: CODE in "fsl_media_check" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./__u2fd1bit" of "CMacro1232.lib" at 414DC
-;Align: CODE in "./__u2fd1bit" of "CMacro1232.lib" with 0 
-Locate: CODE in "fsl_dir_write" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 414C6
-;Align: CODE in "fsl_dir_write" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./ctype/isspace" of "CLib1232.lib" at 414F2
-;Align: CODE in "./ctype/isspace" of "CLib1232.lib" with 0 
-Locate: CODE in "./__rshu2_r" of "CMacro1232.lib" at 4151B
-;Align: CODE in "./__rshu2_r" of "CMacro1232.lib" with 0 
-Locate: CODE in "./__clz32" of "CMacro1232.lib" at 4152F
-;Align: CODE in "./__clz32" of "CMacro1232.lib" with 0 
-Locate: CODE in "./libm/wf_pow" of "CLib1232.lib" at 41507
-;Align: CODE in "./libm/wf_pow" of "CLib1232.lib" with 0 
-Locate: CODE in "./muliu2" of "CMacro1232.lib" at 41543
-;Align: CODE in "./muliu2" of "CMacro1232.lib" with 0 
-Locate: CODE in "lbl_xlt_fnp" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at FC43
-;Align: CODE in "lbl_xlt_fnp" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./libm/copy_sign" of "CLib1232.lib" at 41562
-;Align: CODE in "./libm/copy_sign" of "CLib1232.lib" with 0 
-Locate: CODE in "./ctype/isdigit" of "CLib1232.lib" at 41555
-;Align: CODE in "./ctype/isdigit" of "CLib1232.lib" with 0 
-Locate: CODE in "./libm/copysignf" of "CLib1232.lib" at 4156F
-;Align: CODE in "./libm/copysignf" of "CLib1232.lib" with 0 
-Locate: CODE in "./__clz16" of "CMacro1232.lib" at 3F7F4
-;Align: CODE in "./__clz16" of "CMacro1232.lib" with 0 
-Locate: CODE in "./rshu2" of "CMacro1232.lib" at 41584
-;Align: CODE in "./rshu2" of "CMacro1232.lib" with 0 
-Locate: CODE in "./lshiu2" of "CMacro1232.lib" at 4158E
-;Align: CODE in "./lshiu2" of "CMacro1232.lib" with 0 
-Locate: CODE in "./__divi16_n" of "CMacro1232.lib" at 4157A
-;Align: CODE in "./__divi16_n" of "CMacro1232.lib" with 0 
-Locate: CODE in "./rshu1" of "CMacro1232.lib" at 415A0
-;Align: CODE in "./rshu1" of "CMacro1232.lib" with 0 
-Locate: CODE in "./lshiu1" of "CMacro1232.lib" at 41598
-;Align: CODE in "./lshiu1" of "CMacro1232.lib" with 0 
-Locate: DrvSDCSection in "SDC_DRV" of "GPL162002SDDrv_far_V0_2.4.6.lib" at 32D61
-;Align: DrvSDCSection in "SDC_DRV" of "GPL162002SDDrv_far_V0_2.4.6.lib" with 0 
-Locate: LIB_FAT16_CODE in "basedrive" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 39EDD
-;Align: LIB_FAT16_CODE in "basedrive" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: NB_DATA in "uni_case" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 415A8
-;Align: NB_DATA in "uni_case" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: NB_DATA in "lfn_fd32_build_fcb_name" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 41A86
-;Align: NB_DATA in "lfn_fd32_build_fcb_name" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: NB_DATA in "lfn_fd32_gen_short_fname" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 41B41
-;Align: NB_DATA in "lfn_fd32_gen_short_fname" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: NB_DATA in "./libm/e_pow" of "CLib1232.lib" at 41BFB
-;Align: NB_DATA in "./libm/e_pow" of "CLib1232.lib" with 0 
-Locate: NB_DATA in "./libm/ef_pow" of "CLib1232.lib" at 41C7F
-;Align: NB_DATA in "./libm/ef_pow" of "CLib1232.lib" with 0 
-Locate: NB_DATA in "api_fs_sfnchangedir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 41CC1
-;Align: NB_DATA in "api_fs_sfnchangedir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: NB_DATA in "lbl_misc" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 41CE9
-;Align: NB_DATA in "lbl_misc" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: NB_DATA in "./libm/s_scalbn" of "CLib1232.lib" at 41CF9
-;Align: NB_DATA in "./libm/s_scalbn" of "CLib1232.lib" with 0 
-Locate: NB_DATA in "fsl_ParseDosName" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 41D09
-;Align: NB_DATA in "fsl_ParseDosName" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: NB_DATA in "./libm/e_sqrt" of "CLib1232.lib" at 41D18
-;Align: NB_DATA in "./libm/e_sqrt" of "CLib1232.lib" with 0 
-Locate: NB_DATA in "./libm/sf_scalbn" of "CLib1232.lib" at 41D20
-;Align: NB_DATA in "./libm/sf_scalbn" of "CLib1232.lib" with 0 
-Locate: NB_DATA in "lfn_descend_path" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 41D28
-;Align: NB_DATA in "lfn_descend_path" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: NB_DATA in "api_fs_init" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 41D2D
-;Align: NB_DATA in "api_fs_init" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: NB_DATA in "./libm/ef_sqrt" of "CLib1232.lib" at 41D32
-;Align: NB_DATA in "./libm/ef_sqrt" of "CLib1232.lib" with 0 
-Locate: NB_DATA in "api_fs_lfnfindnext" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 41D36
-;Align: NB_DATA in "api_fs_lfnfindnext" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: NB_DATA in "api_fs_lfncd" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 41D3A
-;Align: NB_DATA in "api_fs_lfncd" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: NB_DATA in "lbl_truename" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 41D3C
-;Align: NB_DATA in "lbl_truename" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: SACM_API_ROM_BLOCK in "SACM_API" of "GPL162002_RecordPen_v001.lib" at 37F4A
-;Align: SACM_API_ROM_BLOCK in "SACM_API" of "GPL162002_RecordPen_v001.lib" with 0 
-Locate: SACM_DECODE_ROM_BLOCK in "SACM_Decode" of "GPL162002_RecordPen_v001.lib" at 3CAF5
-;Align: SACM_DECODE_ROM_BLOCK in "SACM_Decode" of "GPL162002_RecordPen_v001.lib" with 0 
-Locate: SACM_ISR_Service_Section in "SACM_API" of "GPL162002_RecordPen_v001.lib" at 3B2D2
-;Align: SACM_ISR_Service_Section in "SACM_API" of "GPL162002_RecordPen_v001.lib" with 0 
-Locate: SACM_Mask_InitCode in "Snd_Init" of "GPL162002_RecordPen_v001.lib" at 41210
-;Align: SACM_Mask_InitCode in "Snd_Init" of "GPL162002_RecordPen_v001.lib" with 0 
-Locate: SACM_ROM_Block in "sacm" of "GPL162002_RecordPen_v001.lib" at 34D1E
-;Align: SACM_ROM_Block in "sacm" of "GPL162002_RecordPen_v001.lib" with 0 
-Locate: SCSIDataSection in "OS_USB_Host_SCSI_Data" of "2002_USBH_NOS_FAR_V6_11.lib" at 37814
-;Align: SCSIDataSection in "OS_USB_Host_SCSI_Data" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-Locate: USB_Host_Initial_Section in "OS_USB_Host_Initial" of "2002_USBH_NOS_FAR_V6_11.lib" at 3E248
-;Align: USB_Host_Initial_Section in "OS_USB_Host_Initial" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-Locate: USB_Host_Standard_Command_Sectio in "OS_USB_Host_Standard_CMD" of "2002_USBH_NOS_FAR_V6_11.lib" at F98F
-;Align: USB_Host_Standard_Command_Sectio in "OS_USB_Host_Standard_CMD" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-Locate: User_SACM in "user_sacm" of "GPL162002_RecordPen_v001.lib" at 3E338
-;Align: User_SACM in "user_sacm" of "GPL162002_RecordPen_v001.lib" with 0 
-Locate: APP_IRAM in "containers.obj" at 86300 linkat 3900
-;Align: APP_IRAM in "containers.obj" with 0 
-Locate: IRAM in "OS_USB_Host_Control" of "2002_USBH_NOS_FAR_V6_11.lib" at 42F93 linkat 308F
-;Align: IRAM in "OS_USB_Host_Control" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-Locate: IRAM in "DrvUSBHLUNInit" of "2002_USBH_NOS_FAR_V6_11.lib" at 438BC linkat 3090
-;Align: IRAM in "DrvUSBHLUNInit" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-Locate: IRAM in "Space.obj" at 90000 linkat 3091
-;Align: IRAM in "Space.obj" with 0 
-Locate: IRAM in "Flash_reprog_boot.obj" at ADF00
-;Align: IRAM in "Flash_reprog_boot.obj" with 0 
-Locate: IRAM in "OS_USB_Host_SCSI_Data" of "2002_USBH_NOS_FAR_V6_11.lib" at 43FA3 linkat 3081
-;Align: IRAM in "OS_USB_Host_SCSI_Data" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-Locate: IRAM in "DrvUSBHMSDCInitial" of "2002_USBH_NOS_FAR_V6_11.lib" at 42666 linkat 308A
-;Align: IRAM in "DrvUSBHMSDCInitial" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
+Lib: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\.\Driver\Lib\GPL162002SDDrv_far_V0_2.4.6.lib"
+Lib: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\.\Driver\USB_Host_MSDC\2002_USBH_NOS_FAR_V6_11.lib"
+Lib: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\.\System\Lib\ucBSBudocc0.0.9.lib"
+Output: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\System.S37"
 ;Locate: unSP_StartUp in "startup_Data.obj" at F800 
 ;Align: unSP_StartUp in "startup_Data.obj" with 0 
 ;Locate: Reserved_SpeechRAM in "Snd_Init" of "GPL162002_RecordPen_v001.lib" at B70 
@@ -690,14 +81,634 @@ Locate: IRAM in "DrvUSBHMSDCInitial" of "2002_USBH_NOS_FAR_V6_11.lib" at 42666 l
 ;Align: Decode_Out_Buffer in "SACM_Decode" of "GPL162002_RecordPen_v001.lib" with 0 
 ;Locate: OVERLAP_SACM_RAM_BLOCK in "SACM_Decode" of "GPL162002_RecordPen_v001.lib" at 60 
 ;Align: OVERLAP_SACM_RAM_BLOCK in "SACM_Decode" of "GPL162002_RecordPen_v001.lib" with 0 
-;Locate: LB_OSIRQ in "isr.obj" at F863 
+;Locate: LB_OSIRQ in "isr.obj" at F86C 
 ;Align: LB_OSIRQ in "isr.obj" with 0 
-;Locate: APP_IRAM in "timeline.obj" at 41D3E  linkat 523D 
-;Align: APP_IRAM in "timeline.obj" with 0 
+;Locate: APP_IRAM in "containers.obj" at 5161E  linkat 3081 
+;Align: APP_IRAM in "containers.obj" with 0 
+;Locate: IRAM in "Space.obj" at 53888  linkat 52EB 
+;Align: IRAM in "Space.obj" with 0 
+;Locate: GLOBAL_System_SRAM in "IOKeyScan.obj" at 1B 
+;Align: GLOBAL_System_SRAM in "IOKeyScan.obj" with 0 
+;Locate: MP3_Var_RAM in "SACM_API" of "GPL162002_RecordPen_v001.lib"  at 1F 
+;Align: MP3_Var_RAM in "SACM_API" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: MSG_Var_RAM in "SACM_API" of "GPL162002_RecordPen_v001.lib"  at 24 
+;Align: MSG_Var_RAM in "SACM_API" of "GPL162002_RecordPen_v001.lib"  with 0 
 ;Locate: RAM in "fsglobalvar" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 1AB0 
 ;Align: RAM in "fsglobalvar" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
-;Locate: CODE in "DrvUSBHLUNInit" of "2002_USBH_NOS_FAR_V6_11.lib"  at 336D7 
+;Locate: SDC_RAM in "SDC_DRV" of "GPL162002SDDrv_far_V0_2.4.6.lib"  at 2C 
+;Align: SDC_RAM in "SDC_DRV" of "GPL162002SDDrv_far_V0_2.4.6.lib"  with 0 
+;Locate: USB_RAM_Section in "USBD_Drv.obj" at F3C 
+;Align: USB_RAM_Section in "USBD_Drv.obj" with 0 
+;Locate: SD_GlobalValue in "DrvSDCInitial" of "GPL162002SDDrv_far_V0_2.4.6.lib"  at 1 
+;Align: SD_GlobalValue in "DrvSDCInitial" of "GPL162002SDDrv_far_V0_2.4.6.lib"  with 0 
+;Locate: CODE in "parsing.obj" at 30000 
+;Align: CODE in "parsing.obj" with 0 
+;Locate: CODE in "mainLoop.obj" at 325CE 
+;Align: CODE in "mainLoop.obj" with 0 
+;Locate: CODE in "./libm/e_pow" of "CLib1232.lib"  at 34375 
+;Align: CODE in "./libm/e_pow" of "CLib1232.lib"  with 0 
+;Locate: CODE in "Flash_reprog_boot.obj" at 35900 
+;Align: CODE in "Flash_reprog_boot.obj" with 0 
+;Locate: CODE in "USBD.obj" at 36E0C 
+;Align: CODE in "USBD.obj" with 0 
+;Locate: CODE in "./libm/ef_pow" of "CLib1232.lib"  at 37EE6 
+;Align: CODE in "./libm/ef_pow" of "CLib1232.lib"  with 0 
+;Locate: CODE in "startup.obj" at 38CFE 
+;Align: CODE in "startup.obj" with 0 
+;Locate: CODE in "FS_DS.obj" at 399E6 
+;Align: CODE in "FS_DS.obj" with 0 
+;Locate: CODE in "lists.obj" at 3A6C5 
+;Align: CODE in "lists.obj" with 0 
+;Locate: CODE in "containers.obj" at 3B20F 
+;Align: CODE in "containers.obj" with 0 
+;Locate: CODE in "audio.obj" at 3BC26 
+;Align: CODE in "audio.obj" with 0 
+;Locate: CODE in "api_fs_speedup" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 3C5F5 
+;Align: CODE in "api_fs_speedup" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "DrvUSBHLUNInit" of "2002_USBH_NOS_FAR_V6_11.lib"  at 3D929 
 ;Align: CODE in "DrvUSBHLUNInit" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
-;Locate: CODE in "Space.obj" at F97A 
+;Locate: CODE in "files.obj" at 3E25A 
+;Align: CODE in "files.obj" with 0 
+;Locate: CODE in "macro.obj" at 40793 
+;Align: CODE in "macro.obj" with 0 
+;Locate: CODE in "OS_USB_Host_Control" of "2002_USBH_NOS_FAR_V6_11.lib"  at 40ECD 
+;Align: CODE in "OS_USB_Host_Control" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: CODE in "./../../debug/ucBS_List" of "ucBSBudocc0.0.9.lib"  at 41567 
+;Align: CODE in "./../../debug/ucBS_List" of "ucBSBudocc0.0.9.lib"  with 0 
+;Locate: CODE in "USB.obj" at 42214 
+;Align: CODE in "USB.obj" with 0 
+;Locate: CODE in "timeline.obj" at 41BE3 
+;Align: CODE in "timeline.obj" with 0 
+;Locate: CODE in "USBD_Export.obj" at 42E71 
+;Align: CODE in "USBD_Export.obj" with 0 
+;Locate: CODE in "device.obj" at 3F250 
+;Align: CODE in "device.obj" with 0 
+;Locate: CODE in "api_fs_LoadFatTable" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4344D 
+;Align: CODE in "api_fs_LoadFatTable" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "d2d_copy.obj" at 439CB 
+;Align: CODE in "d2d_copy.obj" with 0 
+;Locate: CODE in "swapbyte" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 43F08 
+;Align: CODE in "swapbyte" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "fsl_link_fat" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4443B 
+;Align: CODE in "fsl_link_fat" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "lfn_readdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 44912 
+;Align: CODE in "lfn_readdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "fsl_find_fat_free" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 44DC6 
+;Align: CODE in "fsl_find_fat_free" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "Inbox.obj" at 4527A 
+;Align: CODE in "Inbox.obj" with 0 
+;Locate: CODE in "fsl_map_cluster" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 456C3 
+;Align: CODE in "fsl_map_cluster" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "util.obj" at 45AFF 
+;Align: CODE in "util.obj" with 0 
+;Locate: CODE in "SD_reprog.obj" at 45F29 
+;Align: CODE in "SD_reprog.obj" with 0 
+;Locate: CODE in "./../../debug/ucBS" of "ucBSBudocc0.0.9.lib"  at 46314 
+;Align: CODE in "./../../debug/ucBS" of "ucBSBudocc0.0.9.lib"  with 0 
+;Locate: CODE in "api_fs_lfnmkdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 466E8 
+;Align: CODE in "api_fs_lfnmkdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "pkg_ops.obj" at 46AB2 
+;Align: CODE in "pkg_ops.obj" with 0 
+;Locate: CODE in "fsl_ReadDBR" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 47209 
+;Align: CODE in "fsl_ReadDBR" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "DrvSDCInitial" of "GPL162002SDDrv_far_V0_2.4.6.lib"  at 47925 
+;Align: CODE in "DrvSDCInitial" of "GPL162002SDDrv_far_V0_2.4.6.lib"  with 0 
+;Locate: CODE in "api_fs_lfnopen" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 47CA2 
+;Align: CODE in "api_fs_lfnopen" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "api_fs_lfnfindnext" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4801F 
+;Align: CODE in "api_fs_lfnfindnext" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "fsl_rwblock" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 48381 
+;Align: CODE in "fsl_rwblock" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "OS_USB_Host_SCSI" of "2002_USBH_NOS_FAR_V6_11.lib"  at FCCF 
+;Align: CODE in "OS_USB_Host_SCSI" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: CODE in "api_fs_lfncd" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 486A5 
+;Align: CODE in "api_fs_lfncd" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "lbl_truename" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 489B5 
+;Align: CODE in "lbl_truename" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./libm/e_sqrt" of "CLib1232.lib"  at 48CAE 
+;Align: CODE in "./libm/e_sqrt" of "CLib1232.lib"  with 0 
+;Locate: CODE in "SystemIntoUSB.obj" at 48F8C 
+;Align: CODE in "SystemIntoUSB.obj" with 0 
+;Locate: CODE in "api_fs_lfnrename" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 49265 
+;Align: CODE in "api_fs_lfnrename" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "api_fs_sfnchangedir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4953E 
+;Align: CODE in "api_fs_sfnchangedir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "lfn_fd32_gen_short_fname" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 49AD7 
+;Align: CODE in "lfn_fd32_gen_short_fname" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "DrvUSBHWriteMultiSector" of "2002_USBH_NOS_FAR_V6_11.lib"  at 49DA2 
+;Align: CODE in "DrvUSBHWriteMultiSector" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: CODE in "DrvUSBHReadMultiSector" of "2002_USBH_NOS_FAR_V6_11.lib"  at 4A054 
+;Align: CODE in "DrvUSBHReadMultiSector" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: CODE in "fsl_bpb_to_dpb" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4A2C7 
+;Align: CODE in "fsl_bpb_to_dpb" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "lfn_dir_lfnwrite" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4A539 
+;Align: CODE in "lfn_dir_lfnwrite" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "lbl_misc" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4A78D 
+;Align: CODE in "lbl_misc" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "api_fs_lfnrmdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4A9CC 
+;Align: CODE in "api_fs_lfnrmdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "lfn_fd32_build_fcb_name" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4AE2F 
+;Align: CODE in "lfn_fd32_build_fcb_name" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./addsubd4" of "CMacro1232.lib"  at 4B049 
+;Align: CODE in "./addsubd4" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "lfn_descend_path" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4B24E 
+;Align: CODE in "lfn_descend_path" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "app_exception.obj" at 4B44E 
+;Align: CODE in "app_exception.obj" with 0 
+;Locate: CODE in "api_fs_init" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4B642 
+;Align: CODE in "api_fs_init" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "api_fs_lfndel" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4B821 
+;Align: CODE in "api_fs_lfndel" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "USB_ID.obj" at 4B9FF 
+;Align: CODE in "USB_ID.obj" with 0 
+;Locate: CODE in "lfn_split_lfn" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4BBD0 
+;Align: CODE in "lfn_split_lfn" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "lfn_fetch_lfn" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4BD97 
+;Align: CODE in "lfn_fetch_lfn" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./muld4" of "CMacro1232.lib"  at 4BF5D 
+;Align: CODE in "./muld4" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./divd4" of "CMacro1232.lib"  at 4C0EC 
+;Align: CODE in "./divd4" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "OS_USB_Host_EP0_CMD" of "2002_USBH_NOS_FAR_V6_11.lib"  at 4C276 
+;Align: CODE in "OS_USB_Host_EP0_CMD" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: CODE in "USB_Flash_reprog.obj" at 4C3E9 
+;Align: CODE in "USB_Flash_reprog.obj" with 0 
+;Locate: CODE in "./addsubf2" of "CMacro1232.lib"  at 4C54D 
+;Align: CODE in "./addsubf2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "uni_case" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4C6AD 
+;Align: CODE in "uni_case" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "DrvUSBHMSDCInitial" of "2002_USBH_NOS_FAR_V6_11.lib"  at 4C801 
+;Align: CODE in "DrvUSBHMSDCInitial" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: CODE in "./libm/ef_sqrt" of "CLib1232.lib"  at 4CA96 
+;Align: CODE in "./libm/ef_sqrt" of "CLib1232.lib"  with 0 
+;Locate: CODE in "api_fs_lfnfindfirst" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4CBDC 
+;Align: CODE in "api_fs_lfnfindfirst" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./../../debug/ucBS_Record" of "ucBSBudocc0.0.9.lib"  at 4CD1B 
+;Align: CODE in "./../../debug/ucBS_Record" of "ucBSBudocc0.0.9.lib"  with 0 
+;Locate: CODE in "uni_utf8_to_oemcp" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4CE59 
+;Align: CODE in "uni_utf8_to_oemcp" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "api_fs_mount" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4CF95 
+;Align: CODE in "api_fs_mount" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./mulf2" of "CMacro1232.lib"  at 4D0D0 
+;Align: CODE in "./mulf2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "uni_fd32_utf8to32" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4D20A 
+;Align: CODE in "uni_fd32_utf8to32" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "SD_reprog_finish.obj" at 4D341 
+;Align: CODE in "SD_reprog_finish.obj" with 0 
+;Locate: CODE in "lfn_allocate_lfn_dir_entries" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4D477 
+;Align: CODE in "lfn_allocate_lfn_dir_entries" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./libm/s_scalbn" of "CLib1232.lib"  at 4D5AB 
+;Align: CODE in "./libm/s_scalbn" of "CLib1232.lib"  with 0 
+;Locate: CODE in "uni_nls_base" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4D6DF 
+;Align: CODE in "uni_nls_base" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "fsl_extend" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4D80F 
+;Align: CODE in "fsl_extend" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "lfn_gen_short_fname" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4D93F 
+;Align: CODE in "lfn_gen_short_fname" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./divf2" of "CMacro1232.lib"  at 4DA6B 
+;Align: CODE in "./divf2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "lfn_dir_lfnread" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4DB8E 
+;Align: CODE in "lfn_dir_lfnread" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "copy" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4DCAF 
+;Align: CODE in "copy" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "fsl_dir_read" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4DDD0 
+;Align: CODE in "fsl_dir_read" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./libm/sf_scalbn" of "CLib1232.lib"  at 4DEE5 
+;Align: CODE in "./libm/sf_scalbn" of "CLib1232.lib"  with 0 
+;Locate: CODE in "SysWaitMode.obj" at 4DFE9 
+;Align: CODE in "SysWaitMode.obj" with 0 
+;Locate: CODE in "sys_counters.obj" at 4E0EA 
+;Align: CODE in "sys_counters.obj" with 0 
+;Locate: CODE in "./../../debug/ucBS_Assert" of "ucBSBudocc0.0.9.lib"  at 4E1E4 
+;Align: CODE in "./../../debug/ucBS_Assert" of "ucBSBudocc0.0.9.lib"  with 0 
+;Locate: CODE in "fsl_searchblock" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4E2DD 
+;Align: CODE in "fsl_searchblock" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "api_fs_unmount" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4E5AE 
+;Align: CODE in "api_fs_unmount" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "uni_fd32_utf16to8" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4E694 
+;Align: CODE in "uni_fd32_utf16to8" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "fsl_ParseDosName" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4E770 
+;Align: CODE in "fsl_ParseDosName" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "lfn_fd32_expand_fcb_name" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4E83E 
+;Align: CODE in "lfn_fd32_expand_fcb_name" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "lbl_flush1" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4E8FF 
+;Align: CODE in "lbl_flush1" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "stat" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4E9BF 
+;Align: CODE in "stat" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "lbl_wipe_out_clusters" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4EA71 
+;Align: CODE in "lbl_wipe_out_clusters" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "lbl_dskxfer" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4EB20 
+;Align: CODE in "lbl_dskxfer" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "api_fs_fseek" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4EBCA 
+;Align: CODE in "api_fs_fseek" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "lbl_flush_buffers" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4EC73 
+;Align: CODE in "lbl_flush_buffers" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "uni_fd32_utf32to8" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4ED1C 
+;Align: CODE in "uni_fd32_utf32to8" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "uni_utf8_strupr" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4EDC3 
+;Align: CODE in "uni_utf8_strupr" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./divi2" of "CMacro1232.lib"  at 4EE67 
+;Align: CODE in "./divi2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./modi2" of "CMacro1232.lib"  at 4EF06 
+;Align: CODE in "./modi2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "lfn_split_path_LFN" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4EFA3 
+;Align: CODE in "lfn_split_path_LFN" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "lfn_fat_find" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4F03F 
+;Align: CODE in "lfn_fat_find" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "fsl_remove_lfn_entries" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4F0D8 
+;Align: CODE in "fsl_remove_lfn_entries" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "getcwd" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4F16F 
+;Align: CODE in "getcwd" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "lfn_itoa" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4F204 
+;Align: CODE in "lfn_itoa" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./__mul_u32_u128" of "CMacro1232.lib"  at 4F297 
+;Align: CODE in "./__mul_u32_u128" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "fsl_init_direntry" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4F32A 
+;Align: CODE in "fsl_init_direntry" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "api_fs_safexit" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4F3B5 
+;Align: CODE in "api_fs_safexit" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "ExtMemOper.obj" at 4F437 
+;Align: CODE in "ExtMemOper.obj" with 0 
+;Locate: CODE in "./gtsf2" of "CMacro1232.lib"  at 4F4B9 
+;Align: CODE in "./gtsf2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./ltsf2" of "CMacro1232.lib"  at 4F53A 
+;Align: CODE in "./ltsf2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "fsl_write_fsinfo" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4F5BB 
+;Align: CODE in "fsl_write_fsinfo" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "fsl_getFATblock" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4F638 
+;Align: CODE in "fsl_getFATblock" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "lfn_find_empty_dir_entries" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4F6B4 
+;Align: CODE in "lfn_find_empty_dir_entries" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "FS_user_nos.obj" at 4F72F 
+;Align: CODE in "FS_user_nos.obj" with 0 
+;Locate: CODE in "./divu2" of "CMacro1232.lib"  at 4F7A7 
+;Align: CODE in "./divu2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./modu2" of "CMacro1232.lib"  at 4F81E 
+;Align: CODE in "./modu2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "fsl_delete_dir_entry" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4F894 
+;Align: CODE in "fsl_delete_dir_entry" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./modi1" of "CMacro1232.lib"  at 4F90A 
+;Align: CODE in "./modi1" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "read" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4F97F 
+;Align: CODE in "read" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "write" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4F9F2 
+;Align: CODE in "write" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "fsl_DeleteBlockInBufferCache" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4FA65 
+;Align: CODE in "fsl_DeleteBlockInBufferCache" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./cvi2f2" of "CMacro1232.lib"  at 4FAD8 
+;Align: CODE in "./cvi2f2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "api_fs_fclose" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4FB4B 
+;Align: CODE in "api_fs_fclose" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "lfn_checksum" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4FBBD 
+;Align: CODE in "lfn_checksum" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "fsl_getblk" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4FC2E 
+;Align: CODE in "fsl_getblk" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "uni_toupper" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4FC9F 
+;Align: CODE in "uni_toupper" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "fsl_clus2phys" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4FD0F 
+;Align: CODE in "fsl_clus2phys" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./string/strstr" of "CLib1232.lib"  at 4FD7D 
+;Align: CODE in "./string/strstr" of "CLib1232.lib"  with 0 
+;Locate: CODE in "api_fs_sfnreaddir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4FDEB 
+;Align: CODE in "api_fs_sfnreaddir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "MemPackCopy.obj" at 4FE58 
+;Align: CODE in "MemPackCopy.obj" with 0 
+;Locate: CODE in "fsl_dir_close" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4FEC1 
+;Align: CODE in "fsl_dir_close" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "fsl_get_cds" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4FF2A 
+;Align: CODE in "fsl_get_cds" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "rename" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4FF93 
+;Align: CODE in "rename" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./__divi64_i64_53" of "CMacro1232.lib"  at 50000 
+;Align: CODE in "./__divi64_i64_53" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "fsl_get_f_node" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 50066 
+;Align: CODE in "fsl_get_f_node" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "api_fs_getcwd" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 500CB 
+;Align: CODE in "api_fs_getcwd" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "uni_fd32_utf8to16" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 5012E 
+;Align: CODE in "uni_fd32_utf8to16" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "uni_utf8_stricmp" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 50190 
+;Align: CODE in "uni_utf8_stricmp" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./lthf2" of "CMacro1232.lib"  at 501F1 
+;Align: CODE in "./lthf2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "lfn_fat_creat" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 50250 
+;Align: CODE in "lfn_fat_creat" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./string/strncpy" of "CLib1232.lib"  at 502AF 
+;Align: CODE in "./string/strncpy" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./gthf2" of "CMacro1232.lib"  at 5030E 
+;Align: CODE in "./gthf2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./modu1" of "CMacro1232.lib"  at 5036D 
+;Align: CODE in "./modu1" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "fsl_dir_init_fnode" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 503CA 
+;Align: CODE in "fsl_dir_init_fnode" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "fsl_getblock_from_off" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 50422 
+;Align: CODE in "fsl_getblock_from_off" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./divu1" of "CMacro1232.lib"  at 50476 
+;Align: CODE in "./divu1" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "fsl_release_f_node" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 504C9 
+;Align: CODE in "fsl_release_f_node" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "lbl_move_buffer" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 5051C 
+;Align: CODE in "lbl_move_buffer" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "uni_oemcp_to_utf8" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 5056D 
+;Align: CODE in "uni_oemcp_to_utf8" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "open" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 505BE 
+;Align: CODE in "open" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./cvu2f2" of "CMacro1232.lib"  at 5060F 
+;Align: CODE in "./cvu2f2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./cvi2d4" of "CMacro1232.lib"  at 50700 
+;Align: CODE in "./cvi2d4" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./string/strcspn" of "CLib1232.lib"  at 50660 
+;Align: CODE in "./string/strcspn" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./cvf2d4" of "CMacro1232.lib"  at 5079E 
+;Align: CODE in "./cvf2d4" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "SD.obj" at 50750 
+;Align: CODE in "SD.obj" with 0 
+;Locate: CODE in "findfirst" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 50839 
+;Align: CODE in "findfirst" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "lfn_allocate_sfn_dir_entry" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 507EC 
+;Align: CODE in "lfn_allocate_sfn_dir_entry" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "uni_fd32_utf16to32" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 50886 
+;Align: CODE in "uni_fd32_utf16to32" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./__rshu4_r" of "CMacro1232.lib"  at 508D0 
+;Align: CODE in "./__rshu4_r" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./string/strncmp" of "CLib1232.lib"  at 50919 
+;Align: CODE in "./string/strncmp" of "CLib1232.lib"  with 0 
+;Locate: CODE in "fsl_dos_extend" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 50960 
+;Align: CODE in "fsl_dos_extend" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "mkdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 50AED 
+;Align: CODE in "mkdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "main.obj" at 509A3 
+;Align: CODE in "main.obj" with 0 
+;Locate: CODE in "api_fs_getfsize" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 509E5 
+;Align: CODE in "api_fs_getfsize" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "rmdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 50A27 
+;Align: CODE in "rmdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "unlink" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 50A69 
+;Align: CODE in "unlink" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "chdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 50AAB 
+;Align: CODE in "chdir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "nls_codepage.obj" at 50B2F 
+;Align: CODE in "nls_codepage.obj" with 0 
+;Locate: CODE in "./__divi32_i32_27" of "CMacro1232.lib"  at 50B6F 
+;Align: CODE in "./__divi32_i32_27" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "api_fs_fwrite" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 50BEC 
+;Align: CODE in "api_fs_fwrite" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "lfn_copy_char_in_lfn_slot" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 50BAE 
+;Align: CODE in "lfn_copy_char_in_lfn_slot" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./string/strcat" of "CLib1232.lib"  at 50C67 
+;Align: CODE in "./string/strcat" of "CLib1232.lib"  with 0 
+;Locate: CODE in "uni_fd32_utf32to16" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 50C2A 
+;Align: CODE in "uni_fd32_utf32to16" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "nls_ascii.obj" at 50CA4 
+;Align: CODE in "nls_ascii.obj" with 0 
+;Locate: CODE in "./string/strrchr" of "CLib1232.lib"  at 50CE0 
+;Align: CODE in "./string/strrchr" of "CLib1232.lib"  with 0 
+;Locate: CODE in "lbl_dos_getdate" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 50D53 
+;Align: CODE in "lbl_dos_getdate" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./lshiu4" of "CMacro1232.lib"  at 50D1A 
+;Align: CODE in "./lshiu4" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "ServiceLoop.obj" at 50DC4 
+;Align: CODE in "ServiceLoop.obj" with 0 
+;Locate: CODE in "./cvf2u2" of "CMacro1232.lib"  at 50D8C 
+;Align: CODE in "./cvf2u2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./rshu4" of "CMacro1232.lib"  at 50E32 
+;Align: CODE in "./rshu4" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "api_fs_fread" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 50DFC 
+;Align: CODE in "api_fs_fread" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./cvf2u1" of "CMacro1232.lib"  at 50E68 
+;Align: CODE in "./cvf2u1" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "lseek" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 50ED0 
+;Align: CODE in "lseek" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "lbl_dos_gettime" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 50E9D 
+;Align: CODE in "lbl_dos_gettime" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./cvu2d4" of "CMacro1232.lib"  at 50F35 
+;Align: CODE in "./cvu2d4" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "lfn_fd32_compare_fcb_names" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 50F03 
+;Align: CODE in "lfn_fd32_compare_fcb_names" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./cvi1d4" of "CMacro1232.lib"  at 50F98 
+;Align: CODE in "./cvi1d4" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./cvd4u2" of "CMacro1232.lib"  at 50F67 
+;Align: CODE in "./cvd4u2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./string/memcpy" of "CLib1232.lib"  at 50FF8 
+;Align: CODE in "./string/memcpy" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./string/strspn" of "CLib1232.lib"  at 50FC9 
+;Align: CODE in "./string/strspn" of "CLib1232.lib"  with 0 
+;Locate: CODE in "api_fs_getftime" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 51027 
+;Align: CODE in "api_fs_getftime" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./string/strpbrk" of "CLib1232.lib"  at 510D9 
+;Align: CODE in "./string/strpbrk" of "CLib1232.lib"  with 0 
+;Locate: CODE in "api_fs_changedsk" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 51055 
+;Align: CODE in "api_fs_changedsk" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "OS_USB_Host_ISR" of "2002_USBH_NOS_FAR_V6_11.lib"  at 51081 
+;Align: CODE in "OS_USB_Host_ISR" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: CODE in "./__modi32_n" of "CMacro1232.lib"  at 510AD 
+;Align: CODE in "./__modi32_n" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./__divi32_n" of "CMacro1232.lib"  at 51105 
+;Align: CODE in "./__divi32_n" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "SysOff2OnHook.obj" at 51154 
+;Align: CODE in "SysOff2OnHook.obj" with 0 
+;Locate: CODE in "SysOn2OffHook.obj" at 5112D 
+;Align: CODE in "SysOn2OffHook.obj" with 0 
+;Locate: CODE in "SysIntorWaitMode.obj" at 511A1 
+;Align: CODE in "SysIntorWaitMode.obj" with 0 
+;Locate: CODE in "lbl_xlt_fd" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 511C6 
+;Align: CODE in "lbl_xlt_fd" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "sacm" of "GPL162002_RecordPen_v001.lib"  at 511EB 
+;Align: CODE in "sacm" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: CODE in "./cvu1f2" of "CMacro1232.lib"  at 51255 
+;Align: CODE in "./cvu1f2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "findnext" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 51278 
+;Align: CODE in "findnext" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "SysIntoHighSpeed.obj" at 5120F 
+;Align: CODE in "SysIntoHighSpeed.obj" with 0 
+;Locate: CODE in "./string/strcmp" of "CLib1232.lib"  at 51232 
+;Align: CODE in "./string/strcmp" of "CLib1232.lib"  with 0 
+;Locate: CODE in "fsl_get_dpb" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 5129B 
+;Align: CODE in "fsl_get_dpb" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./string/strchr" of "CLib1232.lib"  at 51341 
+;Align: CODE in "./string/strchr" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./libm/w_pow" of "CLib1232.lib"  at 51362 
+;Align: CODE in "./libm/w_pow" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./string/memset" of "CLib1232.lib"  at 512BD 
+;Align: CODE in "./string/memset" of "CLib1232.lib"  with 0 
+;Locate: CODE in "close" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 512DE 
+;Align: CODE in "close" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "deviceunmount" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 512FF 
+;Align: CODE in "deviceunmount" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "devicemount" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 51320 
+;Align: CODE in "devicemount" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "fsl_getdstart" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 51383 
+;Align: CODE in "fsl_getdstart" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "api_fs_getfattr" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 513A3 
+;Align: CODE in "api_fs_getfattr" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./string/strlen" of "CLib1232.lib"  at 513C2 
+;Align: CODE in "./string/strlen" of "CLib1232.lib"  with 0 
+;Locate: CODE in "getfserrcode" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 513E0 
+;Align: CODE in "getfserrcode" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "SysIntoHaltMode.obj" at 513FC 
+;Align: CODE in "SysIntoHaltMode.obj" with 0 
+;Locate: CODE in "lbl_swap_deleted" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 51433 
+;Align: CODE in "lbl_swap_deleted" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./string/strcpy" of "CLib1232.lib"  at 5144E 
+;Align: CODE in "./string/strcpy" of "CLib1232.lib"  with 0 
+;Locate: CODE in "lbl_time_encode" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 51418 
+;Align: CODE in "lbl_time_encode" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "lbl_next_cluster" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 51469 
+;Align: CODE in "lbl_next_cluster" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "fsl_setdstart" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 51483 
+;Align: CODE in "fsl_setdstart" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "ucBS_Hook.obj" at 5149D 
+;Align: CODE in "ucBS_Hook.obj" with 0 
+;Locate: CODE in "fsl_media_check" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 514B5 
+;Align: CODE in "fsl_media_check" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "fsl_dir_write" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 514E2 
+;Align: CODE in "fsl_dir_write" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./__u2fd1bit" of "CMacro1232.lib"  at 514F8 
+;Align: CODE in "./__u2fd1bit" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "libgloss.obj" at 514CC 
+;Align: CODE in "libgloss.obj" with 0 
+;Locate: CODE in "./ctype/isspace" of "CLib1232.lib"  at FC3F 
+;Align: CODE in "./ctype/isspace" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./__clz32" of "CMacro1232.lib"  at 51536 
+;Align: CODE in "./__clz32" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "DrvStruct.obj" at 5154A 
+;Align: CODE in "DrvStruct.obj" with 0 
+;Locate: CODE in "./libm/wf_pow" of "CLib1232.lib"  at 5150E 
+;Align: CODE in "./libm/wf_pow" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./__rshu2_r" of "CMacro1232.lib"  at 51522 
+;Align: CODE in "./__rshu2_r" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./muliu2" of "CMacro1232.lib"  at 5155E 
+;Align: CODE in "./muliu2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "lbl_xlt_fnp" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 51570 
+;Align: CODE in "lbl_xlt_fnp" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "BodyInit.obj" at 51581 
+;Align: CODE in "BodyInit.obj" with 0 
+;Locate: CODE in "./ctype/islower" of "CLib1232.lib"  at 51591 
+;Align: CODE in "./ctype/islower" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./ctype/isupper" of "CLib1232.lib"  at 515A0 
+;Align: CODE in "./ctype/isupper" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./libm/copy_sign" of "CLib1232.lib"  at 515AF 
+;Align: CODE in "./libm/copy_sign" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./ctype/isdigit" of "CLib1232.lib"  at 515BC 
+;Align: CODE in "./ctype/isdigit" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./libm/copysignf" of "CLib1232.lib"  at 515D4 
+;Align: CODE in "./libm/copysignf" of "CLib1232.lib"  with 0 
+;Locate: CODE in "Space.obj" at 515DF 
 ;Align: CODE in "Space.obj" with 0 
-Locate: __sn_init_table at 80C00 
+;Locate: CODE in "./__clz16" of "CMacro1232.lib"  at 515C9 
+;Align: CODE in "./__clz16" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./__divi16_n" of "CMacro1232.lib"  at 515F4 
+;Align: CODE in "./__divi16_n" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./rshu2" of "CMacro1232.lib"  at 515FE 
+;Align: CODE in "./rshu2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./lshiu2" of "CMacro1232.lib"  at 515EA 
+;Align: CODE in "./lshiu2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./lshiu1" of "CMacro1232.lib"  at 51608 
+;Align: CODE in "./lshiu1" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./rshu1" of "CMacro1232.lib"  at 51610 
+;Align: CODE in "./rshu1" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "SysException.obj" at 51618 
+;Align: CODE in "SysException.obj" with 0 
+;Locate: CODE in "Flash_reprog_Drv.obj" at 4FFFB 
+;Align: CODE in "Flash_reprog_Drv.obj" with 0 
+;Locate: DrvSDCSection in "SDC_DRV" of "GPL162002SDDrv_far_V0_2.4.6.lib"  at 3CFB3 
+;Align: DrvSDCSection in "SDC_DRV" of "GPL162002SDDrv_far_V0_2.4.6.lib"  with 0 
+;Locate: FP_USB_Code_ROM in "Flash_reprog_Drv.obj" at 3EAB7 
+;Align: FP_USB_Code_ROM in "Flash_reprog_Drv.obj" with 0 
+;Locate: LIB_FAT16_CODE in "basedrive" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4980B 
+;Align: LIB_FAT16_CODE in "basedrive" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: NB_DATA in "uni_case" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 540C1 
+;Align: NB_DATA in "uni_case" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: NB_DATA in "startup.obj" at 5459F 
+;Align: NB_DATA in "startup.obj" with 0 
+;Locate: NB_DATA in "lfn_fd32_build_fcb_name" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 54953 
+;Align: NB_DATA in "lfn_fd32_build_fcb_name" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: NB_DATA in "lfn_fd32_gen_short_fname" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 54A0E 
+;Align: NB_DATA in "lfn_fd32_gen_short_fname" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: NB_DATA in "macro.obj" at 54AC8 
+;Align: NB_DATA in "macro.obj" with 0 
+;Locate: NB_DATA in "SD_reprog.obj" at 54B68 
+;Align: NB_DATA in "SD_reprog.obj" with 0 
+;Locate: NB_DATA in "parsing.obj" at 54BF9 
+;Align: NB_DATA in "parsing.obj" with 0 
+;Locate: NB_DATA in "./libm/e_pow" of "CLib1232.lib"  at 54C7D 
+;Align: NB_DATA in "./libm/e_pow" of "CLib1232.lib"  with 0 
+;Locate: NB_DATA in "mainLoop.obj" at 54D01 
+;Align: NB_DATA in "mainLoop.obj" with 0 
+;Locate: NB_DATA in "Inbox.obj" at 54D6A 
+;Align: NB_DATA in "Inbox.obj" with 0 
+;Locate: NB_DATA in "audio.obj" at 54DC0 
+;Align: NB_DATA in "audio.obj" with 0 
+;Locate: NB_DATA in "app_exception.obj" at 54E14 
+;Align: NB_DATA in "app_exception.obj" with 0 
+;Locate: NB_DATA in "./libm/ef_pow" of "CLib1232.lib"  at 54E66 
+;Align: NB_DATA in "./libm/ef_pow" of "CLib1232.lib"  with 0 
+;Locate: NB_DATA in "USB_ID.obj" at 54EA8 
+;Align: NB_DATA in "USB_ID.obj" with 0 
+;Locate: NB_DATA in "Space.obj" at 54EE8 
+;Align: NB_DATA in "Space.obj" with 0 
+;Locate: NB_DATA in "api_fs_sfnchangedir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 54F09 
+;Align: NB_DATA in "api_fs_sfnchangedir" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: NB_DATA in "lists.obj" at 54F21 
+;Align: NB_DATA in "lists.obj" with 0 
+;Locate: NB_DATA in "SD.obj" at 54F37 
+;Align: NB_DATA in "SD.obj" with 0 
+;Locate: NB_DATA in "pkg_ops.obj" at 54F4A 
+;Align: NB_DATA in "pkg_ops.obj" with 0 
+;Locate: NB_DATA in "d2d_copy.obj" at 54F5D 
+;Align: NB_DATA in "d2d_copy.obj" with 0 
+;Locate: NB_DATA in "nls_ascii.obj" at 54F70 
+;Align: NB_DATA in "nls_ascii.obj" with 0 
+;Locate: NB_DATA in "lbl_misc" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 54F81 
+;Align: NB_DATA in "lbl_misc" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: NB_DATA in "./libm/s_scalbn" of "CLib1232.lib"  at 54F91 
+;Align: NB_DATA in "./libm/s_scalbn" of "CLib1232.lib"  with 0 
+;Locate: NB_DATA in "fsl_ParseDosName" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 54FA1 
+;Align: NB_DATA in "fsl_ParseDosName" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: NB_DATA in "files.obj" at 54FB0 
+;Align: NB_DATA in "files.obj" with 0 
+;Locate: NB_DATA in "containers.obj" at 54FBC 
+;Align: NB_DATA in "containers.obj" with 0 
+;Locate: NB_DATA in "device.obj" at 54FC6 
+;Align: NB_DATA in "device.obj" with 0 
+;Locate: NB_DATA in "./libm/e_sqrt" of "CLib1232.lib"  at 54FD0 
+;Align: NB_DATA in "./libm/e_sqrt" of "CLib1232.lib"  with 0 
+;Locate: NB_DATA in "./libm/sf_scalbn" of "CLib1232.lib"  at 54FD8 
+;Align: NB_DATA in "./libm/sf_scalbn" of "CLib1232.lib"  with 0 
+;Locate: NB_DATA in "lfn_descend_path" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 54FE0 
+;Align: NB_DATA in "lfn_descend_path" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: NB_DATA in "api_fs_init" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 54FE5 
+;Align: NB_DATA in "api_fs_init" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: NB_DATA in "./libm/ef_sqrt" of "CLib1232.lib"  at 54FEA 
+;Align: NB_DATA in "./libm/ef_sqrt" of "CLib1232.lib"  with 0 
+;Locate: NB_DATA in "api_fs_lfnfindnext" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 54FEE 
+;Align: NB_DATA in "api_fs_lfnfindnext" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: NB_DATA in "api_fs_lfncd" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 3F7FD 
+;Align: NB_DATA in "api_fs_lfncd" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: NB_DATA in "lbl_truename" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 54FF2 
+;Align: NB_DATA in "lbl_truename" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: SACM_API_ROM_BLOCK in "SACM_API" of "GPL162002_RecordPen_v001.lib"  at 4759F 
+;Align: SACM_API_ROM_BLOCK in "SACM_API" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: SACM_DECODE_ROM_BLOCK in "SACM_Decode" of "GPL162002_RecordPen_v001.lib"  at 4C94C 
+;Align: SACM_DECODE_ROM_BLOCK in "SACM_Decode" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: SACM_ISR_Service_Section in "SACM_API" of "GPL162002_RecordPen_v001.lib"  at 4AC00 
+;Align: SACM_ISR_Service_Section in "SACM_API" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: SACM_Mask_InitCode in "Snd_Init" of "GPL162002_RecordPen_v001.lib"  at 5117B 
+;Align: SACM_Mask_InitCode in "Snd_Init" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: SACM_ROM_Block in "sacm" of "GPL162002_RecordPen_v001.lib"  at 42845 
+;Align: SACM_ROM_Block in "sacm" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: SCSI_Table_Setion in "SCSI_Table.obj" at 54FF4 
+;Align: SCSI_Table_Setion in "SCSI_Table.obj" with 0 
+;Locate: SCSIDataSection in "OS_USB_Host_SCSI_Data" of "2002_USBH_NOS_FAR_V6_11.lib"  at 46E69 
+;Align: SCSIDataSection in "OS_USB_Host_SCSI_Data" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: System_CODE in "IOKeyScan.obj" at 506B0 
+;Align: System_CODE in "IOKeyScan.obj" with 0 
+;Locate: USB_Code_ROM in "USBD_Drv.obj" at 40000 
+;Align: USB_Code_ROM in "USBD_Drv.obj" with 0 
+;Locate: USB_Host_Initial_Section in "OS_USB_Host_Initial" of "2002_USBH_NOS_FAR_V6_11.lib"  at 4E3D0 
+;Align: USB_Host_Initial_Section in "OS_USB_Host_Initial" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: USB_Host_Standard_Command_Sectio in "OS_USB_Host_Standard_CMD" of "2002_USBH_NOS_FAR_V6_11.lib"  at F98B 
+;Align: USB_Host_Standard_Command_Sectio in "OS_USB_Host_Standard_CMD" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: User_SACM in "user_sacm" of "GPL162002_RecordPen_v001.lib"  at 4E4C0 
+;Align: User_SACM in "user_sacm" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: __sn_init_table at F863 

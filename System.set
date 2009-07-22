@@ -13,7 +13,7 @@ BodyName=GPL162003_CS0Flash
 
 [SetLink]
 ExeFile=1
-Output=System.S37
+Output=.\Debug\System.s37
 INTVEC=1
 STARTUP=0
 ALIGNRES=0
@@ -53,7 +53,7 @@ IsGenRes=1
 IsInitGlobal=1
 IsGenList=0
 CurIsa=ISA20
-IsWall=1
+IsWall=0
 POINTER=1
 
 [AdvancedHard]
@@ -63,7 +63,7 @@ nStackSize=30719
 [Beforebuild]
 Description=Old links and maps for comparison
 Count=2
-Command0=copy System.lik System-prev.lik
+Command0=rem copy System.lik System-prev.lik
 Command1=copy Debug\System.map Debug\System-prev.map
 
 [Beforelink]

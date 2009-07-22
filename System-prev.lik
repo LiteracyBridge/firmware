@@ -1,65 +1,66 @@
 Version: 3.0
 Options: m37
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\Resource.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\app_exception.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\audio.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\containers.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\d2d_copy.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\device.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\files.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\lists.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\macro.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\mainLoop.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\parsing.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\pkg_ops.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\startup.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\sys_counters.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\timeline.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\util.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SD.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\FS_user_nos.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\nls_ascii.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\DrvStruct.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\nls_codepage.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\MemPackCopy.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\USB.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\FS_DS.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SCSI_Table.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SystemIntoUSB.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\IOKeyScan.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\startup_Data.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\isr.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\ServiceLoop.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SysWaitMode.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SysOn2OffHook.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SysIntoHighSpeed.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SysIntorWaitMode.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SysOff2OnHook.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SysIntoHaltMode.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SysException.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\ExtMemOper.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\ucBS_Hook.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\main.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\BodyInit.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\libgloss.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\USBD.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\USBD_Drv.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\USB_ID.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\USB_Flash_reprog.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\Flash_reprog_Drv.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\Flash_reprog_boot.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SD_reprog.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\SD_reprog_finish.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\USBD_Export.obj"
-Obj: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\Space.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\Resource.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\app_exception.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\audio.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\containers.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\d2d_copy.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\device.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\files.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\Inbox.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\lists.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\macro.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\mainLoop.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\parsing.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\pkg_ops.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\startup.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\sys_counters.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\timeline.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\util.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SD.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\FS_user_nos.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\nls_ascii.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\DrvStruct.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\nls_codepage.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\MemPackCopy.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\USB.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\FS_DS.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SCSI_Table.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SystemIntoUSB.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\IOKeyScan.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\startup_Data.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\isr.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\ServiceLoop.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SysWaitMode.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SysOn2OffHook.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SysIntoHighSpeed.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SysIntorWaitMode.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SysOff2OnHook.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SysIntoHaltMode.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SysException.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\ExtMemOper.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\ucBS_Hook.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\main.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\BodyInit.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\libgloss.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\USBD.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\USBD_Drv.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\USB_ID.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\USB_Flash_reprog.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\Flash_reprog_Drv.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\Flash_reprog_boot.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SD_reprog.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\SD_reprog_finish.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\USBD_Export.obj"
+Obj: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\Space.obj"
 Lib: "C:\Program Files\Generalplus\unSPIDE 3.0.1\library\CLib32\lib\CLib1232.lib"
-Lib: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\.\Component\Lib\GPL162002_RecordPen_v001.lib"
-Lib: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\.\Component\Lib\GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"
+Lib: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\.\Component\Lib\GPL162002_RecordPen_v001.lib"
+Lib: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\.\Component\Lib\GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"
 Lib: "C:\Program Files\Generalplus\unSPIDE 3.0.1\library\CMacro\CMacro1232.lib"
-Lib: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\.\Driver\Lib\GPL162002SDDrv_far_V0_2.4.6.lib"
-Lib: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\.\Driver\USB_Host_MSDC\2002_USBH_NOS_FAR_V6_11.lib"
-Lib: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\.\System\Lib\ucBSBudocc0.0.9.lib"
-Output: "E:\Documents and Settings\Cliff\My Documents\code\Cliff_code\current-20090516\Debug\System.S37"
+Lib: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\.\Driver\Lib\GPL162002SDDrv_far_V0_2.4.6.lib"
+Lib: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\.\Driver\USB_Host_MSDC\2002_USBH_NOS_FAR_V6_11.lib"
+Lib: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\.\System\Lib\ucBSBudocc0.0.9.lib"
+Output: "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Debug\System.S37"
 Locate: CODE in "Flash_reprog_boot.obj" at AC000
 ;Align: CODE in "Flash_reprog_boot.obj" with 0 
 Locate: CODE in "Flash_reprog_Drv.obj" at AD600
@@ -692,12 +693,36 @@ Locate: IRAM in "DrvUSBHMSDCInitial" of "2002_USBH_NOS_FAR_V6_11.lib" at 42666 l
 ;Align: OVERLAP_SACM_RAM_BLOCK in "SACM_Decode" of "GPL162002_RecordPen_v001.lib" with 0 
 ;Locate: LB_OSIRQ in "isr.obj" at F863 
 ;Align: LB_OSIRQ in "isr.obj" with 0 
-;Locate: APP_IRAM in "timeline.obj" at 41D3E  linkat 523D 
+;Locate: APP_IRAM in "timeline.obj" at 43FAC  linkat 523D 
 ;Align: APP_IRAM in "timeline.obj" with 0 
 ;Locate: RAM in "fsglobalvar" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 1AB0 
 ;Align: RAM in "fsglobalvar" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
 ;Locate: CODE in "DrvUSBHLUNInit" of "2002_USBH_NOS_FAR_V6_11.lib"  at 336D7 
 ;Align: CODE in "DrvUSBHLUNInit" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
-;Locate: CODE in "Space.obj" at F97A 
+;Locate: CODE in "Inbox.obj" at 41D3E 
+;Align: CODE in "Inbox.obj" with 0 
+;Locate: CODE in "stat" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 42187 
+;Align: CODE in "stat" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "getcwd" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 42239 
+;Align: CODE in "getcwd" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "api_fs_getcwd" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 422CE 
+;Align: CODE in "api_fs_getcwd" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./string/strncpy" of "CLib1232.lib"  at 42331 
+;Align: CODE in "./string/strncpy" of "CLib1232.lib"  with 0 
+;Locate: CODE in "api_fs_getfsize" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 42390 
+;Align: CODE in "api_fs_getfsize" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "api_fs_getftime" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 423D2 
+;Align: CODE in "api_fs_getftime" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "OS_USB_Host_ISR" of "2002_USBH_NOS_FAR_V6_11.lib"  at 42400 
+;Align: CODE in "OS_USB_Host_ISR" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: CODE in "api_fs_getfattr" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 4242C 
+;Align: CODE in "api_fs_getfattr" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
+;Locate: CODE in "./ctype/islower" of "CLib1232.lib"  at 41CD9 
+;Align: CODE in "./ctype/islower" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./ctype/isupper" of "CLib1232.lib"  at 4244B 
+;Align: CODE in "./ctype/isupper" of "CLib1232.lib"  with 0 
+;Locate: CODE in "Space.obj" at F982 
 ;Align: CODE in "Space.obj" with 0 
+;Locate: NB_DATA in "Inbox.obj" at 4245A 
+;Align: NB_DATA in "Inbox.obj" with 0 
 Locate: __sn_init_table at 80C00 
