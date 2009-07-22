@@ -9,6 +9,7 @@
 #define PKG_USER		2
 #define PKG_DEFAULT		3
 #define PKG_VARIABLE	4
+#define PKG_QUIZ		5
 #define MAX_FILES		40
 #define MAX_BLOCKS		70
 #define MAX_STATES		140   // should always be 2 x MAX_BLOCKS

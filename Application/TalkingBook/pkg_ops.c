@@ -28,7 +28,7 @@ int deletePackage(char * packageName) {
 	char filename[60], path[60];
 	char strLog[60];
 	int ret, attempt;
-	char *cursor;
+	char *cursor, *prefixCursor;
 	struct f_info file_info;
 	BOOL shouldDelete = TRUE;
 	const int MAX_RETRIES = 3;
@@ -59,9 +59,14 @@ int deletePackage(char * packageName) {
 		strcpy(strLog,"\x0d\x0a");
 		longToDecimalString(timeNow,strLog+2,5);
 		strcat((char *)strLog,(const char *)": DELETE ");
-
-		if (0 == strncmp(packageName,CUSTOM_PKG_PREFIX,strlen(CUSTOM_PKG_PREFIX))) {
-			cursor = packageName + strlen(CUSTOM_PKG_PREFIX);
+		
+		prefixCursor = NULL;
+		if (0 == strncmp(packageName,CUSTOM_PKG_PREFIX,strlen(CUSTOM_PKG_PREFIX)))
+			prefixCursor = CUSTOM_PKG_PREFIX;
+		else if (0 == strncmp(packageName,QUIZ_PKG_PREFIX,strlen(QUIZ_PKG_PREFIX)))
+			prefixCursor = QUIZ_PKG_PREFIX;
+		if (prefixCursor) {
+			cursor = packageName + strlen(prefixCursor);
 			strcpy(path,USER_PATH);
 			strcat(path,cursor);
 			strcat(path,"\\");

@@ -594,12 +594,16 @@ static void takeAction (Action *action, EnumAction actionCode) {
 					if (0 == strncmp(filename,CUSTOM_PKG_PREFIX,strlen(CUSTOM_PKG_PREFIX))) {
 						destination = replaceStack(filename+strlen(CUSTOM_PKG_PREFIX),&pkgSystem);
 						context.queuedPackageType = PKG_USER;
+					}
+					if (0 == strncmp(filename,QUIZ_PKG_PREFIX,strlen(QUIZ_PKG_PREFIX))) {
+						destination = replaceStack(filename+strlen(QUIZ_PKG_PREFIX),&pkgSystem);
+						context.queuedPackageType = PKG_QUIZ;
 					} else {
 						destination = replaceStack(filename,&pkgSystem);
 						context.queuedPackageType = PKG_DEFAULT;
 					}
 					context.queuedPackageNameIndex = destination;
-				} else {
+				} else { // list->listType != LIST_OF_PACKAGES
 					// play sound of subject
 					newFile = getListFile(filename);
 					newTime = 0;
@@ -962,6 +966,7 @@ static void loadPackage(int pkgType, const char * pkgName) {
 	CtnrBlock *block;
 	Action *action;
 	char filePath[60];
+	char *fileExtension;
 	long timeNow;
 		
 	stop();  // better to stop audio playback before file ops  -- also flushes log buffer
@@ -992,6 +997,7 @@ static void loadPackage(int pkgType, const char * pkgName) {
 				context.package = &pkgSystem;
 				strcpy(filePath,SYSTEM_PATH);
 				break;
+			case PKG_QUIZ:
 			case PKG_USER:
 				context.package = &pkgUser;
 				strcpy(filePath,USER_PATH);
@@ -1003,11 +1009,16 @@ static void loadPackage(int pkgType, const char * pkgName) {
 				break;
 		}
 		strcat(filePath,pkgName);
-		strcat(filePath,".txt");
+		fileExtension = filePath + strlen(filePath);
+		strcat(filePath,".txt"); //todo: move to config
 		pkg = context.package;
 		memset(pkg,0,sizeof(CtnrPackage));
 		pkg->pkg_type = pkgType;
 		parseControlFile(filePath, pkg);
+		if (context.package->pkg_type == PKG_QUIZ) {
+			strcpy(fileExtension,".qiz");  //todo: move to config
+			// loadQuizData(filePath);
+		} 
 	}
 	// initialize context
 	// primarily used to reset system list position when returning from user content
