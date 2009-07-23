@@ -379,7 +379,6 @@ int Write_10(unsigned long	lUSB_LUN_Write)
 			CSW_Residue=0;
 #endif
 	}
-#ifdef USBRP
 	else if(ptr_USB_LUN_Write->unLunType == LunType_NOR) {  //rhm
 	
 		flash *pflash = (flash *)ptr_USB_LUN_Write->rhmLunData;
@@ -512,7 +511,6 @@ int Write_10(unsigned long	lUSB_LUN_Write)
 			CSW_Residue=0;
 //RHM #endif
 	}
-#endif
 
 End:	
 #ifdef OS_vension

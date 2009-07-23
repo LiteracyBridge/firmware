@@ -22,9 +22,6 @@ extern long USB_INSERT_PTR;
 extern long USB_ISR_PTR;
 extern void (*ReprogJump)();
 
-#else
-#define N_USB_LUN 1
-
 #endif
 
 //#define print
@@ -683,7 +680,9 @@ void RHMWrite()
 void Cmd_GPVendorCmdMP()
 {
 	int i;
+#ifdef USBRP
 	int rhm;
+#endif
 	SCSI_CMD_MAP	*ScsiCmdPtr;
 	/*RHM
 	SCSI_CMD_MAP ScsiCmdMapList[] = {
@@ -715,7 +714,6 @@ void Cmd_GPVendorCmdMP()
 		SetVenderID();
 		return;
 	}
-#ifdef USBRP
 	if(Command_SecValue == 0x2a) {
 		RHMWrite();
 		return;
@@ -724,7 +722,7 @@ void Cmd_GPVendorCmdMP()
 		RHMJump();
 		return;
 	}
-#endif		
+		
 	rhm = Command_SecValue;
 		
 	CommandFail(0x1A);			

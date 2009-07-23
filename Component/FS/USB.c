@@ -201,19 +201,6 @@ INT16 USBHost_Initial_1(void)
 		
 		bUSB_Init = 0;
 	}
-	//debug 
-/*
-	BulkINEP = 0x81;
-	BulkOUTEP = 2;
-	INTINEP = 0x83;
-	USBH_MaxLUN = 0;
-	R_Device_Address = 1;
-	InterfaceNumber = 0;
-	DeviceClass = 8;
-	InterfaceSubClass = 6;
-	InterfaceProtocol = 0x50;
-*/	
-	//debug
 	ret = DrvUSBHLUNInit(0);
 	if(ret != 0)
 	{
