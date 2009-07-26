@@ -202,8 +202,7 @@ static int recordAudio(char *pkgName, char *cursor) {
 	char filepath[60];
 	long start, end, prev;
 	CtnrFile *file;
-	int len;
-	int header[10];
+	int len, key;
 	
 	strcpy(filepath,USER_PATH);
 	strcat(filepath,pkgName);
@@ -231,16 +230,7 @@ static int recordAudio(char *pkgName, char *cursor) {
 	prev = end;
 	handle = tbOpen((LPSTR)filepath,O_CREAT|O_RDWR);
 	if (handle != -1) {
-		header[0] = (int)('B'<<8 | 'T');
-		header[1] = 0x0102;
-		header[2] = 0x5678;
-		header[3] = 0x9012;
-		header[4] = 0xffff;
-		header[5] = 0xffff; 
-//		write(handle,(LPSTR)header,12);
 		Snd_SACM_RecFAT(handle, C_CODEC_AUDIO1800, BIT_RATE);
-//		*P_WatchDog_Ctrl &= ~0x4006; // clear bit 0 and 14 for 1 sec watchdog period and system reset
-//		*P_WatchDog_Ctrl |= 0x8001; // set bits 0 and 15 for 1 sec period and enable watchdog
 		do {
 			end = getRTCinSeconds();	
 			if (0==(end%2) && (prev != end)) { // blink LED every three seconds
@@ -249,15 +239,21 @@ static int recordAudio(char *pkgName, char *cursor) {
 				wait (100);
 				setLED(LED_RED,TRUE);
 			}
-//			*P_WatchDog_Clear = 0xA005; // clear watchdog reset
-		} while (!keyCheck(0));
+			key = keyCheck(0);
+			if (key == KEY_PLAY) { // pause  TODO: this key press to pause shouldn't be hard coded
+				SACM_Pause();
+				do
+					key = keyCheck(0);
+				while (key != KEY_PLAY && key != KEY_STAR);					
+				SACM_Resume();
+			}
+		} while (key != KEY_STAR); // TODO: this key press to stop shouldn't be hard coded
 		while ((end - start) < 3) { // must be at least 2.0 second recording
 			end = getRTCinSeconds();			
 		}
 		SACM_Stop();		//Snd_Stop(); // no need to call stop() and flush the log
-		lseek(handle, 6, SEEK_SET );			//Seek to the start of the file input
-		write(handle,(LPSTR)header<<1,6);
-		
+		//lseek(handle, 6, SEEK_SET );			//Seek to the start of the file input
+		//write(handle,(LPSTR)header<<1,6);
 		close(handle);
 //		*P_WatchDog_Ctrl &= ~0x8000; // clear bit 15 to disable
 		setLED(LED_RED,FALSE);
