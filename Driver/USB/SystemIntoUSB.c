@@ -1,4 +1,4 @@
-/*-------------------------------------------------*
+
 * Function		:
 * Usage         :
 * Version		:
@@ -221,6 +221,8 @@ xxx:
 	R_USB_State_Machine == 0xf5f5; //debug
 	RHM_FlashPtr = 0;
 	
+	ProcessInbox();
+
 	checkInactivity(TRUE); // count being in usb as acrive ??
 
 	return 0;
