@@ -242,9 +242,11 @@ static int recordAudio(char *pkgName, char *cursor) {
 			key = keyCheck(0);
 			if (key == KEY_PLAY) { // pause  TODO: this key press to pause shouldn't be hard coded
 				SACM_Pause();
+				setLED(LED_RED,FALSE);
 				do
 					key = keyCheck(0);
 				while (key != KEY_PLAY && key != KEY_STAR);					
+				setLED(LED_RED,TRUE);
 				SACM_Resume();
 			}
 		} while (key != KEY_STAR); // TODO: this key press to stop shouldn't be hard coded
