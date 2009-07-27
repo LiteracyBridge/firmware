@@ -5,9 +5,14 @@
 #include "Include/containers.h"
 #include "Include/audio.h"
 #include "Include/pkg_ops.h"
+#include "Include/Inbox.h"
 
 extern APP_IRAM char logBuffer[LOG_BUFFER_SIZE];
 extern APP_IRAM int idxLogBuffer;
+static int ProcessA18(struct f_info *);
+static int ProcessDir(char *);
+static int copyCWD(char *);
+static int updateCategory(char *, char *, char *);
 
 #define D_NOTDIR (D_FILE | D_RDONLY | D_HIDDEN | D_SYSTEM | D_ARCHIVE)
 
@@ -35,69 +40,76 @@ ProcessInbox()
 			strcpy(strLog, "ProcessInbox no inbox, created");	
 			logString(strLog, ASAP);
 			return(0);
-		}
-	}
-	
-	ret = getcwd(savecwd , sizeof(savecwd) - 1 );
-	ret = chdir(INBOX_PATH);
-	
-//  process *.a18 files in inbox - category in file name after # OR IN *.txt
-//  this case may never happen
-//
-	strcpy(strLog, INBOX_PATH);
-	len = strlen(strLog);
-	strcpy(fbuf, INBOX_PATH);
-	strcat(fbuf, "*.a18");
-	ret =_findfirst(fbuf, &file_info, D_ALL);
-	while (ret >= 0) {
-		strcpy(&strLog[len], file_info.f_name);
-		logString(strLog,BUFFER);
-
-		ret = ProcessA18(&file_info);
-
-		ret = unlink(file_info.f_name);
-			
-		ret = _findnext(&file_info);
-	}
-//
-//  now process directories in a:\inbox
-//
-	strcpy(fbuf, INBOX_PATH);
-	strcat(fbuf, "*.*");
-	
-	ret =_findfirst(fbuf, &file_info, D_DIR);
-	
-	for (; ret >= 0; ret = _findnext(&file_info)) {
-		if(file_info.f_attrib & D_DIR) {
-			if(!strcmp(file_info.f_name, "."))
-				continue;
-			if(!strcmp(file_info.f_name, ".."))
-				continue;
-			if(!strcmp(file_info.f_name, "lists")) // lists is special, never deleted	
-				continue;
-			
-			strcpy(fname, file_info.f_name);	
-			r1 = ProcessDir(fname);
-			  // RHM: something I do below makes this necessary
-			  //      upon return after _findnext returns -1 even if there are more dirs
-			ret = _findfirst(fbuf, &file_info, D_ALL);
 		}	
-	}
+		ret = getcwd(savecwd , sizeof(savecwd) - 1 );
+		ret = chdir(INBOX_PATH);
 		
-	r1 = ProcessDir("lists");
-
-	ret = chdir(savecwd);
+	//  process *.a18 files in inbox - category in file name after # OR IN *.txt
+	//  this case may never happen
+	//
+		strcpy(strLog, INBOX_PATH);
+		len = strlen(strLog);
+		strcpy(fbuf, INBOX_PATH);
+		strcat(fbuf, "*");
+		strcat(fbuf,AUDIO_FILE_EXT);
+		ret =_findfirst(fbuf, &file_info, D_ALL);
+		while (ret >= 0) {
+			strcpy(&strLog[len], file_info.f_name);
+			logString(strLog,BUFFER);
 	
-	strcpy(strLog, "ProcessInbox exits");	
-	logString(strLog, ASAP);
+			ret = ProcessA18(&file_info);
+	
+			ret = unlink(file_info.f_name);
+				
+			ret = _findnext(&file_info);
+		}
+	//
+	//  now process directories in a:\inbox
+	//
+		strcpy(fbuf, INBOX_PATH);
+		strcat(fbuf, "*.*");
+		
+		ret =_findfirst(fbuf, &file_info, D_DIR);
+		
+		for (; ret >= 0; ret = _findnext(&file_info)) {
+			if(file_info.f_attrib & D_DIR) {
+				if(!strcmp(file_info.f_name, "."))
+					continue;
+				if(!strcmp(file_info.f_name, ".."))
+					continue;
+				if(!strcmp(file_info.f_name, ".svn"))
+					continue;
+				if(!strcmp(file_info.f_name, "lists")) // lists is special, never deleted	
+					continue;
+				
+				strcpy(fname, file_info.f_name);	
+				r1 = ProcessDir(fname);
+				  // RHM: something I do below makes this necessary
+				  //      upon return after _findnext returns -1 even if there are more dirs
+				ret = _findfirst(fbuf, &file_info, D_ALL);
+			}	
+		}
+			
+		r1 = ProcessDir("lists");
+	
+		ret = chdir(savecwd);
 
+		//TODO: queue up first recording found to be auto-played
+		//context.queuedPackageType = PKG_???
+		//context.queuedPackageNameIndex = replaceStack(filename,&pkgSystem);
+		//will also need to set list counters properly
+				
+		strcpy(strLog, "ProcessInbox exits");	
+		logString(strLog, ASAP);
+	}	// length of INBOX_PATH must be > 1
 }
+
 int 
 ProcessA18(struct f_info *fip)
 {
 	char strLog[80], savecwd[80];
 	char buffer[READ_LENGTH+1], *line, tmpbuf[READ_LENGTH+1];
-	char fnbase[16], category[8], subcategory[8];
+	char fnbase[80], category[8], subcategory[8];
 	int ret, len, len_fnbase, i, catidx, subidx;
 
 	category[0] = subcategory[0] = 0;
@@ -105,8 +117,9 @@ ProcessA18(struct f_info *fip)
 	catidx = subidx = 0;
 	if(ret >= 1) {	// category info in filename
 		strcpy(fnbase, fip->f_name);
-		fnbase[ret] = 0;
-		len_fnbase = ret;
+//	Commenting line below since we want to carry through category info
+//		fnbase[ret] = 0; 
+		len_fnbase = strIndex(fip->f_name, '.');
 		for(i=ret; ; i++ ) {
 			if(fip->f_name[i] == '.')
 				break;
@@ -156,10 +169,12 @@ ProcessA18(struct f_info *fip)
 	}
 
 	strcat(buffer, fnbase);
-	strcat(buffer, ".a18");
+	strcat(buffer, AUDIO_FILE_EXT);
 
 	ret = unlink(buffer);
-	ret = _copy(fip->f_name , buffer);
+	strcpy(tmpbuf,INBOX_PATH);
+	strcat(tmpbuf,fip->f_name);
+	ret = rename(tmpbuf, buffer);
 			
 // TODO - currently doing nothing with subcategory
 	
@@ -172,8 +187,8 @@ ProcessDir(char *dirname)
 {
 	struct f_info file_info;
 	char strLog[80], savecwd[80];
-	char buffer[READ_LENGTH+1];
-	char fnbase[16], category[8], subcategory[8];
+	char buffer[READ_LENGTH+1], tempbuf[80];
+	char fnbase[80], category[8], subcategory[8];
 	int ret, catidx, subidx, len_fnbase, i;
 
 	ret = getcwd(savecwd , sizeof(savecwd) - 1 );
@@ -195,7 +210,7 @@ ProcessDir(char *dirname)
 
 	if(ret >= 1) {	// category info in filename
 		strcpy(fnbase, dirname);
-		fnbase[ret] = 0;
+		//fnbase[ret] = 0;
 		len_fnbase = ret;
 		for(i=ret+1; ; i++ ) {
 			if(dirname[i] == '.')
@@ -214,7 +229,12 @@ ProcessDir(char *dirname)
 	subcategory[subidx] = 0;
 	}
 	
-	copyCWD(USER_PATH);
+	//copyCWD(USER_PATH);
+	strcpy(buffer,INBOX_PATH);
+	strcat(buffer,dirname);
+	strcpy(tempbuf,USER_PATH);
+	strcat(tempbuf,dirname);
+	rename(buffer,tempbuf);
 	
 	if(catidx == 0)
 		strcpy(category, "OTHER");  // "O"
@@ -228,6 +248,7 @@ ProcessDir(char *dirname)
 	
 	return 0;
 }
+
 int copyCWD(char *todir)
 {
 	char to[80], cwd[80], strLog[80];
@@ -240,10 +261,10 @@ int copyCWD(char *todir)
 //  NOTE: getcwd returns a:\inbox\  not a:\\inbox\ as in INBOX_PATH 
 //        hence the -1 below
 	strcat(to, &cwd[strlen(INBOX_PATH)-1]);  // chop off a:\inbox\ - 
-	ret = strIndex(to, '#');
-	if(ret > 1)
-		to[ret] = 0;
-	ret = mkdir(to);
+//	ret = strIndex(to, '#');
+//	if(ret > 1)
+//		to[ret] = 0;
+	ret = mkdir(to);  // this will fail for a:\\lists (used with lists), but that's ok
 	strcat(to, "\\");
 	tobase = strlen(to);
 
@@ -257,10 +278,12 @@ int copyCWD(char *todir)
 				continue;
 			if(!strcmp(fi.f_name, ".."))
 				continue;
+			if(!strcmp(fi.f_name, ".svn"))
+				continue;
 			strcpy(&to[tobase], fi.f_name);
-			r1 = strIndex(to, '#');
-			if(r1 > 1)		// remove category info from dir name
-				to[r1] = 0;
+//			r1 = strIndex(to, '#');
+//			if(r1 > 1)		// remove category info from dir name
+//				to[r1] = 0;
 			r1 = mkdir(to);
 			r1 = chdir(fi.f_name);
 			r1 = copyCWD(to);
@@ -282,17 +305,19 @@ int copyCWD(char *todir)
 
 int updateCategory(char *category, char *fnbase, char *prefix)
 {
-	char buffer[80], tmpbuf[16];
+	char buffer[80], tmpbuf[80];
 	int ret;
 	
 // be sure category is in master-list.txt
-	strcpy(buffer, LIST_PATH);
-	strcat(buffer, "master-list.txt");
+	strcpy(buffer, LIST_MASTER);
 	strcpy(tmpbuf,category);
-	ret = findDeleteStringFromFile((char *)NULL, buffer, tmpbuf, 1);
-	ret = appendStringToFile(buffer, tmpbuf); 
+	// Only add category entry if doesn't already exist.
+	// Checking for existence withuot deleting and appending preserves category order.
+	ret = findDeleteStringFromFile((char *)NULL, buffer, tmpbuf, 0);
+	if (ret == -1) // not found in file
+		ret = appendStringToFile(buffer, tmpbuf); 
 
-// delete new file name or dir name from category.txt, 
+// delete new file name or dir name from {category}.txt, 
 // then add it (only want it to appear once)	
 //   int findDeleteStringFromFile(char *path, char *filename, char* string, BOOL shouldDelete)
 	strcpy(buffer, LIST_PATH);
@@ -304,7 +329,8 @@ int updateCategory(char *category, char *fnbase, char *prefix)
 	} else {
 		strcpy(tmpbuf,fnbase);
 	}
-	ret = findDeleteStringFromFile((char *)NULL, buffer, tmpbuf, 1);
+// This checks if entry already exists and adds a new line only if it does not.
+	ret = findDeleteStringFromFile((char *)NULL, buffer, tmpbuf, 0);
 		
 //  append the basename to the proper .txt file in lists
 //
@@ -315,6 +341,6 @@ int updateCategory(char *category, char *fnbase, char *prefix)
 	} else {
 		strcpy(tmpbuf,fnbase);
 	}
-
-	ret = appendStringToFile(buffer, tmpbuf); 
+	if (ret == -1)
+		ret = appendStringToFile(buffer, tmpbuf); 
 }

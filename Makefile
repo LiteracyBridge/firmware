@@ -1,6 +1,6 @@
 #####################################################################
 #																	 
-#	Created by u'nSP IDE		04:38:33	07/22/09
+#	Created by u'nSP IDE		11:19:29	07/27/09
 #
 #####################################################################
 
@@ -134,7 +134,7 @@ OBJFILES	= \
 "$(OUTDIR)\d2d_copy.obj": "$(OUTDIR)\d2d_copy.asm"
 	$(AS) $(CASFLAGS) $(INCLUDES) -o "$(OUTDIR)\d2d_copy.obj" "$(OUTDIR)\d2d_copy.asm" 
 
-"$(OUTDIR)\device.asm": "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Application\TalkingBook\device.c" ".\Application\TalkingBook\Include\talkingbook.h" ".\Application\TalkingBook\Include\files.h" ".\Application\TalkingBook\Include\macro.h" ".\Application\TalkingBook\Include\device.h" ".\Application\TalkingBook\Include\util.h" "Component\Include\FS\vfs.h" "Component\Include\component_head.h" "C:\Program Files\Generalplus\unSPIDE 3.0.1\library\include\string.h" "C:\Program Files\Generalplus\unSPIDE 3.0.1\library\include\stddef.h" 
+"$(OUTDIR)\device.asm": "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Application\TalkingBook\device.c" ".\Application\TalkingBook\Include\talkingbook.h" ".\Application\TalkingBook\Include\files.h" ".\Application\TalkingBook\Include\macro.h" ".\Application\TalkingBook\Include\Inbox.h" ".\Application\TalkingBook\Include\device.h" ".\Application\TalkingBook\Include\util.h" "Component\Include\FS\vfs.h" "Component\Include\component_head.h" "C:\Program Files\Generalplus\unSPIDE 3.0.1\library\include\string.h" "C:\Program Files\Generalplus\unSPIDE 3.0.1\library\include\stddef.h" 
 	set PATH="$(APPDIR)\toolchain\";%PATH% & \
 	$(CC) $(CFLAGS) -o "$(OUTDIR)/device.asm" "C:/Documents and Settings/Cliff/My Documents/svn/software/device/trunk/firmware/Application/TalkingBook/device.c" 
 
@@ -148,7 +148,7 @@ OBJFILES	= \
 "$(OUTDIR)\files.obj": "$(OUTDIR)\files.asm"
 	$(AS) $(CASFLAGS) $(INCLUDES) -o "$(OUTDIR)\files.obj" "$(OUTDIR)\files.asm" 
 
-"$(OUTDIR)\Inbox.asm": "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Application\TalkingBook\Inbox.c" ".\Application\TalkingBook\Include\talkingbook.h" ".\Application\TalkingBook\Include\device.h" ".\Application\TalkingBook\Include\files.h" ".\Application\TalkingBook\Include\lists.h" ".\Application\TalkingBook\Include\containers.h" ".\Application\TalkingBook\Include\audio.h" ".\Application\TalkingBook\Include\pkg_ops.h" ".\Application\TalkingBook\Include\util.h" "Component\Include\component_head.h" "Component\Include\FS\vfs.h" "C:\Program Files\Generalplus\unSPIDE 3.0.1\library\include\string.h" "C:\Program Files\Generalplus\unSPIDE 3.0.1\library\include\stddef.h" 
+"$(OUTDIR)\Inbox.asm": "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Application\TalkingBook\Inbox.c" ".\Application\TalkingBook\Include\talkingbook.h" ".\Application\TalkingBook\Include\device.h" ".\Application\TalkingBook\Include\files.h" ".\Application\TalkingBook\Include\lists.h" ".\Application\TalkingBook\Include\containers.h" ".\Application\TalkingBook\Include\audio.h" ".\Application\TalkingBook\Include\pkg_ops.h" ".\Application\TalkingBook\Include\Inbox.h" ".\Application\TalkingBook\Include\util.h" "Component\Include\component_head.h" "Component\Include\FS\vfs.h" "C:\Program Files\Generalplus\unSPIDE 3.0.1\library\include\string.h" "C:\Program Files\Generalplus\unSPIDE 3.0.1\library\include\stddef.h" 
 	set PATH="$(APPDIR)\toolchain\";%PATH% & \
 	$(CC) $(CFLAGS) -o "$(OUTDIR)/Inbox.asm" "C:/Documents and Settings/Cliff/My Documents/svn/software/device/trunk/firmware/Application/TalkingBook/Inbox.c" 
 
@@ -253,7 +253,7 @@ OBJFILES	= \
 "$(OUTDIR)\nls_codepage.obj": "$(OUTDIR)\nls_codepage.asm"
 	$(AS) $(CASFLAGS) $(INCLUDES) -o "$(OUTDIR)\nls_codepage.obj" "$(OUTDIR)\nls_codepage.asm" 
 
-"$(OUTDIR)\MemPackCopy.obj": "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Component\FS\MemPackCopy.asm" "System\Include\System\GPL162002.inc" 
+"$(OUTDIR)\MemPackCopy.obj": "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Component\FS\MemPackCopy.asm" 
 	$(AS) $(ASFLAGS) $(INCLUDES) -o "$(OUTDIR)\MemPackCopy.obj" "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Component\FS\MemPackCopy.asm" 
 
 "$(OUTDIR)\USB.asm": "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Component\FS\USB.c" ".\Component\Include\FS\typedef.h" ".\Component\Include\FS\DriverLayer.h" ".\Component\Include\FS\typedef.h" 
@@ -273,7 +273,7 @@ OBJFILES	= \
 "$(OUTDIR)\SCSI_Table.obj": "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Driver\USB\SCSI_Table.asm" 
 	$(AS) $(ASFLAGS) $(INCLUDES) -o "$(OUTDIR)\SCSI_Table.obj" "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Driver\USB\SCSI_Table.asm" 
 
-"$(OUTDIR)\SystemIntoUSB.asm": "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Driver\USB\SystemIntoUSB.c" "Reprog\USBD_Define.h" "Reprog\USBD.h" "Reprog\USB_Flash_reprog.h" "Component\FS\usb_host\USB_Host_Constant.h" "Component\FS\usb_host\USBHostMSDC.h" "Application\Talkingbook\Include\talkingbook.h" "Application\TalkingBook\Include\device.h" "Reprog\USBD_Define.h" 
+"$(OUTDIR)\SystemIntoUSB.asm": "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Driver\USB\SystemIntoUSB.c" "Reprog\USBD_Define.h" "Reprog\USBD.h" "Reprog\USB_Flash_reprog.h" "Component\FS\usb_host\USB_Host_Constant.h" "Component\FS\usb_host\USBHostMSDC.h" "Application\Talkingbook\Include\device.h" "Application\Talkingbook\Include\talkingbook.h" "Application\TalkingBook\Include\device.h" "Reprog\USBD_Define.h" 
 	set PATH="$(APPDIR)\toolchain\";%PATH% & \
 	$(CC) $(CFLAGS) -o "$(OUTDIR)/SystemIntoUSB.asm" "C:/Documents and Settings/Cliff/My Documents/svn/software/device/trunk/firmware/Driver/USB/SystemIntoUSB.c" 
 
@@ -283,7 +283,7 @@ OBJFILES	= \
 "$(OUTDIR)\IOKeyScan.obj": "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Driver\IOKey\IOKeyScan.asm" 
 	$(AS) $(ASFLAGS) $(INCLUDES) -o "$(OUTDIR)\IOKeyScan.obj" "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Driver\IOKey\IOKeyScan.asm" 
 
-"$(OUTDIR)\startup_Data.obj": "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\System\startup_Data.asm" "system\include\system_head.inc" 
+"$(OUTDIR)\startup_Data.obj": "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\System\startup_Data.asm" 
 	$(AS) $(ASFLAGS) $(INCLUDES) -o "$(OUTDIR)\startup_Data.obj" "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\System\startup_Data.asm" 
 
 "$(OUTDIR)\isr.obj": "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\System\isr.asm" 
@@ -325,7 +325,7 @@ OBJFILES	= \
 "$(OUTDIR)\SysException.obj": "$(OUTDIR)\SysException.asm"
 	$(AS) $(CASFLAGS) $(INCLUDES) -o "$(OUTDIR)\SysException.obj" "$(OUTDIR)\SysException.asm" 
 
-"$(OUTDIR)\ExtMemOper.obj": "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\System\ExtMem\ExtMemOper.asm" "system\include\system_head.inc" 
+"$(OUTDIR)\ExtMemOper.obj": "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\System\ExtMem\ExtMemOper.asm" 
 	$(AS) $(ASFLAGS) $(INCLUDES) -o "$(OUTDIR)\ExtMemOper.obj" "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\System\ExtMem\ExtMemOper.asm" 
 
 "$(OUTDIR)\ucBS_Hook.asm": "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\System\Buddy\ucBS_Hook.c" 
@@ -363,7 +363,7 @@ OBJFILES	= \
 "$(OUTDIR)\USBD.obj": "$(OUTDIR)\USBD.asm"
 	$(AS) $(CASFLAGS) $(INCLUDES) -o "$(OUTDIR)\USBD.obj" "$(OUTDIR)\USBD.asm" 
 
-"$(OUTDIR)\USBD_Drv.obj": "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Reprog\USBD_Drv.asm" "System\include\system\GPL162002.inc" "Driver\Include\USB\USBD.inc" "Driver\Include\USB\USBD_Define.inc" 
+"$(OUTDIR)\USBD_Drv.obj": "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Reprog\USBD_Drv.asm" 
 	$(AS) $(ASFLAGS) $(INCLUDES) -o "$(OUTDIR)\USBD_Drv.obj" "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Reprog\USBD_Drv.asm" 
 
 "$(OUTDIR)\USB_ID.obj": "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Reprog\USB_ID.asm" 
@@ -376,7 +376,7 @@ OBJFILES	= \
 "$(OUTDIR)\USB_Flash_reprog.obj": "$(OUTDIR)\USB_Flash_reprog.asm"
 	$(AS) $(CASFLAGS) $(INCLUDES) -o "$(OUTDIR)\USB_Flash_reprog.obj" "$(OUTDIR)\USB_Flash_reprog.asm" 
 
-"$(OUTDIR)\Flash_reprog_Drv.obj": "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Reprog\Flash_reprog_Drv.asm" "System\include\system\GPL162002.inc" "Reprog\USBD_Define.inc" 
+"$(OUTDIR)\Flash_reprog_Drv.obj": "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Reprog\Flash_reprog_Drv.asm" 
 	$(AS) $(ASFLAGS) $(INCLUDES) -o "$(OUTDIR)\Flash_reprog_Drv.obj" "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Reprog\Flash_reprog_Drv.asm" 
 
 "$(OUTDIR)\Flash_reprog_boot.asm": "C:\Documents and Settings\Cliff\My Documents\svn\software\device\trunk\firmware\Reprog\Flash_reprog_boot.c" ".\Reprog\GPL162002.h" ".\Reprog\USB_Flash_reprog.h" "Reprog\USBD_Define.h" "Reprog\USBD.h" 

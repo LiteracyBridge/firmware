@@ -1,4 +1,4 @@
-
+/*-------------------------------------------------*
 * Function		:
 * Usage         :
 * Version		:
@@ -17,11 +17,11 @@
 #include "./component/include/component_head.h"
 #include ".\Reprog\USBD_Define.h"
 #include ".\Reprog\USBD.h"
-
 #include ".\Reprog\USB_Flash_reprog.h"
 
 #include ".\Component\FS\usb_host\USB_Host_Constant.h"
 #include ".\Component\FS\usb_host\USBHostMSDC.h"
+#include ".\Application\Talkingbook\Include\device.h"
 #include ".\Application\Talkingbook\Include\talkingbook.h"
 
 
@@ -205,6 +205,9 @@ int SystemIntoUDisk(unsigned int serviceloop)
 		}
 	}
 xxx:
+	setLED(LED_GREEN,FALSE);
+	setLED(LED_RED,TRUE);
+
 	USB_ServiceLoop(1);
 
 	*P_USBD_Config=0x00;
@@ -221,9 +224,9 @@ xxx:
 	R_USB_State_Machine == 0xf5f5; //debug
 	RHM_FlashPtr = 0;
 	
+	setLED(LED_RED,FALSE);
 	ProcessInbox();
-
-	checkInactivity(TRUE); // count being in usb as acrive ??
+	checkInactivity(TRUE); // count being in usb as active
 
 	return 0;
 }

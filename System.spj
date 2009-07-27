@@ -601,6 +601,13 @@ PARAM=
 ID=
 EXPORT=3
 # End Source File
+# Begin Source File
+SOURCE=.\Application\TalkingBook\Include\Inbox.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=0
+# End Source File
 # End Group
 # Begin Group "External Dependencies"
 #PROP Default_Filter=
@@ -619,7 +626,7 @@ EXPORT=3
 #PROP Default_Filter=
 USEPARAM=FALSE
 PARAM=
-EXPORT=0
+EXPORT=3
 # Begin Source File
 SOURCE=system\include\system_head.inc
 USEPARAM=FALSE
@@ -1484,6 +1491,13 @@ PARAM=
 ID=
 EXPORT=3
 # End Source File
+# Begin Source File
+SOURCE=.\Application\TalkingBook\Include\Inbox.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=0
+# End Source File
 # End Group
 # Begin Group "External Dependencies"
 #PROP Default_Filter=
@@ -1502,7 +1516,7 @@ EXPORT=3
 #PROP Default_Filter=
 USEPARAM=FALSE
 PARAM=
-EXPORT=0
+EXPORT=3
 # Begin Source File
 SOURCE=system\include\system_head.inc
 USEPARAM=FALSE

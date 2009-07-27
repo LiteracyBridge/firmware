@@ -232,8 +232,11 @@ int findDeleteStringFromFile(char *path, char *filename, char * string, BOOL sho
 				bytesToWrite = convertDoubleToSingleChar(tempLine,rCursor,TRUE);
 				ret = write(wHandle,(unsigned long)tempLine<<1,bytesToWrite);
 			}
-			if (!unequal)
-				ret = 0;	
+			if (!unequal) {
+				ret = 0;
+				if (!shouldDelete)	// no need to continue while() 
+					break;  		//if already found text and not copying file
+			}	
 		}
 		close(rHandle);
 		if (shouldDelete) {
