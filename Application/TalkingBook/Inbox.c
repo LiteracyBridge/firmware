@@ -110,17 +110,17 @@ ProcessA18(struct f_info *fip)
 	char strLog[80], savecwd[80];
 	char buffer[READ_LENGTH+1], *line, tmpbuf[READ_LENGTH+1];
 	char fnbase[80], category[8], subcategory[8];
-	int ret, len, len_fnbase, i, catidx, subidx;
+	int ret, len, len_fnbase, i, catidx, subidx, cat_base;
 
 	category[0] = subcategory[0] = 0;
-	ret = strIndex(fip->f_name, '#');
+	cat_base = strIndex(fip->f_name, '#');
 	catidx = subidx = 0;
-	if(ret >= 1) {	// category info in filename
+	if(cat_base >= 1) {	// category info in filename
 		strcpy(fnbase, fip->f_name);
 //	Commenting line below since we want to carry through category info
-//		fnbase[ret] = 0; 
+//		fnbase[cat_base] = 0; 
 		len_fnbase = strIndex(fip->f_name, '.');
-		for(i=ret; ; i++ ) {
+		for(i=cat_base; ; i++ ) {
 			if(fip->f_name[i] == '.')
 				break;
 			if(isupper(fip->f_name[i])) {
@@ -163,19 +163,20 @@ ProcessA18(struct f_info *fip)
 
 // TODO: should some other test be applied here??
 	if(0 == strncmp(fnbase,PKG_NUM_PREFIX,strlen(PKG_NUM_PREFIX))) {
+		strcpy(tmpbuf,INBOX_PATH);
+		strcat(tmpbuf,fip->f_name);
 		ret = 1;	
 		do {
 			strcpy(buffer,USER_PATH);
 			getrevdPkgNumber(fnbase,TRUE);
+			strcat(fnbase,"#");
+			strcat(fnbase, category);
+			strcat(fnbase, subcategory);
 			strcat(buffer, fnbase);
 			strcat(buffer,AUDIO_FILE_EXT);
-			ret = fileExists((LPSTR)buffer); // this causes approx 1 sec delay!
+			ret = rename(tmpbuf, buffer);
 		} while (ret);
 	}
-	
-	strcpy(tmpbuf,INBOX_PATH);
-	strcat(tmpbuf,fip->f_name);
-	ret = rename(tmpbuf, buffer);
 			
 // TODO - currently doing nothing with subcategory
 	
@@ -190,7 +191,7 @@ ProcessDir(char *dirname)
 	char strLog[80], savecwd[80];
 	char buffer[READ_LENGTH+1], tempbuf[80];
 	char fnbase[80], category[8], subcategory[8];
-	int ret, catidx, subidx, len_fnbase, i;
+	int ret, catidx, subidx, len_fnbase, i, cat_base;
 
 	ret = getcwd(savecwd , sizeof(savecwd) - 1 );
 	ret = chdir(dirname);
@@ -207,13 +208,13 @@ ProcessDir(char *dirname)
 	category[0] = subcategory[0] = 0;
 	catidx = subidx = 0;
 	
-	ret = strIndex(dirname, '#');
+	cat_base = strIndex(dirname, '#');
 
-	if(ret >= 1) {	// category info in filename
+	if(cat_base >= 1) {	// category info in filename
 		strcpy(fnbase, dirname);
 		//fnbase[ret] = 0;
-		len_fnbase = ret;
-		for(i=ret+1; ; i++ ) {
+		len_fnbase = cat_base;
+		for(i=cat_base+1; ; i++ ) {
 			if(dirname[i] == '.')
 				break;
 			if(isupper(dirname[i])) {
@@ -233,15 +234,30 @@ ProcessDir(char *dirname)
 	//copyCWD(USER_PATH);
 	strcpy(buffer,INBOX_PATH);
 	strcat(buffer,dirname);
-	strcpy(tempbuf,USER_PATH);
-	strcat(tempbuf,dirname);
-	rename(buffer,tempbuf);
 	
+	if(0 == strncmp(dirname,PKG_NUM_PREFIX,strlen(PKG_NUM_PREFIX))) {
+		ret = 1;
+		while(ret) {
+			strcpy(tempbuf,USER_PATH);
+//			getrevdPkgNumber(tempbuf+strlen(tempbuf),TRUE);
+			getrevdPkgNumber(fnbase,TRUE);
+			strcat(fnbase, dirname+cat_base);
+			strcat(tempbuf, fnbase);
+			ret = rename(buffer,tempbuf);
+		}
+	} else {
+		strcpy(tempbuf,USER_PATH);
+		strcat(tempbuf,dirname);
+		strcpy(fnbase, dirname);
+		ret = rename(buffer,tempbuf);
+	}
+		
 	if(catidx == 0)
 		strcpy(category, "OTHER");  // "O"
 	
 // TODO: - currently doing nothing with subcategory
-// TODO: - other prefixs to process besides ^	
+// TODO: - other prefixs to process besides ^
+	
 	ret = updateCategory(category, fnbase, "^");
 		
 	ret = chdir(savecwd);	
@@ -324,6 +340,12 @@ int updateCategory(char *category, char *fnbase, char *prefix)
 	strcpy(buffer, LIST_PATH);
 	strcat(buffer, category);
 	strcat(buffer,".txt");
+	
+	if(!fileExists(buffer)) {  // if category.txt does not exist create it
+		ret = open(buffer,O_CREAT|O_RDWR);
+		close(ret);
+	}
+	
 	if(prefix) {
 		strcpy(tmpbuf, prefix);
 		strcat(tmpbuf, fnbase);
