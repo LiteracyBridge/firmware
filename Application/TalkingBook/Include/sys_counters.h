@@ -8,6 +8,7 @@ struct SystemCounts {
 	unsigned long packageNumber;
 	unsigned long listNumber;
 	unsigned long lastLogErase;
+	unsigned long revdPkgNumber;
 };
 
 extern SystemCounts systemCounts;

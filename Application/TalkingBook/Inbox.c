@@ -160,18 +160,19 @@ ProcessA18(struct f_info *fip)
 
 	strcpy(buffer, USER_PATH);
 	fnbase[len_fnbase] = 0;
-	
-// TODO: correct rename user recordings to R* (received)
-// TODO: change number to global received number here
 
-	if(fnbase[0] == 'P') {
-		fnbase[0] = 'R';
+// TODO: should some other test be applied here??
+	if(0 == strncmp(fnbase,PKG_NUM_PREFIX,strlen(PKG_NUM_PREFIX))) {
+		ret = 1;	
+		do {
+			strcpy(buffer,USER_PATH);
+			getrevdPkgNumber(fnbase,TRUE);
+			strcat(buffer, fnbase);
+			strcat(buffer,AUDIO_FILE_EXT);
+			ret = fileExists((LPSTR)buffer); // this causes approx 1 sec delay!
+		} while (ret);
 	}
-
-	strcat(buffer, fnbase);
-	strcat(buffer, AUDIO_FILE_EXT);
-
-	ret = unlink(buffer);
+	
 	strcpy(tmpbuf,INBOX_PATH);
 	strcat(tmpbuf,fip->f_name);
 	ret = rename(tmpbuf, buffer);

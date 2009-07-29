@@ -42,6 +42,19 @@ void getPkgNumber(char *name, BOOL shouldUpdate) {
 	longToDecimalString(systemCounts.packageNumber,digits,5);
 	strcat(name,digits);
 	saveSystemCounts();
+}
+
+void getrevdPkgNumber(char *name, BOOL shouldUpdate) {
+	char digits[8];
+	
+//	strcpy(name,PKG_NUM_PREFIX);
+// TOTO: add a prefix to config.txt processing
+	strcpy(name,"R");
+	if (shouldUpdate)
+		systemCounts.revdPkgNumber++;
+	longToDecimalString(systemCounts.revdPkgNumber,digits,5);
+	strcat(name,digits);
+	saveSystemCounts();
 }	
 
 /*
