@@ -373,7 +373,7 @@ int copyOutbox()
 {
 	int ret;
 	
-	ret = copydir("a:\\\\Outbox", "b:\\\\inbox");
+	ret = copydir("b:\\\\Outbox", "a:\\\\inbox");
 //	ret = copydir("a:\\outbox", "a:\\outbox_cp");   //used to test
 	
 	return(ret);
