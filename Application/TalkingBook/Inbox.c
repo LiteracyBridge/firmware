@@ -150,7 +150,8 @@ ProcessA18(struct f_info *fip)
 					break;
 				}
 			}
-			category[sizeof(category)-1] = 0;		
+			category[sizeof(category)-1] = 0;
+			unlink(fnbase);		
 		} else { // .a18 file without category info
 			strcpy(category, "OTHER");
 			//or
@@ -366,4 +367,131 @@ int updateCategory(char *category, char *fnbase, char *prefix)
 	}
 	if (ret == -1)
 		ret = appendStringToFile(buffer, tmpbuf); 
+}
+
+int copyOutbox()
+{
+	int ret;
+	
+	ret = copydir("a:\\\\Outbox", "b:\\\\inbox");
+//	ret = copydir("a:\\outbox", "a:\\outbox_cp");   //used to test
+	
+	return(ret);
+}
+//
+// copy directory tree below fromdir (all subdirectories and files at all levels)
+//
+int copydir(char *fromdir, char *todir)
+{
+	int ret, r1, len_from, len_to, fret;
+	char from[80], to[80], lastdir[40];
+
+	struct f_info fi;
+	
+	fret = 0;
+	
+	strcpy(from, fromdir);
+	len_from = strlen(from);
+	
+	if(from[len_from-1] != '\\') {
+		strcat(from, "\\");
+		len_from++;
+	}
+	strcat(from, "*");
+	
+	strcpy(to, todir);
+	len_to = strlen(to);
+	ret = mkdir(to);	// just to be safe
+	if(to[len_to-1] != '\\') {
+		strcat(to, "\\");
+		len_to++;
+	}
+	ret =_findfirst(from, &fi, D_DIR);
+	from[len_from] = 0;
+	lastdir[0] = 0;
+	
+	for( ; ret >= 0 ; ret = _findnext(&fi)) {
+		if(! (fi.f_attrib & D_DIR))
+			continue;
+		if(!strcmp(fi.f_name, "."))
+			continue;
+		if(!strcmp(fi.f_name, ".."))
+			continue;
+		if(!strcmp(fi.f_name, ".svn"))
+			continue;
+		
+		if(lastdir[0]) {
+			if(!strcmp(fi.f_name, lastdir)) {
+				lastdir[0] = 0;      //should not be necessary
+			}
+			continue;
+		}
+		
+		strcpy(lastdir, fi.f_name);  // should not be necessary
+		
+		from[len_from] = 0;
+		to[len_to]= 0;
+				
+		strcat(from, fi.f_name);
+		strcat(to, fi.f_name);
+		
+		r1 = mkdir(to);
+		
+//		fret += copyfiles(from, to);
+		fret += copydir (from, to);
+		
+		from[len_from] = 0;
+		strcat(from, "*");
+		ret =_findfirst(from, &fi, D_ALL);  // should not be necessary
+		
+		fret++;
+	}
+	
+	from[len_from] = 0;
+	to[len_to]= 0;
+	fret += copyfiles(from, to);
+	
+	return(fret);
+
+}
+//
+// copy all files in fromdir to todir
+//
+int copyfiles(char *fromdir, char *todir)
+{
+	int ret, r1, len_from, len_to, fret;
+	char from[80], to[80];
+	struct f_info fi;
+	
+	fret = 0;
+	
+	strcpy(from, fromdir);
+	len_from = strlen(from);
+	
+	if(from[len_from-1] != '\\') {
+		strcat(from, "\\");
+		len_from++;
+	}
+	strcat(from, "*.*");
+	
+	strcpy(to, todir);
+	len_to = strlen(to);
+//	mkdir(to);	// just to be safe
+	if(to[len_to-1] != '\\') {
+		strcat(to, "\\");
+		len_to++;
+	}
+			
+	ret =_findfirst(from, &fi, D_FILE);
+	while(ret >= 0) {
+		from[len_from] = 0;
+		to[len_to]= 0;
+		strcat(from, fi.f_name);
+		strcat(to, fi.f_name);
+		r1 = _copy(from, to);
+		ret = _findnext(&fi);
+		fret++;
+	}
+		
+	return(fret);
 }

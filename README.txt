@@ -53,3 +53,4 @@ v1.33
 - try to become a usb client after 5(?) seconds of inactivity
 - added code to support USB host, Inbox folder on SD card
 - initial d2d Inbox processing (Inbox.c)
+- added copyOutbox() for usb copy between devices
