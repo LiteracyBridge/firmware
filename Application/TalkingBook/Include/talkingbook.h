@@ -32,6 +32,8 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 //   * detecting held buttons vs. tapped buttons (could be used with SHIFT-like modifier)
 //   * write a working malloc/free
 
+#define PKG_CONTROL_FILENAME	"control.txt"
+#define QUIZ_DATA_FILENAME		"quiz.dat"
 #define FORWARD_SKIP	0x0000
 #define BACKWARD_SKIP	0x0001
 #define DELIMITER		':'

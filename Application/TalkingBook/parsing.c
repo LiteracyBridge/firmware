@@ -23,7 +23,6 @@ static int getBlockIndexFromSymbol (char *, const char *);
 static unsigned int getLinkedTime(OrderBlock *, EnumStartOrEnd);
 static void insertOrderBlock (OrderBlock *, OrderBlock **, unsigned int, EnumStartOrEnd);
 static void setBlockOrder(CtnrPackage *, OrderBlock *, OrderBlock *);
-static int addTextToPkgHeap (char *, CtnrPackage *);
 static int getEnterExitEnumFromChar (char *);
 
 static int getIndexFromLine(char *line, char *symbolMapStart) {
@@ -650,7 +649,7 @@ static void setBlockOrder(CtnrPackage *pkg, OrderBlock *latestStart, OrderBlock 
 	pkg->files[pkg->countFiles - 1].idxFirstBlockEnd = currentBlock;
 }
 
-static int addTextToPkgHeap (char *line, CtnrPackage *pkg) {
+int addTextToPkgHeap (const char *line, CtnrPackage *pkg) {
 	int startingHeap, length;
 	char *heapCursor, *lineCursor;
 
@@ -767,14 +766,15 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 						// if time precision was not specified (see above), use default
 						if (!pkg->timePrecision)
 							pkg->timePrecision = getBitShift(DEFAULT_TIME_PRECISION);
-						charCursor = strchr(line,DELIMITER) + 1;
+						// Setting package idxName with list's package name, not the package name in the control track
+/*						charCursor = strchr(line,DELIMITER) + 1;
 						if (*charCursor != 0) {
 							ret = addTextToPkgHeap (charCursor,pkg);
 							if (ret > -1) {
 								pkg->idxName = ret;											
 							}
 						}
-						break;
+*/						break;
 					case 'L':
 						currentContainerType = 'L';
 						pkg->countLists++;

@@ -551,7 +551,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 	BOOL isTooFar = FALSE;
 	ListItem *list, *tempList;
 	char filename[60];
-	char *cursor;
+	char *cursor, *cursor2;
 	CtnrFile *replayFile;
 		
 	replayFile = NULL;
@@ -765,17 +765,19 @@ static void takeAction (Action *action, EnumAction actionCode) {
 				wait(500);
 			}
 */
+			cursor = getCurrentList(&pkgSystem.lists[context.package->idxMasterList]);
 			do {
 				strcpy(filename,USER_PATH);
 				getPkgNumber(filename+strlen(USER_PATH),TRUE);
-				cursor = filename + strlen(filename);
+				strcat(filename,(const char *)"#");
+				strcat(filename,cursor); // adds current listname to new recording name
+				cursor2 = filename + strlen(filename);
 				strcat(filename,AUDIO_FILE_EXT);
 				ret = fileExists((LPSTR)filename); // this causes approx 1 sec delay!
 			} while (ret);
-			*cursor = 0; // remove extension
+			*cursor2 = 0; // remove extension
 			strcpy(filename,filename+strlen(USER_PATH)); //remove path
 			
-			cursor = getCurrentList(&pkgSystem.lists[context.package->idxMasterList]);
 			ret = createRecording(filename,aux,cursor);
 			if (ret != -1) {
 				destination = replaceStack(filename,context.package);
@@ -963,11 +965,11 @@ static void takeAction (Action *action, EnumAction actionCode) {
 
 static void loadPackage(int pkgType, const char * pkgName) {
 	CtnrPackage *pkg;
-	int i;
+	int i, ret;
 	CtnrBlock *block;
 	Action *action;
 	char filePath[60];
-	char *fileExtension;
+	char *fileName;
 	long timeNow;
 		
 	stop();  // better to stop audio playback before file ops  -- also flushes log buffer
@@ -997,6 +999,8 @@ static void loadPackage(int pkgType, const char * pkgName) {
 			case PKG_SYSTEM:
 				context.package = &pkgSystem;
 				strcpy(filePath,SYSTEM_PATH);
+				strcat(filePath,pkgName);
+				strcat(filePath,".txt"); //todo: move to config
 				break;
 			case PKG_QUIZ:
 			case PKG_USER:
@@ -1004,20 +1008,24 @@ static void loadPackage(int pkgType, const char * pkgName) {
 				strcpy(filePath,USER_PATH);
 				strcat(filePath,pkgName);
 				strcat(filePath,"\\");
+				fileName = filePath + strlen(filePath);
+				strcat(filePath,PKG_CONTROL_FILENAME);
 				break;
 			default:
 				logException(5,0,USB_MODE);
 				break;
 		}
-		strcat(filePath,pkgName);
-		fileExtension = filePath + strlen(filePath);
-		strcat(filePath,".txt"); //todo: move to config
 		pkg = context.package;
 		memset(pkg,0,sizeof(CtnrPackage));
 		pkg->pkg_type = pkgType;
+		ret = addTextToPkgHeap(pkgName,pkg);
+		if (ret > -1)
+			pkg->idxName = ret;	
+		else
+			logException(11,pkgName,USB_MODE);			
 		parseControlFile(filePath, pkg);
 		if (context.package->pkg_type == PKG_QUIZ) {
-			strcpy(fileExtension,".qiz");  //todo: move to config
+			strcpy(fileName,QUIZ_DATA_FILENAME);  //todo: move to config
 			// loadQuizData(filePath);
 		} 
 	}

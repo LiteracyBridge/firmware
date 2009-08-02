@@ -87,8 +87,8 @@ int deletePackage(char * packageName) {
 		}
 		else {
 			cursor = packageName;
-			if (strlen(cursor) < (60 - strlen(strLog) - 1)) // this should almost always be true
-				strcat((char *)strLog,cursor); // not going to bother with else condition now -- strncat seems to malfunction
+			if (LBstrncat((char *)strLog,cursor,60) == 59)
+				strLog[58] = '~';
 			logString(strLog,BUFFER);
 			strcpy(filename,USER_PATH);
 			strcat(filename,cursor);

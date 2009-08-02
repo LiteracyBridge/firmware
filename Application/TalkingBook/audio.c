@@ -202,7 +202,7 @@ static int recordAudio(char *pkgName, char *cursor) {
 	char filepath[60];
 	long start, end, prev;
 	CtnrFile *file;
-	int len, key;
+	int key;
 	
 	strcpy(filepath,USER_PATH);
 	strcat(filepath,pkgName);
@@ -214,13 +214,9 @@ static int recordAudio(char *pkgName, char *cursor) {
 	strcpy(temp,"\x0d\x0a");
 	longToDecimalString(start,temp+2,5);
 	strcat(temp,(const char *)": RECORD ");
-	len = strlen(pkgName) + strlen(cursor);
-	if ((len+4) < (60-strlen(temp)-1)) { // strncat doesn't work well; +4 for " -> " below
-		strcat(temp,pkgName);
-		strcat(temp," -> ");
-		strcat(temp,cursor);
-	} else
-		strcat (temp,"{long name}");
+	LBstrncat(temp,pkgName,60);
+	LBstrncat(temp," -> ",60);
+	LBstrncat(temp,cursor,60);	
 	logString(temp,BUFFER);
 	insertSound(&pkgSystem.files[SPEAK_SOUND_FILE_IDX],NULL,TRUE);
 	stop();
@@ -327,8 +323,7 @@ void markStartPlay(long timeNow, const char * name) {
 	strcpy(log,"\x0d\x0a");
 	longToDecimalString(timeNow,log+2,5);
 	strcat((char *)log,(const char *)": PLAY ");
-	if (strlen(name) < (40 - strlen(log) - 1)) // this should almost always be true
-		strcat((char *)log,name); // not going to bother with else condition now -- strncat seems to malfunction
+	if (LBstrncat((char *)log,name,40) == 39)
+		log[38] = '~';
 	logString(log,BUFFER);	
 }
-

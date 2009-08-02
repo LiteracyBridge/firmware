@@ -10,8 +10,8 @@ struct ListItem {
 	unsigned int actionStartEnd; // see bit map for ctnrBlock below
 	unsigned int idxFirstAction;
 	unsigned long currentFilePosition;
-    char currentString[40];
-    char filename[40];
+    char currentString[60];
+    char filename[60];
     unsigned int idxListWithFilename;
     unsigned long posListWithFilename;
     EnumListType listType;

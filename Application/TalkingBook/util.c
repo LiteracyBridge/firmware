@@ -190,3 +190,15 @@ int LBstrncpy (char *to, const char *from, int max) {
 		*to = '\0';	
 	return len--; // don't count \0
 } 
+
+int LBstrncat (char *to, const char *from, int max) {
+	int initLen, maxAddLen, addedLen;
+	
+	initLen = strlen(to);
+	maxAddLen = max - initLen - 1;
+	if (maxAddLen > 0)
+		addedLen = LBstrncpy(to + initLen,from,maxAddLen);
+	else
+		addedLen = 0;
+	return initLen + addedLen;
+} 
