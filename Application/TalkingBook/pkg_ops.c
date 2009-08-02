@@ -25,8 +25,9 @@ void packageRecording(char * pkgName, char *listName) {
 int deletePackage(char * packageName) {
 	// check master list; iterate through each list; if packageName not found in any list, delete package files
 	// return 0 if not found in any list and package deleted; return -1 otherwise (usually that it was found in another list)
-	char filename[60], path[60];
-	char strLog[60];
+	const int LOG_LENGTH = PATH_LENGTH + 20;
+	char filename[PATH_LENGTH], path[PATH_LENGTH];
+	char strLog[LOG_LENGTH];
 	int ret, attempt;
 	char *cursor, *prefixCursor;
 	struct f_info file_info;
@@ -87,8 +88,8 @@ int deletePackage(char * packageName) {
 		}
 		else {
 			cursor = packageName;
-			if (LBstrncat((char *)strLog,cursor,60) == 59)
-				strLog[58] = '~';
+			if (LBstrncat((char *)strLog,cursor,LOG_LENGTH) == LOG_LENGTH-1)
+				strLog[LOG_LENGTH-2] = '~';
 			logString(strLog,BUFFER);
 			strcpy(filename,USER_PATH);
 			strcat(filename,cursor);

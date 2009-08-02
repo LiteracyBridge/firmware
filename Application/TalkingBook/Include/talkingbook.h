@@ -41,6 +41,8 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 #define AVG_SYMBOL_LENGTH	12
 // TODO: malloc this -- it's huge waste of space to do it with an 2-dimensional array
 #define READ_LENGTH			1024
+#define FILE_LENGTH			40
+#define PATH_LENGTH			(FILE_LENGTH * 2)
 #define LOG_CARRYOVER_BYTES 512
 #define TEXT_EVENT_LEFT		'<'
 #define TEXT_EVENT_RIGHT	'>'
@@ -98,7 +100,7 @@ extern int KEY_PLAY, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_SELECT, KEY_STAR
 extern int LED_GREEN, LED_RED, LED_ALL;
 extern int MAX_SPEED, NORMAL_SPEED, SPEED_INCREMENT;
 extern int NORMAL_VOLUME, MAX_VOLUME, VOLUME_INCREMENT;
-extern char *BOOT_PACKAGE, *SYSTEM_PATH, *USER_PATH, *LIST_PATH, *INBOX_PATH;
+extern char *BOOT_PACKAGE, *SYSTEM_PATH, *USER_PATH, *LIST_PATH, *INBOX_PATH, *OUTBOX_PATH;
 extern int MAX_PWR_CYCLES_IN_LOG;
 extern char *SYSTEM_VARIABLE_FILE, *LOG_FILE;
 extern char *LIST_MASTER;

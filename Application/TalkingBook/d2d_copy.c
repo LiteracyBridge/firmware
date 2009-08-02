@@ -12,7 +12,7 @@ static int testCopy(char *, char *, int);
 
 int d2dCopy(const char * filenameList, const char * packageName) {
 	int ret;
-	char to[80], strLog[60],filename[80], path[80];
+	char to[PATH_LENGTH], strLog[PATH_LENGTH],filename[PATH_LENGTH], path[PATH_LENGTH];
 	char *cursor, *prefixCursor;
 	int maxTrials = 5;
 	struct f_info file_info;
@@ -64,8 +64,8 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 	}
 	else {
 		cursor = (char *)packageName;
-		if (LBstrncat((char *)strLog,cursor,60) == 59)
-			strLog[58] = '~';
+		if (LBstrncat((char *)strLog,cursor,PATH_LENGTH) == PATH_LENGTH-1)
+			strLog[PATH_LENGTH-2] = '~';
 		logString(strLog,BUFFER);
 		strcpy(filename,USER_PATH);
 		strcat(filename,cursor);

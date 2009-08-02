@@ -550,7 +550,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 	BOOL reposition = FALSE;
 	BOOL isTooFar = FALSE;
 	ListItem *list, *tempList;
-	char filename[60];
+	char filename[PATH_LENGTH];
 	char *cursor, *cursor2;
 	CtnrFile *replayFile;
 		
@@ -968,7 +968,7 @@ static void loadPackage(int pkgType, const char * pkgName) {
 	int i, ret;
 	CtnrBlock *block;
 	Action *action;
-	char filePath[60];
+	char filePath[PATH_LENGTH];
 	char *fileName;
 	long timeNow;
 		

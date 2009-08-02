@@ -11,7 +11,7 @@
 static int getFileHandle (CtnrFile *);
 static void playLongInt(CtnrFile *, unsigned long);
 static int recordAudio(char *, char *);
-APP_IRAM static char lastFilenameRecorded[40];
+APP_IRAM static char lastFilenameRecorded[FILE_LENGTH];
 
 void stop(void) {
 	context.isStopped = TRUE;
@@ -24,7 +24,7 @@ void stop(void) {
 
 static int getFileHandle (CtnrFile *newFile) {
 	int ret = 0; 
-	char sTemp[80];
+	char sTemp[PATH_LENGTH];
 	BOOL getLastRecording = FALSE;
 	CtnrPackage *pkg;
 		
@@ -198,8 +198,8 @@ void insertSoundFile(int idxFile) {
 	
 static int recordAudio(char *pkgName, char *cursor) {
 	int handle, ret = -1;
-	char temp[60];
-	char filepath[60];
+	char temp[PATH_LENGTH];
+	char filepath[PATH_LENGTH];
 	long start, end, prev;
 	CtnrFile *file;
 	int key;
@@ -317,13 +317,14 @@ void markEndPlay(long timeNow) {
 }
 
 void markStartPlay(long timeNow, const char * name) {
-	char log[40];
+	const int LOG_LENGTH = PATH_LENGTH + 20;
+	char log[LOG_LENGTH];
 	
 	context.packageStartTime = timeNow;
 	strcpy(log,"\x0d\x0a");
 	longToDecimalString(timeNow,log+2,5);
 	strcat((char *)log,(const char *)": PLAY ");
-	if (LBstrncat((char *)log,name,40) == 39)
-		log[38] = '~';
+	if (LBstrncat((char *)log,name,LOG_LENGTH) == LOG_LENGTH-1)
+		log[LOG_LENGTH-2] = '~';
 	logString(log,BUFFER);	
 }

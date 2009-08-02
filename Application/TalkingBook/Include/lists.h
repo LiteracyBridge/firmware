@@ -1,6 +1,7 @@
 #ifndef	__LISTS_h__
 #define	__LISTS_h__
 
+#define LIST_ITEM_LENGTH	40
 typedef struct ListItem ListItem;
 typedef enum EnumListType EnumListType;
 
@@ -10,8 +11,8 @@ struct ListItem {
 	unsigned int actionStartEnd; // see bit map for ctnrBlock below
 	unsigned int idxFirstAction;
 	unsigned long currentFilePosition;
-    char currentString[60];
-    char filename[60];
+    char currentString[LIST_ITEM_LENGTH]; // stores item in list
+    char filename[FILE_LENGTH];  // stores name of list file without path
     unsigned int idxListWithFilename;
     unsigned long posListWithFilename;
     EnumListType listType;

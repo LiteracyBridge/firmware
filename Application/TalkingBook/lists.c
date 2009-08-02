@@ -9,7 +9,7 @@ static int openList(ListItem *, char *);
 
 static int openList(ListItem *list, char *outFilename) {
 	int ret;
-	char filename[40];
+	char filename[FILE_LENGTH];
 	
 	stop();
 	ret = tbChdir((LPSTR)LIST_PATH);
@@ -253,9 +253,9 @@ static int moveToTop(char *filename, char * string) {
 int insertIntoList(ListItem *list, long posInsert, char * string) {
 	//todo: create a version without a roundtrip between single/dbl-byte chars	
 	int rHandle, wHandle, ret, i, bytesToWrite;
-	char wFilepath[60],rFilepath[60];
+	char wFilepath[PATH_LENGTH],rFilepath[PATH_LENGTH];
 	char buffer[READ_LENGTH+1];
-	char tempLine[100];
+	char tempLine[LIST_ITEM_LENGTH];
 	int MAX_BYTES = 2 * READ_LENGTH;
 
 	strcpy(rFilepath,LIST_PATH);

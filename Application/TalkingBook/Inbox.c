@@ -22,8 +22,8 @@ unsigned int
 ProcessInbox()
 {
 	struct f_info file_info;
-	char strLog[80], savecwd[80];
-	char fbuf[80], fname[32];
+	char strLog[PATH_LENGTH], savecwd[PATH_LENGTH];
+	char fbuf[PATH_LENGTH], fname[FILE_LENGTH];
 	int ret, r1, len;
 	
 	strcpy(strLog, "ProcessInbox");	
@@ -372,10 +372,11 @@ int updateCategory(char *category, char *fnbase, char *prefix)
 int copyOutbox()
 {
 	int ret;
+	char inbox[PATH_LENGTH];
 	
-	ret = copydir("b:\\\\Outbox", "a:\\\\inbox");
-//	ret = copydir("a:\\outbox", "a:\\outbox_cp");   //used to test
-	
+	LBstrncpy(inbox,INBOX_PATH,PATH_LENGTH);
+	inbox[0] = 'b'; // changes a: to b:
+	ret = copydir(OUTBOX_PATH, inbox);	
 	return(ret);
 }
 //
@@ -384,7 +385,7 @@ int copyOutbox()
 int copydir(char *fromdir, char *todir)
 {
 	int ret, r1, len_from, len_to, fret;
-	char from[80], to[80], lastdir[40];
+	char from[PATH_LENGTH], to[PATH_LENGTH], lastdir[FILE_LENGTH];
 
 	struct f_info fi;
 	

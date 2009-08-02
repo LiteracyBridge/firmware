@@ -505,7 +505,7 @@ int replaceStack (char *line, CtnrPackage *pkg) {
 
 CtnrFile *getListFile(char *name) {
 	CtnrFile *file;
-	char temp[40];
+	char temp[FILE_LENGTH];
 	
 	strcpy(temp,name);
 	if (pkgSystem.idxLanguageCode != -1) {
