@@ -73,12 +73,16 @@ ProcessInbox()
 		
 		for (; ret >= 0; ret = _findnext(&file_info)) {
 			if(file_info.f_attrib & D_DIR) {
-				if(!strcmp(file_info.f_name, "."))
+				if(file_info.f_name[0] == '.')
+					continue;
+				
+/*				if(!strcmp(file_info.f_name, "."))
 					continue;
 				if(!strcmp(file_info.f_name, ".."))
 					continue;
 				if(!strcmp(file_info.f_name, ".svn"))
 					continue;
+*/
 				if(!strcmp(file_info.f_name, "lists")) // lists is special, never deleted	
 					continue;
 				
@@ -162,10 +166,11 @@ ProcessA18(struct f_info *fip)
 	strcpy(buffer, USER_PATH);
 	fnbase[len_fnbase] = 0;
 
+	strcpy(tmpbuf,INBOX_PATH);
+	strcat(tmpbuf,fip->f_name);
+
 // TODO: should some other test be applied here??
 	if(0 == strncmp(fnbase,PKG_NUM_PREFIX,strlen(PKG_NUM_PREFIX))) {
-		strcpy(tmpbuf,INBOX_PATH);
-		strcat(tmpbuf,fip->f_name);
 		ret = 1;	
 		do {
 			strcpy(buffer,USER_PATH);
@@ -177,6 +182,12 @@ ProcessA18(struct f_info *fip)
 			strcat(buffer,AUDIO_FILE_EXT);
 			ret = rename(tmpbuf, buffer);
 		} while (ret);
+	} else {
+		strcat(buffer, fip->f_name);
+		ret = rename(tmpbuf, buffer);
+		if(ret) {
+			unlink(tmpbuf);	// rename failed, remove from inbox anyway
+		}	
 	}
 			
 // TODO - currently doing nothing with subcategory
@@ -290,14 +301,14 @@ int copyCWD(char *todir)
 	
 	ret =_findfirst(cwd, &fi, D_ALL);
 	for (; ret >= 0; ret = _findnext(&fi)) {
+		
+// skip files and directories beginning with .		
+		if(fi.f_name[0] == '.')
+			continue;
+		
 		to[tobase] = 0;
+
 		if(fi.f_attrib & D_DIR) {
-			if(!strcmp(fi.f_name, "."))
-				continue;
-			if(!strcmp(fi.f_name, ".."))
-				continue;
-			if(!strcmp(fi.f_name, ".svn"))
-				continue;
 			strcpy(&to[tobase], fi.f_name);
 //			r1 = strIndex(to, '#');
 //			if(r1 > 1)		// remove category info from dir name
@@ -414,11 +425,8 @@ int copydir(char *fromdir, char *todir)
 	for( ; ret >= 0 ; ret = _findnext(&fi)) {
 		if(! (fi.f_attrib & D_DIR))
 			continue;
-		if(!strcmp(fi.f_name, "."))
-			continue;
-		if(!strcmp(fi.f_name, ".."))
-			continue;
-		if(!strcmp(fi.f_name, ".svn"))
+		
+		if(fi.f_name[0]=='.')
 			continue;
 		
 		if(lastdir[0]) {
@@ -485,11 +493,13 @@ int copyfiles(char *fromdir, char *todir)
 			
 	ret =_findfirst(from, &fi, D_FILE);
 	while(ret >= 0) {
-		from[len_from] = 0;
-		to[len_to]= 0;
-		strcat(from, fi.f_name);
-		strcat(to, fi.f_name);
-		r1 = _copy(from, to);
+		if(fi.f_name[0] != '.') {
+			from[len_from] = 0;
+			to[len_to]= 0;
+			strcat(from, fi.f_name);
+			strcat(to, fi.f_name);
+			r1 = _copy(from, to);
+		}
 		ret = _findnext(&fi);
 		fret++;
 	}
