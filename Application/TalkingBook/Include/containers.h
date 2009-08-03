@@ -10,11 +10,11 @@
 #define PKG_DEFAULT		3
 #define PKG_VARIABLE	4
 #define PKG_QUIZ		5
-#define MAX_FILES		40
-#define MAX_BLOCKS		70
-#define MAX_STATES		140   // should always be 2 x MAX_BLOCKS
-#define MAX_ACTIONS		140   // 2 actions per block (in addition to start/end actions)
-#define MAX_LISTS		5
+#define MAX_FILES		60
+#define MAX_BLOCKS		90
+#define MAX_STATES		180   // should always be 2 x MAX_BLOCKS
+#define MAX_ACTIONS		180   // 2 actions per block (in addition to start/end actions)
+#define MAX_LISTS		2
 #define MAX_BLOCK_OVERLAP	4   // allows for a file-wide block, a page, a line, and a hyperlink
 #define PKG_HEAP_SIZE	512  // enough for 10 chars per struct file/filename and per ListItem filename
 #define PKG_STACK_SIZE	100   // only stores one item and is erased by next item stored (used for list item filenames)

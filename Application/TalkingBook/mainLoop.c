@@ -10,6 +10,7 @@
 #include "Include/parsing.h"
 #include "Include/macro.h"
 #include "Include/d2d_copy.h"
+#include "Include/Inbox.h"
 #include "Include/mainLoop.h"
 
 typedef enum EnumEnterOrExit EnumEnterOrExit;
@@ -436,7 +437,8 @@ int checkInactivity(BOOL resetTimer) {
 	APP_IRAM static BOOL warnedUser;
 	APP_IRAM static long lastActivity;
 	char *strList;
-
+	struct newContent nc;
+	
 	currentTime = getRTCinSeconds();	
 	logVoltage(currentTime);
 
@@ -467,15 +469,17 @@ int checkInactivity(BOOL resetTimer) {
 			//if (context.queuedPackageNameIndex == -1)
 			//	resetSystem(); // we don't want to reset if ProcessInbox has queued a package to be played
 			//else {
+				ProcessInbox(&nc);
+
 				pkgSystem.lists[0].currentFilePosition = -1;
 				strList = getCurrentList(&pkgSystem.lists[0]);
-				while (strcmp(strList,(char *)"EDU")) {
+				while (strcmp(strList,(char *)nc.newAudioFileCat)) {
 					strList = getPreviousList(&pkgSystem.lists[0]);
 				}
 				pkgSystem.lists[1].currentFilePosition = -1;
 				strList = getCurrentList(&pkgSystem.lists[1]);
 				
-				insertSound(getListFile((char *)"EDU"),NULL,TRUE);
+				insertSound(getListFile((char *)nc.newAudioFileCat),NULL,TRUE);
 
 				context.queuedPackageNameIndex = replaceStack(strList,&pkgSystem);
 				context.queuedPackageType = PKG_USER;  // todo: this should apply to quizes too
