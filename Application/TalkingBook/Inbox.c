@@ -9,8 +9,8 @@
 
 extern APP_IRAM char logBuffer[LOG_BUFFER_SIZE];
 extern APP_IRAM int idxLogBuffer;
-static int ProcessA18(struct f_info *);
-static int ProcessDir(char *);
+static int ProcessA18(struct f_info *, struct newContent *);
+static int ProcessDir(char *, struct newContent *);
 static int copyCWD(char *);
 static int updateCategory(char *, char *, char *);
 
@@ -19,7 +19,7 @@ static int updateCategory(char *, char *, char *);
 //  called when leaving USB mode to check for files copied from other device into a:\Inbox
 //
 unsigned int
-ProcessInbox()
+ProcessInbox(struct newContent *pNC)
 {
 	struct f_info file_info;
 	char strLog[PATH_LENGTH], savecwd[PATH_LENGTH];
@@ -27,6 +27,9 @@ ProcessInbox()
 	int ret, r1, len, fret;
 	
 	fret = 0;
+	pNC->newAudioFileCat[0] = pNC->newAudioFileName[0] = 0;
+	pNC->newAudioDirCat [0] = pNC->newAudioDirName [0] = 0;
+	
 	strcpy(strLog, "ProcessInbox");	
 	logString(strLog, BUFFER);
 	
@@ -58,10 +61,10 @@ ProcessInbox()
 			strcpy(&strLog[len], file_info.f_name);
 			logString(strLog,BUFFER);
 	
-			fret += ProcessA18(&file_info);
+			fret += ProcessA18(&file_info, pNC);
 	
 			ret = unlink(file_info.f_name);
-				
+							
 			ret = _findnext(&file_info);
 		}
 	//
@@ -77,25 +80,18 @@ ProcessInbox()
 				if(file_info.f_name[0] == '.')
 					continue;
 				
-/*				if(!strcmp(file_info.f_name, "."))
-					continue;
-				if(!strcmp(file_info.f_name, ".."))
-					continue;
-				if(!strcmp(file_info.f_name, ".svn"))
-					continue;
-*/
 				if(!strcmp(file_info.f_name, "lists")) // lists is special, never deleted	
 					continue;
 				
 				strcpy(fname, file_info.f_name);	
-				fret += ProcessDir(fname);
+				fret += ProcessDir(fname, pNC);
 				  // RHM: something I do below makes this necessary
 				  //      upon return after _findnext returns -1 even if there are more dirs
 				ret = _findfirst(fbuf, &file_info, D_ALL);
 			}	
 		}
 			
-		r1 = ProcessDir("lists");
+		r1 = ProcessDir("lists", pNC);
 	
 		ret = chdir(savecwd);
 
@@ -112,7 +108,7 @@ ProcessInbox()
 }
 
 int 
-ProcessA18(struct f_info *fip)
+ProcessA18(struct f_info *fip, struct newContent *pNC)
 {
 	char strLog[80], savecwd[80];
 	char buffer[READ_LENGTH+1], *line, tmpbuf[READ_LENGTH+1];
@@ -195,6 +191,11 @@ ProcessA18(struct f_info *fip)
 			fret++;
 		}
 	}
+	
+	if(pNC->newAudioFileCat[0] == 0) {
+		strcpy(pNC->newAudioFileCat, category);
+		strcpy(pNC->newAudioFileName, fnbase);
+	}
 			
 // TODO - currently doing nothing with subcategory
 	
@@ -205,7 +206,7 @@ ProcessA18(struct f_info *fip)
 }
 
 int 
-ProcessDir(char *dirname)
+ProcessDir(char *dirname, struct newContent *pNC)
 {
 	struct f_info file_info;
 	char strLog[80], savecwd[80];
@@ -281,6 +282,13 @@ ProcessDir(char *dirname)
 // TODO: - other prefixs to process besides ^
 	
 	ret = updateCategory(category, fnbase, "^");
+	
+	if(pNC->newAudioDirCat[0] == 0) {
+		strcpy(pNC->newAudioDirCat, category);
+		strcat(pNC->newAudioDirName, "^");
+		strcat(pNC->newAudioDirName, fnbase);
+	}
+
 		
 	ret = chdir(savecwd);	
 	ret = rmdir(dirname);
@@ -365,8 +373,8 @@ int updateCategory(char *category, char *fnbase, char *prefix)
 	strcat(buffer, category);
 	strcat(buffer,".txt");
 	
-	if(!fileExists((LPSTR)buffer)) {  // if category.txt does not exist create it
-		ret = open((LPSTR)buffer,O_CREAT|O_RDWR);
+	if(!fileExists(buffer)) {  // if category.txt does not exist create it
+		ret = open(buffer,O_CREAT|O_RDWR);
 		close(ret);
 	}
 	
@@ -389,9 +397,7 @@ int updateCategory(char *category, char *fnbase, char *prefix)
 		strcpy(tmpbuf,fnbase);
 	}
 	if (ret == -1)
-		ret = insertStringInFile(buffer,tmpbuf,0);
-//		ret = appendStringToFile(buffer, tmpbuf); 
-	return ret;
+		ret = appendStringToFile(buffer, tmpbuf); 
 }
 
 int copyOutbox()

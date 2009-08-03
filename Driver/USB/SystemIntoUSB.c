@@ -225,7 +225,7 @@ xxx:
 	RHM_FlashPtr = 0;
 	
 	setLED(LED_RED,FALSE);
-	ProcessInbox();
+//	ProcessInbox();
 	checkInactivity(TRUE); // count being in usb as active
 
 	return 0;
