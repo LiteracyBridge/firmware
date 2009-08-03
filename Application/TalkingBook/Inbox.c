@@ -24,8 +24,9 @@ ProcessInbox()
 	struct f_info file_info;
 	char strLog[PATH_LENGTH], savecwd[PATH_LENGTH];
 	char fbuf[PATH_LENGTH], fname[FILE_LENGTH];
-	int ret, r1, len;
+	int ret, r1, len, fret;
 	
+	fret = 0;
 	strcpy(strLog, "ProcessInbox");	
 	logString(strLog, BUFFER);
 	
@@ -57,7 +58,7 @@ ProcessInbox()
 			strcpy(&strLog[len], file_info.f_name);
 			logString(strLog,BUFFER);
 	
-			ret = ProcessA18(&file_info);
+			fret += ProcessA18(&file_info);
 	
 			ret = unlink(file_info.f_name);
 				
@@ -87,7 +88,7 @@ ProcessInbox()
 					continue;
 				
 				strcpy(fname, file_info.f_name);	
-				r1 = ProcessDir(fname);
+				fret += ProcessDir(fname);
 				  // RHM: something I do below makes this necessary
 				  //      upon return after _findnext returns -1 even if there are more dirs
 				ret = _findfirst(fbuf, &file_info, D_ALL);
@@ -106,6 +107,8 @@ ProcessInbox()
 		strcpy(strLog, "ProcessInbox exits");	
 		logString(strLog, ASAP);
 	}	// length of INBOX_PATH must be > 1
+	
+	return(fret);
 }
 
 int 
@@ -114,11 +117,11 @@ ProcessA18(struct f_info *fip)
 	char strLog[80], savecwd[80];
 	char buffer[READ_LENGTH+1], *line, tmpbuf[READ_LENGTH+1];
 	char fnbase[80], category[8], subcategory[8];
-	int ret, len, len_fnbase, i, catidx, subidx, cat_base;
+	int ret, len, len_fnbase, i, catidx, subidx, cat_base, fret;
 
 	category[0] = subcategory[0] = 0;
 	cat_base = strIndex(fip->f_name, '#');
-	catidx = subidx = 0;
+	catidx = subidx = fret = 0;
 	if(cat_base >= 1) {	// category info in filename
 		strcpy(fnbase, fip->f_name);
 //	Commenting line below since we want to carry through category info
@@ -171,7 +174,8 @@ ProcessA18(struct f_info *fip)
 
 // TODO: should some other test be applied here??
 	if(0 == strncmp(fnbase,PKG_NUM_PREFIX,strlen(PKG_NUM_PREFIX))) {
-		ret = 1;	
+		ret = 1;
+		fret++;
 		do {
 			strcpy(buffer,USER_PATH);
 			getrevdPkgNumber(fnbase,TRUE);
@@ -187,12 +191,16 @@ ProcessA18(struct f_info *fip)
 		ret = rename(tmpbuf, buffer);
 		if(ret) {
 			unlink(tmpbuf);	// rename failed, remove from inbox anyway
-		}	
+		} else {
+			fret++;
+		}
 	}
 			
 // TODO - currently doing nothing with subcategory
 	
 	ret = updateCategory(category, fnbase, (char *)NULL);
+	
+	return(fret);
 
 }
 
@@ -203,7 +211,7 @@ ProcessDir(char *dirname)
 	char strLog[80], savecwd[80];
 	char buffer[READ_LENGTH+1], tempbuf[80];
 	char fnbase[80], category[8], subcategory[8];
-	int ret, catidx, subidx, len_fnbase, i, cat_base;
+	int ret, fret, catidx, subidx, len_fnbase, i, cat_base;
 
 	ret = getcwd(savecwd , sizeof(savecwd) - 1 );
 	ret = chdir(dirname);
@@ -219,6 +227,8 @@ ProcessDir(char *dirname)
 	
 	category[0] = subcategory[0] = 0;
 	catidx = subidx = 0;
+	
+	fret = 1;
 	
 	cat_base = strIndex(dirname, '#');
 
@@ -275,16 +285,17 @@ ProcessDir(char *dirname)
 	ret = chdir(savecwd);	
 	ret = rmdir(dirname);
 	
-	return 0;
+	return (fret);
 }
 
 int copyCWD(char *todir)
 {
 	char to[80], cwd[80], strLog[80];
-	int ret, r1, tobase;
+	int ret, r1, tobase, fret;
 	struct f_info fi;
 	
 	strcpy(to, todir);
+	fret = 0;
 	
 	ret = getcwd(cwd, sizeof(cwd)-1);
 //  NOTE: getcwd returns a:\inbox\  not a:\\inbox\ as in INBOX_PATH 
@@ -324,12 +335,13 @@ int copyCWD(char *todir)
 			logString(strLog, BUFFER);
 			if(!fileExists(to)) {
 				r1 = _copy(fi.f_name, to);
+				fret++;
 			}
 			r1 = unlink(fi.f_name);
 		}
 	}
 	
-	return(0);	
+	return(fret);	
 }
 
 int updateCategory(char *category, char *fnbase, char *prefix)
