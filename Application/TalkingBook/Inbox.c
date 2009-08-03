@@ -64,7 +64,7 @@ ProcessInbox(struct newContent *pNC)
 			fret += ProcessA18(&file_info, pNC);
 	
 			ret = unlink(file_info.f_name);
-							
+				
 			ret = _findnext(&file_info);
 		}
 	//
@@ -191,7 +191,7 @@ ProcessA18(struct f_info *fip, struct newContent *pNC)
 			fret++;
 		}
 	}
-	
+			
 	if(pNC->newAudioFileCat[0] == 0) {
 		strcpy(pNC->newAudioFileCat, category);
 		strcpy(pNC->newAudioFileName, fnbase);
@@ -373,8 +373,8 @@ int updateCategory(char *category, char *fnbase, char *prefix)
 	strcat(buffer, category);
 	strcat(buffer,".txt");
 	
-	if(!fileExists(buffer)) {  // if category.txt does not exist create it
-		ret = open(buffer,O_CREAT|O_RDWR);
+	if(!fileExists((LPSTR)buffer)) {  // if category.txt does not exist create it
+		ret = open((LPSTR)buffer,O_CREAT|O_RDWR);
 		close(ret);
 	}
 	
@@ -397,7 +397,9 @@ int updateCategory(char *category, char *fnbase, char *prefix)
 		strcpy(tmpbuf,fnbase);
 	}
 	if (ret == -1)
-		ret = appendStringToFile(buffer, tmpbuf); 
+		ret = insertStringInFile(buffer,tmpbuf,0);
+//		ret = appendStringToFile(buffer, tmpbuf); 
+	return ret;
 }
 
 int copyOutbox()
