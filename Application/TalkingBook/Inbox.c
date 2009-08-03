@@ -365,8 +365,8 @@ int updateCategory(char *category, char *fnbase, char *prefix)
 	strcat(buffer, category);
 	strcat(buffer,".txt");
 	
-	if(!fileExists(buffer)) {  // if category.txt does not exist create it
-		ret = open(buffer,O_CREAT|O_RDWR);
+	if(!fileExists((LPSTR)buffer)) {  // if category.txt does not exist create it
+		ret = open((LPSTR)buffer,O_CREAT|O_RDWR);
 		close(ret);
 	}
 	
@@ -389,7 +389,9 @@ int updateCategory(char *category, char *fnbase, char *prefix)
 		strcpy(tmpbuf,fnbase);
 	}
 	if (ret == -1)
-		ret = appendStringToFile(buffer, tmpbuf); 
+		ret = insertStringInFile(buffer,tmpbuf,0);
+//		ret = appendStringToFile(buffer, tmpbuf); 
+	return ret;
 }
 
 int copyOutbox()

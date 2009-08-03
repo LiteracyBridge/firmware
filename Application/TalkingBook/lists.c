@@ -287,6 +287,7 @@ int insertIntoList(ListItem *list, long posInsert, char * string) {
 		close(rHandle);
 		i = unlink((LPSTR)rFilepath);
 		if (i != -1) {
+			//todo: change this to rename instead of copy and unlink
 			i = _copy((LPSTR)wFilepath,(LPSTR)rFilepath);
 			if (i != -1)
 				i = unlink((LPSTR)wFilepath);

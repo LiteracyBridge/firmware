@@ -435,6 +435,7 @@ int checkInactivity(BOOL resetTimer) {
 	long currentTime;
 	APP_IRAM static BOOL warnedUser;
 	APP_IRAM static long lastActivity;
+	char *strList;
 
 	currentTime = getRTCinSeconds();	
 	logVoltage(currentTime);
@@ -443,7 +444,7 @@ int checkInactivity(BOOL resetTimer) {
 		lastActivity = currentTime;
 		warnedUser = FALSE;
 	} else if (!warnedUser && currentTime - lastActivity > INACTIVITY_SECONDS) {
-		adjustVolume(MAX_VOLUME,FALSE,TRUE);  // todo: add a check to see if earphones are used -- if so, reduce volume
+		adjustVolume(MAX_VOLUME-2,FALSE,TRUE);  // todo: add a check to see if earphones are used -- if so, reduce volume
 		insertSound(&pkgSystem.files[INACTIVITY_SOUND_FILE_IDX],NULL,FALSE);
 		restoreVolume(FALSE);
 		lastActivity = getRTCinSeconds();
@@ -462,6 +463,24 @@ int checkInactivity(BOOL resetTimer) {
 		while(usbret == 1) {
 			usbret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_ONCE);
 		}
+		if (!usbret) { //USB connection was made
+			//if (context.queuedPackageNameIndex == -1)
+			//	resetSystem(); // we don't want to reset if ProcessInbox has queued a package to be played
+			//else {
+				pkgSystem.lists[0].currentFilePosition = -1;
+				strList = getCurrentList(&pkgSystem.lists[0]);
+				while (strcmp(strList,(char *)"EDU")) {
+					strList = getPreviousList(&pkgSystem.lists[0]);
+				}
+				pkgSystem.lists[1].currentFilePosition = -1;
+				strList = getCurrentList(&pkgSystem.lists[1]);
+				
+				insertSound(getListFile((char *)"EDU"),NULL,TRUE);
+
+				context.queuedPackageNameIndex = replaceStack(strList,&pkgSystem);
+				context.queuedPackageType = PKG_USER;  // todo: this should apply to quizes too
+			//}		
+		}
 	}
 
 	/*
@@ -478,8 +497,6 @@ void mainLoop (void) {
 	CtnrBlock *insertBlock;
 	ListItem *list;
 	int inactivityCheckCounter = 0;
-	unsigned int usbret;
-	
 	
 	startUp();
 /*
@@ -591,17 +608,19 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			} else {
 				if (list->listType == LIST_OF_PACKAGES) {
 					// load package
-					if (0 == strncmp(filename,CUSTOM_PKG_PREFIX,strlen(CUSTOM_PKG_PREFIX))) {
-						destination = replaceStack(filename+strlen(CUSTOM_PKG_PREFIX),&pkgSystem);
-						context.queuedPackageType = PKG_USER;
-					} else if (0 == strncmp(filename,QUIZ_PKG_PREFIX,strlen(QUIZ_PKG_PREFIX))) {
-						destination = replaceStack(filename+strlen(QUIZ_PKG_PREFIX),&pkgSystem);
-						context.queuedPackageType = PKG_QUIZ;
-					} else {
-						destination = replaceStack(filename,&pkgSystem);
-						context.queuedPackageType = PKG_DEFAULT;
-					}
+					context.queuedPackageType = PKG_USER;
+					destination = replaceStack(filename,&pkgSystem);
 					context.queuedPackageNameIndex = destination;
+//					if (0 == strncmp(filename,CUSTOM_PKG_PREFIX,strlen(CUSTOM_PKG_PREFIX))) {
+//						destination = replaceStack(filename+strlen(CUSTOM_PKG_PREFIX),&pkgSystem);
+//						context.queuedPackageType = PKG_USER;
+//					} else if (0 == strncmp(filename,QUIZ_PKG_PREFIX,strlen(QUIZ_PKG_PREFIX))) {
+//						destination = replaceStack(filename+strlen(QUIZ_PKG_PREFIX),&pkgSystem);
+//						context.queuedPackageType = PKG_QUIZ;
+//					} else {
+//						destination = replaceStack(filename,&pkgSystem);
+//						context.queuedPackageType = PKG_DEFAULT;
+//					}
 				} else { // list->listType != LIST_OF_PACKAGES
 					// play sound of subject
 					newFile = getListFile(filename);
@@ -630,6 +649,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			newTime = newBlock->startTime;
 			reposition = TRUE;
 			break;		
+
 		case DELETE:
 			stop();
 			tempList = &context.package->lists[destination];
@@ -984,10 +1004,11 @@ static void loadPackage(int pkgType, const char * pkgName) {
 	context.lastFile = NULL;
 	context.queuedPackageType = PKG_NONE; //reset takeAction's JUMP_PACKAGE or JUMP_PACKAGE
 	context.returnPackage = NULL;		
+
 	if ((pkgType == PKG_SYSTEM) && (pkgName == NULL)) {
 		context.package = &pkgSystem;
 		pkg = context.package;
-	} else if (pkgType == PKG_DEFAULT) {
+	} else if ((pkgType == PKG_USER) && (pkgName[1] != '_')) {  //todo: move '_' and maybe position 1 to config
 		context.package = &pkgDefault;
 		pkg = context.package;
 		//overwrite last filename with new one -- strlen(template's filename) > strlen(standard getPkgNumber())
@@ -1002,7 +1023,6 @@ static void loadPackage(int pkgType, const char * pkgName) {
 				strcat(filePath,pkgName);
 				strcat(filePath,".txt"); //todo: move to config
 				break;
-			case PKG_QUIZ:
 			case PKG_USER:
 				context.package = &pkgUser;
 				strcpy(filePath,USER_PATH);

@@ -14,6 +14,7 @@ extern BOOL nextNameValuePair (int, char *, char, char **, char **);
 extern void clearStaleLog(void);
 extern void flushLog(void);
 extern int appendStringToFile(const char *, char *);
+extern int insertStringInFile(const char *, char *, long);
 //extern int createControlFromTemplate(char *, char *);
 extern int findDeleteStringFromFile(char *, char *, char *, BOOL);
 extern long getFilePosition(void);

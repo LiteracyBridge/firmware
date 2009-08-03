@@ -52,5 +52,7 @@ v1.33
 - set default clock rate, add isr processing for USB host interrupts
 - try to become a usb client after 5(?) seconds of inactivity
 - added code to support USB host, Inbox folder on SD card
-- initial d2d Inbox processing (Inbox.c)
+- initial d2d copy from host to Inbox of client and Inbox processing (Inbox.c)
 - added copyOutbox() for usb copy between devices
+- added pause functionality to record feature
+- plays most recently copied package and its category name

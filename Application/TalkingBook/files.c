@@ -87,6 +87,52 @@ void flushLog(void) {
 	}
 }
 
+
+int insertStringInFile(const char * filename, char * strText, long posInsert) {
+	//todo: create a version without a roundtrip between single/dbl-byte chars	
+	int rHandle, wHandle, ret, i, bytesToWrite;
+	char wFilepath[PATH_LENGTH];
+	char buffer[READ_LENGTH+1];
+	char tempLine[80];
+	int MAX_BYTES = 2 * READ_LENGTH;
+
+	strcpy(wFilepath,"temp.txt");
+	rHandle = tbOpen((LPSTR)(filename),O_RDONLY);
+	wHandle = tbOpen((LPSTR)wFilepath,O_CREAT|O_TRUNC|O_WRONLY);
+	ret = -1;
+	if (rHandle != -1 && wHandle != -1) {
+		buffer[READ_LENGTH] = '\0';
+		ret = strcspn(strText,"\x0a\x0d");
+		if (ret > 0) 
+			*(strText + ret) = '\0';
+		if (posInsert) {
+			bytesToWrite = read(rHandle,(unsigned long)buffer << 1,posInsert % MAX_BYTES);
+			ret = write(wHandle,(unsigned long)buffer << 1,bytesToWrite);
+			for (i=bytesToWrite; i < posInsert; i+= MAX_BYTES) {
+				bytesToWrite = read(rHandle,(unsigned long)buffer << 1,MAX_BYTES);
+				ret = write(wHandle,(unsigned long)buffer << 1,bytesToWrite);
+			}
+		}
+		bytesToWrite = convertDoubleToSingleChar(tempLine,strText,TRUE);
+		ret = write(wHandle,(unsigned long)tempLine<<1,bytesToWrite);		
+		do {
+			bytesToWrite = read(rHandle,(unsigned long)buffer << 1,MAX_BYTES);
+			ret = write(wHandle,(unsigned long)buffer << 1,bytesToWrite);
+		} while (bytesToWrite == MAX_BYTES);
+		close(wHandle);
+		close(rHandle);
+		i = unlink((LPSTR)filename);
+		if (i != -1) {
+			//todo: change this to rename instead of copy and unlink
+			i = _copy((LPSTR)wFilepath,(LPSTR)filename);
+			if (i != -1)
+				i = unlink((LPSTR)wFilepath);
+		}
+		ret = i;
+	}
+	return ret;
+}
+
 int appendStringToFile(const char * filename, char * strText) {
 	// WARNING: This function destroys strText.
 	// WARNING: reading/writing to NAND while audio is playing/recording is bad!
@@ -393,12 +439,8 @@ INT16 tbChdir(LPSTR path) {
 int fileExists(LPSTR name) {
 	int ret;
 	struct stat_t statbuf;
-	struct f_info f_info; 
 	
 	ret = stat(name, &statbuf);
-//	ret = _findfirst(name, &f_info, D_FILE);
-//	if (ret >= 0)
-// 	dup original code with line below
 //	if((ret == 0) && !(statbuf.st_mode & 0x10)) //exists and not a dir
 	if(ret == 0)  // it exists - could be a directory - use line above for file only test
 		ret = 1;
