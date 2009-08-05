@@ -122,7 +122,11 @@ SetSystemClockRate(unsigned int plln_val)
 
 	*P_PLLN = plln_val;   //clock rate = plln_val * 3;
 
-	*P_Clock_Ctrl = SYS_96MCLOCK;  // restore clock state to use pll 
+	if(plln_val == 32)
+		*P_Clock_Ctrl = SYS_96MCLOCK;  // restore clock state to use pll 
+	else 
+		*P_Clock_Ctrl = 0x8410;
+		
 	while ((*P_Power_State & 0x7) == 0) ; // wait for clock src to "settle"
 
 	return(*P_PLLN);
