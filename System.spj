@@ -602,11 +602,18 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=.\Application\TalkingBook\Include\Inbox.h
+SOURCE=Application\TalkingBook\Include\Inbox.h
 USEPARAM=FALSE
 PARAM=
 ID=
-EXPORT=0
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Application\TalkingBook\Include\SD_reprog.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=6645601
 # End Source File
 # End Group
 # Begin Group "External Dependencies"
@@ -1492,11 +1499,18 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=.\Application\TalkingBook\Include\Inbox.h
+SOURCE=Application\TalkingBook\Include\Inbox.h
 USEPARAM=FALSE
 PARAM=
 ID=
-EXPORT=0
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Application\TalkingBook\Include\SD_reprog.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=6645601
 # End Source File
 # End Group
 # Begin Group "External Dependencies"

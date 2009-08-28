@@ -3,11 +3,14 @@
 #include "Include/files.h"
 #include "Include/macro.h"
 #include "Include/containers.h"
+#include "Include/Inbox.h"
+#include "Include/audio.h"
 #include "Include/device.h"
 
-extern int SystemIntoUDisk(void);
+extern int SystemIntoUDisk(unsigned int);
 extern void KeyScan_ServiceLoop(void);
 extern int SP_GetCh(void);
+
 static void logKeystroke(int);
 
 APP_IRAM static int volume, speed;
@@ -61,7 +64,27 @@ int restoreVolume(BOOL normalVolume) {
 }
 
 int adjustVolume (int amount, BOOL relative, BOOL rememberOldVolume) {
+
+/*
+	APP_IRAM static long timeLastVolChg = 0;
+	long timeCurrent,diff;
+	char stringLog[30];
 	
+	timeCurrent = getRTCinSeconds();
+	diff = timeCurrent - timeLastVolChg;
+	timeLastVolChg = timeCurrent;
+	
+	strcat(stringLog,"V:");
+	longToDecimalString((long)volume,stringLog+3,5);
+	strcat(stringLog,",");
+	longToDecimalString(diff,stringLog+strlen(stringLog),5);
+	strcat(stringLog,"sec   ");
+	if (relative && amount > 0)
+		strcat(stringLog,"+");
+	else if (relative && amount < 0)
+		strcat(stringLog,"-");
+	logString(stringLog,BUFFER);
+*/		
 	if (rememberOldVolume)
 		oldVolume = volume;
 	
@@ -100,26 +123,11 @@ int getSpeed(void) {
 	return speed;
 }
 
-void setUSBDevice (BOOL set) {
-		
+void setUSBDevice (BOOL set) {		
 	if (set) {
 		Snd_Stop();
-		if (LED_GREEN)
-			setLED(LED_GREEN,FALSE);
-		else // for USB before reading config file, or if config corrupted
-			setLED(0x040,FALSE);		
-		if (LED_RED)
-			setLED(LED_RED,TRUE);
-		else // for USB before reading config file, or if config corrupted
-			setLED(0x200,TRUE);		
-		SystemIntoUSB(USB_Device);	
-		if (LED_RED)
-			setLED(LED_RED,FALSE);
-		else // for USB before reading config file, or if config corrupted
-			setLED(0x200,FALSE);		
-		// ProcessInbox is currently being called from SystemIntoUDisk()
-		if (context.queuedPackageNameIndex == -1)
-			resetSystem(); // we don't want to reset if ProcessInbox has queued a package to be played
+		SystemIntoUDisk(1);	
+		ProcessInbox();
 	}
 }
 
@@ -140,30 +148,36 @@ void logVoltage(long time) {
 			*P_MADC_Ctrl &= ~0x05;  // clear CHSEL (channel select)
 			*P_MADC_Ctrl |=  0x02;  // select LINEIN1 
 			timeInitialized = time;
-		} else if (time > (timeInitialized + 2)) { // 2-3 second delay)
+		} else if ((context.isStopped || context.isPaused) && (time > (timeInitialized + 2))) { // 2-3 second delay)
 			if (!wasSampleStarted) {
 				*P_MADC_Ctrl |= 0x40; // set STRCNV, starting the voltage sample
 				wasSampleStarted = TRUE;
 			} else if (*P_MADC_Ctrl & 0x80) {  // checks CNVRDY (sample is ready)
-				strcpy(buffer,"V:");
-			 	sample = (unsigned int)*P_MADC_Data;
-			 	longToHexString((long)sample,buffer+strlen(buffer),1);
-			 	strcat(buffer," | ");
-			 	sample >>= 4; // only bits 4-15
-				f = sample / (float)0x0fff;
-				sample = (unsigned int) (f * 1000); // to give "xx.x%"
-				longToDecimalString((long)sample,buffer+strlen(buffer),3);
-				i = strlen(buffer);
-				buffer[i+2] = 0;
-				buffer[i+1] = '%';
-				buffer[i] = buffer[i-1];
-				buffer[i-1] = '.'; 
-				logString(buffer,ASAP);
-			 	voltage = sample;
-			 	*P_ADC_Setup &= ~0xc000; // disable ADBEN and ADCEN to save power
-				timeInitialized = -1;
-				timeLastSample = time;
-				wasSampleStarted = FALSE;
+				if (!context.isStopped && !context.isPaused) { // began playing in mid-sample - throw out
+					wasSampleStarted = FALSE; // try again next loop
+					timeInitialized = -1;
+				}
+				else {
+					strcpy(buffer,"V:");
+				 	sample = (unsigned int)*P_MADC_Data;
+				 	longToHexString((long)sample,buffer+strlen(buffer),1);
+				 	strcat(buffer," | ");
+				 	sample >>= 4; // only bits 4-15
+					f = sample / (float)0x0fff;
+					sample = (unsigned int) (f * 1000); // to give "xx.x%"
+					longToDecimalString((long)sample,buffer+strlen(buffer),3);
+					i = strlen(buffer);
+					buffer[i+2] = 0;
+					buffer[i+1] = '%';
+					buffer[i] = buffer[i-1];
+					buffer[i-1] = '.'; 
+					logString(buffer,ASAP);
+				 	voltage = sample;
+				 	*P_ADC_Setup &= ~0xc000; // disable ADBEN and ADCEN to save power
+					timeInitialized = -1;
+					timeLastSample = time;
+					wasSampleStarted = FALSE;
+				}
 			}
 		}		
 	}
@@ -219,6 +233,7 @@ void wait(int t) { //t=time in msec
 void resetSystem(void) {
 	// set watchdog timer to reset device; 0x780A (Watchdog Reset Control Register)
 	// see GPL Programmer's Manual (V1.0 Dec 20,2006), Section 3.5, page 18
+	flushLog();
 	fs_safexit(); // should close all open files
 	*P_WatchDog_Ctrl &= ~0x1; // clear bit 0 for 0.125 sec 
 	*P_WatchDog_Ctrl |= 0x8004; // set bits 2 and 15 for 0.125 sec, system reset, and enable watchdog

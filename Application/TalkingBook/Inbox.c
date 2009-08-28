@@ -5,7 +5,15 @@
 #include "Include/containers.h"
 #include "Include/audio.h"
 #include "Include/pkg_ops.h"
+#include "Include/SD_reprog.h"
 #include "Include/Inbox.h"
+
+struct newContent {
+	char newAudioFileCat  [FILE_LENGTH];
+	char newAudioFileName [FILE_LENGTH];
+	char newAudioDirCat   [FILE_LENGTH];
+	char newAudioDirName  [FILE_LENGTH];
+};
 
 extern APP_IRAM char logBuffer[LOG_BUFFER_SIZE];
 extern APP_IRAM int idxLogBuffer;
@@ -18,17 +26,19 @@ static int updateCategory(char *, char *, char *);
 
 //  called when leaving USB mode to check for files copied from other device into a:\Inbox
 //
-unsigned int
-ProcessInbox(struct newContent *pNC)
+void
+ProcessInbox(void)
 {
 	struct f_info file_info;
 	char strLog[PATH_LENGTH], savecwd[PATH_LENGTH];
-	char fbuf[PATH_LENGTH], fname[FILE_LENGTH];
+	char fbuf[PATH_LENGTH], fbuf2[PATH_LENGTH], fname[FILE_LENGTH];
+	char *strList;
 	int ret, r1, len, fret;
-	
+	struct newContent nc;	
+
 	fret = 0;
-	pNC->newAudioFileCat[0] = pNC->newAudioFileName[0] = 0;
-	pNC->newAudioDirCat [0] = pNC->newAudioDirName [0] = 0;
+	nc.newAudioFileCat[0] = nc.newAudioFileName[0] = 0;
+	nc.newAudioDirCat [0] = nc.newAudioDirName [0] = 0;
 	
 	strcpy(strLog, "ProcessInbox");	
 	logString(strLog, BUFFER);
@@ -59,12 +69,9 @@ ProcessInbox(struct newContent *pNC)
 		ret =_findfirst(fbuf, &file_info, D_ALL);
 		while (ret >= 0) {
 			strcpy(&strLog[len], file_info.f_name);
-			logString(strLog,BUFFER);
-	
-			fret += ProcessA18(&file_info, pNC);
-	
-			ret = unlink(file_info.f_name);
-				
+			logString(strLog,BUFFER);		
+			fret += ProcessA18(&file_info, &nc);
+			ret = unlink(file_info.f_name);					
 			ret = _findnext(&file_info);
 		}
 	//
@@ -79,32 +86,56 @@ ProcessInbox(struct newContent *pNC)
 			if(file_info.f_attrib & D_DIR) {
 				if(file_info.f_name[0] == '.')
 					continue;
-				
 				if(!strcmp(file_info.f_name, "lists")) // lists is special, never deleted	
 					continue;
 				
 				strcpy(fname, file_info.f_name);	
-				fret += ProcessDir(fname, pNC);
+				fret += ProcessDir(fname, &nc);
 				  // RHM: something I do below makes this necessary
 				  //      upon return after _findnext returns -1 even if there are more dirs
 				ret = _findfirst(fbuf, &file_info, D_ALL);
 			}	
 		}
 			
-		r1 = ProcessDir("lists", pNC);
+		r1 = ProcessDir("lists", &nc);
 	
-		ret = chdir(savecwd);
-
-		//TODO: queue up first recording found to be auto-played
-		//context.queuedPackageType = PKG_???
-		//context.queuedPackageNameIndex = replaceStack(filename,&pkgSystem);
-		//will also need to set list counters properly
-				
-		strcpy(strLog, "ProcessInbox exits");	
-		logString(strLog, ASAP);
-	}	// length of INBOX_PATH must be > 1
+		// check for firmware update
+		strcpy(fbuf,UPDATE_PATH);
+		strcat(fbuf,SYSTEM_FN);
+		if (fileExists((LPSTR)fbuf)) {
+			strcpy(strLog, "Found firmware update");	
+			logString(strLog, BUFFER);
+			strcpy(fbuf2,FIRMWARE_PATH);
+			strcat(fbuf2,UPDATE_FN);
+			ret = rename((LPSTR)fbuf,(LPSTR)fbuf2);
+			if(ret) {
+				ret = unlink((LPSTR)fbuf);	// rename failed, remove from inbox anyway
+				strcpy(strLog, "firmware copy FAILED");	
+				logString(strLog, BUFFER);
+			} else {
+				//TODO: call an audio file to tell user to wait for reprogramming to complete
+				resetSystem(); // reset to begin new firmware reprogramming
+			}
+		}
+		
+		ret = chdir((LPSTR)savecwd);
+		// Set up current list to position at one of the newly copied messages and queue it up to play
+		// This point is only reached if there was not a successful copy made of new firmware
+		if (nc.newAudioFileCat[0]) {
+			pkgSystem.lists[0].currentFilePosition = -1;
+			strList = getCurrentList(&pkgSystem.lists[0]);
+			while (strcmp(strList,(char *)nc.newAudioFileCat)) {
+				strList = getPreviousList(&pkgSystem.lists[0]);
+			}
+			pkgSystem.lists[1].currentFilePosition = -1;
+			strList = getCurrentList(&pkgSystem.lists[1]);
+			
+			insertSound(getListFile((char *)nc.newAudioFileCat),NULL,TRUE);
 	
-	return(fret);
+			context.queuedPackageNameIndex = replaceStack(strList,&pkgSystem);
+			context.queuedPackageType = PKG_USER;  // todo: this should apply to quizes too
+		} 
+	}	// end of if: length of INBOX_PATH must be > 1
 }
 
 int 
@@ -342,7 +373,7 @@ int copyCWD(char *todir)
 			strcpy(strLog, to);
 			logString(strLog, BUFFER);
 			if(!fileExists(to)) {
-				r1 = _copy(fi.f_name, to);
+				r1 = _copy(fi.f_name, to); //TODO: should this be a rename?
 				fret++;
 			}
 			r1 = unlink(fi.f_name);

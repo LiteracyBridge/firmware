@@ -15,6 +15,8 @@
 
 typedef enum EnumEnterOrExit EnumEnterOrExit;
 enum EnumEnterOrExit {ENTERING, EXITING};
+extern int SystemIntoUDisk(unsigned int);
+extern void check_new_sd_flash(void);
 
 static void processBlockEnterExit (CtnrBlock *, EnumEnterOrExit);
 static void processTimelineJump (int, int);
@@ -433,23 +435,23 @@ static void keyResponse(void) {
 }
 
 int checkInactivity(BOOL resetTimer) {
-	long currentTime;
+	unsigned long currentTime;
 	APP_IRAM static BOOL warnedUser;
-	APP_IRAM static long lastActivity;
-	char *strList;
-	struct newContent nc;
+	APP_IRAM static unsigned long lastActivity;
+	APP_IRAM static unsigned long lastUSBCheck;
+	char stringLog[20];
 	
 	currentTime = getRTCinSeconds();	
 	logVoltage(currentTime);
 
 	if (resetTimer) {
-		lastActivity = currentTime;
+		lastUSBCheck = lastActivity = currentTime;
 		warnedUser = FALSE;
 	} else if (!warnedUser && currentTime - lastActivity > INACTIVITY_SECONDS) {
 		adjustVolume(MAX_VOLUME-2,FALSE,TRUE);  // todo: add a check to see if earphones are used -- if so, reduce volume
 		insertSound(&pkgSystem.files[INACTIVITY_SOUND_FILE_IDX],NULL,FALSE);
 		restoreVolume(FALSE);
-		lastActivity = getRTCinSeconds();
+		lastActivity = currentTime;
 /*
 		*P_WAIT = 0x5005;
 		//GPL16003A Programming Mnnual Section 3.6 says wait 6 NOPs to enter wait mode successfully
@@ -459,31 +461,25 @@ int checkInactivity(BOOL resetTimer) {
 		//warnedUser = TRUE;
 	} 
 	
+	// log time every minute to track power-on time
+	if (!(currentTime % 60) && context.isStopped) {
+		longToDecimalString(getRTCinSeconds(),stringLog,5);
+		logString(stringLog,ASAP);	
+	}
+		
+
 // this tries each pass after USB_CLIENT_POLL_INTERVAL second of inactivity, too frequent??
-	if(currentTime - lastActivity > USB_CLIENT_POLL_INTERVAL) {
-		int usbret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY);
+	if(USB_CLIENT_POLL_INTERVAL && (currentTime - lastUSBCheck > USB_CLIENT_POLL_INTERVAL)) {
+		int usbret;
+		
+		lastUSBCheck = currentTime;
+		usbret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY);
 		while(usbret == 1) {
 			usbret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_ONCE);
 		}
 		if (!usbret) { //USB connection was made
-			//if (context.queuedPackageNameIndex == -1)
-			//	resetSystem(); // we don't want to reset if ProcessInbox has queued a package to be played
-			//else {
-				ProcessInbox(&nc);
-
-				pkgSystem.lists[0].currentFilePosition = -1;
-				strList = getCurrentList(&pkgSystem.lists[0]);
-				while (strcmp(strList,(char *)nc.newAudioFileCat)) {
-					strList = getPreviousList(&pkgSystem.lists[0]);
-				}
-				pkgSystem.lists[1].currentFilePosition = -1;
-				strList = getCurrentList(&pkgSystem.lists[1]);
-				
-				insertSound(getListFile((char *)nc.newAudioFileCat),NULL,TRUE);
-
-				context.queuedPackageNameIndex = replaceStack(strList,&pkgSystem);
-				context.queuedPackageType = PKG_USER;  // todo: this should apply to quizes too
-			//}		
+			lastActivity = currentTime; //	count being in usb as active
+			ProcessInbox();
 		}
 	}
 
@@ -503,6 +499,8 @@ void mainLoop (void) {
 	int inactivityCheckCounter = 0;
 	
 	startUp();
+	check_new_sd_flash();
+
 /*
 	ret = tbOpen((LPSTR)"a:\\\\user\\africa-my-africa.a18",O_RDWR);		
 	SACMGet_A1800FAT_Mode(ret,100);
@@ -531,6 +529,7 @@ void mainLoop (void) {
 			// this assume that stopped means end of audio file
 			// todo: this should be checking end action for CtnrFile (doesn't exist yet)
 			context.isStopped = TRUE;
+			markEndPlay(getRTCinSeconds());
 			flushLog();			
 			if (GREEN_LED_WHEN_PLAYING) {
 				setLED(LED_GREEN,FALSE);
@@ -547,12 +546,11 @@ void mainLoop (void) {
 					insertSound(getFileFromBlock(insertBlock),insertBlock,FALSE);
 			}
 		}
-		keyResponse();
 		if (++inactivityCheckCounter > 100) {
 			checkInactivity(!context.isStopped && !context.isPaused);
 			inactivityCheckCounter = 0;
 		}
-
+		keyResponse();
 	} // end of while(1) loop
 }
 
@@ -1012,7 +1010,7 @@ static void loadPackage(int pkgType, const char * pkgName) {
 	if ((pkgType == PKG_SYSTEM) && (pkgName == NULL)) {
 		context.package = &pkgSystem;
 		pkg = context.package;
-	} else if ((pkgType == PKG_USER) && (pkgName[1] != '_')) {  //todo: move '_' and maybe position 1 to config
+	} else if ((pkgType == PKG_DEFAULT) || ((pkgType == PKG_USER) && (pkgName[0] != '^'))) {  //todo: move '_' and maybe position 1 to config
 		context.package = &pkgDefault;
 		pkg = context.package;
 		//overwrite last filename with new one -- strlen(template's filename) > strlen(standard getPkgNumber())

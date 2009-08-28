@@ -4,12 +4,6 @@
 #include "./Reprog/USB_Flash_reprog.h"
 #include "./Application\TalkingBook\Include\util.h"
 
-#define SD_FW_DIR  "a:\\\\System\\Firmware\\"
-#define UPDATE_FN    "Update\\System.bin"
-#define ATTEMPTED_FN "Update\\Attempted.bin"
-#define PREV_FN      "Archive\\Previous.bin"
-#define CURRENT_FN 	 "Archive\\Current.bin"
-
 void
 FlashReprogLomem(flash *fp, unsigned int *buf)
 {

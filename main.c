@@ -35,8 +35,6 @@ int main (void)
 	
 #ifdef USBRP
 	
-	check_new_sd_flash();
-
 	CLOCK_RATE = 8;  // start with 24MHz clock
 	SetSystemClockRate(CLOCK_RATE);
 

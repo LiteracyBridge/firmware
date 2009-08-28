@@ -1,14 +1,4 @@
-#include "./system/include/system_head.h"
-#include "./driver/include/driver_head.h"
-#include "./component/include/component_head.h"
-#include "./Reprog/USB_Flash_reprog.h"
-#include "./Application\TalkingBook\Include\util.h"
-
-#define SD_FW_DIR  "a:\\\\System\\Firmware\\"
-#define UPDATE_FN    "Update\\System.bin"
-#define ATTEMPTED_FN "Update\\Attempted.bin"
-#define PREV_FN      "Archive\\Previous.bin"
-#define CURRENT_FN 	 "Archive\\Current.bin"
+#include "./Application\TalkingBook\Include\SD_reprog.h"
 
 void Check_flash_reprog();
 void NewCurrent();
@@ -61,19 +51,23 @@ FlashReprogHimem(flash *fp)
 void
 NewCurrent()
 {
-	char prev[128] = SD_FW_DIR;
-	char cur [128] = SD_FW_DIR;
-	char att [128] = SD_FW_DIR;
+	char prev[128];
+	char cur [128];
+	char att [128];
+
+	strcpy(prev,FIRMWARE_PATH);
+	strcpy(cur,FIRMWARE_PATH);
+	strcpy(att,FIRMWARE_PATH);
 	
 	strcat(prev,PREV_FN);
 	strcat(cur,CURRENT_FN);
 	strcat(att,ATTEMPTED_FN);
 	
-	unlink(prev);
-	rename(cur, prev);
+	unlink((LPSTR)prev);
+	rename((LPSTR)cur, (LPSTR)prev);
 			// move Attempt to Current
-	unlink(cur);
-	rename(att, cur);
+	unlink((LPSTR)cur);
+	rename((LPSTR)att, (LPSTR)cur);
 }
 
 /*
@@ -118,19 +112,23 @@ ReprogFailed(flash *fp)
 
 void check_new_sd_flash()
 {
-	int i, ret;
+	int ret;
 	flash  FL = {0};
+	char Flash_fileName[64];
+	char Attempt_fileName[64];
+	char Archive_path[64];
+	int fl_size = USB_Flash_init((flash *)0, 0);
+	int flash_execution_buf[fl_size];
+	char strLog[40];
 	
 	// if following file exists reprogram the flash with it
-	char Flash_fileName[64] = SD_FW_DIR;
+	strcpy(Flash_fileName,FIRMWARE_PATH);
 	// rename the above to Attempted during reprogramming (the file has neither succeeded or failed)
 	// if Attempted exists at powerup reprogramming was interrupted so reprogram Attempted again
 	//   (until it succeeds or fails)
-	char Attempt_fileName[64] = SD_FW_DIR;
+	strcpy(Attempt_fileName,FIRMWARE_PATH);
 	// upon successful reprogramming move Current to Prev, Attempted to Current
 	
-	int fl_size = USB_Flash_init((flash *)0, 0);
-	int flash_execution_buf[fl_size];
 
 	 strcat(Flash_fileName, UPDATE_FN);
 	 strcat(Attempt_fileName, ATTEMPTED_FN);
@@ -146,12 +144,16 @@ void check_new_sd_flash()
 	} else {
 		ret = rename((LPSTR)(Flash_fileName), (LPSTR)(Attempt_fileName));
 	}
-	
+	strcpy(strLog, "Reprogramming with new firmware update");	
+	logString(strLog, ASAP);
+
 	FL.flash_exe_buf = (void *) &flash_execution_buf[0];
 	USB_Flash_init(&FL, 1);
 
-// be sure System\Firmware\Archive exists
-	mkdir("a:\\\\System\\Firmware\\Archive");
+    // be sure System\Firmware\Archive exists
+	strcpy(Archive_path,FIRMWARE_PATH);
+	strcat(Archive_path,"Archive");
+	mkdir((LPSTR)Archive_path);
 	
 	Try_SD_reprog(&FL);
 

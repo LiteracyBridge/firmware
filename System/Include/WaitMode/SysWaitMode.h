@@ -82,5 +82,6 @@ void SysOn2OffHook(void);
 void SysIntoHighSpeed(void);
 void SysIntoWaitMode(void);
 void SysIntoHaltMode(void);
+unsigned int SetSystemClockRate(unsigned int);
 
 #endif

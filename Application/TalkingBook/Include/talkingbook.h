@@ -1,7 +1,7 @@
 #ifndef	__TALKINGBOOK_h__
 #define	__TALKINGBOOK_h__
 
-#define VERSION			"v1.33"
+#define VERSION			"v1.34"
 
 asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 #define APP_IRAM 		__attribute__((section(".APP_IRAM")))
@@ -82,7 +82,7 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 #define TEXT_ACTION_LED_ALL			'A'
 
 // try to become a usb client after USB_CLIENT_POLL_INTERVAL seconds of inactivity
-#define USB_CLIENT_POLL_INTERVAL       5
+// moved to config.txt: #define USB_CLIENT_POLL_INTERVAL       5
 
 // initialize usb hardware & software to become a client but return without running usb serviceloop
 #define USB_CLIENT_SETUP_ONLY          2
@@ -100,7 +100,7 @@ extern int KEY_PLAY, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_SELECT, KEY_STAR
 extern int LED_GREEN, LED_RED, LED_ALL;
 extern int MAX_SPEED, NORMAL_SPEED, SPEED_INCREMENT;
 extern int NORMAL_VOLUME, MAX_VOLUME, VOLUME_INCREMENT;
-extern char *BOOT_PACKAGE, *SYSTEM_PATH, *USER_PATH, *LIST_PATH, *INBOX_PATH, *OUTBOX_PATH;
+extern char *BOOT_PACKAGE, *SYSTEM_PATH, *USER_PATH, *LIST_PATH, *INBOX_PATH, *UPDATE_PATH, *FIRMWARE_PATH, *OUTBOX_PATH;
 extern int MAX_PWR_CYCLES_IN_LOG;
 extern char *SYSTEM_VARIABLE_FILE, *LOG_FILE;
 extern char *LIST_MASTER;
@@ -119,6 +119,6 @@ extern int INACTIVITY_SECONDS;
 extern int MIC_GAIN_NORMAL, MIC_GAIN_HEADPHONE;
 extern char *CONTROL_TEMPLATE;
 extern char *MACRO_FILE;
-extern int VOLTAGE_SAMPLE_FREQ_SEC;
+extern int VOLTAGE_SAMPLE_FREQ_SEC, USB_CLIENT_POLL_INTERVAL;
 extern int LOG_WARNINGS, LOG_KEYS;
 #endif

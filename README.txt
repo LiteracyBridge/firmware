@@ -56,3 +56,11 @@ v1.33
 - added copyOutbox() for usb copy between devices
 - added pause functionality to record feature
 - plays most recently copied package and its category name
+
+v1.34
+- fixed button response problem caused by auto check to become USB client
+- changed INBOX to allow check and copy of system firmware updates -- see config.txt
+  So now new user content and firmware updates can be dropped into \inbox
+  TODO: allow replacement of \system audio files and control txt files
+- only log voltage when stopped or paused (not sure yet if this helps erratic measurements)
+- small code refactoring and cleanup; also moved some #defines to confix.txt

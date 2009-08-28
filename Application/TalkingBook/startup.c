@@ -5,6 +5,7 @@
 #include "Include/parsing.h"
 #include "Include/macro.h"
 #include "Include/sys_counters.h"
+#include "Include/Inbox.h"
 #include "Include/startup.h"
 
 #define SYSTEM_HEAP_SIZE 512	//config file values
@@ -21,7 +22,7 @@ APP_IRAM int KEY_PLAY, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_SELECT, KEY_ST
 APP_IRAM int LED_GREEN, LED_RED, LED_ALL;
 APP_IRAM int MAX_SPEED, NORMAL_SPEED, SPEED_INCREMENT;
 APP_IRAM int NORMAL_VOLUME, MAX_VOLUME, VOLUME_INCREMENT;
-APP_IRAM char *BOOT_PACKAGE, *SYSTEM_PATH, *USER_PATH, *LIST_PATH, *INBOX_PATH, *OUTBOX_PATH;
+APP_IRAM char *BOOT_PACKAGE, *SYSTEM_PATH, *USER_PATH, *LIST_PATH, *INBOX_PATH, *UPDATE_PATH, *FIRMWARE_PATH, *OUTBOX_PATH;
 APP_IRAM int MAX_PWR_CYCLES_IN_LOG;
 APP_IRAM char *SYSTEM_VARIABLE_FILE, *LOG_FILE;
 APP_IRAM char *LIST_MASTER;
@@ -40,7 +41,7 @@ APP_IRAM int INACTIVITY_SECONDS;
 APP_IRAM int MIC_GAIN_NORMAL, MIC_GAIN_HEADPHONE;
 APP_IRAM char *CONTROL_TEMPLATE;
 APP_IRAM char *MACRO_FILE;
-APP_IRAM int VOLTAGE_SAMPLE_FREQ_SEC;
+APP_IRAM int VOLTAGE_SAMPLE_FREQ_SEC, USB_CLIENT_POLL_INTERVAL;
 APP_IRAM int LOG_WARNINGS, LOG_KEYS;
 APP_IRAM unsigned int CLOCK_RATE;
 
@@ -94,8 +95,10 @@ static char * addTextToSystemHeap (char *line) {
 	length = (lineCursor - line + 1);
 	startingHeap = cursorSystemHeap;
 	cursorSystemHeap = startingHeap + length;
-	if (cursorSystemHeap-systemHeap >= SYSTEM_HEAP_SIZE)
+	if (cursorSystemHeap-systemHeap >= SYSTEM_HEAP_SIZE) {
+		logString(line,ASAP);
 		logException(15,0,USB_MODE); //todo:system heap is full
+	}
 	strcpy(startingHeap,line);
 	return startingHeap;
 }
@@ -147,6 +150,8 @@ static void loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"USER_PATH")) USER_PATH=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"LIST_PATH")) LIST_PATH=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"INBOX_PATH")) INBOX_PATH=addTextToSystemHeap(value);
+				else if (!strcmp(name,(char *)"UPDATE_PATH")) UPDATE_PATH=addTextToSystemHeap(value);
+				else if (!strcmp(name,(char *)"FIRMWARE_PATH")) FIRMWARE_PATH=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"OUTBOX_PATH")) OUTBOX_PATH=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"LOG_FILE")) LOG_FILE=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"LIST_MASTER")) LIST_MASTER=addTextToSystemHeap(value);
@@ -179,6 +184,7 @@ static void loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"CONTROL_TEMPLATE")) CONTROL_TEMPLATE=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"MACRO_FILE")) MACRO_FILE=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"VOLTAGE_SAMPLE_FREQ_SEC")) VOLTAGE_SAMPLE_FREQ_SEC=strToInt(value);
+				else if (!strcmp(name,(char *)"USB_CLIENT_POLL_INTERVAL")) USB_CLIENT_POLL_INTERVAL=strToInt(value);
 				else if (!strcmp(name,(char *)"LOG_WARNINGS")) LOG_WARNINGS=strToInt(value);
 				else if (!strcmp(name,(char *)"LOG_KEYS")) LOG_KEYS=strToInt(value);
 				else if (!strcmp(name,(char *)"CLOCK_RATE")) {

@@ -21,9 +21,9 @@
 
 #include ".\Component\FS\usb_host\USB_Host_Constant.h"
 #include ".\Component\FS\usb_host\USBHostMSDC.h"
-#include ".\Application\Talkingbook\Include\device.h"
 #include ".\Application\Talkingbook\Include\talkingbook.h"
-
+#include ".\Application\Talkingbook\Include\device.h"
+#include ".\Application\Talkingbook\Include\containers.h"
 
 //unsigned int R_Write_protect = 0;//add by haoyu for no err
 extern unsigned int	_Nand_ErasePhysicalBlock(unsigned long BlockAddr);
@@ -142,7 +142,7 @@ str_USB_Lun_Info 	*FP_USB_Lun_Define[N_USB_LUN];
 int SystemIntoUDisk(unsigned int serviceloop)
 {
 	extern flash *RHM_FlashPtr; //RHM , *FP_RHM_FlashPtr;
-	int ret,i;
+	int i;
 #ifdef USBRP
 	int fl_size = USB_Flash_init((flash *)0, 0);
 	flash FL;
@@ -160,12 +160,9 @@ int SystemIntoUDisk(unsigned int serviceloop)
 	
 #endif
 	SysDisableWaitMode(3);
-
 	SetSystemClockRate(32);
 
-
 	if(serviceloop) {
-		int j;
 		R_NAND_Present=0;
 		MaxLUN = 0;
 		R_SDC_Present=1;
@@ -188,6 +185,10 @@ int SystemIntoUDisk(unsigned int serviceloop)
 			USB_ServiceLoop(0);
 			if(R_USB_State_Machine > 0 && R_USB_State_Machine <= SCSI_CSW_Stage) {
 				goto xxx;
+			} else {
+				context.keystroke = keyCheck(0);
+				if (context.keystroke)
+					break;
 			}
 		}
 		if (tmp == 0 && R_USB_State_Machine == 0) {
@@ -205,9 +206,17 @@ int SystemIntoUDisk(unsigned int serviceloop)
 		}
 	}
 xxx:
-	setLED(LED_GREEN,FALSE);
-	setLED(LED_RED,TRUE);
-
+	if (LED_GREEN)
+		setLED(LED_GREEN,FALSE);
+	else // for USB before reading config file, or if config corrupted
+		setLED(0x040,FALSE);		
+	if (LED_RED)
+		setLED(LED_RED,TRUE);
+	else // for USB before reading config file, or if config corrupted
+		setLED(0x200,TRUE);		
+	
+	//TODO: log entering USB device mode
+	
 	USB_ServiceLoop(1);
 
 	*P_USBD_Config=0x00;
@@ -221,12 +230,13 @@ xxx:
 	
 	SetSystemClockRate(CLOCK_RATE);
 
-	R_USB_State_Machine == 0xf5f5; //debug
+	R_USB_State_Machine == 0xf5f5; //CS: THIS LOOKS LIKE A BUG -- A TEST; NOT AN ASSIGNMENT!
 	RHM_FlashPtr = 0;
 	
-	setLED(LED_RED,FALSE);
-//	ProcessInbox();
-	checkInactivity(TRUE); // count being in usb as active
+	if (LED_RED)
+		setLED(LED_RED,FALSE);
+	else // for USB before reading config file, or if config corrupted
+		setLED(0x200,FALSE);		
 
 	return 0;
 }
@@ -257,48 +267,6 @@ void USB_Insert_TimeOut(void)
 }
 
 ///////////////////////////////////////////////////////////
-
-int SystemIntoUSB(unsigned int USBHorD_Flag)
-{
-	int trials, x;
-	const int maxTrials = 20;
-	
-	if(USBHorD_Flag == USB_Host){
-		
-//		SysIntoHighSpeed();
-		SetSystemClockRate(16);  //48MHz for Host mode
-
-		setLED(LED_GREEN,FALSE);
-		for (trials = 0; trials < maxTrials; trials++) {
-			setLED(LED_RED,TRUE);
-			x = _devicemount(1); 
-			setLED(LED_RED,FALSE);
-			if (x == C_USBDevicesmountOK)
-				break;
-			wait (1000);			
-		}
-		if (trials < maxTrials) {
-			setLED(LED_GREEN,TRUE);
-			wait(1000);
-			USBHost_Flag = C_USBDevicesmountOK;
-			//  cbs:USB_HostProcess();
-			//  unmount USB devices;  
-			if(_deviceunmount(1) != 0x00)
-				USBHost_Flag = C_USBDiskPlugOut;
-			else
-				USBHost_Flag = C_USBDevicesUnmount;
-			*P_USBH_Config = 0;
-			*P_USBH_INTEN  = 0;		
-		}	
-		
-		SetSystemClockRate(CLOCK_RATE);
-
-	}else if(USBHorD_Flag == USB_Device){
-		SystemIntoUDisk(1);	
-	}
-
-	return 0;
-}
 
 int setUSBHost(BOOL enter) {
 	int trials, x;
