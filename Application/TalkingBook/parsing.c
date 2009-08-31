@@ -761,6 +761,20 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 							}
 						}
 					}
+					charCursor = strstr(line,"APP"); //TODO: handle all this in a const array of application strings
+					if (!charCursor)
+					    charCursor = strstr(line,"app"); 
+					if (charCursor) {
+						if ((charCursor = strchr(line,DELIMITER))) {
+							charCursor++;
+							if (strstr(line,APP_QUIZ_PLAY_STR)) 
+								pkg->app_type = APP_QUIZ_PLAY;
+							else if (strstr(line,APP_QUIZ_REC_STR)) 
+								pkg->app_type = APP_QUIZ_REC;
+							else
+								pkg->app_type = APP_CUSTOM;
+						}
+					}
 				}
 				// parse line if ended with \n or if last line of last buffer	
 				switch (*line) {

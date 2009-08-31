@@ -8,6 +8,11 @@
 #define PKG_APP			2
 #define PKG_MSG			3
 #define PKG_VARIABLE	4
+
+#define APP_CUSTOM		0
+#define APP_QUIZ_PLAY   1
+#define APP_QUIZ_REC 	2
+
 #define MAX_FILES		60
 #define MAX_BLOCKS		90
 #define MAX_STATES		180   // should always be 2 x MAX_BLOCKS
@@ -140,6 +145,7 @@ struct Action {
 struct CtnrPackage {
 	int idxName;  //reference to Heap index; same as directory name for "OTHER content" (anything non-system audio received from elsewhere)
 	int pkg_type; // see defined values (PKG_SYS, PKG_APP, PKG_MSG)
+	int app_type; // e.g. APP_QUIZ_PLAY, APP_QUIZ_REC, and APP_CUSTOM
     CtnrFile tempFile; // used for playing list names and package titles
 	CtnrFile files[MAX_FILES]; 
 	CtnrBlock blocks[MAX_BLOCKS];
