@@ -1,7 +1,7 @@
 #ifndef	__TALKINGBOOK_h__
 #define	__TALKINGBOOK_h__
 
-#define VERSION			"v1.34"
+#define VERSION			"v1.35"
 
 asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 #define APP_IRAM 		__attribute__((section(".APP_IRAM")))
@@ -13,17 +13,19 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 // DONT FORGET TO CHANGE #define DEVBOARD and /Driver/IOKey/IOKeyScan.asm file
 
 // TODO LIST
-//   * registry
-//     -- handle universal content categories
+//   * have ProcessInbox() handle copying new files (or new versions of existing files) to \system dir
+//     This could be done by using a variant of copyCWD to copy in all new files for /system/* or /config.txt
+//     This would also substitute for the current one-off check of System.bin by adding a folder /system/Firmware/Update/System.bin
+//   * registry/categories
+//     -- allow categories to be numbers, which means rethinking category/subcategory case distinction
+//     -- handle universal content SUB-categories
 //     -- handle user voice tag categories
 //   * user recordings
 //     -- more advanced: multiple choice creation without computer (voice prompts to create) 
 //   * limit recording from filling memory card (use config setting for min free space)
 //   * tag as private
 //   * usb host mode
-//     -- tie to 'share' option
-//     -- primary scenario is another talkingbook device; 
-//     -- secondary scenario is usb flash drive
+//     -- secondary scenario is Talking Book updating from Outbox
 //   * power saving
 //     -- low power sleep mode when no activity
 //     -- consider trying lower proc speed (and check if affects catching block start/end events)
@@ -31,9 +33,14 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 //   * recorded user feedback
 //   * detecting held buttons vs. tapped buttons (could be used with SHIFT-like modifier)
 //   * write a working malloc/free
-
+//   * rewrite containers so that DEFAULT package doesn't alloc same # of files/blocks/actions as others
+//   * allow pause before block begins (e.g. A$:3,[newblock] for a 3-sec delay)
 #define PKG_CONTROL_FILENAME	"control.txt"
-#define QUIZ_DATA_FILENAME		"quiz.dat"
+#define APP_DATA_FILENAME		"data.bin"
+#define SYS_PKG_CHAR		'%'
+#define APP_PKG_CHAR		'^'
+#define CATEGORY_DELIM		'#'
+#define CATEGORY_DELIM_STR	"#"
 #define FORWARD_SKIP	0x0000
 #define BACKWARD_SKIP	0x0001
 #define DELIMITER		':'
@@ -104,9 +111,8 @@ extern char *BOOT_PACKAGE, *SYSTEM_PATH, *USER_PATH, *LIST_PATH, *INBOX_PATH, *U
 extern int MAX_PWR_CYCLES_IN_LOG;
 extern char *SYSTEM_VARIABLE_FILE, *LOG_FILE;
 extern char *LIST_MASTER;
-extern char *PKG_NUM_PREFIX, *LIST_NUM_PREFIX, *CUSTOM_PKG_PREFIX,*QUIZ_PKG_PREFIX;
+extern char *PKG_NUM_PREFIX, *LIST_NUM_PREFIX, *CUSTOM_PKG_PREFIX;
 extern char *AUDIO_FILE_EXT;
-extern char *CONTROL_EXT;
 extern int DEFAULT_TIME_PRECISION;
 extern int DEFAULT_REWIND;
 extern int INSERT_SOUND_REWIND_MS;

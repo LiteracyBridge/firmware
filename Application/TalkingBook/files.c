@@ -207,7 +207,6 @@ int createControlFromTemplate(char *packageName, char * filename) {
 
 	strcpy(file1,USER_PATH);
 	strcat(file1,filename);
-	strcat(file1,CONTROL_EXT);
 	wHandle = tbOpen((LPSTR)file1,O_CREAT|O_TRUNC|O_WRONLY);
 	rHandle = tbOpen((LPSTR)CONTROL_TEMPLATE,O_RDONLY);
 	if (rHandle == -1 || wHandle == -1)
@@ -243,7 +242,7 @@ int createControlFromTemplate(char *packageName, char * filename) {
 }
 */
 
-int findDeleteStringFromFile(char *path, char *filename, char * string, BOOL shouldDelete) {
+int findDeleteStringFromFile(char *path, char *filename, const char * string, BOOL shouldDelete) {
 	//todo: create a version without a roundtrip between single/dbl-byte chars	
 	int rHandle, wHandle, ret, i, bytesToWrite;
 	char tempFilename[10];
@@ -251,12 +250,14 @@ int findDeleteStringFromFile(char *path, char *filename, char * string, BOOL sho
 	char *rCursor;
 	char tempLine[100];
 	int unequal;
-
+	char find[PATH_LENGTH];
+	
+	LBstrncpy(find,string,PATH_LENGTH);
 	buffer[READ_LENGTH] = '\0';
 	
-	ret = strcspn(string,"\x0a\x0d");
+	ret = strcspn(find,"\x0a\x0d");
 	if (ret > 0) 
-		*(string + ret) = '\0';
+		*(find + ret) = '\0';
 
 	ret = -1;
 	if(path != NULL) {
@@ -413,8 +414,8 @@ INT16 tbOpen(LPSTR path, INT16 open_flag) {
 
 	if (handle < 0)
 		logException(23,(const char *)path,RESET);
+	*/
 	return handle;
-*/
 }
 
 INT16 tbChdir(LPSTR path) {

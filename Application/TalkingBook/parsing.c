@@ -374,13 +374,16 @@ static BOOL parseCreateAction (char *line, Action *action, int *actionCount, cha
 					logException(6,strAction,0);  // todo:invalid internal reference in control track file
 				}
 			} else { // explicit name
-				if (*strAction == '#') {
-					action[*actionCount].aux = PKG_SYSTEM;
+				if (*strAction == SYS_PKG_CHAR) {
+					action[*actionCount].aux = PKG_SYS;
+					strAction++;
+				} else if (*strAction == APP_PKG_CHAR) {
+					action[*actionCount].aux = PKG_APP;
 					strAction++;
 				} else
-					action[*actionCount].aux = PKG_USER;
+					action[*actionCount].aux = PKG_MSG;
 				cursor = strchr(strAction,'>');
-				if (cursor == strAction) // "<#>" indicates current system package
+				if (cursor == strAction) // "<%>" indicates current system package
 					action[*actionCount].destination = -1;
 				else {
 					if (cursor)

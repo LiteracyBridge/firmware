@@ -20,7 +20,7 @@ extern APP_IRAM int idxLogBuffer;
 static int ProcessA18(struct f_info *, struct newContent *);
 static int ProcessDir(char *, struct newContent *);
 static int copyCWD(char *);
-static int updateCategory(char *, char *, char *);
+static int updateCategory(char *, char *, char);
 
 #define D_NOTDIR (D_FILE | D_RDONLY | D_HIDDEN | D_SYSTEM | D_ARCHIVE)
 
@@ -36,6 +36,7 @@ ProcessInbox(void)
 	int ret, r1, len, fret;
 	struct newContent nc;	
 
+	setLED(LED_RED,TRUE);
 	fret = 0;
 	nc.newAudioFileCat[0] = nc.newAudioFileName[0] = 0;
 	nc.newAudioDirCat [0] = nc.newAudioDirName [0] = 0;
@@ -61,14 +62,14 @@ ProcessInbox(void)
 	//  process *.a18 files in inbox - category in file name after # OR IN *.txt
 	//  this case may never happen
 	//
-		strcpy(strLog, INBOX_PATH);
-		len = strlen(strLog);
+		//strcpy(strLog, INBOX_PATH);
+		//len = strlen(strLog);
 		strcpy(fbuf, INBOX_PATH);
 		strcat(fbuf, "*");
 		strcat(fbuf,AUDIO_FILE_EXT);
 		ret =_findfirst(fbuf, &file_info, D_ALL);
 		while (ret >= 0) {
-			strcpy(&strLog[len], file_info.f_name);
+			strcpy(strLog, file_info.f_name);
 			logString(strLog,BUFFER);		
 			fret += ProcessA18(&file_info, &nc);
 			ret = unlink(file_info.f_name);					
@@ -90,6 +91,7 @@ ProcessInbox(void)
 					continue;
 				
 				strcpy(fname, file_info.f_name);	
+				logString(fname,BUFFER);		
 				fret += ProcessDir(fname, &nc);
 				  // RHM: something I do below makes this necessary
 				  //      upon return after _findnext returns -1 even if there are more dirs
@@ -121,24 +123,34 @@ ProcessInbox(void)
 		ret = chdir((LPSTR)savecwd);
 		// Set up current list to position at one of the newly copied messages and queue it up to play
 		// This point is only reached if there was not a successful copy made of new firmware
-		if (nc.newAudioFileCat[0]) {
+		if (nc.newAudioFileCat[0])
+			strcpy(fbuf,nc.newAudioFileCat);
+		else if (nc.newAudioDirCat[0])
+			strcpy(fbuf,nc.newAudioDirCat);
+		else
+			fbuf[0] = 0;
+		if (fbuf[0]) {
 			pkgSystem.lists[0].currentFilePosition = -1;
 			strList = getCurrentList(&pkgSystem.lists[0]);
-			while (strcmp(strList,(char *)nc.newAudioFileCat)) {
+			while (strcmp(strList,fbuf)) {
 				strList = getPreviousList(&pkgSystem.lists[0]);
 			}
 			pkgSystem.lists[1].currentFilePosition = -1;
 			strList = getCurrentList(&pkgSystem.lists[1]);
-			
-			insertSound(getListFile((char *)nc.newAudioFileCat),NULL,TRUE);
-	
+			if (strList[0] == APP_PKG_CHAR) {
+				strList++;
+				context.queuedPackageType = PKG_APP;  
+			} else
+				context.queuedPackageType = PKG_MSG;
+			insertSound(getListFile(fbuf),NULL,TRUE);	
 			context.queuedPackageNameIndex = replaceStack(strList,&pkgSystem);
-			context.queuedPackageType = PKG_USER;  // todo: this should apply to quizes too
 		} 
 	}	// end of if: length of INBOX_PATH must be > 1
+	setLED(LED_RED,FALSE);
+	checkInactivity(TRUE);
 }
 
-int 
+static int 
 ProcessA18(struct f_info *fip, struct newContent *pNC)
 {
 	char strLog[80], savecwd[80];
@@ -147,7 +159,7 @@ ProcessA18(struct f_info *fip, struct newContent *pNC)
 	int ret, len, len_fnbase, i, catidx, subidx, cat_base, fret;
 
 	category[0] = subcategory[0] = 0;
-	cat_base = strIndex(fip->f_name, '#');
+	cat_base = strIndex(fip->f_name, CATEGORY_DELIM);
 	catidx = subidx = fret = 0;
 	if(cat_base >= 1) {	// category info in filename
 		strcpy(fnbase, fip->f_name);
@@ -206,7 +218,7 @@ ProcessA18(struct f_info *fip, struct newContent *pNC)
 		do {
 			strcpy(buffer,USER_PATH);
 			getrevdPkgNumber(fnbase,TRUE);
-			strcat(fnbase,"#");
+			strcat(fnbase,CATEGORY_DELIM_STR);
 			strcat(fnbase, category);
 			strcat(fnbase, subcategory);
 			strcat(buffer, fnbase);
@@ -236,7 +248,7 @@ ProcessA18(struct f_info *fip, struct newContent *pNC)
 
 }
 
-int 
+static int 
 ProcessDir(char *dirname, struct newContent *pNC)
 {
 	struct f_info file_info;
@@ -262,7 +274,7 @@ ProcessDir(char *dirname, struct newContent *pNC)
 	
 	fret = 1;
 	
-	cat_base = strIndex(dirname, '#');
+	cat_base = strIndex(dirname, CATEGORY_DELIM);
 
 	if(cat_base >= 1) {	// category info in filename
 		strcpy(fnbase, dirname);
@@ -283,8 +295,7 @@ ProcessDir(char *dirname, struct newContent *pNC)
 		}
 	category[catidx] = 0;
 	subcategory[subidx] = 0;
-	}
-	
+	}	
 	//copyCWD(USER_PATH);
 	strcpy(buffer,INBOX_PATH);
 	strcat(buffer,dirname);
@@ -310,13 +321,11 @@ ProcessDir(char *dirname, struct newContent *pNC)
 		strcpy(category, "OTHER");  // "O"
 	
 // TODO: - currently doing nothing with subcategory
-// TODO: - other prefixs to process besides ^
 	
-	ret = updateCategory(category, fnbase, "^");
+	ret = updateCategory(category, fnbase, APP_PKG_CHAR);
 	
 	if(pNC->newAudioDirCat[0] == 0) {
 		strcpy(pNC->newAudioDirCat, category);
-		strcat(pNC->newAudioDirName, "^");
 		strcat(pNC->newAudioDirName, fnbase);
 	}
 
@@ -327,9 +336,9 @@ ProcessDir(char *dirname, struct newContent *pNC)
 	return (fret);
 }
 
-int copyCWD(char *todir)
+static int copyCWD(char *todir)
 {
-	char to[80], cwd[80], strLog[80];
+	char to[PATH_LENGTH], cwd[PATH_LENGTH], strLog[PATH_LENGTH];
 	int ret, r1, tobase, fret;
 	struct f_info fi;
 	
@@ -337,12 +346,7 @@ int copyCWD(char *todir)
 	fret = 0;
 	
 	ret = getcwd(cwd, sizeof(cwd)-1);
-//  NOTE: getcwd returns a:\inbox\  not a:\\inbox\ as in INBOX_PATH 
-//        hence the -1 below
-	strcat(to, &cwd[strlen(INBOX_PATH)-1]);  // chop off a:\inbox\ - 
-//	ret = strIndex(to, '#');
-//	if(ret > 1)
-//		to[ret] = 0;
+	strcat(to, &cwd[strlen(INBOX_PATH)]);  // chop off a:\inbox\ - 
 	ret = mkdir(to);  // this will fail for a:\\lists (used with lists), but that's ok
 	strcat(to, "\\");
 	tobase = strlen(to);
@@ -360,30 +364,26 @@ int copyCWD(char *todir)
 
 		if(fi.f_attrib & D_DIR) {
 			strcpy(&to[tobase], fi.f_name);
-//			r1 = strIndex(to, '#');
-//			if(r1 > 1)		// remove category info from dir name
-//				to[r1] = 0;
 			r1 = mkdir(to);
 			r1 = chdir(fi.f_name);
 			r1 = copyCWD(to);
 		} else {
 			strcat(to,fi.f_name);
-// TODO: if unconditional copy need to unlink, then _copy
-//			unlink(to);
+			// unconditional copy (deletes any same filename)
+			unlink(to);
 			strcpy(strLog, to);
 			logString(strLog, BUFFER);
-			if(!fileExists(to)) {
-				r1 = _copy(fi.f_name, to); //TODO: should this be a rename?
+			if(1) {  // was: if(!fileExists(to))
+				r1 = rename(fi.f_name, to); //was: _copy
 				fret++;
 			}
-			r1 = unlink(fi.f_name);
+			//was: r1 = unlink(fi.f_name);
 		}
 	}
-	
 	return(fret);	
 }
 
-int updateCategory(char *category, char *fnbase, char *prefix)
+static int updateCategory(char *category, char *fnbase, char prefix)
 {
 	char buffer[80], tmpbuf[80];
 	int ret;
@@ -410,8 +410,8 @@ int updateCategory(char *category, char *fnbase, char *prefix)
 	}
 	
 	if(prefix) {
-		strcpy(tmpbuf, prefix);
-		strcat(tmpbuf, fnbase);
+		tmpbuf[0] = prefix;
+		strcpy(tmpbuf+1, fnbase);
 	} else {
 		strcpy(tmpbuf,fnbase);
 	}
@@ -419,17 +419,8 @@ int updateCategory(char *category, char *fnbase, char *prefix)
 	ret = findDeleteStringFromFile((char *)NULL, buffer, tmpbuf, 0);
 		
 //  append the basename to the proper .txt file in lists
-//
-//		int appendStringToFile(const char * filename, char * strText)
-	if(prefix) {
-		strcpy(tmpbuf, prefix);
-		strcat(tmpbuf, fnbase);
-	} else {
-		strcpy(tmpbuf,fnbase);
-	}
 	if (ret == -1)
 		ret = insertStringInFile(buffer,tmpbuf,0);
-//		ret = appendStringToFile(buffer, tmpbuf); 
 	return ret;
 }
 

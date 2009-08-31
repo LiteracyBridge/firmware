@@ -33,8 +33,6 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 	prefixCursor = NULL;
 	if (0 == strncmp(packageName,CUSTOM_PKG_PREFIX,strlen(CUSTOM_PKG_PREFIX)))
 		prefixCursor = CUSTOM_PKG_PREFIX;
-	else if (0 == strncmp(packageName,QUIZ_PKG_PREFIX,strlen(QUIZ_PKG_PREFIX)))
-		prefixCursor = QUIZ_PKG_PREFIX;
 	if (prefixCursor) {
 		cursor = (char *)packageName + strlen(prefixCursor);
 		strcpy(path,to);

@@ -42,15 +42,15 @@ static int getFileHandle (CtnrFile *newFile) {
 	} 
 	else { // not a list or last recording; just a normal file	
 		switch (pkg->pkg_type) {
-			case PKG_SYSTEM:
+			case PKG_SYS:
 				strcpy(sTemp,SYSTEM_PATH);
 				break;		
-			case PKG_USER:
+			case PKG_APP:
 				strcpy(sTemp, USER_PATH);
 				strcat(sTemp,pkg->strHeapStack + pkg->idxName);
 				strcat(sTemp,"\\");
 				break;
-			case PKG_DEFAULT:	
+			case PKG_MSG:	
 				strcpy(sTemp, USER_PATH);
 				break;
 		}
@@ -307,7 +307,7 @@ int createRecording(char *pkgName, int fromHeadphone, char *listName) {
 void markEndPlay(long timeNow) {
 	long timeDiff;
 	char log[30];
-		
+	
 	timeDiff = timeNow - context.packageStartTime;
 	context.packageStartTime = 0;
 	strcpy (log,"TIME PLAYED (secs): ");

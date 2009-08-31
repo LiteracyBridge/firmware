@@ -440,7 +440,8 @@ int checkInactivity(BOOL resetTimer) {
 	APP_IRAM static unsigned long lastActivity;
 	APP_IRAM static unsigned long lastUSBCheck;
 	char stringLog[20];
-	
+	int justLogged;
+		
 	currentTime = getRTCinSeconds();	
 	logVoltage(currentTime);
 
@@ -462,11 +463,12 @@ int checkInactivity(BOOL resetTimer) {
 	} 
 	
 	// log time every minute to track power-on time
-	if (!(currentTime % 60) && context.isStopped) {
+	if (!justLogged && !(currentTime % 60) && context.isStopped) {
 		longToDecimalString(getRTCinSeconds(),stringLog,5);
-		logString(stringLog,ASAP);	
-	}
-		
+		logString(stringLog,ASAP);
+		justLogged = 1;	
+	} else if (justLogged  && (currentTime % 60) && context.isStopped)
+		justLogged = 0;		
 
 // this tries each pass after USB_CLIENT_POLL_INTERVAL second of inactivity, too frequent??
 	if(USB_CLIENT_POLL_INTERVAL && (currentTime - lastUSBCheck > USB_CLIENT_POLL_INTERVAL)) {
@@ -507,7 +509,7 @@ void mainLoop (void) {
 	Snd_SACM_PlayFAT(ret, C_CODEC_AUDIO1800);	
 */
 
-	loadPackage(PKG_SYSTEM,BOOT_PACKAGE);
+	loadPackage(PKG_SYS,BOOT_PACKAGE);
 	
 	insertSound(&pkgSystem.files[BEEP_SOUND_FILE_IDX],NULL,TRUE); 
 
@@ -529,7 +531,8 @@ void mainLoop (void) {
 			// this assume that stopped means end of audio file
 			// todo: this should be checking end action for CtnrFile (doesn't exist yet)
 			context.isStopped = TRUE;
-			markEndPlay(getRTCinSeconds());
+			if (context.packageStartTime)
+				markEndPlay(getRTCinSeconds());
 			flushLog();			
 			if (GREEN_LED_WHEN_PLAYING) {
 				setLED(LED_GREEN,FALSE);
@@ -610,19 +613,21 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			} else {
 				if (list->listType == LIST_OF_PACKAGES) {
 					// load package
-					context.queuedPackageType = PKG_USER;
-					destination = replaceStack(filename,&pkgSystem);
+					switch (filename[0]) {
+						case SYS_PKG_CHAR:
+							context.queuedPackageType = PKG_SYS;
+							destination = replaceStack(filename+1,&pkgSystem);
+							break;
+						case APP_PKG_CHAR:
+							context.queuedPackageType = PKG_APP;
+							destination = replaceStack(filename+1,&pkgSystem);
+							break;
+						default:
+							context.queuedPackageType = PKG_MSG;
+							destination = replaceStack(filename,&pkgSystem);
+							break;
+					}
 					context.queuedPackageNameIndex = destination;
-//					if (0 == strncmp(filename,CUSTOM_PKG_PREFIX,strlen(CUSTOM_PKG_PREFIX))) {
-//						destination = replaceStack(filename+strlen(CUSTOM_PKG_PREFIX),&pkgSystem);
-//						context.queuedPackageType = PKG_USER;
-//					} else if (0 == strncmp(filename,QUIZ_PKG_PREFIX,strlen(QUIZ_PKG_PREFIX))) {
-//						destination = replaceStack(filename+strlen(QUIZ_PKG_PREFIX),&pkgSystem);
-//						context.queuedPackageType = PKG_QUIZ;
-//					} else {
-//						destination = replaceStack(filename,&pkgSystem);
-//						context.queuedPackageType = PKG_DEFAULT;
-//					}
 				} else { // list->listType != LIST_OF_PACKAGES
 					// play sound of subject
 					newFile = getListFile(filename);
@@ -634,8 +639,21 @@ static void takeAction (Action *action, EnumAction actionCode) {
 		
 		case JUMP_PACKAGE:
 			if (aux == PKG_VARIABLE) {
-				aux = PKG_USER;
-				destination = replaceStack(getCurrentList(&pkgSystem.lists[destination]),&pkgSystem);
+				strcpy(filename,getCurrentList(&pkgSystem.lists[destination]));
+				switch (filename[0]) {
+					case SYS_PKG_CHAR:
+						aux = PKG_SYS;
+						destination = replaceStack(filename+1,&pkgSystem);
+						break;
+					case APP_PKG_CHAR:
+						aux = PKG_APP;
+						destination = replaceStack(filename+1,&pkgSystem);
+						break;
+					default:
+						aux = PKG_MSG;
+						destination = replaceStack(filename,&pkgSystem);
+						break;
+				}
 			}
 			context.queuedPackageType = aux;
 			context.queuedPackageNameIndex = destination;
@@ -791,7 +809,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			do {
 				strcpy(filename,USER_PATH);
 				getPkgNumber(filename+strlen(USER_PATH),TRUE);
-				strcat(filename,(const char *)"#");
+				strcat(filename,(const char *)CATEGORY_DELIM_STR);
 				strcat(filename,cursor); // adds current listname to new recording name
 				cursor2 = filename + strlen(filename);
 				strcat(filename,AUDIO_FILE_EXT);
@@ -804,7 +822,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			if (ret != -1) {
 				destination = replaceStack(filename,context.package);
 				context.queuedPackageNameIndex = destination;
-				context.queuedPackageType = PKG_DEFAULT;
+				context.queuedPackageType = PKG_MSG;
 			} else
 				logException(28,"recording failed",RESET); //todo: add voice error msg?
 			break;	
@@ -1000,17 +1018,17 @@ static void loadPackage(int pkgType, const char * pkgName) {
 	timeNow = getRTCinSeconds();
 	if (context.packageStartTime)
 		markEndPlay(timeNow);
-	if (pkgType != PKG_SYSTEM)
+	if (pkgType != PKG_SYS)
 		markStartPlay(timeNow,pkgName);
 
 	context.lastFile = NULL;
 	context.queuedPackageType = PKG_NONE; //reset takeAction's JUMP_PACKAGE or JUMP_PACKAGE
 	context.returnPackage = NULL;		
 
-	if ((pkgType == PKG_SYSTEM) && (pkgName == NULL)) {
+	if ((pkgType == PKG_SYS) && (pkgName == NULL)) {
 		context.package = &pkgSystem;
 		pkg = context.package;
-	} else if ((pkgType == PKG_DEFAULT) || ((pkgType == PKG_USER) && (pkgName[0] != '^'))) {  //todo: move '_' and maybe position 1 to config
+	} else if (pkgType == PKG_MSG) { 
 		context.package = &pkgDefault;
 		pkg = context.package;
 		//overwrite last filename with new one -- strlen(template's filename) > strlen(standard getPkgNumber())
@@ -1019,13 +1037,13 @@ static void loadPackage(int pkgType, const char * pkgName) {
 	else {
 		//SET PKG, DIR, AND OPEN FILE
 		switch (pkgType) {
-			case PKG_SYSTEM:
+			case PKG_SYS:
 				context.package = &pkgSystem;
 				strcpy(filePath,SYSTEM_PATH);
 				strcat(filePath,pkgName);
 				strcat(filePath,".txt"); //todo: move to config
 				break;
-			case PKG_USER:
+			case PKG_APP:
 				context.package = &pkgUser;
 				strcpy(filePath,USER_PATH);
 				strcat(filePath,pkgName);
@@ -1046,10 +1064,10 @@ static void loadPackage(int pkgType, const char * pkgName) {
 		else
 			logException(11,pkgName,USB_MODE);			
 		parseControlFile(filePath, pkg);
-		if (context.package->pkg_type == PKG_QUIZ) {
-			strcpy(fileName,QUIZ_DATA_FILENAME);  //todo: move to config
-			// loadQuizData(filePath);
-		} 
+//		if (context.package->pkg_type == PKG_QUIZ) {
+//			strcpy(fileName,QUIZ_DATA_FILENAME);  //todo: move to config
+//			loadQuizData(filePath);
+//		} 
 	}
 	// initialize context
 	// primarily used to reset system list position when returning from user content

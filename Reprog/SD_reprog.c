@@ -1,3 +1,4 @@
+#include "./Application\TalkingBook\Include\device.h"
 #include "./Application\TalkingBook\Include\SD_reprog.h"
 
 void Check_flash_reprog();
@@ -144,6 +145,7 @@ void check_new_sd_flash()
 	} else {
 		ret = rename((LPSTR)(Flash_fileName), (LPSTR)(Attempt_fileName));
 	}
+	setLED(LED_RED,TRUE);
 	strcpy(strLog, "Reprogramming with new firmware update");	
 	logString(strLog, ASAP);
 
@@ -156,6 +158,8 @@ void check_new_sd_flash()
 	mkdir((LPSTR)Archive_path);
 	
 	Try_SD_reprog(&FL);
+
+	setLED(LED_RED,FALSE);
 
 	__asm__("irq on");
 	__asm__("fiq on");

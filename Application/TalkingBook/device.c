@@ -201,7 +201,7 @@ int keyCheck(int longCheck) {
 		if (keystroke == KEY_SELECT) {
 			MACRO_FILE = 0; // terminate macro
 			keystroke = 0;
-			//loadPackage(PKG_SYSTEM,BOOT_PACKAGE); // go to home	
+			//loadPackage(PKG_SYS,BOOT_PACKAGE); // go to home	
 		} else
 			keystroke = nextMacroKey();
 	}

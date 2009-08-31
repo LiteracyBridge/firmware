@@ -12,7 +12,7 @@ VER=3.0.1
 #PROP Default_Filter=
 USEPARAM=FALSE
 PARAM=
-EXPORT=3
+EXPORT=0
 # Begin Source File
 SOURCE=System.rc
 USEPARAM=FALSE
@@ -139,6 +139,13 @@ EXPORT=3
 # End Source File
 # Begin Source File
 SOURCE=Application\TalkingBook\util.c
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Application\TalkingBook\quiz.c
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -474,7 +481,7 @@ EXPORT=3
 #PROP Default_Filter=
 USEPARAM=FALSE
 PARAM=
-EXPORT=3
+EXPORT=66400
 # Begin Source File
 SOURCE=System.h
 USEPARAM=FALSE
@@ -609,11 +616,18 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=.\Application\TalkingBook\Include\SD_reprog.h
+SOURCE=Application\TalkingBook\Include\SD_reprog.h
 USEPARAM=FALSE
 PARAM=
 ID=
-EXPORT=6645601
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Application\TalkingBook\Include\quiz.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
 # End Source File
 # End Group
 # Begin Group "External Dependencies"
@@ -909,7 +923,7 @@ EXPORT=0
 #PROP Default_Filter=
 USEPARAM=FALSE
 PARAM=
-EXPORT=3
+EXPORT=0
 # Begin Source File
 SOURCE=System.rc
 USEPARAM=FALSE
@@ -1036,6 +1050,13 @@ EXPORT=3
 # End Source File
 # Begin Source File
 SOURCE=Application\TalkingBook\util.c
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Application\TalkingBook\quiz.c
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -1371,7 +1392,7 @@ EXPORT=3
 #PROP Default_Filter=
 USEPARAM=FALSE
 PARAM=
-EXPORT=3
+EXPORT=66400
 # Begin Source File
 SOURCE=System.h
 USEPARAM=FALSE
@@ -1506,11 +1527,18 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=.\Application\TalkingBook\Include\SD_reprog.h
+SOURCE=Application\TalkingBook\Include\SD_reprog.h
 USEPARAM=FALSE
 PARAM=
 ID=
-EXPORT=6645601
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Application\TalkingBook\Include\quiz.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
 # End Source File
 # End Group
 # Begin Group "External Dependencies"

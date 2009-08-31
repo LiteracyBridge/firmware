@@ -3,13 +3,11 @@
 
 #include "lists.h"
 
-#define TEMPLATE_CHAR	'#'
 #define PKG_NONE		0
-#define PKG_SYSTEM		1
-#define PKG_USER		2
-#define PKG_DEFAULT		3
+#define PKG_SYS			1
+#define PKG_APP			2
+#define PKG_MSG			3
 #define PKG_VARIABLE	4
-#define PKG_QUIZ		5
 #define MAX_FILES		60
 #define MAX_BLOCKS		90
 #define MAX_STATES		180   // should always be 2 x MAX_BLOCKS
@@ -141,7 +139,7 @@ struct Action {
 
 struct CtnrPackage {
 	int idxName;  //reference to Heap index; same as directory name for "OTHER content" (anything non-system audio received from elsewhere)
-	int pkg_type; // see defined values (SYSTEM, OWNER, OTHER)
+	int pkg_type; // see defined values (PKG_SYS, PKG_APP, PKG_MSG)
     CtnrFile tempFile; // used for playing list names and package titles
 	CtnrFile files[MAX_FILES]; 
 	CtnrBlock blocks[MAX_BLOCKS];

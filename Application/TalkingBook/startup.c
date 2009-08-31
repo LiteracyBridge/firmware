@@ -26,9 +26,8 @@ APP_IRAM char *BOOT_PACKAGE, *SYSTEM_PATH, *USER_PATH, *LIST_PATH, *INBOX_PATH, 
 APP_IRAM int MAX_PWR_CYCLES_IN_LOG;
 APP_IRAM char *SYSTEM_VARIABLE_FILE, *LOG_FILE;
 APP_IRAM char *LIST_MASTER;
-APP_IRAM char *PKG_NUM_PREFIX, *LIST_NUM_PREFIX, *CUSTOM_PKG_PREFIX,*QUIZ_PKG_PREFIX;
+APP_IRAM char *PKG_NUM_PREFIX, *LIST_NUM_PREFIX, *CUSTOM_PKG_PREFIX;
 APP_IRAM  char *AUDIO_FILE_EXT;
-APP_IRAM char *CONTROL_EXT;
 APP_IRAM int DEFAULT_TIME_PRECISION;
 APP_IRAM int DEFAULT_REWIND;
 APP_IRAM int INSERT_SOUND_REWIND_MS;
@@ -157,12 +156,13 @@ static void loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"LIST_MASTER")) LIST_MASTER=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"MAX_PWR_CYCLES_IN_LOG")) MAX_PWR_CYCLES_IN_LOG=strToInt(value);
 				else if (!strcmp(name,(char *)"SYSTEM_VARIABLE_FILE")) SYSTEM_VARIABLE_FILE=addTextToSystemHeap(value);
+				// can we make the following prefixes be single-byte chars? 
+				// it would make it easier to check list items starts with CUSTOM_PKG_PREFIX
 				else if (!strcmp(name,(char *)"PKG_NUM_PREFIX")) PKG_NUM_PREFIX=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"LIST_NUM_PREFIX")) LIST_NUM_PREFIX=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"CUSTOM_PKG_PREFIX")) CUSTOM_PKG_PREFIX=addTextToSystemHeap(value);
-				else if (!strcmp(name,(char *)"QUIZ_PKG_PREFIX")) QUIZ_PKG_PREFIX=addTextToSystemHeap(value);
+				
 				else if (!strcmp(name,(char *)"AUDIO_FILE_EXT")) AUDIO_FILE_EXT=addTextToSystemHeap(value);
-				else if (!strcmp(name,(char *)"CONTROL_EXT")) CONTROL_EXT=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"DEFAULT_TIME_PRECISION")) DEFAULT_TIME_PRECISION=strToInt(value);
 				else if (!strcmp(name,(char *)"DEFAULT_REWIND")) DEFAULT_REWIND=strToInt(value);
 				else if (!strcmp(name,(char *)"INSERT_SOUND_REWIND_MS")) INSERT_SOUND_REWIND_MS=strToInt(value);
@@ -202,6 +202,6 @@ static void loadConfigFile(void) {
 
 static void loadDefaultPackage(void) {
 	
-	pkgDefault.pkg_type = PKG_DEFAULT;
+	pkgDefault.pkg_type = PKG_MSG;
 	parseControlFile (CONTROL_TEMPLATE, &pkgDefault);
 }
