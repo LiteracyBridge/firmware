@@ -570,7 +570,7 @@ Locate: CODE in "USB_ID.obj" at 8B000
 ;Align: CODE in "USB_ID.obj" with 0 
 Locate: CODE in "d2d_copy.obj" at 8B300
 ;Align: CODE in "d2d_copy.obj" with 0 
-Locate: CODE in "nls_ascii.obj" at 8B800
+Locate: CODE in "nls_ascii.obj" at 8B8B0
 ;Align: CODE in "nls_ascii.obj" with 0 
 Locate: CODE in "nls_codepage.obj" at 8BA00
 ;Align: CODE in "nls_codepage.obj" with 0 
@@ -654,7 +654,7 @@ Locate: NB_DATA in "pkg_ops.obj" at A38A0
 ;Align: NB_DATA in "pkg_ops.obj" with 0 
 Locate: CODE in "mainLoop.obj" at A3A00
 ;Align: CODE in "mainLoop.obj" with 0 
-Locate: CODE in "startup.obj" at A5880
+Locate: CODE in "startup.obj" at A5900
 ;Align: CODE in "startup.obj" with 0 
 Locate: NB_DATA in "containers.obj" at A6740
 ;Align: NB_DATA in "containers.obj" with 0 
@@ -694,7 +694,7 @@ Locate: CODE in "SD_reprog_finish.obj" at AE000
 ;Align: OVERLAP_SACM_RAM_BLOCK in "SACM_Decode" of "GPL162002_RecordPen_v001.lib" with 0 
 ;Locate: LB_OSIRQ in "isr.obj" at F863 
 ;Align: LB_OSIRQ in "isr.obj" with 0 
-;Locate: APP_IRAM in "timeline.obj" at 451F6  linkat 5324 
+;Locate: APP_IRAM in "timeline.obj" at 451FE  linkat 5324 
 ;Align: APP_IRAM in "timeline.obj" with 0 
 ;Locate: RAM in "fsglobalvar" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 1AB0 
 ;Align: RAM in "fsglobalvar" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 

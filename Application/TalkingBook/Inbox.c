@@ -29,6 +29,10 @@ static int updateCategory(char *, char *, char);
 void
 ProcessInbox(void)
 {
+	// TODO: handle duplicate packages and unique name issue
+	// TODO: if copying 1+ files and all of them have the same name as existing files (rename returns -1), then
+	//       return a message saying nothing new was copied.  If just one thing was new, that is the one that should be played.
+	
 	struct f_info file_info;
 	char strLog[PATH_LENGTH], savecwd[PATH_LENGTH];
 	char fbuf[PATH_LENGTH], fbuf2[PATH_LENGTH], fname[FILE_LENGTH];
@@ -130,6 +134,7 @@ ProcessInbox(void)
 		else
 			fbuf[0] = 0;
 		if (fbuf[0]) {
+			context.package = &pkgSystem; // in case paused on content
 			pkgSystem.lists[0].currentFilePosition = -1;
 			strList = getCurrentList(&pkgSystem.lists[0]);
 			while (strcmp(strList,fbuf)) {

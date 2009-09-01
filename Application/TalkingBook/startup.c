@@ -31,7 +31,7 @@ APP_IRAM  char *AUDIO_FILE_EXT;
 APP_IRAM int DEFAULT_TIME_PRECISION;
 APP_IRAM int DEFAULT_REWIND;
 APP_IRAM int INSERT_SOUND_REWIND_MS;
-APP_IRAM int HYPERLINK_SOUND_FILE_IDX, DELETED_FILE_IDX, BEEP_SOUND_FILE_IDX, BIP_SOUND_FILE_IDX, SPEAK_SOUND_FILE_IDX, 
+APP_IRAM int HYPERLINK_SOUND_FILE_IDX, DELETED_FILE_IDX, PRE_COPY_FILE_IDX, POST_COPY_FILE_IDX, BEEP_SOUND_FILE_IDX, BIP_SOUND_FILE_IDX, SPEAK_SOUND_FILE_IDX, 
     INACTIVITY_SOUND_FILE_IDX, ERROR_SOUND_FILE_IDX, EMPTY_LIST_FILE_IDX;
 APP_IRAM int BLOCK_START_LEADER, BLOCK_END_LEADER;
 APP_IRAM long BIT_RATE;
@@ -174,6 +174,8 @@ static void loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"ERROR_SOUND_FILE_IDX")) ERROR_SOUND_FILE_IDX=strToInt(value);
 				else if (!strcmp(name,(char *)"EMPTY_LIST_FILE_IDX")) EMPTY_LIST_FILE_IDX=strToInt(value);
 				else if (!strcmp(name,(char *)"DELETED_FILE_IDX")) DELETED_FILE_IDX=strToInt(value);
+				else if (!strcmp(name,(char *)"PRE_COPY_FILE_IDX")) PRE_COPY_FILE_IDX=strToInt(value);
+				else if (!strcmp(name,(char *)"POST_COPY_FILE_IDX")) POST_COPY_FILE_IDX=strToInt(value);
 				else if (!strcmp(name,(char *)"BLOCK_START_LEADER")) BLOCK_START_LEADER=strToInt(value);
 				else if (!strcmp(name,(char *)"BLOCK_END_LEADER")) BLOCK_END_LEADER=strToInt(value);
 				else if (!strcmp(name,(char *)"BIT_RATE")) BIT_RATE=strToLong(value);

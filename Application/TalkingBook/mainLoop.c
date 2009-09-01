@@ -663,8 +663,12 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			stop();
 			tempList = &context.package->lists[destination];
 			getListFilename(filename,destination,FALSE);
-			cursor = getCurrentList(tempList);			
-			d2dCopy((const char *)filename,(const char *)cursor);
+			cursor = getCurrentList(tempList);
+			if (PRE_COPY_FILE_IDX)
+				insertSound(&pkgSystem.files[PRE_COPY_FILE_IDX],NULL,TRUE);  
+			ret = d2dCopy((const char *)filename,(const char *)cursor);
+			if (ret == 0 && POST_COPY_FILE_IDX) 
+				insertSound(&pkgSystem.files[POST_COPY_FILE_IDX],NULL,TRUE); 
 			newBlock = &context.package->blocks[aux];
 			newTime = newBlock->startTime;
 			reposition = TRUE;

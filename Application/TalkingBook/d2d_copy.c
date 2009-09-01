@@ -11,13 +11,14 @@ extern int setUSBHost(BOOL enter);
 static int testCopy(char *, char *, int);
 
 int d2dCopy(const char * filenameList, const char * packageName) {
-	int ret;
+	int ret, retCopy;
 	char to[PATH_LENGTH], strLog[PATH_LENGTH],filename[PATH_LENGTH], path[PATH_LENGTH];
 	char *cursor, *prefixCursor;
 	int maxTrials = 5;
 	struct f_info file_info;
 	long timeNow;
 
+	retCopy = 0;
 	setLED(LED_GREEN,FALSE);
 	timeNow = getRTCinSeconds();
 	markEndPlay(timeNow);
@@ -54,9 +55,13 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 			strcat(to,cursor); // to get directory name
 			strcat(to,"\\");
 			strcat(to,file_info.f_name);
-			testCopy(filename,to,maxTrials); //was unlink((LPSTR)filename);
-			if (ret != -1) 
-				logString(file_info.f_name,BUFFER);
+			retCopy = testCopy(filename,to,maxTrials); //was unlink((LPSTR)filename);
+			if (retCopy == -1) {
+				strcpy(strLog,(const char *)"Copy Failed! ");
+				strcat(strLog,filename);
+			} else
+				strcpy(strLog,filename);
+			logString(strLog,BUFFER);
 			ret = _findnext(&file_info);
 		}
 	}
@@ -70,41 +75,38 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 		strcat(filename,AUDIO_FILE_EXT);
 		strcat(to,cursor);
 		strcat(to,AUDIO_FILE_EXT);
-		ret = testCopy(filename,to,maxTrials); //was unlink((LPSTR)filename);
+		retCopy = testCopy(filename,to,maxTrials); //was unlink((LPSTR)filename);
+		if (retCopy == -1) {
+			strcpy(strLog,(const char *)"Copy Failed! ");
+			strcat(strLog,filename);
+		} else
+			strcpy(strLog,filename);
+		logString(strLog,BUFFER);
 	}
-	// this needs to be part of inbox processing
-/*	if(filenameList[0]) {
-		strcpy(to,LIST_PATH);
-		to[0] = 'b'; //change a:\\ drive to b:\\ drive
-		strcat(to,filenameList);
-		strcpy(temp,package); // since appendStringToFile destroys string
-		appendStringToFile(to,temp); //destroys temp
-	}
-*/
 	strcpy(filename,LIST_PATH); 
 	strcat(filename,filenameList);
 	strcat(filename,"*");
 	strcat(filename,AUDIO_FILE_EXT);
 	ret =_findfirst((LPSTR)filename, &file_info, D_FILE);
-	while (ret >= 0) {
+	while (ret >= 0 && (retCopy == 0)) {
 		strcpy(filename,LIST_PATH);
 		strcat(filename,file_info.f_name);
 		strcpy(to,INBOX_PATH);
 		to[0] = 'b'; //change a:\\ drive to b:\\ drive
 		strcat(to,LIST_PATH+3); // +3 removes the "a:\" but keeps "\lists\", for example
 		strcat(to,file_info.f_name);
-		ret = testCopy(filename,to,maxTrials); //was unlink((LPSTR)filename);
-		if (ret != -1) 
-			logString(file_info.f_name,BUFFER);
+		retCopy = testCopy(filename,to,maxTrials); //was unlink((LPSTR)filename);
+		if (retCopy == -1) {
+			strcpy(strLog,(const char *)"Copy Failed! ");
+			strcat(strLog,file_info.f_name);
+		} else
+			strcpy(strLog,file_info.f_name);
+		logString(strLog,BUFFER);
 		ret = _findnext(&file_info);
 	}
-
-	if (!ret) 
-		insertSound(&pkgSystem.files[DELETED_FILE_IDX],NULL,TRUE);  // todo: give it a unique sound
-	else
-		ret = -1;
 	
 	setUSBHost(FALSE);
+	return retCopy;
 }
 
 static int testCopy(char * from, char * to, int maxTrials) {
