@@ -647,7 +647,7 @@ EXPORT=3
 #PROP Default_Filter=
 USEPARAM=FALSE
 PARAM=
-EXPORT=3
+EXPORT=0
 # Begin Source File
 SOURCE=system\include\system_head.inc
 USEPARAM=FALSE
@@ -1558,7 +1558,7 @@ EXPORT=3
 #PROP Default_Filter=
 USEPARAM=FALSE
 PARAM=
-EXPORT=3
+EXPORT=0
 # Begin Source File
 SOURCE=system\include\system_head.inc
 USEPARAM=FALSE
