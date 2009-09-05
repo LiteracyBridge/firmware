@@ -104,9 +104,14 @@ ProcessInbox(void)
 		}
 			
 		r1 = ProcessDir("lists", &nc);
-	
-		// check for firmware update
+		
+//      copy any system updates from UPDATE_PATH to a:\ 
 		strcpy(fbuf,UPDATE_PATH);
+		strcpy(fbuf2, "a:\\");
+		copydir(fbuf, fbuf2);
+		
+		// check for firmware update
+		strcpy(fbuf,UPDATE_PATH);		
 		strcat(fbuf,SYSTEM_FN);
 		if (fileExists((LPSTR)fbuf)) {
 			strcpy(strLog, "Found firmware update");	
