@@ -547,7 +547,14 @@ int copyfiles(char *fromdir, char *todir)
 			to[len_to]= 0;
 			strcat(from, fi.f_name);
 			strcat(to, fi.f_name);
-			r1 = _copy(from, to);
+			if((lower(from[0]) == 'a') && (lower(to[0]) == 'a')) {
+				unlink(to);
+				r1 = rename(from, to);
+//				if(r1) {	//rename failed??
+//				}
+			} else {
+				r1 = _copy(from, to);
+			}
 		}
 		ret = _findnext(&fi);
 		fret++;
