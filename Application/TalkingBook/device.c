@@ -281,12 +281,36 @@ void setOperationalMode(int newmode)
     //
     // cpu reset on exiting halt mode, so nothing below here executes
   } else if (newmode == P_SLEEP) {
-  	int r = *P_MINT_Ctrl;
-  	r |= 0x5400;  // bits 14,12,10 set , enable port b key change wakeup
+  	int r;
+  	 	
+	*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
+	Log_ClockCtrl();
+	
+  	stop();
+
+	r = *P_MINT_Ctrl; 	
+	r |= 0x1000;  // KC1EN enable IOB1 key change wakeup
   	*P_MINT_Ctrl = r;
+  	
   	*P_IOB_Latch = *P_IOB_Data;	// save current state so change is detected
+  	
     *P_SLEEP = 0xa00a;  // write a00a to sleep register
     //
     // system reset exiting sleep mode, so nothing below executes
   }
 }
+void
+Log_ClockCtrl()
+{
+	char buffer[80];
+ 	unsigned int r1 = (unsigned int)*P_Clock_Ctrl;
+ 	strcpy(buffer, "P_Clock_Ctrl = 0x");
+	longToHexString((long)r1,buffer+strlen(buffer),1);
+	logString(buffer,ASAP);
+	
+ 	strcpy(buffer, "P_IOB_Buffer = 0x");
+ 	r1 = *P_IOB_Buffer;
+	longToHexString((long)r1,buffer+strlen(buffer),1);
+	logString(buffer,ASAP);
+}
+
