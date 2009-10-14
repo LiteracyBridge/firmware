@@ -267,3 +267,26 @@ static void logKeystroke(int intKey) {
 		logString(str,BUFFER);	
 	}
 }
+
+void setOperationalMode(int newmode)
+{
+  if(newmode == P_WAIT) {
+  	SysIntoWaitMode();
+    // when leaving wait mode, next instruction is executed, so we return here
+    return;
+  } else if (newmode == P_HALT) {
+//  	int save_rtc_ctrl = *P_RTC_Ctrl;
+//  	*P_RTC_Ctrl = save_rtc_ctrl & 0x7fff;  // turn off rtc??	
+  	SysIntoHaltMode();
+    //
+    // cpu reset on exiting halt mode, so nothing below here executes
+  } else if (newmode == P_SLEEP) {
+  	int r = *P_MINT_Ctrl;
+  	r |= 0x5400;  // bits 14,12,10 set , enable port b key change wakeup
+  	*P_MINT_Ctrl = r;
+  	*P_IOB_Latch = *P_IOB_Data;	// save current state so change is detected
+    *P_SLEEP = 0xa00a;  // write a00a to sleep register
+    //
+    // system reset exiting sleep mode, so nothing below executes
+  }
+}

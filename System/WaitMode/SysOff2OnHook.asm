@@ -26,7 +26,7 @@
 
 .PUBLIC _SysOff2OnHook
 _SysOff2OnHook:	.PROC
-	__setb P_LCD_Setup,13,R1				//enable lcd module
+//rhm TB has no LCD	__setb P_LCD_Setup,13,R1				//enable lcd module
 	__setb P_TimeBaseC_Ctrl ,13,R1			//set timebasec interrupt
 
 	__setb P_RTC_INT_Ctrl ,0,R1				//set half second

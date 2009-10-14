@@ -9,6 +9,8 @@
 .CODE
 
 _SysWaitLCDFP: .PROC
+	retf   //RHM we have no LCD
+	
 	r1 = [P_LCD_Setup]			//clear LCD FP signal interrupt flag
 	[P_LCD_Setup] = r1
 
