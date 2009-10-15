@@ -6,6 +6,9 @@
 #include "Include/macro.h"
 #include "Include/sys_counters.h"
 #include "Include/Inbox.h"
+#include "Include/audio.h"
+#include "Include/SD_reprog.h"
+#include "Include/mainLoop.h"
 #include "Include/startup.h"
 
 #define SYSTEM_HEAP_SIZE 512	//config file values
@@ -49,6 +52,9 @@ void startUp(void) {
 	char buffer[100];
 	int key;
 
+	CLOCK_RATE = 48;  // set a safe 48MHz as default clock in case of config problem
+	SetSystemClockRate(MAX_CLOCK_SPEED); // to speed up initial startup -- set CLOCK_RATE later
+
 	key = keyCheck(1);  // long keycheck 
 	if (key == 0x02)  // Star button on device
 		setUSBDevice(TRUE);  // allows USB device mode no matter what is on memory card
@@ -75,8 +81,11 @@ void startUp(void) {
 	strcat(buffer,(const char *)" - version " VERSION);
 	logString(buffer,ASAP);
 
-//	IOKey_Initial();	--> this was moved to BodyInit.c 
-//  to flip on a transistor early enough to power the microSD card
+	check_new_sd_flash();
+	loadPackage(PKG_SYS,BOOT_PACKAGE);	
+	insertSound(&pkgSystem.files[BEEP_SOUND_FILE_IDX],NULL,TRUE); 
+	SetSystemClockRate(CLOCK_RATE); // either set in config file or the default 48 MHz set at beginning of startUp()
+	mainLoop();
 }
 
 static char * addTextToSystemHeap (char *line) {
@@ -191,7 +200,7 @@ static void loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"LOG_KEYS")) LOG_KEYS=strToInt(value);
 				else if (!strcmp(name,(char *)"CLOCK_RATE")) {
 					CLOCK_RATE = strToInt(value);
-					SetSystemClockRate(CLOCK_RATE);
+					//SetSystemClockRate(CLOCK_RATE); -- do this after initial setup (e.g. parsing system package)
 				}
 		}
 	}

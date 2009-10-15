@@ -160,7 +160,7 @@ int SystemIntoUDisk(unsigned int serviceloop)
 	
 #endif
 	SysDisableWaitMode(3);
-	SetSystemClockRate(32);
+	SetSystemClockRate(48);
 
 	if(serviceloop) {
 		R_NAND_Present=0;
@@ -186,9 +186,11 @@ int SystemIntoUDisk(unsigned int serviceloop)
 			if(R_USB_State_Machine > 0 && R_USB_State_Machine <= SCSI_CSW_Stage) {
 				goto xxx;
 			} else {
-				context.keystroke = keyCheck(0);
-				if (context.keystroke)
-					break;
+				if (!(j % 50)) {
+					context.keystroke = keyCheck(0);
+					if (context.keystroke)
+						break;
+				}
 			}
 		}
 		if (tmp == 0 && R_USB_State_Machine == 0) {
@@ -274,7 +276,7 @@ int setUSBHost(BOOL enter) {
 	
 
 	if (enter){		
-		SetSystemClockRate(16);  //48MHz for Host mode
+		SetSystemClockRate(48);  //48MHz for Host mode
 		setLED(LED_GREEN,FALSE);
 		for (trials = 0; trials < maxTrials; trials++) {
 			setLED(LED_RED,TRUE);

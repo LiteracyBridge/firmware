@@ -306,12 +306,14 @@ int createRecording(char *pkgName, int fromHeadphone, char *listName) {
 
 void markEndPlay(long timeNow) {
 	long timeDiff;
-	char log[30];
+	char log[40];
 	
 	timeDiff = timeNow - context.packageStartTime;
 	context.packageStartTime = 0;
-	strcpy (log,"TIME PLAYED (secs): ");
+	strcpy (log,"TIME PLAYED: ");
 	longToDecimalString(timeDiff,log+strlen(log),4);
+	strcat(log," sec at VOL=");
+	longToDecimalString((long)getVolume(),log+strlen(log),2);
 	strcat(log,"\x0d\x0a");
 	logString(log,BUFFER);
 }

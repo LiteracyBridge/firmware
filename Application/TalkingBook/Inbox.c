@@ -29,6 +29,7 @@ static int updateCategory(char *, char *, char);
 void
 ProcessInbox(void)
 {
+	// TODO: handle bad received files that might look like 0-byte files (This can lock the device up if played.)
 	// TODO: handle duplicate packages and unique name issue
 	// TODO: if copying 1+ files and all of them have the same name as existing files (rename returns -1), then
 	//       return a message saying nothing new was copied.  If just one thing was new, that is the one that should be played.

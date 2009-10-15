@@ -61,7 +61,7 @@ static int getIndexFromLine(char *line, char *symbolMapStart) {
 //              FWD, BACK, JUMP_TIME, CALL_BLOCK, JUMP_PACKAGE, JUMP_LIST, DELETE, 
 //              ENTER_EXIT_MARKER, VOLUME_UP, VOLUME_DOWN, VOLUME_NORMAL, SPEED_UP, SPEED_DOWN, SPEED_NORMAL,  
 //				USB_MARKER, USB_DEVICE_ON, USB_HOST_ON, USB_DEVICE_OFF, USB_HOST_OFF,  
-//              LED_MARKER, LED_RED_ON, LED_GREEN_ON, LED_ALL_ON, LED_RED_OFF, LED_GREEN_OFF, LED_ALL_OFF};
+//              LED_MARKER, LED_RED_ON, LED_GREEN_ON, LED_ALL_ON, LED_RED_OFF, LED_GREEN_OFF, LED_ALL_OFF, SLEEP};
 
 static int getEventEnumFromChar (char *c) {
 	int ret = -1;
@@ -73,7 +73,7 @@ static int getEventEnumFromChar (char *c) {
 
 static int getActionEnumFromChar (char *c) {
 	int ret = -1;
-	const char *ACTION_CODES = "~.,[)I_PCEEEFBT(<LD_VVVSSS_UUUU_RGARGA";  // '_' is placeholder for marker codes
+	const char *ACTION_CODES = "~.,[)I_PCEEEFBT(<LD_VVVSSS_UUUU_RGARGAZ";  // '_' is placeholder for marker codes
 	// note that E is for rEcord since R should represent Red
 	// only first instance of action code is found, others are placeholders as dealt with below
 	

@@ -17,10 +17,10 @@ extern int adjustSpeed (int, BOOL);
 extern int getVolume(void);
 extern int getSpeed(void);
 extern void setUSBDevice (BOOL);
-extern void logVoltage(long);
+extern void logVoltage(unsigned long);
 extern int keyCheck(int);
 extern int waitForButton(int);
 extern void wait(int);
 extern void resetSystem(void);
-
+extern void setOperationalMode(int);
 #endif

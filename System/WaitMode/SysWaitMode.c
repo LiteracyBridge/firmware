@@ -110,8 +110,11 @@ SetSystemClockRate(unsigned int plln_val)
 {
 	unsigned int clk_state;
 	
-	if(plln_val < 4) plln_val = 4;  //clock rate == 12MHz  (4 * 3)
-	if(plln_val > 32) plln_val = 32; //CLOCK RATE == 96MHz (32 * 3)
+	if(plln_val < 12) plln_val = 12;  //clock rate == 12MHz  
+	if(plln_val > 96) plln_val = 96; //CLOCK RATE == 96MHz 
+
+	//divide by 3 for *P_PLLN 
+	plln_val /= 3;
 		
 	clk_state = *P_Clock_Ctrl;
 	

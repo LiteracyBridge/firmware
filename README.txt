@@ -64,3 +64,15 @@ v1.34
   TODO: allow replacement of \system audio files and control txt files
 - only log voltage when stopped or paused (not sure yet if this helps erratic measurements)
 - small code refactoring and cleanup; also moved some #defines to confix.txt
+
+v1.35
+- early/unfinished work with package types and "application types"
+- config paths now have one backslash not two
+- config CLOCK_RATE now specified in MHz (12-96)
+- fixed bug in v1.34 that didn't use specified addresses in system.lik
+- improved copy UI with better audio instructions in English and Dagaare
+- ProcessInbox() can now copy in any new file, not just user audio and firmware
+- new setOperationalMode() for WAIT/HALT/SLEEP; SLEEP triggered by 'Z' action
+- voltage logging now works well when audio is stopped
+- when logging duration of played audio msg, now shows last volume level
+- blinks green light when inactive for 30 seconds

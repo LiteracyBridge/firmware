@@ -14,4 +14,6 @@
 #define PREV_FN      "Archive\\Previous.bin"
 #define CURRENT_FN 	 "Archive\\Current.bin"
 
+extern void check_new_sd_flash(void);
+
 #endif

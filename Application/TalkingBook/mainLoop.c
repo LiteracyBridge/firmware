@@ -1,3 +1,4 @@
+#include "./system/include/system_head.h"
 #include "Include/talkingbook.h"
 #include "Include/containers.h"
 #include "Include/timeline.h"
@@ -16,7 +17,6 @@
 typedef enum EnumEnterOrExit EnumEnterOrExit;
 enum EnumEnterOrExit {ENTERING, EXITING};
 extern int SystemIntoUDisk(unsigned int);
-extern void check_new_sd_flash(void);
 
 static void processBlockEnterExit (CtnrBlock *, EnumEnterOrExit);
 static void processTimelineJump (int, int);
@@ -30,8 +30,6 @@ static void endOfTimeframe(int, BOOL);
 static void keyResponse(void);
 int checkInactivity(BOOL);
 static void takeAction (Action *, EnumAction);
-static void loadPackage(int, const char *);
-
 
 static EnumAction getStartEndCodeFromTimeframe(int idxTimeframe, EnumBorderCrossing approach, int *actionTime, int *idxAction) {
 	// This function is used by takeAction()'s processing of relative jumps, which must look at relevant start/end actions.
@@ -439,38 +437,43 @@ int checkInactivity(BOOL resetTimer) {
 	APP_IRAM static BOOL warnedUser;
 	APP_IRAM static unsigned long lastActivity;
 	APP_IRAM static unsigned long lastUSBCheck;
+	APP_IRAM static int justLogged;
+	APP_IRAM static BOOL green;
 	char stringLog[20];
-	int justLogged;
 		
 	currentTime = getRTCinSeconds();	
+
 	logVoltage(currentTime);
 
 	if (resetTimer) {
 		lastUSBCheck = lastActivity = currentTime;
 		warnedUser = FALSE;
-	} else if (!warnedUser && currentTime - lastActivity > INACTIVITY_SECONDS) {
-		adjustVolume(MAX_VOLUME-2,FALSE,TRUE);  // todo: add a check to see if earphones are used -- if so, reduce volume
+	} else if (INACTIVITY_SECONDS && !warnedUser && currentTime - lastActivity > INACTIVITY_SECONDS) {
+		adjustVolume(MAX_VOLUME-3,FALSE,TRUE);  // todo: move this -3 to config
+		// todo: add a check to see if earphones are used -- if so, reduce volume
 		insertSound(&pkgSystem.files[INACTIVITY_SOUND_FILE_IDX],NULL,FALSE);
 		restoreVolume(FALSE);
 		lastActivity = currentTime;
-/*
-		*P_WAIT = 0x5005;
-		//GPL16003A Programming Mnnual Section 3.6 says wait 6 NOPs to enter wait mode successfully
-		//6 x asm("nop\n");  // a CPU no-op instruction to pass the time
-*/
-		//setLED(LED_RED,FALSE);
-		//warnedUser = TRUE;
-	} 
-	
+	} else if (currentTime - lastActivity > 30) { //todo: move this to config file
+		// blink green light when paused/stopped to remind that power is on
+		if ((currentTime % 4) == 1) {
+			if (!green) {
+				setLED(LED_GREEN,TRUE);
+				green = TRUE;
+			} 
+		} else if (green) {
+			setLED(LED_GREEN,FALSE);
+			green = FALSE;
+		}		
+	}	
 	// log time every minute to track power-on time
-	if (!justLogged && !(currentTime % 60) && context.isStopped) {
-		longToDecimalString(getRTCinSeconds(),stringLog,5);
+	if (!justLogged && !(currentTime % 60) && (context.isStopped || context.isPaused)) {
+		longToDecimalString(currentTime,stringLog,5);
 		logString(stringLog,ASAP);
 		justLogged = 1;	
-	} else if (justLogged  && (currentTime % 60) && context.isStopped)
+	} else if (justLogged  && (currentTime % 60))
 		justLogged = 0;		
 
-// this tries each pass after USB_CLIENT_POLL_INTERVAL second of inactivity, too frequent??
 	if(USB_CLIENT_POLL_INTERVAL && (currentTime - lastUSBCheck > USB_CLIENT_POLL_INTERVAL)) {
 		int usbret;
 		
@@ -484,15 +487,6 @@ int checkInactivity(BOOL resetTimer) {
 			ProcessInbox();
 		}
 	}
-
-	/*
-	else if (warnedUser && currentTime - lastActivity > 10) {	
-		setLED(LED_RED,TRUE);
-		lastActivity = currentTime;
-		warnedUser = FALSE;
-		*P_HALT = 0x500A;
-	}
-*/
 }
 
 void mainLoop (void) {
@@ -500,19 +494,6 @@ void mainLoop (void) {
 	ListItem *list;
 	int inactivityCheckCounter = 0;
 	
-	startUp();
-	check_new_sd_flash();
-
-/*
-	ret = tbOpen((LPSTR)"a:\\\\user\\africa-my-africa.a18",O_RDWR);		
-	SACMGet_A1800FAT_Mode(ret,100);
-	Snd_SACM_PlayFAT(ret, C_CODEC_AUDIO1800);	
-*/
-
-	loadPackage(PKG_SYS,BOOT_PACKAGE);
-	
-	insertSound(&pkgSystem.files[BEEP_SOUND_FILE_IDX],NULL,TRUE); 
-
 	while(1) {
 		
 		// check if need to load in a new package
@@ -549,7 +530,7 @@ void mainLoop (void) {
 					insertSound(getFileFromBlock(insertBlock),insertBlock,FALSE);
 			}
 		}
-		if (++inactivityCheckCounter > 100) {
+		if (++inactivityCheckCounter > 10) {
 			checkInactivity(!context.isStopped && !context.isPaused);
 			inactivityCheckCounter = 0;
 		}
@@ -763,6 +744,8 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			status = SACM_Status();
 			switch (status) {
 				case 0:
+//					if (context.package->pkg_type != PKG_SYS)
+						markStartPlay(Snd_A1800_GetCurrentTime(),context.package->strHeapStack+context.package->idxName);
 					if (context.idxActiveList == -1) {
 						enterOrExitAllBlocks(context.idxTimeframe,ENTERING);
 						i = getStartingBlockIdxFromTimeline(context.idxTimeframe);
@@ -946,6 +929,10 @@ static void takeAction (Action *action, EnumAction actionCode) {
 				reposition = TRUE;
 			} // context is not system file
 			break;
+		case SLEEP:
+			// call sleep function
+			setOperationalMode((int)P_SLEEP); 
+			break;
 		case NOP:
 			// no operation
 			break;
@@ -1007,7 +994,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 	//todo: maybe for JUMP_BLOCK (not CALL_BLOCK) , allow offsets within a block (stored in first 13 bits of aux)
 }
 
-static void loadPackage(int pkgType, const char * pkgName) {
+void loadPackage(int pkgType, const char * pkgName) {
 	CtnrPackage *pkg;
 	int i, ret;
 	CtnrBlock *block;
@@ -1037,6 +1024,7 @@ static void loadPackage(int pkgType, const char * pkgName) {
 		pkg = context.package;
 		//overwrite last filename with new one -- strlen(template's filename) > strlen(standard getPkgNumber())
 		strcpy(pkg->strHeapStack+pkg->files[0].idxFilename,pkgName);
+		pkg->idxName = pkg->files[0].idxFilename;
 	}
 	else {
 		//SET PKG, DIR, AND OPEN FILE

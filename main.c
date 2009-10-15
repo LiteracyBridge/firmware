@@ -8,7 +8,7 @@
 #include "./system/include/system_head.h"
 #include "./driver/include/driver_head.h"
 #include "./component/include/component_head.h"
-#include "./Application/TalkingBook/Include/mainloop.h"
+#include "./Application/TalkingBook/Include/startup.h"
 
 extern long USB_ISR_PTR;
 extern long USB_INSERT_PTR;
@@ -29,20 +29,12 @@ int main (void)
 	__asm__("irq on");
 	__asm__("fiq on");
 	
-	fs_init();
+	fs_init(); 	// should include call to IOKey_Initial() within BodyInit.c 
+	 			// to flip on a transistor early enough to power the microSD card
+
 	_devicemount(0);
 	ChangeCodePage(UNI_ENGLISH);
-	
-#ifdef USBRP
-	
-	CLOCK_RATE = 8;  // start with 24MHz clock
-	SetSystemClockRate(CLOCK_RATE);
-
-	
-//	SystemIntoUDisk();
-	
-#endif //USBRP
-	
-	mainLoop();
+		
+	startUp();
 	return 0;
 }

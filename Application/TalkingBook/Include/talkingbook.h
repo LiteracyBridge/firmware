@@ -1,7 +1,7 @@
 #ifndef	__TALKINGBOOK_h__
 #define	__TALKINGBOOK_h__
 
-#define VERSION			"v1.35"
+#define VERSION			"v1.35a"
 
 asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 #define APP_IRAM 		__attribute__((section(".APP_IRAM")))
@@ -35,6 +35,7 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 //   * write a working malloc/free
 //   * rewrite containers so that DEFAULT package doesn't alloc same # of files/blocks/actions as others
 //   * allow pause before block begins (e.g. A$:3,[newblock] for a 3-sec delay)
+#define MAX_CLOCK_SPEED			96
 #define PKG_CONTROL_FILENAME	"control.txt"
 #define APP_DATA_FILENAME		"data.bin"
 #define SYS_PKG_CHAR		'%'

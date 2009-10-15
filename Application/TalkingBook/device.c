@@ -12,6 +12,7 @@ extern void KeyScan_ServiceLoop(void);
 extern int SP_GetCh(void);
 
 static void logKeystroke(int);
+static void Log_ClockCtrl(void);
 
 APP_IRAM static int volume, speed;
 APP_IRAM static unsigned long voltage; // voltage sample 
@@ -131,54 +132,58 @@ void setUSBDevice (BOOL set) {
 	}
 }
 
-void logVoltage(long time) {
-	APP_IRAM static long timeLastSample = -1;
-	APP_IRAM static long timeInitialized = -1;
-	APP_IRAM static BOOL wasSampleStarted;
+void logVoltage(unsigned long time) {
+	APP_IRAM static unsigned long timeLastSample = -1;
+	APP_IRAM static unsigned long timeInitialized = -1;
+	APP_IRAM static BOOL wasSampleStarted = FALSE;
 	int i;
 	unsigned int sample;
 	float f;
 	char buffer[40];
 	
-	
+	if (timeLastSample == -1 && timeInitialized == -1) { 
+		*P_ADC_Setup |= 0xc000;  // enable ADBEN and ADCEN
+		*P_MADC_Ctrl &= ~0x05;  // clear CHSEL (channel select)
+		*P_MADC_Ctrl |=  0x02;  // select LINEIN1 
+		timeInitialized = time;
+	}	
 	if (timeLastSample == -1 || time >= (timeLastSample+VOLTAGE_SAMPLE_FREQ_SEC)) {
-		if (timeInitialized == -1) {
+//		if ((context.isStopped || context.isPaused) && timeInitialized == -1) {
 			// need to initialize ADC
-			*P_ADC_Setup |= 0xc000;  // enable ADBEN and ADCEN
-			*P_MADC_Ctrl &= ~0x05;  // clear CHSEL (channel select)
-			*P_MADC_Ctrl |=  0x02;  // select LINEIN1 
-			timeInitialized = time;
-		} else if ((context.isStopped || context.isPaused) && (time > (timeInitialized + 2))) { // 2-3 second delay)
+//			*P_ADC_Setup |= 0xc000;  // enable ADBEN and ADCEN
+//			*P_MADC_Ctrl &= ~0x05;  // clear CHSEL (channel select)
+//			*P_MADC_Ctrl |=  0x02;  // select LINEIN1 
+//			timeInitialized = time;
+//		} else 
+		if ((context.isStopped || context.isPaused) && (time > (timeInitialized + 2))) { // 2-3 second delay)
 			if (!wasSampleStarted) {
 				*P_MADC_Ctrl |= 0x40; // set STRCNV, starting the voltage sample
 				wasSampleStarted = TRUE;
 			} else if (*P_MADC_Ctrl & 0x80) {  // checks CNVRDY (sample is ready)
-				if (!context.isStopped && !context.isPaused) { // began playing in mid-sample - throw out
-					wasSampleStarted = FALSE; // try again next loop
-					timeInitialized = -1;
-				}
-				else {
-					strcpy(buffer,"V:");
-				 	sample = (unsigned int)*P_MADC_Data;
-				 	longToHexString((long)sample,buffer+strlen(buffer),1);
-				 	strcat(buffer," | ");
-				 	sample >>= 4; // only bits 4-15
-					f = sample / (float)0x0fff;
-					sample = (unsigned int) (f * 1000); // to give "xx.x%"
-					longToDecimalString((long)sample,buffer+strlen(buffer),3);
-					i = strlen(buffer);
-					buffer[i+2] = 0;
-					buffer[i+1] = '%';
-					buffer[i] = buffer[i-1];
-					buffer[i-1] = '.'; 
-					logString(buffer,ASAP);
-				 	voltage = sample;
-				 	*P_ADC_Setup &= ~0xc000; // disable ADBEN and ADCEN to save power
-					timeInitialized = -1;
-					timeLastSample = time;
-					wasSampleStarted = FALSE;
-				}
+				strcpy(buffer,"V:");
+			 	sample = (unsigned int)*P_MADC_Data;
+			 	//longToHexString((long)sample,buffer+strlen(buffer),1);
+			 	//strcat(buffer," | ");
+			 	sample >>= 4; // only bits 4-15
+				f = 2 * 3.3 * (sample / (float)0x0fff); // ref = 3.3v; LINE1 measures 1/2 voltage
+				sample = (unsigned int) (f * 100); // to give "x.xx" for total voltage
+				longToDecimalString((long)sample,buffer+strlen(buffer),3);
+				i = strlen(buffer);
+				buffer[i+1] = 0;
+				buffer[i] = buffer[i-1];
+				buffer[i-1] = buffer[i-2];
+				buffer[i-2] = '.'; 
+				logString(buffer,ASAP);
+			 	voltage = sample;
+//			 	*P_ADC_Setup &= ~0xc000; // disable ADBEN and ADCEN to save power
+//				timeInitialized = -1;
+				timeLastSample = time;
+				wasSampleStarted = FALSE;
 			}
+		} else if (!context.isStopped && !context.isPaused && wasSampleStarted) { // began playing in mid-sample - throw out
+			wasSampleStarted = FALSE; // try again next loop
+//		 	*P_ADC_Setup &= ~0xc000; // disable ADBEN and ADCEN to save power
+//			timeInitialized = -1;
 		}		
 	}
 }
@@ -268,40 +273,36 @@ static void logKeystroke(int intKey) {
 	}
 }
 
-void setOperationalMode(int newmode)
-{
-  if(newmode == P_WAIT) {
+void setOperationalMode(int newmode) {
+  if(newmode == (int)P_WAIT) {
+  	// stop();  --- should we see if we can WAIT while paused in an audio file?
   	SysIntoWaitMode();
     // when leaving wait mode, next instruction is executed, so we return here
     return;
-  } else if (newmode == P_HALT) {
+  } else if (newmode == (int)P_HALT) {
+  	stop();
 //  	int save_rtc_ctrl = *P_RTC_Ctrl;
 //  	*P_RTC_Ctrl = save_rtc_ctrl & 0x7fff;  // turn off rtc??	
   	SysIntoHaltMode();
     //
     // cpu reset on exiting halt mode, so nothing below here executes
-  } else if (newmode == P_SLEEP) {
+  } else if (newmode == (int)P_SLEEP) {
   	int r;
   	 	
+  	stop();
 	*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
 	Log_ClockCtrl();
-	
-  	stop();
-
 	r = *P_MINT_Ctrl; 	
 	r |= 0x1000;  // KC1EN enable IOB1 key change wakeup
   	*P_MINT_Ctrl = r;
-  	
-  	*P_IOB_Latch = *P_IOB_Data;	// save current state so change is detected
-  	
+  	*P_IOB_Latch = *P_IOB_Data;	// save current state so change is detected  	
     *P_SLEEP = 0xa00a;  // write a00a to sleep register
-    //
     // system reset exiting sleep mode, so nothing below executes
   }
 }
+
 void
-Log_ClockCtrl()
-{
+Log_ClockCtrl() {
 	char buffer[80];
  	unsigned int r1 = (unsigned int)*P_Clock_Ctrl;
  	strcpy(buffer, "P_Clock_Ctrl = 0x");
