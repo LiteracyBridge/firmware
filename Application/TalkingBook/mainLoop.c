@@ -17,6 +17,8 @@
 typedef enum EnumEnterOrExit EnumEnterOrExit;
 enum EnumEnterOrExit {ENTERING, EXITING};
 extern int SystemIntoUDisk(unsigned int);
+extern APP_IRAM BOOL wasSampleStarted;
+
 
 static void processBlockEnterExit (CtnrBlock *, EnumEnterOrExit);
 static void processTimelineJump (int, int);
@@ -423,7 +425,7 @@ static void keyResponse(void) {
 		processButtonEvent(SELECT);
 	} else if (keystroke == KEY_HOME) {
 		processButtonEvent(HOME);
-	} else if (keystroke == KEY_STAR) {
+	} else if (keystroke == KEY_STAR) {		
 		processButtonEvent(STAR);	
 	} else if (keystroke == KEY_PLUS) {
 		processButtonEvent(PLUS);	
@@ -443,7 +445,7 @@ int checkInactivity(BOOL resetTimer) {
 		
 	currentTime = getRTCinSeconds();	
 
-	logVoltage(currentTime);
+	logVoltage();
 
 	if (resetTimer) {
 		lastUSBCheck = lastActivity = currentTime;
@@ -490,12 +492,17 @@ int checkInactivity(BOOL resetTimer) {
 }
 
 void mainLoop (void) {
+	unsigned int getCurVoltageSample(unsigned long);
 	CtnrBlock *insertBlock;
 	ListItem *list;
 	int inactivityCheckCounter = 0;
 	
 	while(1) {
 		
+		getCurVoltageSample(0L);
+		if(wasSampleStarted)
+			getCurVoltageSample(0L);
+
 		// check if need to load in a new package
 		if (context.queuedPackageType > PKG_NONE) {
 			if (context.queuedPackageNameIndex != -1)
@@ -503,6 +510,7 @@ void mainLoop (void) {
 			else
 				loadPackage(context.queuedPackageType, NULL);
 		}
+		
 		// check for start or end event
 		// todo: do we have to check SACM_Status() to see if stopped or can that be moved into the start/end event processing?
 		if (SACM_Status() && !context.isPaused && 

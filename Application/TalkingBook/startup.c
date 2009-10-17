@@ -46,19 +46,32 @@ APP_IRAM char *MACRO_FILE;
 APP_IRAM int VOLTAGE_SAMPLE_FREQ_SEC, USB_CLIENT_POLL_INTERVAL;
 APP_IRAM int LOG_WARNINGS, LOG_KEYS;
 APP_IRAM unsigned int CLOCK_RATE;
+APP_IRAM int vThresh_1;
 
 
 void startUp(void) {
+	APP_IRAM static unsigned long timeInitialized = -1;
+
 	char buffer[100];
 	int key;
 
 	CLOCK_RATE = 48;  // set a safe 48MHz as default clock in case of config problem
 	SetSystemClockRate(MAX_CLOCK_SPEED); // to speed up initial startup -- set CLOCK_RATE later
 
+// init battery voltage sensing	
+	vThresh_1 = 0;
+	*P_ADC_Setup |= 0x8000;  // enable ADBEN
+	*P_MADC_Ctrl &= ~0x05;  // clear CHSEL (channel select)
+	*P_MADC_Ctrl |=  0x02;  // select LINEIN1 
+	timeInitialized = getRTCinSeconds();
+
+
 	key = keyCheck(1);  // long keycheck 
 	if (key == 0x02)  // Star button on device
 		setUSBDevice(TRUE);  // allows USB device mode no matter what is on memory card
-
+		
+	check_new_sd_flash();
+	
 	loadConfigFile();
 	
 	SysDisableWaitMode(WAITMODE_CHANNEL_A);
@@ -75,6 +88,7 @@ void startUp(void) {
 	}
 	resetRTC();  //  reset before saving anything to disk and running macros
 	saveSystemCounts();
+	timeInitialized = getRTCinSeconds();	// do again as resetRTC above
 
 	strcpy(buffer,"\x0d\x0a" "---------------------------------------------------------\x0d\x0a" "CYCLE "); //cycle number
 	longToDecimalString(systemCounts.powerUpNumber,(char *)(buffer+strlen(buffer)),4);

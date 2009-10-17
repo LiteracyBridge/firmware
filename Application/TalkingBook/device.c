@@ -17,6 +17,9 @@ static void Log_ClockCtrl(void);
 APP_IRAM static int volume, speed;
 APP_IRAM static unsigned long voltage; // voltage sample 
 APP_IRAM static int oldVolume;
+APP_IRAM BOOL wasSampleStarted = FALSE;
+extern APP_IRAM int vThresh_1;
+APP_IRAM  unsigned long timeLastSample = -1;
 
 void resetRTC(void) {
 	*P_Second = 0;
@@ -132,60 +135,72 @@ void setUSBDevice (BOOL set) {
 	}
 }
 
-void logVoltage(unsigned long time) {
-	APP_IRAM static unsigned long timeLastSample = -1;
-	APP_IRAM static unsigned long timeInitialized = -1;
-	APP_IRAM static BOOL wasSampleStarted = FALSE;
+void logVoltage() {
+	unsigned int getCurVoltageSample(unsigned long);
+
 	int i;
 	unsigned int sample;
 	float f;
 	char buffer[40];
+	unsigned long time = getRTCinSeconds();
 	
-	if (timeLastSample == -1 && timeInitialized == -1) { 
-		*P_ADC_Setup |= 0xc000;  // enable ADBEN and ADCEN
-		*P_MADC_Ctrl &= ~0x05;  // clear CHSEL (channel select)
-		*P_MADC_Ctrl |=  0x02;  // select LINEIN1 
-		timeInitialized = time;
-	}	
-	if (timeLastSample == -1 || time >= (timeLastSample+VOLTAGE_SAMPLE_FREQ_SEC)) {
-//		if ((context.isStopped || context.isPaused) && timeInitialized == -1) {
-			// need to initialize ADC
-//			*P_ADC_Setup |= 0xc000;  // enable ADBEN and ADCEN
-//			*P_MADC_Ctrl &= ~0x05;  // clear CHSEL (channel select)
-//			*P_MADC_Ctrl |=  0x02;  // select LINEIN1 
-//			timeInitialized = time;
-//		} else 
-		if ((context.isStopped || context.isPaused) && (time > (timeInitialized + 2))) { // 2-3 second delay)
-			if (!wasSampleStarted) {
-				*P_MADC_Ctrl |= 0x40; // set STRCNV, starting the voltage sample
-				wasSampleStarted = TRUE;
-			} else if (*P_MADC_Ctrl & 0x80) {  // checks CNVRDY (sample is ready)
-				strcpy(buffer,"V:");
-			 	sample = (unsigned int)*P_MADC_Data;
-			 	//longToHexString((long)sample,buffer+strlen(buffer),1);
-			 	//strcat(buffer," | ");
-			 	sample >>= 4; // only bits 4-15
-				f = 2 * 3.3 * (sample / (float)0x0fff); // ref = 3.3v; LINE1 measures 1/2 voltage
-				sample = (unsigned int) (f * 100); // to give "x.xx" for total voltage
-				longToDecimalString((long)sample,buffer+strlen(buffer),3);
-				i = strlen(buffer);
-				buffer[i+1] = 0;
-				buffer[i] = buffer[i-1];
-				buffer[i-1] = buffer[i-2];
-				buffer[i-2] = '.'; 
-				logString(buffer,ASAP);
-			 	voltage = sample;
-//			 	*P_ADC_Setup &= ~0xc000; // disable ADBEN and ADCEN to save power
-//				timeInitialized = -1;
-				timeLastSample = time;
-				wasSampleStarted = FALSE;
-			}
-		} else if (!context.isStopped && !context.isPaused && wasSampleStarted) { // began playing in mid-sample - throw out
-			wasSampleStarted = FALSE; // try again next loop
-//		 	*P_ADC_Setup &= ~0xc000; // disable ADBEN and ADCEN to save power
-//			timeInitialized = -1;
-		}		
+//	if ((context.isStopped || context.isPaused) && (time > (timeInitialized + 2)))     // 2-3 second delay)
+	if ((context.isStopped || context.isPaused))
+	{ 
+			
+		sample = getCurVoltageSample(time);
+		
+		strcpy(buffer,"V:");
+	 	longToHexString(((long)vThresh_1 & 0xffff),buffer+strlen(buffer),1);
+	 	strcat(buffer," | ");
+	 	
+		if(sample == 0xffff) {
+			sample = getCurVoltageSample(time);
+			if(sample == 0xffff)
+				return;
+		}
+		
+		longToDecimalString((long)sample,buffer+strlen(buffer),3);
+		i = strlen(buffer);
+		buffer[i+1] = 0;
+		buffer[i] = buffer[i-1];
+		buffer[i-1] = buffer[i-2];
+		buffer[i-2] = '.'; 
+		logString(buffer,ASAP);				
+	 	voltage = sample;			 	
 	}
+}
+unsigned int
+getCurVoltageSample(unsigned long time)
+{	
+	unsigned ret = 0xffff;
+	
+	if(time == 0L)
+		time = getRTCinSeconds();
+
+	if (!wasSampleStarted) {
+		*P_ADC_Setup |= 0x4000;
+		*P_MADC_Ctrl |= 0x40; // set STRCNV, starting the voltage sample
+		wasSampleStarted = TRUE;
+	} else if (*P_MADC_Ctrl & 0x80) {  // checks CNVRDY (sample is ready)					
+	 	ret = (unsigned int)*P_MADC_Data;
+	 	
+//rhm			 	sample >>= 4; // only bits 4-15
+//rhm				f = 2 * 3.3 * (sample / (float)0x0fff); // ref = 3.3v; LINE1 measures 1/2 voltage
+//rhm				sample = (unsigned int) (f * 100); // to give "x.xx" for total voltage
+
+		ret /= 99;  //RHM heuristically determined to work on my board, replaced 3 lines above
+		
+	 	*P_ADC_Setup &= ~0x4000; // disable ADCEN to save power
+		timeLastSample = time;
+		wasSampleStarted = FALSE;
+		vThresh_1 <<= 1;
+#define V_THRESH 262
+// RHM: above set for testing on my system, change to a meaningful value and move to a header file
+		if(ret < V_THRESH)	// if voltage < 2.62 set a bit in vThresh_1, all ones in vThresh means 16 samples in a row below 
+			vThresh_1 |= 1;
+	}
+	return(ret);
 }
 
 int keyCheck(int longCheck) {

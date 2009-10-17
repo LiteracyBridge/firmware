@@ -1,67 +1,67 @@
 Version: 3.0
 Options: m37
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\Resource.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\app_exception.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\audio.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\containers.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\d2d_copy.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\device.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\files.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\Inbox.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\lists.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\macro.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\mainLoop.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\parsing.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\pkg_ops.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\startup.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\sys_counters.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\timeline.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\util.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\quiz.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\SD.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\FS_user_nos.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\nls_ascii.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\DrvStruct.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\nls_codepage.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\MemPackCopy.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\USB.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\FS_DS.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\SCSI_Table.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\SystemIntoUSB.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\IOKeyScan.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\startup_Data.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\isr.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\ServiceLoop.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\SysWaitMode.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\SysOn2OffHook.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\SysIntoHighSpeed.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\SysIntorWaitMode.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\SysOff2OnHook.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\SysIntoHaltMode.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\SysException.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\ExtMemOper.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\ucBS_Hook.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\main.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\BodyInit.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\libgloss.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\USBD.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\USBD_Drv.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\USB_ID.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\USB_Flash_reprog.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\Flash_reprog_Drv.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\Flash_reprog_boot.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\SD_reprog.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\SD_reprog_finish.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\USBD_Export.obj"
-Obj: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\Space.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\Resource.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\app_exception.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\audio.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\containers.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\d2d_copy.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\device.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\files.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\Inbox.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\lists.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\macro.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\mainLoop.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\parsing.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\pkg_ops.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\startup.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\sys_counters.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\timeline.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\util.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\quiz.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\SD.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\FS_user_nos.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\nls_ascii.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\DrvStruct.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\nls_codepage.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\MemPackCopy.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\USB.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\FS_DS.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\SCSI_Table.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\SystemIntoUSB.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\IOKeyScan.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\startup_Data.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\isr.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\ServiceLoop.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\SysWaitMode.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\SysOn2OffHook.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\SysIntoHighSpeed.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\SysIntorWaitMode.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\SysOff2OnHook.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\SysIntoHaltMode.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\SysException.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\ExtMemOper.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\ucBS_Hook.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\main.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\BodyInit.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\libgloss.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\USBD.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\USBD_Drv.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\USB_ID.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\USB_Flash_reprog.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\Flash_reprog_Drv.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\Flash_reprog_boot.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\SD_reprog.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\SD_reprog_finish.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\USBD_Export.obj"
+Obj: "C:\LiteracyBridge\SVN\v47\Debug\Space.obj"
 Lib: "C:\Program Files\Generalplus\unSPIDE 3.0.1\library\CLib32\lib\CLib1232.lib"
-Lib: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\.\Component\Lib\GPL162002_RecordPen_v001.lib"
-Lib: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\.\Component\Lib\GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"
+Lib: "C:\LiteracyBridge\SVN\v47\.\Component\Lib\GPL162002_RecordPen_v001.lib"
+Lib: "C:\LiteracyBridge\SVN\v47\.\Component\Lib\GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"
 Lib: "C:\Program Files\Generalplus\unSPIDE 3.0.1\library\CMacro\CMacro1232.lib"
-Lib: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\.\Driver\Lib\GPL162002SDDrv_far_V0_2.4.6.lib"
-Lib: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\.\Driver\USB_Host_MSDC\2002_USBH_NOS_FAR_V6_11.lib"
-Lib: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\.\System\Lib\ucBSBudocc0.0.9.lib"
-Output: "C:\Documents and Settings\Cliff Schmidt\My Documents\talkingbook\software\device\trunk\firmware\Debug\System.S37"
+Lib: "C:\LiteracyBridge\SVN\v47\.\Driver\Lib\GPL162002SDDrv_far_V0_2.4.6.lib"
+Lib: "C:\LiteracyBridge\SVN\v47\.\Driver\USB_Host_MSDC\2002_USBH_NOS_FAR_V6_11.lib"
+Lib: "C:\LiteracyBridge\SVN\v47\.\System\Lib\ucBSBudocc0.0.9.lib"
+Output: "C:\LiteracyBridge\SVN\v47\Debug\System.S37"
 Locate: SD_GlobalValue in "DrvSDCInitial" of "GPL162002SDDrv_far_V0_2.4.6.lib" at 1
 ;Align: SD_GlobalValue in "DrvSDCInitial" of "GPL162002SDDrv_far_V0_2.4.6.lib" with 0 
 Locate: GLOBAL_System_SRAM in "IOKeyScan.obj" at 1B
@@ -390,8 +390,6 @@ Locate: CODE in "./rshu4" of "CMacro1232.lib" at 40F39
 ;Align: CODE in "./rshu4" of "CMacro1232.lib" with 0 
 Locate: CODE in "api_fs_fread" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40F6F
 ;Align: CODE in "api_fs_fread" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: CODE in "./cvf2u1" of "CMacro1232.lib" at 40FA5
-;Align: CODE in "./cvf2u1" of "CMacro1232.lib" with 0 
 Locate: CODE in "lseek" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 40FDA
 ;Align: CODE in "lseek" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
 Locate: CODE in "lbl_dos_gettime" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 4100D
@@ -426,8 +424,6 @@ Locate: CODE in "findnext" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 4127F
 ;Align: CODE in "findnext" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
 Locate: CODE in "./string/strcmp" of "CLib1232.lib" at 412A2
 ;Align: CODE in "./string/strcmp" of "CLib1232.lib" with 0 
-Locate: CODE in "./cvu1f2" of "CMacro1232.lib" at 412C5
-;Align: CODE in "./cvu1f2" of "CMacro1232.lib" with 0 
 Locate: CODE in "fsl_get_dpb" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 412E8
 ;Align: CODE in "fsl_get_dpb" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
 Locate: CODE in "close" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 4130A
@@ -524,14 +520,6 @@ Locate: NB_DATA in "api_fs_lfncd" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 
 ;Align: NB_DATA in "api_fs_lfncd" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
 Locate: NB_DATA in "lbl_truename" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" at 41D3C
 ;Align: NB_DATA in "lbl_truename" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib" with 0 
-Locate: IRAM in "DrvUSBHMSDCInitial" of "2002_USBH_NOS_FAR_V6_11.lib" at 42666 linkat 308A
-;Align: IRAM in "DrvUSBHMSDCInitial" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-Locate: IRAM in "OS_USB_Host_Control" of "2002_USBH_NOS_FAR_V6_11.lib" at 42F93 linkat 308F
-;Align: IRAM in "OS_USB_Host_Control" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-Locate: IRAM in "DrvUSBHLUNInit" of "2002_USBH_NOS_FAR_V6_11.lib" at 438BC linkat 3090
-;Align: IRAM in "DrvUSBHLUNInit" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-Locate: IRAM in "OS_USB_Host_SCSI_Data" of "2002_USBH_NOS_FAR_V6_11.lib" at 43FA3 linkat 3081
-;Align: IRAM in "OS_USB_Host_SCSI_Data" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
 Locate: CODE in "containers.obj" at 80000
 ;Align: CODE in "containers.obj" with 0 
 Locate: CODE in "device.obj" at 81000
@@ -618,8 +606,6 @@ Locate: NB_DATA in "nls_ascii.obj" at 8EC00
 ;Align: NB_DATA in "nls_ascii.obj" with 0 
 Locate: NB_DATA in "SD.obj" at 8EE00
 ;Align: NB_DATA in "SD.obj" with 0 
-Locate: IRAM in "Space.obj" at 90000 linkat 3091
-;Align: IRAM in "Space.obj" with 0 
 Locate: NB_DATA in "Space.obj" at 91000
 ;Align: NB_DATA in "Space.obj" with 0 
 Locate: CODE in "main.obj" at 9C800
@@ -654,9 +640,9 @@ Locate: NB_DATA in "pkg_ops.obj" at A38A0
 ;Align: NB_DATA in "pkg_ops.obj" with 0 
 Locate: CODE in "mainLoop.obj" at A3A00
 ;Align: CODE in "mainLoop.obj" with 0 
-Locate: CODE in "startup.obj" at A5900
+Locate: CODE in "startup.obj" at A5A00
 ;Align: CODE in "startup.obj" with 0 
-Locate: NB_DATA in "containers.obj" at A6740
+Locate: NB_DATA in "containers.obj" at A6820
 ;Align: NB_DATA in "containers.obj" with 0 
 Locate: NB_DATA in "mainLoop.obj" at A9E00
 ;Align: NB_DATA in "mainLoop.obj" with 0 
@@ -668,10 +654,20 @@ Locate: FP_USB_Code_ROM in "Flash_reprog_Drv.obj" at AD620
 ;Align: FP_USB_Code_ROM in "Flash_reprog_Drv.obj" with 0 
 Locate: NB_DATA in "Flash_reprog_boot.obj" at ADE00
 ;Align: NB_DATA in "Flash_reprog_boot.obj" with 0 
-Locate: IRAM in "Flash_reprog_boot.obj" at ADF00
-;Align: IRAM in "Flash_reprog_boot.obj" with 0 
 Locate: CODE in "SD_reprog_finish.obj" at AE000
 ;Align: CODE in "SD_reprog_finish.obj" with 0 
+Locate: IRAM in "OS_USB_Host_Control" of "2002_USBH_NOS_FAR_V6_11.lib" at 42F93 linkat 308F
+;Align: IRAM in "OS_USB_Host_Control" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
+Locate: IRAM in "DrvUSBHLUNInit" of "2002_USBH_NOS_FAR_V6_11.lib" at 438BC linkat 3090
+;Align: IRAM in "DrvUSBHLUNInit" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
+Locate: IRAM in "Flash_reprog_boot.obj" at ADF00
+;Align: IRAM in "Flash_reprog_boot.obj" with 0 
+Locate: IRAM in "Space.obj" at 90000 linkat 3091
+;Align: IRAM in "Space.obj" with 0 
+Locate: IRAM in "OS_USB_Host_SCSI_Data" of "2002_USBH_NOS_FAR_V6_11.lib" at 43FA3 linkat 3081
+;Align: IRAM in "OS_USB_Host_SCSI_Data" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
+Locate: IRAM in "DrvUSBHMSDCInitial" of "2002_USBH_NOS_FAR_V6_11.lib" at 42666 linkat 308A
+;Align: IRAM in "DrvUSBHMSDCInitial" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
 ;Locate: unSP_StartUp in "startup_Data.obj" at F800 
 ;Align: unSP_StartUp in "startup_Data.obj" with 0 
 ;Locate: Reserved_SpeechRAM in "Snd_Init" of "GPL162002_RecordPen_v001.lib" at B70 
@@ -694,7 +690,7 @@ Locate: CODE in "SD_reprog_finish.obj" at AE000
 ;Align: OVERLAP_SACM_RAM_BLOCK in "SACM_Decode" of "GPL162002_RecordPen_v001.lib" with 0 
 ;Locate: LB_OSIRQ in "isr.obj" at F863 
 ;Align: LB_OSIRQ in "isr.obj" with 0 
-;Locate: APP_IRAM in "timeline.obj" at 451FE  linkat 5324 
+;Locate: APP_IRAM in "timeline.obj" at 4526D  linkat 5324 
 ;Align: APP_IRAM in "timeline.obj" with 0 
 ;Locate: RAM in "fsglobalvar" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 1AB0 
 ;Align: RAM in "fsglobalvar" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
@@ -714,21 +710,21 @@ Locate: CODE in "SD_reprog_finish.obj" at AE000
 ;Align: CODE in "./string/strcasecmp" of "CLib1232.lib"  with 0 
 ;Locate: CODE in "api_fs_getfsize" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 41F8B 
 ;Align: CODE in "api_fs_getfsize" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
-;Locate: CODE in "api_fs_getftime" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 41FCD 
+;Locate: CODE in "api_fs_getftime" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 40FA5 
 ;Align: CODE in "api_fs_getftime" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
-;Locate: CODE in "OS_USB_Host_ISR" of "2002_USBH_NOS_FAR_V6_11.lib"  at 41FFB 
+;Locate: CODE in "OS_USB_Host_ISR" of "2002_USBH_NOS_FAR_V6_11.lib"  at 41FCD 
 ;Align: CODE in "OS_USB_Host_ISR" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
-;Locate: CODE in "api_fs_getfattr" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 42027 
+;Locate: CODE in "api_fs_getfattr" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  at 412C5 
 ;Align: CODE in "api_fs_getfattr" of "GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib"  with 0 
 ;Locate: CODE in "./ctype/tolower" of "CLib1232.lib"  at 41CD9 
 ;Align: CODE in "./ctype/tolower" of "CLib1232.lib"  with 0 
-;Locate: CODE in "./ctype/isupper" of "CLib1232.lib"  at 42046 
-;Align: CODE in "./ctype/isupper" of "CLib1232.lib"  with 0 
-;Locate: CODE in "./ctype/islower" of "CLib1232.lib"  at 42055 
+;Locate: CODE in "./ctype/islower" of "CLib1232.lib"  at 41FF9 
 ;Align: CODE in "./ctype/islower" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./ctype/isupper" of "CLib1232.lib"  at 42008 
+;Align: CODE in "./ctype/isupper" of "CLib1232.lib"  with 0 
 ;Locate: CODE in "Space.obj" at F982 
 ;Align: CODE in "Space.obj" with 0 
-;Locate: NB_DATA in "Inbox.obj" at 42064 
+;Locate: NB_DATA in "Inbox.obj" at 42017 
 ;Align: NB_DATA in "Inbox.obj" with 0 
 ;Locate: NB_DATA in "sys_counters.obj" at F98D 
 ;Align: NB_DATA in "sys_counters.obj" with 0 
