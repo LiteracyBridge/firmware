@@ -28,7 +28,14 @@ F_System_Initial:
  	[P_IOA_Dir] = r1;	// IOA0-9 are inputs for buttons
  	[P_IOA_Attrib] = r1; 	// rest are set to output high
     r1 = 0xec00			// set IOA[15..0]
- 	[P_IOA_Data] = r1;	
+ 	[P_IOA_Data] = r1;
+//  set up input through IOB
+// 	r1 = [P_IOB_Dir];
+// 	r1 = r1 and 0xFFF8;	
+//	[P_IOB_Dir] = r1;
+//	r1 = [P_IOB_Attrib];
+//	r1 = r1 and 0xFFF8; 
+//	[P_IOB_Attrib] = r1;
 	call	F_Key_Scan_Initial;	
 	retf;
 	.ENDP;
@@ -95,9 +102,10 @@ F_Key_Scan_Initial: .PROC
 F_Key_Scan_ServiceLoop:	.PROC
 	
 	r1 = [P_IOA_Data];			// get key data from IOA
-	//r1 = [P_IOC_Data];			// get key data from IOC
-
+//	r2 = [P_IOB_Data];			// get key data from IOB
+//	r2 = r2 and 0x07;
 	r1 = r1 and 0x3ff;			// mask out only IOA0-IOA9 -  AA
+//	r1 = r1 or r2;
 	r2 = [RW_G_DebounceReg];		//
 	[RW_G_DebounceReg] = r1;		//
 	cmp r2,[RW_G_DebounceReg];		//

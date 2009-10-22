@@ -17,8 +17,6 @@
 typedef enum EnumEnterOrExit EnumEnterOrExit;
 enum EnumEnterOrExit {ENTERING, EXITING};
 extern int SystemIntoUDisk(unsigned int);
-extern APP_IRAM BOOL wasSampleStarted;
-
 
 static void processBlockEnterExit (CtnrBlock *, EnumEnterOrExit);
 static void processTimelineJump (int, int);
@@ -498,11 +496,6 @@ void mainLoop (void) {
 	int inactivityCheckCounter = 0;
 	
 	while(1) {
-		
-		getCurVoltageSample(0L);
-		if(wasSampleStarted)
-			getCurVoltageSample(0L);
-
 		// check if need to load in a new package
 		if (context.queuedPackageType > PKG_NONE) {
 			if (context.queuedPackageNameIndex != -1)

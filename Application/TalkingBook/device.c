@@ -17,9 +17,7 @@ static void Log_ClockCtrl(void);
 APP_IRAM static int volume, speed;
 APP_IRAM static unsigned long voltage; // voltage sample 
 APP_IRAM static int oldVolume;
-APP_IRAM BOOL wasSampleStarted = FALSE;
 extern APP_IRAM int vThresh_1;
-APP_IRAM  unsigned long timeLastSample = -1;
 
 void resetRTC(void) {
 	*P_Second = 0;
@@ -136,11 +134,8 @@ void setUSBDevice (BOOL set) {
 }
 
 void logVoltage() {
-	unsigned int getCurVoltageSample(unsigned long);
-
 	int i;
 	unsigned int sample;
-	float f;
 	char buffer[40];
 	unsigned long time = getRTCinSeconds();
 	
@@ -170,10 +165,12 @@ void logVoltage() {
 	 	voltage = sample;			 	
 	}
 }
+
 unsigned int
-getCurVoltageSample(unsigned long time)
-{	
+getCurVoltageSample(unsigned long time) {	
 	unsigned ret = 0xffff;
+	APP_IRAM static BOOL wasSampleStarted = FALSE;
+	APP_IRAM static unsigned long timeLastSample = -1;
 	
 	if(time == 0L)
 		time = getRTCinSeconds();
@@ -302,14 +299,32 @@ void setOperationalMode(int newmode) {
     //
     // cpu reset on exiting halt mode, so nothing below here executes
   } else if (newmode == (int)P_SLEEP) {
-  	int r;
-  	 	
+
   	stop();
+  	
+  	//disable ADC and DAC
+  	*P_DAC_Ctrl |= 0x000c; // set PWDAL and PWDAR to power down
+  	*P_DAC_Ctrl &= ~0x0001; // clear DACLK
+	*P_ADC_Setup = 0;  //&= ~0xc000; // disable ADBEN and ADCEN 
+	*P_HQADC_Ctrl = 0x000E;
+
 	*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
 	Log_ClockCtrl();
-	r = *P_MINT_Ctrl; 	
-	r |= 0x1000;  // KC1EN enable IOB1 key change wakeup
-  	*P_MINT_Ctrl = r;
+	
+	//disable speaker driver & SD card
+ 	*P_IOA_Dir  |= 0x1800;
+ 	*P_IOA_Attrib |= 0x1800; 	
+    *P_IOA_Data  |= 0x1000;
+    *P_IOA_Data  &= ~0x0800;    	
+
+	// disable NOR flash
+ 	*P_IOD_Dir  |= 0x0001;	 
+ 	*P_IOD_Attrib |= 0x0001;
+    *P_IOD_Data  |= 0x0001;
+
+	// setup wakeup
+	*P_IOB_Attrib |= 0x0005; 
+	*P_MINT_Ctrl |= 0x5800;  // KC1EN enable IOB1 key change wakeup
   	*P_IOB_Latch = *P_IOB_Data;	// save current state so change is detected  	
     *P_SLEEP = 0xa00a;  // write a00a to sleep register
     // system reset exiting sleep mode, so nothing below executes
