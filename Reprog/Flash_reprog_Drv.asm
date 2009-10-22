@@ -1,6 +1,7 @@
-//.include GPL162002.inc
+// Copyright 2009 Literacy Bridge
+// CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
+// Contact: info@literacybridge.org
 .include .\System\include\system\GPL162002.inc
-//.include USBD.inc
 .external _Device_Descriptor
 .external _Config_Descriptor
 .external _String0_Descriptor

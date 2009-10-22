@@ -1,11 +1,6 @@
-/*-------------------------------------------------*
-* Function		:
-* Usage         :
-* Version		:
-* Return Code   :
-* Revision      :
-* Remark        :
-*--------------------------------------------------*/
+// Copyright 2009 Literacy Bridge
+// CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
+// Contact: info@literacybridge.org
 #define CREATEUSBVAR				
 #define	USB_TIME_OUT	10			// timeout was  3s
 

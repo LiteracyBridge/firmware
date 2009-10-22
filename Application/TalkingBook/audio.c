@@ -1,3 +1,6 @@
+// Copyright 2009 Literacy Bridge
+// CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
+// Contact: info@literacybridge.org
 #include "./system/include/system_head.h"
 #include "./driver/include/driver_head.h"
 #include "./component/include/component_head.h"

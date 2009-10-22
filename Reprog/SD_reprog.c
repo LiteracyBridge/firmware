@@ -1,3 +1,6 @@
+// Copyright 2009 Literacy Bridge
+// CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
+// Contact: info@literacybridge.org
 #include "./Application\TalkingBook\Include\device.h"
 #include "./Application\TalkingBook\Include\SD_reprog.h"
 

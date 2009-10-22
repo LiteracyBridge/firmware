@@ -1,3 +1,6 @@
+// Copyright 2009 Literacy Bridge
+// CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
+// Contact: info@literacybridge.org
 #include "./system/include/System/GPL162002.h"
 #include "./Application/TalkingBook/Include/talkingbook.h"
 #include "./Application/TalkingBook/Include/sys_counters.h"

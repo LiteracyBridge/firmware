@@ -1,3 +1,6 @@
+// Copyright 2009 Literacy Bridge
+// CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
+// Contact: info@literacybridge.org
 
 #include ".\System\Include\System\GPL162002.h"
 #ifdef USBRP

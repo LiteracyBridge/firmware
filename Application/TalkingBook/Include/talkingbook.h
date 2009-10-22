@@ -1,7 +1,10 @@
+// Copyright 2009 Literacy Bridge
+// CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
+// Contact: info@literacybridge.org
 #ifndef	__TALKINGBOOK_h__
 #define	__TALKINGBOOK_h__
 
-#define VERSION			"v1.35a"
+#define VERSION			"v1.35b"
 
 asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 #define APP_IRAM 		__attribute__((section(".APP_IRAM")))

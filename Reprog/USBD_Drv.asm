@@ -1,3 +1,6 @@
+// Copyright 2009 Literacy Bridge
+// CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
+// Contact: info@literacybridge.org
 .include .\System\include\system\GPL162002.inc
 .include .\Driver\Include\USB\USBD.inc
 .include .\Driver\Include\USB\USBD_Define.inc
