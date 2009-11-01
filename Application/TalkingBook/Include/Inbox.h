@@ -4,6 +4,6 @@
 #ifndef	__INBOX_h__
 #define	__INBOX_h__
 
-extern void ProcessInbox(void);
-
+extern void processInbox(void);
+extern void copyOutbox(void);
 #endif

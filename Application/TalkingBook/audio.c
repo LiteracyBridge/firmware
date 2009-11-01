@@ -11,10 +11,21 @@
 #include "Include/containers.h"
 #include "Include/audio.h"
 
+extern unsigned long RES_DING_A18_SA;
+extern unsigned long RES_BIP_A18_SA;
+
 static int getFileHandle (CtnrFile *);
 static void playLongInt(CtnrFile *, unsigned long);
 static int recordAudio(char *, char *);
 APP_IRAM static char lastFilenameRecorded[FILE_LENGTH];
+
+void playDing(void) {
+	Snd_SACM_PlayMemory(C_CODEC_AUDIO1800,RES_DING_A18_SA);	
+}
+
+void playBip(void) {
+	Snd_SACM_PlayMemory(C_CODEC_AUDIO1800,RES_BIP_A18_SA);	
+}
 
 void stop(void) {
 	context.isStopped = TRUE;

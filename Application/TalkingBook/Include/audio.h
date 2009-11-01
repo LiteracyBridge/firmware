@@ -8,6 +8,9 @@
 
 extern void SACM_Stop(void);
 
+extern void playDing(void);
+extern void playBip(void);
+
 extern void stop(void);
 extern void play(CtnrFile *, unsigned int);
 extern void insertSound(CtnrFile *, CtnrBlock *, BOOL);

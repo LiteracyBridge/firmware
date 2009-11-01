@@ -16,9 +16,6 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 // DONT FORGET TO CHANGE #define DEVBOARD and /Driver/IOKey/IOKeyScan.asm file
 
 // TODO LIST
-//   * have ProcessInbox() handle copying new files (or new versions of existing files) to \system dir
-//     This could be done by using a variant of copyCWD to copy in all new files for /system/* or /config.txt
-//     This would also substitute for the current one-off check of System.bin by adding a folder /system/Firmware/Update/System.bin
 //   * registry/categories
 //     -- allow categories to be numbers, which means rethinking category/subcategory case distinction
 //     -- handle universal content SUB-categories
@@ -111,7 +108,8 @@ extern int KEY_PLAY, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_SELECT, KEY_STAR
 extern int LED_GREEN, LED_RED, LED_ALL;
 extern int MAX_SPEED, NORMAL_SPEED, SPEED_INCREMENT;
 extern int NORMAL_VOLUME, MAX_VOLUME, VOLUME_INCREMENT;
-extern char *BOOT_PACKAGE, *SYSTEM_PATH, *USER_PATH, *LIST_PATH, *INBOX_PATH, *UPDATE_PATH, *FIRMWARE_PATH, *OUTBOX_PATH;
+extern char *BOOT_PACKAGE, *SYSTEM_PATH, *USER_PATH, *LIST_PATH;
+extern char *INBOX_PATH, *OUTBOX_PATH, *NEW_PKG_SUBDIR, *SYS_UPDATE_SUBDIR;
 extern int MAX_PWR_CYCLES_IN_LOG;
 extern char *SYSTEM_VARIABLE_FILE, *LOG_FILE;
 extern char *LIST_MASTER;

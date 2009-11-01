@@ -378,6 +378,13 @@ ID=
 EXPORT=3
 # End Source File
 # End Group
+# Begin Source File
+SOURCE=System\PowerOnOff.asm
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
 # End Group
 # Begin Source File
 SOURCE=main.c
@@ -482,13 +489,6 @@ EXPORT=3
 USEPARAM=FALSE
 PARAM=
 EXPORT=3
-# Begin Source File
-SOURCE=System.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
 # Begin Source File
 SOURCE=Resource.inc
 USEPARAM=FALSE
@@ -602,13 +602,6 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=..\..\Cliff_code\current\TalkingBook\Application\TalkingBook\Include\app_exception.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
 SOURCE=Application\TalkingBook\Include\Inbox.h
 USEPARAM=FALSE
 PARAM=
@@ -624,6 +617,13 @@ EXPORT=3
 # End Source File
 # Begin Source File
 SOURCE=Application\TalkingBook\Include\quiz.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Application\TalkingBook\Include\app_exception.h
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -649,14 +649,49 @@ USEPARAM=FALSE
 PARAM=
 EXPORT=0
 # Begin Source File
-SOURCE=system\include\system_head.inc
+SOURCE=system\include\system_head.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=system\include\system_head.h
+SOURCE=driver\include\driver_head.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=component\include\component_head.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Reprog\USB_Flash_reprog.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Reprog\GPL162002.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Component\Include\FS\typedef.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Component\Include\FS\vfs.h
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -670,7 +705,56 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
+SOURCE=System\Include\System\GPL162002.inc
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Reprog\USBD_Define.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Reprog\USBD.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Component\FS\usb_host\USB_Host_Constant.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Component\FS\usb_host\USBHostMSDC.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=system\include\system_head.inc
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
 SOURCE=System\include\system\GPL162001ISR.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=System\include\system\SysException.h
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -698,13 +782,6 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=System\include\system\SysException.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
 SOURCE=System\include\ExtMem\unExtMem.h
 USEPARAM=FALSE
 PARAM=
@@ -719,14 +796,7 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=driver\include\driver_head.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=component\include\component_head.h
+SOURCE=system\include\system\unSPMACRO.h
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -740,7 +810,14 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Component\Include\FS\vfs.h
+SOURCE=driver\include\NandDriver\Nand2_Oper.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=driver\include\NandDriver\nanddriver.h
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -775,83 +852,6 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Component\Include\FS\typedef.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=system\include\system\unSPMACRO.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Driver\Include\USB\USBD.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=driver\include\NandDriver\Nand2_Oper.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=driver\include\NandDriver\nanddriver.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=System\Include\System\GPL162002.inc
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Component\FS\usb_host\USB_Host_Constant.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Component\FS\usb_host\USBHostMSDC.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Reprog\USB_Flash_reprog.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Reprog\USBD_Define.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Reprog\USBD.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
 SOURCE=Driver\Include\USB\USBD_Define.h
 USEPARAM=FALSE
 PARAM=
@@ -859,7 +859,7 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Reprog\GPL162002.h
+SOURCE=Driver\Include\USB\USBD.h
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -901,18 +901,11 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Application\TalkingBook\Include\app_exception.h
+SOURCE=Component/Include/FS/typedef.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=.\Component\Include\FS\DriverLayer.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=0
 # End Source File
 # End Group
 # End SubItem
@@ -1289,6 +1282,13 @@ ID=
 EXPORT=3
 # End Source File
 # End Group
+# Begin Source File
+SOURCE=System\PowerOnOff.asm
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
 # End Group
 # Begin Source File
 SOURCE=main.c
@@ -1393,13 +1393,6 @@ EXPORT=3
 USEPARAM=FALSE
 PARAM=
 EXPORT=3
-# Begin Source File
-SOURCE=System.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
 # Begin Source File
 SOURCE=Resource.inc
 USEPARAM=FALSE
@@ -1513,13 +1506,6 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=..\..\Cliff_code\current\TalkingBook\Application\TalkingBook\Include\app_exception.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
 SOURCE=Application\TalkingBook\Include\Inbox.h
 USEPARAM=FALSE
 PARAM=
@@ -1535,6 +1521,13 @@ EXPORT=3
 # End Source File
 # Begin Source File
 SOURCE=Application\TalkingBook\Include\quiz.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Application\TalkingBook\Include\app_exception.h
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -1560,14 +1553,49 @@ USEPARAM=FALSE
 PARAM=
 EXPORT=0
 # Begin Source File
-SOURCE=system\include\system_head.inc
+SOURCE=system\include\system_head.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=system\include\system_head.h
+SOURCE=driver\include\driver_head.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=component\include\component_head.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Reprog\USB_Flash_reprog.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Reprog\GPL162002.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Component\Include\FS\typedef.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Component\Include\FS\vfs.h
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -1581,7 +1609,56 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
+SOURCE=System\Include\System\GPL162002.inc
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Reprog\USBD_Define.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Reprog\USBD.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Component\FS\usb_host\USB_Host_Constant.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Component\FS\usb_host\USBHostMSDC.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=system\include\system_head.inc
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
 SOURCE=System\include\system\GPL162001ISR.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=System\include\system\SysException.h
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -1609,13 +1686,6 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=System\include\system\SysException.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
 SOURCE=System\include\ExtMem\unExtMem.h
 USEPARAM=FALSE
 PARAM=
@@ -1630,14 +1700,7 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=driver\include\driver_head.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=component\include\component_head.h
+SOURCE=system\include\system\unSPMACRO.h
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -1651,7 +1714,14 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Component\Include\FS\vfs.h
+SOURCE=driver\include\NandDriver\Nand2_Oper.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=driver\include\NandDriver\nanddriver.h
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -1686,83 +1756,6 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Component\Include\FS\typedef.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=system\include\system\unSPMACRO.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Driver\Include\USB\USBD.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=driver\include\NandDriver\Nand2_Oper.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=driver\include\NandDriver\nanddriver.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=System\Include\System\GPL162002.inc
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Component\FS\usb_host\USB_Host_Constant.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Component\FS\usb_host\USBHostMSDC.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Reprog\USB_Flash_reprog.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Reprog\USBD_Define.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Reprog\USBD.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
 SOURCE=Driver\Include\USB\USBD_Define.h
 USEPARAM=FALSE
 PARAM=
@@ -1770,7 +1763,7 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Reprog\GPL162002.h
+SOURCE=Driver\Include\USB\USBD.h
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -1812,18 +1805,11 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Application\TalkingBook\Include\app_exception.h
+SOURCE=Component/Include/FS/typedef.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=.\Component\Include\FS\DriverLayer.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=0
 # End Source File
 # End Group
 # End SubItem

@@ -18,17 +18,20 @@
 #define CONFIG_FILE		"a:\\\\config.txt"
 
 extern unsigned int SetSystemClockRate(unsigned int);
+extern int SystemIntoUDisk(unsigned int);
 
+static void setDefaults(void);
 static char * addTextToSystemHeap (char *);
-static void loadConfigFile (void);
 static void loadDefaultPackage(void);
+static void loadConfigFile (void);
 
 // These capitalized variables are set in the config file.
 APP_IRAM int KEY_PLAY, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_SELECT, KEY_STAR, KEY_HOME, KEY_PLUS, KEY_MINUS;	
 APP_IRAM int LED_GREEN, LED_RED, LED_ALL;
 APP_IRAM int MAX_SPEED, NORMAL_SPEED, SPEED_INCREMENT;
 APP_IRAM int NORMAL_VOLUME, MAX_VOLUME, VOLUME_INCREMENT;
-APP_IRAM char *BOOT_PACKAGE, *SYSTEM_PATH, *USER_PATH, *LIST_PATH, *INBOX_PATH, *UPDATE_PATH, *FIRMWARE_PATH, *OUTBOX_PATH;
+APP_IRAM char *BOOT_PACKAGE, *SYSTEM_PATH, *USER_PATH, *LIST_PATH;
+APP_IRAM char *INBOX_PATH, *OUTBOX_PATH,*NEW_PKG_SUBDIR, *SYS_UPDATE_SUBDIR;
 APP_IRAM int MAX_PWR_CYCLES_IN_LOG;
 APP_IRAM char *SYSTEM_VARIABLE_FILE, *LOG_FILE;
 APP_IRAM char *LIST_MASTER;
@@ -51,30 +54,66 @@ APP_IRAM int LOG_WARNINGS, LOG_KEYS;
 APP_IRAM unsigned int CLOCK_RATE;
 APP_IRAM int vThresh_1;
 
+static void setDefaults(void) {
+	// This function sets variables that are usually set in config file, 
+	// but they need defaults in case config file doesn't list them or isn't loaded yet
+	KEY_PLAY = DEFAULT_KEY_PLAY;
+	KEY_LEFT = DEFAULT_KEY_LEFT;
+	KEY_RIGHT = DEFAULT_KEY_RIGHT;
+	KEY_UP = DEFAULT_KEY_UP;
+	KEY_DOWN = DEFAULT_KEY_DOWN;
+	KEY_SELECT = DEFAULT_KEY_SELECT;
+	KEY_STAR = DEFAULT_KEY_STAR;
+	KEY_HOME = DEFAULT_KEY_HOME;
+	KEY_PLUS = DEFAULT_KEY_PLUS;
+	KEY_MINUS = DEFAULT_KEY_MINUS;
+	LED_GREEN = DEFAULT_LED_GREEN;
+	LED_ALL = LED_GREEN | LED_RED;
+	LED_RED = DEFAULT_LED_RED;
+	CLOCK_RATE = DEFAULT_CLOCK_RATE;
+	NORMAL_VOLUME = DEFAULT_NORMAL_VOLUME;
+	NORMAL_SPEED = DEFAULT_NORMAL_SPEED;
+}
 
 void startUp(void) {
 	APP_IRAM static unsigned long timeInitialized = -1;
 
 	char buffer[100];
 	int key;
-
-	CLOCK_RATE = 48;  // set a safe 48MHz as default clock in case of config problem
+	
 	SetSystemClockRate(MAX_CLOCK_SPEED); // to speed up initial startup -- set CLOCK_RATE later
+
+	setDefaults();
+	setLED(LED_ALL,FALSE);  // red light can be left on after reprog restart
+
+	//to stop user from wondering if power is on and possibly cycling too quickly,
+	playDing();  // it is important to play a sound immediately 
+
+	key = keyCheck(1);  // long keycheck 
+	if (key == KEY_STAR || key == KEY_MINUS) {
+		// allows USB device mode no matter what is on memory card
+		Snd_Stop();
+		SystemIntoUDisk(1);	
+		loadConfigFile();
+		processInbox();
+		resetSystem();
+	} else if (key == KEY_PLUS) {
+		// outbox mode: copy outbox files to connecting device
+		loadConfigFile();
+		copyOutbox();
+		resetSystem();
+	}
+
+	// check for new firmware first
+	check_new_sd_flash();
 
 // init battery voltage sensing	
 	vThresh_1 = 0;
 	*P_ADC_Setup |= 0x8000;  // enable ADBEN
 	*P_MADC_Ctrl &= ~0x05;  // clear CHSEL (channel select)
 	*P_MADC_Ctrl |=  0x02;  // select LINEIN1 
-	timeInitialized = getRTCinSeconds();
-
-
-	key = keyCheck(1);  // long keycheck 
-	if (key == 0x02)  // Star button on device
-		setUSBDevice(TRUE);  // allows USB device mode no matter what is on memory card
+	timeInitialized = 0;
 		
-	check_new_sd_flash();
-	
 	loadConfigFile();
 	
 	SysDisableWaitMode(WAITMODE_CHANNEL_A);
@@ -91,16 +130,13 @@ void startUp(void) {
 	}
 	resetRTC();  //  reset before saving anything to disk and running macros
 	saveSystemCounts();
-	timeInitialized = getRTCinSeconds();	// do again as resetRTC above
 
 	strcpy(buffer,"\x0d\x0a" "---------------------------------------------------------\x0d\x0a" "CYCLE "); //cycle number
 	longToDecimalString(systemCounts.powerUpNumber,(char *)(buffer+strlen(buffer)),4);
 	strcat(buffer,(const char *)" - version " VERSION);
-	logString(buffer,ASAP);
+	logString(buffer,BUFFER);
 
-	check_new_sd_flash();
 	loadPackage(PKG_SYS,BOOT_PACKAGE);	
-	insertSound(&pkgSystem.files[BEEP_SOUND_FILE_IDX],NULL,TRUE); 
 	SetSystemClockRate(CLOCK_RATE); // either set in config file or the default 48 MHz set at beginning of startUp()
 	mainLoop();
 }
@@ -163,7 +199,6 @@ static void loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"KEY_MINUS")) KEY_MINUS=strToInt(value);			
 				else if (!strcmp(name,(char *)"LED_GREEN")) LED_GREEN=strToInt(value);
 				else if (!strcmp(name,(char *)"LED_RED")) LED_RED=strToInt(value);
-				else if (!strcmp(name,(char *)"LED_ALL")) LED_ALL=strToInt(value);
 				else if (!strcmp(name,(char *)"MAX_SPEED")) MAX_SPEED=strToInt(value);
 				else if (!strcmp(name,(char *)"NORMAL_SPEED")) NORMAL_SPEED=strToInt(value);
 				else if (!strcmp(name,(char *)"MAX_VOLUME")) MAX_VOLUME=strToInt(value);
@@ -175,9 +210,9 @@ static void loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"USER_PATH")) USER_PATH=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"LIST_PATH")) LIST_PATH=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"INBOX_PATH")) INBOX_PATH=addTextToSystemHeap(value);
-				else if (!strcmp(name,(char *)"UPDATE_PATH")) UPDATE_PATH=addTextToSystemHeap(value);
-				else if (!strcmp(name,(char *)"FIRMWARE_PATH")) FIRMWARE_PATH=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"OUTBOX_PATH")) OUTBOX_PATH=addTextToSystemHeap(value);
+				else if (!strcmp(name,(char *)"NEW_PKG_SUBDIR")) NEW_PKG_SUBDIR=addTextToSystemHeap(value);
+				else if (!strcmp(name,(char *)"SYS_UPDATE_SUBDIR")) SYS_UPDATE_SUBDIR=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"LOG_FILE")) LOG_FILE=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"LIST_MASTER")) LIST_MASTER=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"MAX_PWR_CYCLES_IN_LOG")) MAX_PWR_CYCLES_IN_LOG=strToInt(value);
@@ -186,8 +221,7 @@ static void loadConfigFile(void) {
 				// it would make it easier to check list items starts with CUSTOM_PKG_PREFIX
 				else if (!strcmp(name,(char *)"PKG_NUM_PREFIX")) PKG_NUM_PREFIX=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"LIST_NUM_PREFIX")) LIST_NUM_PREFIX=addTextToSystemHeap(value);
-				else if (!strcmp(name,(char *)"CUSTOM_PKG_PREFIX")) CUSTOM_PKG_PREFIX=addTextToSystemHeap(value);
-				
+				else if (!strcmp(name,(char *)"CUSTOM_PKG_PREFIX")) CUSTOM_PKG_PREFIX=addTextToSystemHeap(value);				
 				else if (!strcmp(name,(char *)"AUDIO_FILE_EXT")) AUDIO_FILE_EXT=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"DEFAULT_TIME_PRECISION")) DEFAULT_TIME_PRECISION=strToInt(value);
 				else if (!strcmp(name,(char *)"DEFAULT_REWIND")) DEFAULT_REWIND=strToInt(value);
@@ -215,15 +249,13 @@ static void loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"USB_CLIENT_POLL_INTERVAL")) USB_CLIENT_POLL_INTERVAL=strToInt(value);
 				else if (!strcmp(name,(char *)"LOG_WARNINGS")) LOG_WARNINGS=strToInt(value);
 				else if (!strcmp(name,(char *)"LOG_KEYS")) LOG_KEYS=strToInt(value);
-				else if (!strcmp(name,(char *)"CLOCK_RATE")) {
-					CLOCK_RATE = strToInt(value);
-					//SetSystemClockRate(CLOCK_RATE); -- do this after initial setup (e.g. parsing system package)
-				}
+				else if (!strcmp(name,(char *)"CLOCK_RATE")) CLOCK_RATE = strToInt(value);
 		}
 	}
 	if (!goodPass)
 		logException(14,0,USB_MODE); 		
 	close(handle);
+	LED_ALL = LED_GREEN | LED_RED;
 	if (*(LOG_FILE+1) != ':')
 		LOG_FILE = 0; // should be == "a:\\....." otherwise, logging is turned off
 }

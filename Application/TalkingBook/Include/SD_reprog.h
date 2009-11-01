@@ -11,12 +11,12 @@
 #include "./Application\TalkingBook\Include\talkingbook.h"
 #include "./Application\TalkingBook\Include\files.h"
 
-#define SYSTEM_FN	"System.bin"
-#define UPDATE_FN    "Update\\"SYSTEM_FN 
-#define ATTEMPTED_FN "Update\\Attempted.bin"
-#define PREV_FN      "Archive\\Previous.bin"
-#define CURRENT_FN 	 "Archive\\Current.bin"
-
+#define FIRMWARE_PATH	"a:\\System\\Firmware\\"
+//TODO: change this to use any *.bin and keep filename for easy version identification
+#define UPDATE_FN    	"a:\\System.bin"
+#define ATTEMPTED_FN	FIRMWARE_PATH"Attempted.bin"
+#define PREV_FN			FIRMWARE_PATH"Previous.bin"
+#define CURRENT_FN 		FIRMWARE_PATH"Current.bin"
 extern void check_new_sd_flash(void);
 
 #endif

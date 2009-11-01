@@ -13,7 +13,7 @@ BodyName=GPL162003_CS0Flash
 
 [SetLink]
 ExeFile=1
-Output=.\Debug\System.s37
+Output=System.S37
 INTVEC=1
 STARTUP=0
 ALIGNRES=0

@@ -10,6 +10,7 @@
 #include "Include/audio.h"
 #include "Include/device.h"
 
+extern void _SystemOnOff(void);
 extern int SystemIntoUDisk(unsigned int);
 extern void KeyScan_ServiceLoop(void);
 extern int SP_GetCh(void);
@@ -47,7 +48,6 @@ void setLED(unsigned int color, BOOL on) {
 		unsigned int nAttrib;
 		unsigned int nDrv;
 	};
-
 	struct GPIO *LEDPort = (struct GPIO *)P_IOB_Data;
 	if (on) {
  		LEDPort->nDir 	 |= color;
@@ -132,7 +132,8 @@ void setUSBDevice (BOOL set) {
 	if (set) {
 		Snd_Stop();
 		SystemIntoUDisk(1);	
-		ProcessInbox();
+		processInbox();
+		setLED(LED_ALL,FALSE);
 	}
 }
 
@@ -141,13 +142,11 @@ void logVoltage() {
 	unsigned int sample;
 	char buffer[40];
 	unsigned long time = getRTCinSeconds();
+	APP_IRAM static unsigned long timeLastSample = -1;
 	
 //	if ((context.isStopped || context.isPaused) && (time > (timeInitialized + 2)))     // 2-3 second delay)
-	if ((context.isStopped || context.isPaused))
-	{ 
-			
+	if (VOLTAGE_SAMPLE_FREQ_SEC && (context.isStopped || context.isPaused) && time > (timeLastSample+VOLTAGE_SAMPLE_FREQ_SEC)) { 	
 		sample = getCurVoltageSample(time);
-		
 		strcpy(buffer,"V:");
 	 	longToHexString(((long)vThresh_1 & 0xffff),buffer+strlen(buffer),1);
 	 	strcat(buffer," | ");
@@ -165,7 +164,8 @@ void logVoltage() {
 		buffer[i-1] = buffer[i-2];
 		buffer[i-2] = '.'; 
 		logString(buffer,ASAP);				
-	 	voltage = sample;			 	
+	 	voltage = sample;			 		
+		timeLastSample = time;
 	}
 }
 
@@ -173,8 +173,7 @@ unsigned int
 getCurVoltageSample(unsigned long time) {	
 	unsigned ret = 0xffff;
 	APP_IRAM static BOOL wasSampleStarted = FALSE;
-	APP_IRAM static unsigned long timeLastSample = -1;
-	
+
 	if(time == 0L)
 		time = getRTCinSeconds();
 
@@ -192,7 +191,6 @@ getCurVoltageSample(unsigned long time) {
 		ret /= 99;  //RHM heuristically determined to work on my board, replaced 3 lines above
 		
 	 	*P_ADC_Setup &= ~0x4000; // disable ADCEN to save power
-		timeLastSample = time;
 		wasSampleStarted = FALSE;
 		vThresh_1 <<= 1;
 #define V_THRESH 262
@@ -258,7 +256,7 @@ void resetSystem(void) {
 	*P_WatchDog_Ctrl &= ~0x1; // clear bit 0 for 0.125 sec 
 	*P_WatchDog_Ctrl |= 0x8004; // set bits 2 and 15 for 0.125 sec, system reset, and enable watchdog
 	*P_WatchDog_Clear = 0; // should immediately reset
-	wait(500);	
+	while(1);	
 }
 
 static void logKeystroke(int intKey) {
@@ -324,6 +322,10 @@ void setOperationalMode(int newmode) {
  	*P_IOD_Dir  |= 0x0001;	 
  	*P_IOD_Attrib |= 0x0001;
     *P_IOD_Data  |= 0x0001;
+
+	_SystemOnOff();
+
+	while(1);
 
 	// setup wakeup
 	*P_IOB_Attrib |= 0x0005; 

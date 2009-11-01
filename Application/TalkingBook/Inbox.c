@@ -20,73 +20,120 @@ struct newContent {
 
 extern APP_IRAM char logBuffer[LOG_BUFFER_SIZE];
 extern APP_IRAM int idxLogBuffer;
-static int ProcessA18(struct f_info *, struct newContent *);
-static int ProcessDir(char *, struct newContent *);
-static int copyCWD(char *);
+static int processA18(struct f_info *, struct newContent *);
+static int processDir(char *, struct newContent *);
+//static int copyCWD(char *);
 static int updateCategory(char *, char *, char);
+static void processSystemFiles(void);
+static struct newContent processNewPackages(void);
+static void queueNewPackage(struct newContent);
 
 #define D_NOTDIR (D_FILE | D_RDONLY | D_HIDDEN | D_SYSTEM | D_ARCHIVE)
 
 //  called when leaving USB mode to check for files copied from other device into a:\Inbox
 //
-void
-ProcessInbox(void)
-{
+extern void
+processInbox(void) {
 	// TODO: handle bad received files that might look like 0-byte files (This can lock the device up if played.)
 	// TODO: handle duplicate packages and unique name issue
 	// TODO: if copying 1+ files and all of them have the same name as existing files (rename returns -1), then
 	//       return a message saying nothing new was copied.  If just one thing was new, that is the one that should be played.
 	
+	struct newContent nc;	
+	char strLog[PATH_LENGTH];
+	
+	playBip();
+	setLED(LED_RED,TRUE);
+
+	strcpy(strLog, "processInbox");	
+	logString(strLog, ASAP);
+	nc = processNewPackages();
+	processSystemFiles(); //copy system files, including firmware
+	queueNewPackage(nc);
+	setLED(LED_RED,FALSE);
+	checkInactivity(TRUE);
+}
+
+static void 
+queueNewPackage(struct newContent nc) {
+	char fbuf[PATH_LENGTH];
+	char *strList;
+
+	// Set up current list to position at one of the newly copied messages and queue it up to play
+	// This point is only reached if there was not a successful copy made of new firmware
+	if (nc.newAudioFileCat[0])
+		strcpy(fbuf,nc.newAudioFileCat);
+	else if (nc.newAudioDirCat[0])
+		strcpy(fbuf,nc.newAudioDirCat);
+	else
+		fbuf[0] = 0;
+	//logString(nc.newAudioFileCat,BUFFER);
+	//flushLog();
+	if (fbuf[0]) {
+		context.package = &pkgSystem; // in case paused on content
+		pkgSystem.lists[0].currentFilePosition = -1;
+		strList = getCurrentList(&pkgSystem.lists[0]);
+		while (strcmp(strList,fbuf)) {
+			strList = getPreviousList(&pkgSystem.lists[0]);
+		}
+		pkgSystem.lists[1].currentFilePosition = -1;
+		strList = getCurrentList(&pkgSystem.lists[1]);
+		if (strList[0] == APP_PKG_CHAR) {
+			strList++;
+			context.queuedPackageType = PKG_APP;  
+		} else
+			context.queuedPackageType = PKG_MSG;
+		insertSound(getListFile(fbuf),NULL,TRUE);	
+		context.queuedPackageNameIndex = replaceStack(strList,&pkgSystem);
+	} 
+}
+
+static struct newContent
+processNewPackages(void) {
 	struct f_info file_info;
 	char strLog[PATH_LENGTH], savecwd[PATH_LENGTH];
-	char fbuf[PATH_LENGTH], fbuf2[PATH_LENGTH], fname[FILE_LENGTH];
+	char fbuf[PATH_LENGTH], strNewPkgPath[PATH_LENGTH], fname[FILE_LENGTH];
 	char *strList;
 	int ret, r1, len, fret;
 	struct newContent nc;	
 
-	setLED(LED_RED,TRUE);
 	fret = 0;
 	nc.newAudioFileCat[0] = nc.newAudioFileName[0] = 0;
 	nc.newAudioDirCat [0] = nc.newAudioDirName [0] = 0;
-	
-	strcpy(strLog, "ProcessInbox");	
-	logString(strLog, BUFFER);
-	
+		
 //  check for *.a18 files in Inbox
-	strcpy(fbuf, INBOX_PATH);
-	len = strlen(fbuf);
+	strcpy(strNewPkgPath, INBOX_PATH);
+	strcat(strNewPkgPath, NEW_PKG_SUBDIR);
+	len = strlen(strNewPkgPath);
 	if(len > 1) {
-		fbuf[len-1] = 0;
-		ret = fileExists(fbuf);
+		strNewPkgPath[len-1] = 0;
+		ret = fileExists(strNewPkgPath);
 		if(ret == 0) {
-			mkdir(fbuf);
-			strcpy(strLog, "ProcessInbox no inbox, created");	
+			mkdir(strNewPkgPath);
+			strcpy(strLog, "no new packages");	
 			logString(strLog, ASAP);
-			return(0);
+			return nc;
 		}	
 		ret = getcwd(savecwd , sizeof(savecwd) - 1 );
-		ret = chdir(INBOX_PATH);
-		
+		ret = chdir(strNewPkgPath);
+		strcat(strNewPkgPath,"\\");  // add back what was removed above
 	//  process *.a18 files in inbox - category in file name after # OR IN *.txt
 	//  this case may never happen
 	//
-		//strcpy(strLog, INBOX_PATH);
-		//len = strlen(strLog);
-		strcpy(fbuf, INBOX_PATH);
+		strcpy(fbuf, strNewPkgPath);
 		strcat(fbuf, "*");
 		strcat(fbuf,AUDIO_FILE_EXT);
 		ret =_findfirst(fbuf, &file_info, D_ALL);
 		while (ret >= 0) {
 			strcpy(strLog, file_info.f_name);
-			logString(strLog,BUFFER);		
-			fret += ProcessA18(&file_info, &nc);
+			//logString(strLog,BUFFER);		
+			fret += processA18(&file_info, &nc);
 			ret = unlink(file_info.f_name);					
 			ret = _findnext(&file_info);
 		}
 	//
-	//  now process directories in a:\inbox
-	//
-		strcpy(fbuf, INBOX_PATH);
+	//  now process directories
+		strcpy(fbuf, strNewPkgPath);
 		strcat(fbuf, "*.*");
 		
 		ret =_findfirst(fbuf, &file_info, D_DIR);
@@ -95,78 +142,37 @@ ProcessInbox(void)
 			if(file_info.f_attrib & D_DIR) {
 				if(file_info.f_name[0] == '.')
 					continue;
-				if(!strcmp(file_info.f_name, "lists")) // lists is special, never deleted	
-					continue;
 				
 				strcpy(fname, file_info.f_name);	
-				logString(fname,BUFFER);		
-				fret += ProcessDir(fname, &nc);
+				//logString(fname,BUFFER);		
+				fret += processDir(fname, &nc);
 				  // RHM: something I do below makes this necessary
 				  //      upon return after _findnext returns -1 even if there are more dirs
 				ret = _findfirst(fbuf, &file_info, D_ALL);
 			}	
 		}
-			
-		r1 = ProcessDir("lists", &nc);
-		
-//      copy any system updates from UPDATE_PATH to a:\ 
-		strcpy(fbuf,UPDATE_PATH);
-		strcpy(fbuf2, "a:\\");
-		copydir(fbuf, fbuf2);
-		
-		// check for firmware update
-		strcpy(fbuf,UPDATE_PATH);		
-		strcat(fbuf,SYSTEM_FN);
-		if (fileExists((LPSTR)fbuf)) {
-			strcpy(strLog, "Found firmware update");	
-			logString(strLog, BUFFER);
-			strcpy(fbuf2,FIRMWARE_PATH);
-			strcat(fbuf2,UPDATE_FN);
-			ret = rename((LPSTR)fbuf,(LPSTR)fbuf2);
-			if(ret) {
-				ret = unlink((LPSTR)fbuf);	// rename failed, remove from inbox anyway
-				strcpy(strLog, "firmware copy FAILED");	
-				logString(strLog, BUFFER);
-			} else {
-				//TODO: call an audio file to tell user to wait for reprogramming to complete
-				resetSystem(); // reset to begin new firmware reprogramming
-			}
-		}
 		
 		ret = chdir((LPSTR)savecwd);
-		// Set up current list to position at one of the newly copied messages and queue it up to play
-		// This point is only reached if there was not a successful copy made of new firmware
-		if (nc.newAudioFileCat[0])
-			strcpy(fbuf,nc.newAudioFileCat);
-		else if (nc.newAudioDirCat[0])
-			strcpy(fbuf,nc.newAudioDirCat);
-		else
-			fbuf[0] = 0;
-		if (fbuf[0]) {
-			context.package = &pkgSystem; // in case paused on content
-			pkgSystem.lists[0].currentFilePosition = -1;
-			strList = getCurrentList(&pkgSystem.lists[0]);
-			while (strcmp(strList,fbuf)) {
-				strList = getPreviousList(&pkgSystem.lists[0]);
-			}
-			pkgSystem.lists[1].currentFilePosition = -1;
-			strList = getCurrentList(&pkgSystem.lists[1]);
-			if (strList[0] == APP_PKG_CHAR) {
-				strList++;
-				context.queuedPackageType = PKG_APP;  
-			} else
-				context.queuedPackageType = PKG_MSG;
-			insertSound(getListFile(fbuf),NULL,TRUE);	
-			context.queuedPackageNameIndex = replaceStack(strList,&pkgSystem);
-		} 
-	}	// end of if: length of INBOX_PATH must be > 1
-	setLED(LED_RED,FALSE);
-	checkInactivity(TRUE);
+	}	// end of if: length of strNewPkgPath must be > 1
+	return nc;
 }
 
+static void 
+processSystemFiles(void) {
+	// copy any system updates from SYS_UPDATE_SUBDIR to a:\ 
+	long l;
+	char strSysUpdatePath[PATH_LENGTH];
+	
+	strcpy(strSysUpdatePath,INBOX_PATH);
+	strcat(strSysUpdatePath,SYS_UPDATE_SUBDIR);
+	l = (long)copydir((char *)strSysUpdatePath, (char *)"a:\\");  // returns # of items copied
+	if (l > 1)  // 1 is for the SYS_UPDATE_SUBDIR
+		resetSystem(); // reset to begin new firmware reprogramming or to reload new config/system control
+}
+
+
 static int 
-ProcessA18(struct f_info *fip, struct newContent *pNC)
-{
+processA18(struct f_info *fip, struct newContent *pNC) {
 	char strLog[80], savecwd[80];
 	char buffer[READ_LENGTH+1], *line, tmpbuf[READ_LENGTH+1];
 	char fnbase[80], category[8], subcategory[8];
@@ -223,6 +229,7 @@ ProcessA18(struct f_info *fip, struct newContent *pNC)
 	fnbase[len_fnbase] = 0;
 
 	strcpy(tmpbuf,INBOX_PATH);
+	strcat(tmpbuf,NEW_PKG_SUBDIR);
 	strcat(tmpbuf,fip->f_name);
 
 // TODO: should some other test be applied here??
@@ -238,11 +245,18 @@ ProcessA18(struct f_info *fip, struct newContent *pNC)
 			strcat(buffer, fnbase);
 			strcat(buffer,AUDIO_FILE_EXT);
 			ret = rename(tmpbuf, buffer);
+//			logString((char *)"Rename from/to",BUFFER);
+//			logString(tmpbuf,BUFFER);
+//			logString(buffer,ASAP);
 		} while (ret);
 	} else {
 		strcat(buffer, fip->f_name);
 		ret = rename(tmpbuf, buffer);
+//			logString((char *)"Rename from/to",BUFFER);
+//			logString(tmpbuf,BUFFER);
+//			logString(buffer,ASAP);
 		if(ret) {
+			logString((char *)"rename failed",ASAP);
 			unlink(tmpbuf);	// rename failed, remove from inbox anyway
 		} else {
 			fret++;
@@ -263,8 +277,7 @@ ProcessA18(struct f_info *fip, struct newContent *pNC)
 }
 
 static int 
-ProcessDir(char *dirname, struct newContent *pNC)
-{
+processDir(char *dirname, struct newContent *pNC) {
 	struct f_info file_info;
 	char strLog[80], savecwd[80];
 	char buffer[READ_LENGTH+1], tempbuf[80];
@@ -273,15 +286,6 @@ ProcessDir(char *dirname, struct newContent *pNC)
 
 	ret = getcwd(savecwd , sizeof(savecwd) - 1 );
 	ret = chdir(dirname);
-
-	if(!strcasecmp(dirname, "lists")) {
-		// move from \\Inbox\lists to \\lists
-		copyCWD("a:\\");
-		ret = chdir(savecwd);
-		return(0);
-	} 
-	
-	// processing a directory that is not "lists"
 	
 	category[0] = subcategory[0] = 0;
 	catidx = subidx = 0;
@@ -312,6 +316,7 @@ ProcessDir(char *dirname, struct newContent *pNC)
 	}	
 	//copyCWD(USER_PATH);
 	strcpy(buffer,INBOX_PATH);
+	strcat(buffer,NEW_PKG_SUBDIR);
 	strcat(buffer,dirname);
 	
 	if(0 == strncmp(dirname,PKG_NUM_PREFIX,strlen(PKG_NUM_PREFIX))) {
@@ -350,55 +355,8 @@ ProcessDir(char *dirname, struct newContent *pNC)
 	return (fret);
 }
 
-static int copyCWD(char *todir)
-{
-	char to[PATH_LENGTH], cwd[PATH_LENGTH], strLog[PATH_LENGTH];
-	int ret, r1, tobase, fret;
-	struct f_info fi;
-	
-	strcpy(to, todir);
-	fret = 0;
-	
-	ret = getcwd(cwd, sizeof(cwd)-1);
-	strcat(to, &cwd[strlen(INBOX_PATH)]);  // chop off a:\inbox\ - 
-	ret = mkdir(to);  // this will fail for a:\\lists (used with lists), but that's ok
-	strcat(to, "\\");
-	tobase = strlen(to);
-
-	strcat(cwd,"\\*.*");
-	
-	ret =_findfirst(cwd, &fi, D_ALL);
-	for (; ret >= 0; ret = _findnext(&fi)) {
-		
-// skip files and directories beginning with .		
-		if(fi.f_name[0] == '.')
-			continue;
-		
-		to[tobase] = 0;
-
-		if(fi.f_attrib & D_DIR) {
-			strcpy(&to[tobase], fi.f_name);
-			r1 = mkdir(to);
-			r1 = chdir(fi.f_name);
-			r1 = copyCWD(to);
-		} else {
-			strcat(to,fi.f_name);
-			// unconditional copy (deletes any same filename)
-			unlink(to);
-			strcpy(strLog, to);
-			logString(strLog, BUFFER);
-			if(1) {  // was: if(!fileExists(to))
-				r1 = rename(fi.f_name, to); //was: _copy
-				fret++;
-			}
-			//was: r1 = unlink(fi.f_name);
-		}
-	}
-	return(fret);	
-}
-
-static int updateCategory(char *category, char *fnbase, char prefix)
-{
+static int 
+updateCategory(char *category, char *fnbase, char prefix) {
 	char buffer[80], tmpbuf[80];
 	int ret;
 	
@@ -438,22 +396,24 @@ static int updateCategory(char *category, char *fnbase, char prefix)
 	return ret;
 }
 
-int copyOutbox()
-{
+extern void 
+copyOutbox() {
 	int ret;
-	char inbox[PATH_LENGTH];
+	long time;
+	char bInbox[PATH_LENGTH];
 	
-	LBstrncpy(inbox,INBOX_PATH,PATH_LENGTH);
-	inbox[0] = 'b'; // changes a: to b:
-	ret = copydir(OUTBOX_PATH, inbox);	
-	return(ret);
+	setUSBHost(TRUE);
+	strcpy(bInbox,INBOX_PATH);
+	bInbox[0] = 'b'; // changes a: to b:
+	
+	copydir(OUTBOX_PATH, bInbox);
+	setUSBHost(FALSE);
 }
-//
-// copy directory tree below fromdir (all subdirectories and files at all levels)
-//
-int copydir(char *fromdir, char *todir)
-{
-	int ret, r1, len_from, len_to, fret;
+
+static int 
+copydir(char *fromdir, char *todir) {
+// 	copy directory tree below fromdir (all subdirectories and files at all levels)
+	int ret, r1, len_from, len_to, len, fret;
 	char from[PATH_LENGTH], to[PATH_LENGTH], lastdir[FILE_LENGTH];
 
 	struct f_info fi;
@@ -503,9 +463,8 @@ int copydir(char *fromdir, char *todir)
 		strcat(to, fi.f_name);
 		
 		r1 = mkdir(to);
-		
-//		fret += copyfiles(from, to);
 		fret += copydir (from, to);
+		ret = rmdir(from);
 		
 		from[len_from] = 0;
 		strcat(from, "*");
@@ -517,14 +476,18 @@ int copydir(char *fromdir, char *todir)
 	from[len_from] = 0;
 	to[len_to]= 0;
 	fret += copyfiles(from, to);
+	strcpy(lastdir,LIST_PATH+2);
+	if (len = strlen(lastdir))
+		lastdir[len-1] = 0; // remove last '\'
+	if (strstr(fromdir,lastdir))
+		fret = 0; // prevents system reset if only copying list files
 	
 	return(fret);
-
 }
 //
 // copy all files in fromdir to todir
 //
-int copyfiles(char *fromdir, char *todir)
+static int copyfiles(char *fromdir, char *todir)
 {
 	int ret, r1, len_from, len_to, fret;
 	char from[80], to[80];
@@ -559,15 +522,23 @@ int copyfiles(char *fromdir, char *todir)
 			if((lower(from[0]) == 'a') && (lower(to[0]) == 'a')) {
 				unlink(to);
 				r1 = rename(from, to);
-//				if(r1) {	//rename failed??
-//				}
 			} else {
+				setLED(LED_GREEN,FALSE);
+				setLED(LED_RED,TRUE);
 				r1 = _copy(from, to);
+				wait (500);
+				setLED(LED_RED,FALSE);
+				if (r1 != -1) {
+					setLED(LED_GREEN,TRUE);
+					wait(500);
+				}
 			}
+//			logString((char *)"FROM/TO:",BUFFER);
+//			logString(from,BUFFER);
+//			logString(to,ASAP);
 		}
 		ret = _findnext(&fi);
 		fret++;
 	}
-		
 	return(fret);
 }

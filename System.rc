@@ -1,4 +1,18 @@
 # Begin Project
 # Begin SubItem "System  Resources"
+# Begin Source File
+SOURCE=Resource\bip.a18
+USEPARAM=FALSE
+PARAM=
+ID=RES_BIP_A18
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Resource\ding.a18
+USEPARAM=FALSE
+PARAM=
+ID=RES_DING_A18
+EXPORT=3
+# End Source File
 # End SubItem
 # End Project

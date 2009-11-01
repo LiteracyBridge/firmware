@@ -487,7 +487,8 @@ int checkInactivity(BOOL resetTimer) {
 		}
 		if (!usbret) { //USB connection was made
 			lastActivity = currentTime; //	count being in usb as active
-			ProcessInbox();
+			processInbox();
+			setLED(LED_ALL,FALSE);
 		}
 	}
 }
@@ -732,12 +733,12 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;	
 					
 		case USB_HOST_ON:
-			stop();
+/*			stop();
 			setUSBDevice(TRUE);
 			newBlock = &context.package->blocks[destination];
 			newTime = newBlock->startTime;
 			reposition = TRUE;
-			break;	
+*/			break;	
 					
 		case STOP:
 			stop();
@@ -1008,7 +1009,8 @@ void loadPackage(int pkgType, const char * pkgName) {
 	long timeNow;
 		
 	stop();  // better to stop audio playback before file ops  -- also flushes log buffer
-
+	setLED(LED_RED,FALSE);
+	
 	// log start of new user package and duration of last package for user experience tracking
 	timeNow = getRTCinSeconds();
 	if (context.packageStartTime)

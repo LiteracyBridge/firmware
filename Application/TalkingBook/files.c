@@ -60,7 +60,7 @@ void logString(char *string, int whenToWrite) {
 		if (whenToWrite==ASAP && !SACM_Status()) {
 			flushLog();
 			appendStringToFile(LOG_FILE,string);  // destroys *string	
-		} else {		
+		} else {
 			if (idxLogBuffer && (idxLogBuffer <= (LOG_BUFFER_SIZE - 3))) {
 				// already one entry, separate with CRLF
 				logBuffer[idxLogBuffer++] = 0x0d;

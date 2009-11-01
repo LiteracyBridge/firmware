@@ -11,7 +11,7 @@
 #include "Include/d2d_copy.h"
 
 extern int setUSBHost(BOOL enter);
-static int testCopy(char *, char *, int);
+static int fileCopy(char *, char *, int);
 
 int d2dCopy(const char * filenameList, const char * packageName) {
 	int ret, retCopy;
@@ -34,6 +34,7 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 	
 	strcpy(to,INBOX_PATH);
 	to[0] = 'b'; //change a:\\ drive to b:\\ drive
+	strcat(to,NEW_PKG_SUBDIR);
 	prefixCursor = NULL;
 	if (0 == strncmp(packageName,CUSTOM_PKG_PREFIX,strlen(CUSTOM_PKG_PREFIX)))
 		prefixCursor = CUSTOM_PKG_PREFIX;
@@ -55,10 +56,11 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 			strcat(filename,file_info.f_name);
 			strcpy(to,INBOX_PATH);
 			to[0] = 'b'; //change a:\\ drive to b:\\ drive
+			strcat(to,NEW_PKG_SUBDIR);
 			strcat(to,cursor); // to get directory name
 			strcat(to,"\\");
 			strcat(to,file_info.f_name);
-			retCopy = testCopy(filename,to,maxTrials); //was unlink((LPSTR)filename);
+			retCopy = fileCopy(filename,to,maxTrials); //was unlink((LPSTR)filename);
 			if (retCopy == -1) {
 				strcpy(strLog,(const char *)"Copy Failed! ");
 				strcat(strLog,filename);
@@ -78,7 +80,7 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 		strcat(filename,AUDIO_FILE_EXT);
 		strcat(to,cursor);
 		strcat(to,AUDIO_FILE_EXT);
-		retCopy = testCopy(filename,to,maxTrials); //was unlink((LPSTR)filename);
+		retCopy = fileCopy(filename,to,maxTrials); //was unlink((LPSTR)filename);
 		if (retCopy == -1) {
 			strcpy(strLog,(const char *)"Copy Failed! ");
 			strcat(strLog,filename);
@@ -95,10 +97,11 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 		strcpy(filename,LIST_PATH);
 		strcat(filename,file_info.f_name);
 		strcpy(to,INBOX_PATH);
+		strcat(to,SYS_UPDATE_SUBDIR);
 		to[0] = 'b'; //change a:\\ drive to b:\\ drive
 		strcat(to,LIST_PATH+3); // +3 removes the "a:\" but keeps "\lists\", for example
 		strcat(to,file_info.f_name);
-		retCopy = testCopy(filename,to,maxTrials); //was unlink((LPSTR)filename);
+		retCopy = fileCopy(filename,to,maxTrials); //was unlink((LPSTR)filename);
 		if (retCopy == -1) {
 			strcpy(strLog,(const char *)"Copy Failed! ");
 			strcat(strLog,file_info.f_name);
@@ -112,7 +115,7 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 	return retCopy;
 }
 
-static int testCopy(char * from, char * to, int maxTrials) {
+static int fileCopy(char * from, char * to, int maxTrials) {
 	int ret, trials;
 	
 	setLED(LED_ALL,FALSE);
