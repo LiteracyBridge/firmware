@@ -414,7 +414,7 @@ static int
 copydir(char *fromdir, char *todir) {
 // 	copy directory tree below fromdir (all subdirectories and files at all levels)
 	int ret, r1, len_from, len_to, len, fret;
-	char from[PATH_LENGTH], to[PATH_LENGTH], lastdir[FILE_LENGTH];
+	char from[PATH_LENGTH], fromfind[PATH_LENGTH], to[PATH_LENGTH], lastdir[FILE_LENGTH];
 
 	struct f_info fi;
 	
@@ -436,26 +436,21 @@ copydir(char *fromdir, char *todir) {
 		strcat(to, "\\");
 		len_to++;
 	}
-	ret =_findfirst(from, &fi, D_DIR);
+	strcpy(fromfind,from);
+	ret =_findfirst(fromfind, &fi, D_DIR);
 	from[len_from] = 0;
 	lastdir[0] = 0;
 	
-	for( ; ret >= 0 ; ret = _findnext(&fi)) {
-		if(! (fi.f_attrib & D_DIR))
-			continue;
-		
-		if(fi.f_name[0]=='.')
-			continue;
-		
-		if(lastdir[0]) {
-			if(!strcmp(fi.f_name, lastdir)) {
-				lastdir[0] = 0;      //should not be necessary
-			}
+	while (ret >= 0) {
+		if(! (fi.f_attrib & D_DIR)) {
+			ret = _findnext(&fi);
 			continue;
 		}
-		
-		strcpy(lastdir, fi.f_name);  // should not be necessary
-		
+	
+		if(fi.f_name[0]=='.') {
+			ret = _findnext(&fi);
+			continue;
+		}
 		from[len_from] = 0;
 		to[len_to]= 0;
 				
@@ -465,13 +460,10 @@ copydir(char *fromdir, char *todir) {
 		r1 = mkdir(to);
 		fret += copydir (from, to);
 		ret = rmdir(from);
-		
-		from[len_from] = 0;
-		strcat(from, "*");
-		ret =_findfirst(from, &fi, D_ALL);  // should not be necessary
-		
+				
 		fret++;
-	}
+		ret =_findfirst(fromfind, &fi, D_DIR);  //necessary to reset after rmdir? 
+	};
 	
 	from[len_from] = 0;
 	to[len_to]= 0;

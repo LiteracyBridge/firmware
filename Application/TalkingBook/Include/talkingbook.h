@@ -4,7 +4,7 @@
 #ifndef	__TALKINGBOOK_h__
 #define	__TALKINGBOOK_h__
 
-#define VERSION			"v1.35b"
+#define VERSION			"v1.36"
 
 asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 #define APP_IRAM 		__attribute__((section(".APP_IRAM")))
