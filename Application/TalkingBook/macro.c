@@ -147,6 +147,9 @@ int nextMacroKey (int keystroke) {
 
 	//todo-macro: left/right to step through macro (not easy with current setup)
 
+	if (keystroke == KEY_PLUS || keystroke == KEY_MINUS)
+		return keystroke; // pass through to allow volume change
+
 	if (keystroke == KEY_PLAY && SACM_Status() && !context.isPaused) {
 		secNow = getRTCinSeconds();
 		SACM_Pause();
@@ -209,14 +212,8 @@ int nextMacroKey (int keystroke) {
 }
 
 
-/* 		do {
-			end = getRTCinSeconds();	
-			if (0==(end%2) && (prev != end)) { // blink LED every three seconds
-				prev = end;
-				setLED(LED_RED,FALSE);
-				wait (100);
-				setLED(LED_RED,TRUE);
-			}
+/* THIS CODE is here to remind Cliff to allow playing "tour-guide files" in the middle of a macro
+ 		do {
 			key = keyCheck(0);
 			if (key == KEY_PLAY) { // pause  TODO: this key press to pause shouldn't be hard coded
 				SACM_Pause();
