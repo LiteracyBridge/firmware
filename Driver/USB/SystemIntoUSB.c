@@ -189,16 +189,18 @@ int SystemIntoUDisk(unsigned int serviceloop)
 			}
 		}
 		if (tmp == 0 && R_USB_State_Machine == 0) {
+			SetSystemClockRate(CLOCK_RATE);
 			return(2);
 		}
 
 		if(R_USB_State_Machine == 0xf5f5) {
+			SetSystemClockRate(CLOCK_RATE);
 			return(2);
 		}
 		if(!(R_USB_State_Machine > 0 && R_USB_State_Machine <= SCSI_CSW_Stage)) {
 			SysEnableWaitMode(3);
-			SetSystemClockRate(CLOCK_RATE);
 			RHM_FlashPtr = 0;
+			SetSystemClockRate(CLOCK_RATE);
 			return 1;
 		}
 	}
@@ -225,8 +227,6 @@ xxx:
 	}
 	SysEnableWaitMode( 3 );
 	
-	SetSystemClockRate(CLOCK_RATE);
-
 	R_USB_State_Machine == 0xf5f5; //CS: THIS LOOKS LIKE A BUG -- A TEST; NOT AN ASSIGNMENT!
 	RHM_FlashPtr = 0;
 	
@@ -234,7 +234,7 @@ xxx:
 		setLED(LED_RED,FALSE);
 	else // for USB before reading config file, or if config corrupted
 		setLED(0x200,FALSE);		
-
+	SetSystemClockRate(CLOCK_RATE);
 	return 0;
 }
 

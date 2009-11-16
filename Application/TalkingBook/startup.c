@@ -84,7 +84,8 @@ void startUp(void) {
 	SetSystemClockRate(MAX_CLOCK_SPEED); // to speed up initial startup -- set CLOCK_RATE later
 
 	setDefaults();
-	setLED(LED_ALL,FALSE);  // red light can be left on after reprog restart
+	setLED(LED_RED,FALSE);  // red light can be left on after reprog restart
+	setLED(LED_GREEN,TRUE);  // red light can be left on after reprog restart
 
 	//to stop user from wondering if power is on and possibly cycling too quickly,
 	playDing();  // it is important to play a sound immediately 

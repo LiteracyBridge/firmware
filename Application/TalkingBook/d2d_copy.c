@@ -117,8 +117,16 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 
 static int fileCopy(char * from, char * to, int maxTrials) {
 	int ret, trials;
-	
+/*
+	long filesize;
+	int secToCopy;
+	struct f_info f_info;
+	// get filesize to estimate expected copy time
+	ret =_findfirst((LPSTR)from, &f_info, D_FILE);
+	filesize = f_info.f_size;
+*/	
 	setLED(LED_ALL,FALSE);
+
 	for (trials = 1; trials <= maxTrials; trials++) {
 		setLED(LED_RED,TRUE);		
 		

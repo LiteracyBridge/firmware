@@ -20,6 +20,6 @@ struct MacroLoop {
 };
 
 extern void loadMacro(void);
-extern int nextMacroKey (void);
+extern int nextMacroKey (int);
 
 #endif

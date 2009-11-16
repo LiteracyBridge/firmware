@@ -4,10 +4,15 @@
 #include "Include/talkingbook.h"
 #include "Include/device.h"
 #include "Include/files.h"
+#include "Include/audio.h"
+#include "Include/containers.h"
 #include "Include/macro.h"
+extern void KeyScan_ServiceLoop(void);
+extern int SP_GetCh(void);
 
 #define MAX_MACRO_ITEMS     100
 #define MAX_MACRO_LOOPS     10
+#define TOUR_OFFSET			0x100  // to keep tour audio file numbers away from keystroke values
 
 APP_IRAM static MacroInstr macro[MAX_MACRO_ITEMS];
 APP_IRAM static MacroLoop loop[MAX_MACRO_LOOPS];
@@ -85,6 +90,8 @@ void loadMacro(void) {
 							key = KEY_MINUS;
 							break;
 						default:
+							// todo-macro if *action is number, store value in key (+0x100 or someting like that)
+							// using TOUR_OFFSET
 							key = 0xFFFF; // causes no-op in case macro script has some unallowed character
 							break;
 					}
@@ -129,8 +136,7 @@ void loadMacro(void) {
 }
 
 
-int nextMacroKey (void) {
-	int keystroke;
+int nextMacroKey (int keystroke) {
 	APP_IRAM static int idxMacro;
 	APP_IRAM static long secLastMacro;
 	APP_IRAM static int idxLoop;
@@ -138,6 +144,26 @@ int nextMacroKey (void) {
 	long secNow;
 	long secNextEvent;
 	char buffer[50];
+
+	//todo-macro: left/right to step through macro (not easy with current setup)
+
+	if (keystroke == KEY_PLAY && SACM_Status() && !context.isPaused) {
+		secNow = getRTCinSeconds();
+		SACM_Pause();
+		do {
+			KeyScan_ServiceLoop();
+			keystroke = (int)SP_GetCh();
+		} while (keystroke != KEY_PLAY && keystroke != KEY_SELECT);					
+		if (keystroke == KEY_PLAY) {
+			secLastMacro += (getRTCinSeconds() - secNow); // don't count paused time in macro timeline
+			SACM_Resume();
+		}
+	}
+
+	if (keystroke == KEY_SELECT) {  // handles this whether or not happened during pause
+		idxMacro = MAX_MACRO_ITEMS; // terminate macro
+		stop();
+	}
 
 	if ((idxMacro >= MAX_MACRO_ITEMS) || (macro[idxMacro].wait == -1)) {
 		MACRO_FILE = 0; // end of macros
@@ -149,6 +175,7 @@ int nextMacroKey (void) {
  			keystroke = 0;
  		else {
  			keystroke = macro[idxMacro].key;
+			// if > #DEFINE then call fct, play, loop, reset secNow			
  			secLastMacro = secNow;
  			if (macro[idxMacro].log) {
 				buffer[0] = 'M';  //macro log entry
@@ -180,3 +207,25 @@ int nextMacroKey (void) {
 	}
 	return keystroke;	
 }
+
+
+/* 		do {
+			end = getRTCinSeconds();	
+			if (0==(end%2) && (prev != end)) { // blink LED every three seconds
+				prev = end;
+				setLED(LED_RED,FALSE);
+				wait (100);
+				setLED(LED_RED,TRUE);
+			}
+			key = keyCheck(0);
+			if (key == KEY_PLAY) { // pause  TODO: this key press to pause shouldn't be hard coded
+				SACM_Pause();
+				setLED(LED_RED,FALSE);
+				do
+					key = keyCheck(0);
+				while (key != KEY_PLAY && key != KEY_STAR);					
+				setLED(LED_RED,TRUE);
+				SACM_Resume();
+			}
+		} while (key != KEY_STAR); // TODO: this key press to stop shouldn't be hard coded
+ */

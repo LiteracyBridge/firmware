@@ -215,14 +215,8 @@ int keyCheck(int longCheck) {
 	for (i = 0; i < loops; i++)
 		KeyScan_ServiceLoop();
 	keystroke = (int)SP_GetCh();
-	if (MACRO_FILE) {
-		if (keystroke == KEY_SELECT) {
-			MACRO_FILE = 0; // terminate macro
-			keystroke = 0;
-			//loadPackage(PKG_SYS,BOOT_PACKAGE); // go to home	
-		} else
-			keystroke = nextMacroKey();
-	}
+	if (MACRO_FILE)
+		keystroke = nextMacroKey(keystroke);
 	if (keystroke)
 		logKeystroke(keystroke);
 	return keystroke;
