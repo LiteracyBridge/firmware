@@ -16,8 +16,9 @@ struct SystemCounts {
 
 extern SystemCounts systemCounts;
 
-extern void saveSystemCounts();
+extern void saveSystemCounts(void);
 extern int loadSystemCounts(void);
 extern void getPkgNumber(char *, BOOL);
-
+extern void logSystemCounts(void);
+extern void getrevdPkgNumber(char *, BOOL);
 #endif

@@ -127,9 +127,9 @@ int insertStringInFile(const char * filename, char * strText, long posInsert) {
 		i = unlink((LPSTR)filename);
 		if (i != -1) {
 			//todo: change this to rename instead of copy and unlink
-			i = _copy((LPSTR)wFilepath,(LPSTR)filename);
-			if (i != -1)
-				i = unlink((LPSTR)wFilepath);
+			i = rename((LPSTR)wFilepath,(LPSTR)filename);
+			//if (i != -1)
+			//	i = unlink((LPSTR)wFilepath);
 		}
 		ret = i;
 	}
@@ -412,6 +412,7 @@ INT16 tbOpen(LPSTR path, INT16 open_flag) {
 			logException(22,(const char *)path,0);
 		else
 			break;
+		wait(100);
 	}
 /*  commenting lines below to let caller decide how to handle inability to open particular file:
 

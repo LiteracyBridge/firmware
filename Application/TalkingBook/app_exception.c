@@ -47,7 +47,7 @@ void logException(unsigned int errorCode, const char * pStrError, int resetOrUSB
 // 		commenting out code to alert user of error -- just use lights and auto-reset to welcome msg
 //		if (errorCode != 10 && errorCode != 14)  // can't access config or system boot 
 //			insertSoundFile(ERROR_SOUND_FILE_IDX);
-		if (errorCode != 14) // LED_GREEN and LED_RED are not assigned without config file
+//		if (errorCode != 14) // LED_GREEN and LED_RED are not assigned without config file
 			for (i=0; i < 5; i++) {
 				setLED(LED_GREEN,FALSE);
 				setLED(LED_RED,TRUE);

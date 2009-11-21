@@ -234,12 +234,13 @@ static int recordAudio(char *pkgName, char *cursor) {
 	logString(temp,BUFFER);
 	insertSound(&pkgSystem.files[SPEAK_SOUND_FILE_IDX],NULL,TRUE);
 	stop();
-	setLED(LED_RED,TRUE);
 	start = getRTCinSeconds();
-	end = start;
-	prev = end;
+	prev = end = start;
 	handle = tbOpen((LPSTR)filepath,O_CREAT|O_RDWR);
 	if (handle != -1) {
+		setLED(LED_RED,TRUE);
+		playBip();
+		while (SACM_Status());
 		Snd_SACM_RecFAT(handle, C_CODEC_AUDIO1800, BIT_RATE);
 		do {
 			end = getRTCinSeconds();	
@@ -260,9 +261,9 @@ static int recordAudio(char *pkgName, char *cursor) {
 				SACM_Resume();
 			}
 		} while (key != KEY_STAR); // TODO: this key press to stop shouldn't be hard coded
-		while ((end - start) < 3) { // must be at least 2.0 second recording
-			end = getRTCinSeconds();			
-		}
+//		while ((end - start) < 3) { // must be at least 2.0 second recording
+//			end = getRTCinSeconds();			
+//		}
 		SACM_Stop();		//Snd_Stop(); // no need to call stop() and flush the log
 		//lseek(handle, 6, SEEK_SET );			//Seek to the start of the file input
 		//write(handle,(LPSTR)header<<1,6);
@@ -289,8 +290,7 @@ int createRecording(char *pkgName, int fromHeadphone, char *listName) {
 	int SPINS; //from page 102 of GPL Progammers Manual v1.0/Dec20,2006 
 	           //headphone amp audio driver input source select 
 	
-	if (context.packageStartTime) // in case beginning recording while playing another pkg
-		markEndPlay(getRTCinSeconds());
+	markEndPlay(getRTCinSeconds());
 		
 	if (fromHeadphone) {
 		SPINS = 2;
@@ -322,14 +322,18 @@ void markEndPlay(long timeNow) {
 	long timeDiff;
 	char log[40];
 	
-	timeDiff = timeNow - context.packageStartTime;
-	context.packageStartTime = 0;
-	strcpy (log,"TIME PLAYED: ");
-	longToDecimalString(timeDiff,log+strlen(log),4);
-	strcat(log," sec at VOL=");
-	longToDecimalString((long)getVolume(),log+strlen(log),2);
-	strcat(log,"\x0d\x0a");
-	logString(log,BUFFER);
+	if (context.packageStartTime) {
+		timeDiff = timeNow - context.packageStartTime;
+		context.packageStartTime = 0;
+		if (context.package->pkg_type != PKG_SYS) {
+			strcpy (log,"TIME PLAYED: ");
+			longToDecimalString(timeDiff,log+strlen(log),4);
+			strcat(log," sec at VOL=");
+			longToDecimalString((long)getVolume(),log+strlen(log),2);
+			strcat(log,"\x0d\x0a");
+			logString(log,BUFFER);
+		}
+	}
 }
 
 void markStartPlay(long timeNow, const char * name) {

@@ -5,5 +5,6 @@
 #define	__MAINLOOP_h__
 
 extern void mainLoop (void);
+extern int checkInactivity(BOOL); 
 extern void loadPackage(int, const char *);
 #endif

@@ -4,7 +4,7 @@
 #ifndef	__TALKINGBOOK_h__
 #define	__TALKINGBOOK_h__
 
-#define VERSION			"v1.36"
+#define VERSION			"v1.37"
 
 asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 #define APP_IRAM 		__attribute__((section(".APP_IRAM")))
@@ -16,10 +16,16 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 // DONT FORGET TO CHANGE #define DEVBOARD and /Driver/IOKey/IOKeyScan.asm file
 
 // TODO LIST
+//	 * On Startup, if no microSD card or if blank (no config.txt) then run full system test/diagnostic with reprog abiliy`
+//   * ADC/DAC modem-like capability for xfer of control tracks and compressed audio over mobile phones
+//   * 
 //   * registry/categories
 //     -- allow categories to be numbers, which means rethinking category/subcategory case distinction
 //     -- handle universal content SUB-categories
 //     -- handle user voice tag categories
+//   * start macro from a package
+//	 * tour guide audio within macro (or just include that within a package that is a macro)
+//   * allow pause before block begins (e.g. A$:3,[newblock] for a 3-sec delay)
 //   * user recordings
 //     -- more advanced: multiple choice creation without computer (voice prompts to create) 
 //   * limit recording from filling memory card (use config setting for min free space)
@@ -28,13 +34,11 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 //     -- secondary scenario is Talking Book updating from Outbox
 //   * power saving
 //     -- low power sleep mode when no activity
-//     -- consider trying lower proc speed (and check if affects catching block start/end events)
 //     -- limiting volume when voltage is dropping
 //   * recorded user feedback
 //   * detecting held buttons vs. tapped buttons (could be used with SHIFT-like modifier)
 //   * write a working malloc/free
 //   * rewrite containers so that DEFAULT package doesn't alloc same # of files/blocks/actions as others
-//   * allow pause before block begins (e.g. A$:3,[newblock] for a 3-sec delay)
 #define MAX_CLOCK_SPEED			96
 #define PKG_CONTROL_FILENAME	"control.txt"
 #define APP_DATA_FILENAME		"data.bin"

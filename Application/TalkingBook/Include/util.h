@@ -7,8 +7,8 @@
 #include <string.h>
 // extern char * strstr(const char *,const char *);
 // extern char * strchr(const char *,char);
-extern int isspace(char);
-extern int isdigit(char);
+//extern int isspace(char);
+//extern int isdigit(char);
 // extern char * strcpy(char *, const char *);
 // extern char * strcat(char *, const char *);
 // extern unsigned long int strlen(const char *);

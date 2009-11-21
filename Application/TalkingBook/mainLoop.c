@@ -435,7 +435,7 @@ static void keyResponse(void) {
 	}
 }
 
-int checkInactivity(BOOL resetTimer) {
+extern int checkInactivity(BOOL resetTimer) {
 	unsigned long currentTime;
 	APP_IRAM static BOOL warnedUser;
 	APP_IRAM static unsigned long lastActivity;
@@ -517,8 +517,7 @@ void mainLoop (void) {
 			// this assume that stopped means end of audio file
 			// todo: this should be checking end action for CtnrFile (doesn't exist yet)
 			context.isStopped = TRUE;
-			if (context.packageStartTime)
-				markEndPlay(getRTCinSeconds());
+			markEndPlay(getRTCinSeconds());
 			flushLog();			
 			if (GREEN_LED_WHEN_PLAYING) {
 				setLED(LED_GREEN,FALSE);
@@ -596,30 +595,34 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			if (!filename[0]) { 
 				// empty list
 				insertSound(&pkgSystem.files[EMPTY_LIST_FILE_IDX],NULL,FALSE);
-			} else {
-				if (list->listType == LIST_OF_PACKAGES) {
-					// load package
-					switch (filename[0]) {
-						case SYS_PKG_CHAR:
-							context.queuedPackageType = PKG_SYS;
-							destination = replaceStack(filename+1,&pkgSystem);
-							break;
-						case APP_PKG_CHAR:
-							context.queuedPackageType = PKG_APP;
-							destination = replaceStack(filename+1,&pkgSystem);
-							break;
-						default:
-							context.queuedPackageType = PKG_MSG;
-							destination = replaceStack(filename,&pkgSystem);
-							break;
-					}
-					context.queuedPackageNameIndex = destination;
-				} else { // list->listType != LIST_OF_PACKAGES
-					// play sound of subject
-					newFile = getListFile(filename);
-					newTime = 0;
-					reposition = TRUE;
+				// empty list of packages; redirect to current point in list of lists
+				list = &context.package->lists[0];
+				context.idxActiveList = 0;
+			    cursor = getCurrentList(list);
+			    strcpy(filename,cursor);
+			} 
+			if (list->listType == LIST_OF_PACKAGES) {
+				// load package
+				switch (filename[0]) {
+					case SYS_PKG_CHAR:
+						context.queuedPackageType = PKG_SYS;
+						destination = replaceStack(filename+1,&pkgSystem);
+						break;
+					case APP_PKG_CHAR:
+						context.queuedPackageType = PKG_APP;
+						destination = replaceStack(filename+1,&pkgSystem);
+						break;
+					default:
+						context.queuedPackageType = PKG_MSG;
+						destination = replaceStack(filename,&pkgSystem);
+						break;
 				}
+				context.queuedPackageNameIndex = destination;
+			} else { // list->listType != LIST_OF_PACKAGES
+				// play sound of subject
+				newFile = getListFile(filename);
+				newTime = 0;
+				reposition = TRUE;
 			}
 			break;
 		
@@ -1013,8 +1016,7 @@ void loadPackage(int pkgType, const char * pkgName) {
 	
 	// log start of new user package and duration of last package for user experience tracking
 	timeNow = getRTCinSeconds();
-	if (context.packageStartTime)
-		markEndPlay(timeNow);
+	markEndPlay(timeNow);
 	if (pkgType != PKG_SYS)
 		markStartPlay(timeNow,pkgName);
 

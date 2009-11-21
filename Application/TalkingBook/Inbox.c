@@ -1,6 +1,8 @@
 // Copyright 2009 Literacy Bridge
 // CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
 // Contact: info@literacybridge.org
+#include <string.h>
+#include <ctype.h>
 #include "Include/talkingbook.h"
 #include "Include/device.h"
 #include "Include/files.h"
@@ -9,6 +11,8 @@
 #include "Include/audio.h"
 #include "Include/pkg_ops.h"
 #include "Include/SD_reprog.h"
+#include "Include/sys_counters.h"
+#include "Include/mainLoop.h"
 #include "Include/Inbox.h"
 
 struct newContent {
@@ -20,6 +24,9 @@ struct newContent {
 
 extern APP_IRAM char logBuffer[LOG_BUFFER_SIZE];
 extern APP_IRAM int idxLogBuffer;
+
+extern int setUSBHost(BOOL);
+
 static int processA18(struct f_info *, struct newContent *);
 static int processDir(char *, struct newContent *);
 //static int copyCWD(char *);
@@ -27,6 +34,8 @@ static int updateCategory(char *, char *, char);
 static void processSystemFiles(void);
 static struct newContent processNewPackages(void);
 static void queueNewPackage(struct newContent);
+static int copydir(char *, char *);
+static int copyfiles(char *, char *);
 
 #define D_NOTDIR (D_FILE | D_RDONLY | D_HIDDEN | D_SYSTEM | D_ARCHIVE)
 
@@ -47,6 +56,7 @@ processInbox(void) {
 
 	strcpy(strLog, "processInbox");	
 	logString(strLog, ASAP);
+	//logSystemCounts();
 	nc = processNewPackages();
 	processSystemFiles(); //copy system files, including firmware
 	queueNewPackage(nc);
@@ -93,8 +103,7 @@ processNewPackages(void) {
 	struct f_info file_info;
 	char strLog[PATH_LENGTH], savecwd[PATH_LENGTH];
 	char fbuf[PATH_LENGTH], strNewPkgPath[PATH_LENGTH], fname[FILE_LENGTH];
-	char *strList;
-	int ret, r1, len, fret;
+	int ret, len, fret;
 	struct newContent nc;	
 
 	fret = 0;
@@ -107,15 +116,15 @@ processNewPackages(void) {
 	len = strlen(strNewPkgPath);
 	if(len > 1) {
 		strNewPkgPath[len-1] = 0;
-		ret = fileExists(strNewPkgPath);
+		ret = fileExists((LPSTR)strNewPkgPath);
 		if(ret == 0) {
-			mkdir(strNewPkgPath);
+			mkdir((LPSTR)strNewPkgPath);
 			strcpy(strLog, "no new packages");	
 			logString(strLog, ASAP);
 			return nc;
 		}	
-		ret = getcwd(savecwd , sizeof(savecwd) - 1 );
-		ret = chdir(strNewPkgPath);
+		ret = getcwd((LPSTR)savecwd , sizeof(savecwd) - 1 );
+		ret = chdir((LPSTR)strNewPkgPath);
 		strcat(strNewPkgPath,"\\");  // add back what was removed above
 	//  process *.a18 files in inbox - category in file name after # OR IN *.txt
 	//  this case may never happen
@@ -123,12 +132,12 @@ processNewPackages(void) {
 		strcpy(fbuf, strNewPkgPath);
 		strcat(fbuf, "*");
 		strcat(fbuf,AUDIO_FILE_EXT);
-		ret =_findfirst(fbuf, &file_info, D_ALL);
+		ret =_findfirst((LPSTR)fbuf, &file_info, D_ALL);
 		while (ret >= 0) {
 			strcpy(strLog, file_info.f_name);
 			//logString(strLog,BUFFER);		
 			fret += processA18(&file_info, &nc);
-			ret = unlink(file_info.f_name);					
+			ret = unlink((LPSTR)file_info.f_name);					
 			ret = _findnext(&file_info);
 		}
 	//
@@ -136,7 +145,7 @@ processNewPackages(void) {
 		strcpy(fbuf, strNewPkgPath);
 		strcat(fbuf, "*.*");
 		
-		ret =_findfirst(fbuf, &file_info, D_DIR);
+		ret =_findfirst((LPSTR)fbuf, &file_info, D_DIR);
 		
 		for (; ret >= 0; ret = _findnext(&file_info)) {
 			if(file_info.f_attrib & D_DIR) {
@@ -148,7 +157,7 @@ processNewPackages(void) {
 				fret += processDir(fname, &nc);
 				  // RHM: something I do below makes this necessary
 				  //      upon return after _findnext returns -1 even if there are more dirs
-				ret = _findfirst(fbuf, &file_info, D_ALL);
+				ret = _findfirst((LPSTR)fbuf, &file_info, D_ALL);
 			}	
 		}
 		
@@ -173,10 +182,9 @@ processSystemFiles(void) {
 
 static int 
 processA18(struct f_info *fip, struct newContent *pNC) {
-	char strLog[80], savecwd[80];
 	char buffer[READ_LENGTH+1], *line, tmpbuf[READ_LENGTH+1];
 	char fnbase[80], category[8], subcategory[8];
-	int ret, len, len_fnbase, i, catidx, subidx, cat_base, fret;
+	int ret, len_fnbase, i, catidx, subidx, cat_base, fret;
 
 	category[0] = subcategory[0] = 0;
 	cat_base = strIndex(fip->f_name, CATEGORY_DELIM);
@@ -189,11 +197,12 @@ processA18(struct f_info *fip, struct newContent *pNC) {
 		for(i=cat_base; ; i++ ) {
 			if(fip->f_name[i] == '.')
 				break;
-			if(isupper(fip->f_name[i])) {
+			// categories must be caps; subcategories must be lower; each can have digits but not in first position
+			if(isupper(fip->f_name[i]) || (catidx && isdigit(fip->f_name[i])) ) {
 				category[catidx++] = fip->f_name[i];
 				continue;
 			}
-			if(islower(fip->f_name[i]))
+			if(islower(fip->f_name[i])|| (catidx && isdigit(fip->f_name[i])))
 				subcategory[subidx++] = fip->f_name[i]; 
 		}
 		category[catidx] = 0;
@@ -203,10 +212,10 @@ processA18(struct f_info *fip, struct newContent *pNC) {
 		strcpy(fnbase, fip->f_name);
 		fnbase[len_fnbase] = 0;
 		strcat(fnbase, ".txt");
-		ret = fileExists(fnbase);
+		ret = fileExists((LPSTR)fnbase);
 		if(ret) {	//open txt file, read category
 			getLine(-1,0);
-			ret = tbOpen(fnbase,O_RDONLY);
+			ret = tbOpen((LPSTR)fnbase,O_RDONLY);
 			line = getLine(ret, buffer);
 			strncpy(category, line, sizeof(category)-1);
 			close(ret);	
@@ -217,7 +226,7 @@ processA18(struct f_info *fip, struct newContent *pNC) {
 				}
 			}
 			category[sizeof(category)-1] = 0;
-			unlink(fnbase);		
+			unlink((LPSTR)fnbase);		
 		} else { // .a18 file without category info
 			strcpy(category, "OTHER");
 			//or
@@ -244,20 +253,22 @@ processA18(struct f_info *fip, struct newContent *pNC) {
 			strcat(fnbase, subcategory);
 			strcat(buffer, fnbase);
 			strcat(buffer,AUDIO_FILE_EXT);
-			ret = rename(tmpbuf, buffer);
+			ret = rename((LPSTR)tmpbuf, (LPSTR)buffer);
 //			logString((char *)"Rename from/to",BUFFER);
 //			logString(tmpbuf,BUFFER);
 //			logString(buffer,ASAP);
 		} while (ret);
 	} else {
 		strcat(buffer, fip->f_name);
-		ret = rename(tmpbuf, buffer);
+		ret = rename((LPSTR)tmpbuf, (LPSTR)buffer);
 //			logString((char *)"Rename from/to",BUFFER);
 //			logString(tmpbuf,BUFFER);
 //			logString(buffer,ASAP);
 		if(ret) {
+			logString((char *)tmpbuf,BUFFER);
+			logString((char *)buffer,BUFFER);
 			logString((char *)"rename failed",ASAP);
-			unlink(tmpbuf);	// rename failed, remove from inbox anyway
+			unlink((LPSTR)tmpbuf);	// rename failed, remove from inbox anyway
 		} else {
 			fret++;
 		}
@@ -270,7 +281,7 @@ processA18(struct f_info *fip, struct newContent *pNC) {
 			
 // TODO - currently doing nothing with subcategory
 	
-	ret = updateCategory(category, fnbase, (char *)NULL);
+	ret = updateCategory((char *)category, (char *)fnbase, 0);
 	
 	return(fret);
 
@@ -278,14 +289,13 @@ processA18(struct f_info *fip, struct newContent *pNC) {
 
 static int 
 processDir(char *dirname, struct newContent *pNC) {
-	struct f_info file_info;
-	char strLog[80], savecwd[80];
+	char savecwd[80];
 	char buffer[READ_LENGTH+1], tempbuf[80];
 	char fnbase[80], category[8], subcategory[8];
 	int ret, fret, catidx, subidx, len_fnbase, i, cat_base;
 
-	ret = getcwd(savecwd , sizeof(savecwd) - 1 );
-	ret = chdir(dirname);
+	ret = getcwd((LPSTR)savecwd , sizeof(savecwd) - 1 );
+	ret = chdir((LPSTR)dirname);
 	
 	category[0] = subcategory[0] = 0;
 	catidx = subidx = 0;
@@ -327,13 +337,13 @@ processDir(char *dirname, struct newContent *pNC) {
 			getrevdPkgNumber(fnbase,TRUE);
 			strcat(fnbase, dirname+cat_base);
 			strcat(tempbuf, fnbase);
-			ret = rename(buffer,tempbuf);
+			ret = rename((LPSTR)buffer,(LPSTR)tempbuf);
 		}
 	} else {
 		strcpy(tempbuf,USER_PATH);
 		strcat(tempbuf,dirname);
 		strcpy(fnbase, dirname);
-		ret = rename(buffer,tempbuf);
+		ret = rename((LPSTR)buffer,(LPSTR)tempbuf);
 	}
 		
 	if(catidx == 0)
@@ -349,8 +359,8 @@ processDir(char *dirname, struct newContent *pNC) {
 	}
 
 		
-	ret = chdir(savecwd);	
-	ret = rmdir(dirname);
+	ret = chdir((LPSTR)savecwd);	
+	ret = rmdir((LPSTR)dirname);
 	
 	return (fret);
 }
@@ -398,8 +408,6 @@ updateCategory(char *category, char *fnbase, char prefix) {
 
 extern void 
 copyOutbox() {
-	int ret;
-	long time;
 	char bInbox[PATH_LENGTH];
 	
 	setUSBHost(TRUE);
@@ -431,13 +439,13 @@ copydir(char *fromdir, char *todir) {
 	
 	strcpy(to, todir);
 	len_to = strlen(to);
-	ret = mkdir(to);	// just to be safe
+	ret = mkdir((LPSTR)to);	// just to be safe
 	if(to[len_to-1] != '\\') {
 		strcat(to, "\\");
 		len_to++;
 	}
 	strcpy(fromfind,from);
-	ret =_findfirst(fromfind, &fi, D_DIR);
+	ret =_findfirst((LPSTR)fromfind, &fi, D_DIR);
 	from[len_from] = 0;
 	lastdir[0] = 0;
 	
@@ -457,19 +465,19 @@ copydir(char *fromdir, char *todir) {
 		strcat(from, fi.f_name);
 		strcat(to, fi.f_name);
 		
-		r1 = mkdir(to);
+		r1 = mkdir((LPSTR)to);
 		fret += copydir (from, to);
-		ret = rmdir(from);
+		ret = rmdir((LPSTR)from);
 				
 		fret++;
-		ret =_findfirst(fromfind, &fi, D_DIR);  //necessary to reset after rmdir? 
+		ret =_findfirst((LPSTR)fromfind, &fi, D_DIR);  //necessary to reset after rmdir? 
 	};
 	
 	from[len_from] = 0;
 	to[len_to]= 0;
 	fret += copyfiles(from, to);
 	strcpy(lastdir,LIST_PATH+2);
-	if (len = strlen(lastdir))
+	if ((len = strlen(lastdir)))
 		lastdir[len-1] = 0; // remove last '\'
 	if (strstr(fromdir,lastdir))
 		fret = 0; // prevents system reset if only copying list files
@@ -504,7 +512,7 @@ static int copyfiles(char *fromdir, char *todir)
 		len_to++;
 	}
 			
-	ret =_findfirst(from, &fi, D_FILE);
+	ret =_findfirst((LPSTR)from, &fi, D_FILE);
 	while(ret >= 0) {
 		if(fi.f_name[0] != '.') {
 			from[len_from] = 0;
@@ -512,12 +520,12 @@ static int copyfiles(char *fromdir, char *todir)
 			strcat(from, fi.f_name);
 			strcat(to, fi.f_name);
 			if((lower(from[0]) == 'a') && (lower(to[0]) == 'a')) {
-				unlink(to);
-				r1 = rename(from, to);
+				unlink((LPSTR)to);
+				r1 = rename((LPSTR)from, (LPSTR)to);
 			} else {
 				setLED(LED_GREEN,FALSE);
 				setLED(LED_RED,TRUE);
-				r1 = _copy(from, to);
+				r1 = _copy((LPSTR)from, (LPSTR)to);
 				wait (500);
 				setLED(LED_RED,FALSE);
 				if (r1 != -1) {

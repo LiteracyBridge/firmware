@@ -136,7 +136,7 @@ void startUp(void) {
 	longToDecimalString(systemCounts.powerUpNumber,(char *)(buffer+strlen(buffer)),4);
 	strcat(buffer,(const char *)" - version " VERSION);
 	logString(buffer,BUFFER);
-
+	logSystemCounts();
 	loadPackage(PKG_SYS,BOOT_PACKAGE);	
 	SetSystemClockRate(CLOCK_RATE); // either set in config file or the default 48 MHz set at beginning of startUp()
 	mainLoop();

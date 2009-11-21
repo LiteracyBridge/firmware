@@ -5,19 +5,29 @@
 #include "./driver/include/driver_head.h"
 #include "./component/include/component_head.h"
 #include "Include/talkingbook.h"
+#include "Include/device.h"
 #include "Include/files.h"
 #include "Include/sys_counters.h"
 
 APP_IRAM SystemCounts systemCounts;
 
 void saveSystemCounts() {
-	int handle, ret;
+	int handle, ret, i;
 	
-	ret = unlink((LPSTR)(SYSTEM_VARIABLE_FILE));
+	i = 0;
+	do {
+ 		ret = unlink((LPSTR)(SYSTEM_VARIABLE_FILE));
+ 		if (ret)
+	 		wait(100);
+	}
+	while (ret && ++i < 3);
+	
 	handle = tbOpen((LPSTR)(SYSTEM_VARIABLE_FILE),O_CREAT|O_RDWR);
 	if (handle != -1)
 		ret = write(handle, (unsigned long)&systemCounts<<1, sizeof(SystemCounts)<<1);
 	else {
+		if (ret)
+			logString((char *)"failed unlink of system var file",BUFFER);
 		close(handle);
 		logException(17,SYSTEM_VARIABLE_FILE,RESET); //can't save SYSTEM_VARIABLE_FILE;
 	}
@@ -70,4 +80,16 @@ void nextListNumber(char *name) {
 	saveSystemCounts();
 }	
 */
+
+void logSystemCounts() {
+	char str[50];
+
+	strcpy(str,(char *)"S");
+	longToDecimalString(systemCounts.powerUpNumber, str+1, 4); 
+	strcat(str,(char *)"P");
+	longToDecimalString(systemCounts.packageNumber, str+6, 4); 
+	strcat(str,(char *)"R");
+	longToDecimalString(systemCounts.revdPkgNumber, str+11, 4); 
+	logString(str,ASAP);
+}
 

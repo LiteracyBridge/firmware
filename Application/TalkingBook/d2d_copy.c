@@ -90,7 +90,9 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 	}
 	strcpy(filename,LIST_PATH); 
 	strcat(filename,filenameList);
-	strcat(filename,"*");
+//	strcat(filename,"*");  //TODO: for now only copying the current language for the copied category
+	strcat(filename,"-");
+	strcat(filename,&pkgSystem.strHeapStack[pkgSystem.idxLanguageCode]);
 	strcat(filename,AUDIO_FILE_EXT);
 	ret =_findfirst((LPSTR)filename, &file_info, D_FILE);
 	while (ret >= 0 && (retCopy == 0)) {
@@ -100,11 +102,14 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 		strcat(to,SYS_UPDATE_SUBDIR);
 		to[0] = 'b'; //change a:\\ drive to b:\\ drive
 		strcat(to,LIST_PATH+3); // +3 removes the "a:\" but keeps "\lists\", for example
+		mkdir((LPSTR)to);
 		strcat(to,file_info.f_name);
 		retCopy = fileCopy(filename,to,maxTrials); //was unlink((LPSTR)filename);
 		if (retCopy == -1) {
 			strcpy(strLog,(const char *)"Copy Failed! ");
-			strcat(strLog,file_info.f_name);
+			strcat(strLog,filename);
+			strcat(strLog,(const char *)" ");
+			strcat(strLog,to);
 		} else
 			strcpy(strLog,file_info.f_name);
 		logString(strLog,BUFFER);

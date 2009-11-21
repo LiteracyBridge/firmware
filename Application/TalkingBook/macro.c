@@ -165,7 +165,10 @@ int nextMacroKey (int keystroke) {
 
 	if (keystroke == KEY_SELECT) {  // handles this whether or not happened during pause
 		idxMacro = MAX_MACRO_ITEMS; // terminate macro
-		stop();
+//		stop();
+		// TODO:using pause instad of stop: when stop() called and then USB_POLL happens, device keys don't respond?
+		context.isPaused = TRUE;
+		SACM_Pause();
 	}
 
 	if ((idxMacro >= MAX_MACRO_ITEMS) || (macro[idxMacro].wait == -1)) {
