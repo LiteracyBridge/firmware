@@ -76,3 +76,8 @@ v1.35
 - voltage logging now works well when audio is stopped
 - when logging duration of played audio msg, now shows last volume level
 - blinks green light when inactive for 30 seconds
+
+v1.37
+- record starts faster
+- empty categories bounce back to list name
+- 
