@@ -34,6 +34,10 @@ static void keyResponse(void);
 int checkInactivity(BOOL);
 static void takeAction (Action *, EnumAction);
 
+extern APP_IRAM unsigned int vCur_1;
+extern void refuse_lowvoltage(int);
+extern void set_voltmaxvolume();
+
 static EnumAction getStartEndCodeFromTimeframe(int idxTimeframe, EnumBorderCrossing approach, int *actionTime, int *idxAction) {
 	// This function is used by takeAction()'s processing of relative jumps, which must look at relevant start/end actions.
 	// It accepts a timeframe index and a jump direction (forward/backward) and returns the action, the action code, and the time of the start/end event.
@@ -443,10 +447,12 @@ extern int checkInactivity(BOOL resetTimer) {
 	APP_IRAM static int justLogged;
 	APP_IRAM static BOOL green;
 	char stringLog[20];
+	int v;
 		
 	currentTime = getRTCinSeconds();	
 
-	logVoltage();
+	while((v = getCurVoltageSample()) == 0xffff);
+	set_voltmaxvolume();
 
 	if (resetTimer) {
 		lastUSBCheck = lastActivity = currentTime;
@@ -494,12 +500,16 @@ extern int checkInactivity(BOOL resetTimer) {
 }
 
 void mainLoop (void) {
-	unsigned int getCurVoltageSample(unsigned long);
+	unsigned int getCurVoltageSample();
 	CtnrBlock *insertBlock;
 	ListItem *list;
 	int inactivityCheckCounter = 0;
 	
 	while(1) {
+		
+		logVoltage(); //debug
+		
+		
 		// check if need to load in a new package
 		if (context.queuedPackageType > PKG_NONE) {
 			if (context.queuedPackageNameIndex != -1)
@@ -535,8 +545,13 @@ void mainLoop (void) {
 			}
 		}
 		if (++inactivityCheckCounter > 10) {
+			int testctr = 0;
 			checkInactivity(!context.isStopped && !context.isPaused);
 			inactivityCheckCounter = 0;
+			if(!context.isStopped && !context.isPaused) {
+				if(vCur_1 < 0xff)
+					testctr++;
+			}
 		}
 		keyResponse();
 	} // end of while(1) loop
@@ -800,6 +815,11 @@ static void takeAction (Action *action, EnumAction actionCode) {
 				wait(500);
 			}
 */
+			if(vCur_1 < V_MIN_RECORD_VOLTAGE) {
+				refuse_lowvoltage(0);
+				break;
+			}
+			
 			cursor = getCurrentList(&pkgSystem.lists[context.package->idxMasterList]);
 			do {
 				strcpy(filename,USER_PATH);

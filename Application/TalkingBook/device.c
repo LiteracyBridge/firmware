@@ -22,6 +22,9 @@ APP_IRAM static int volume, speed;
 APP_IRAM static unsigned long voltage; // voltage sample 
 APP_IRAM static int oldVolume;
 extern APP_IRAM int vThresh_1;
+extern APP_IRAM unsigned int vCur_1;
+void set_voltmaxvolume();
+
 
 void resetRTC(void) {
 	*P_Second = 0;
@@ -69,7 +72,7 @@ int restoreVolume(BOOL normalVolume) {
 }
 
 int adjustVolume (int amount, BOOL relative, BOOL rememberOldVolume) {
-
+	int wrk;
 /*
 	APP_IRAM static long timeLastVolChg = 0;
 	long timeCurrent,diff;
@@ -97,6 +100,8 @@ int adjustVolume (int amount, BOOL relative, BOOL rememberOldVolume) {
 		volume += amount;
 	else
 		volume = amount;
+	
+	set_voltmaxvolume();
 
 	if (volume > MAX_VOLUME)  
 		volume = MAX_VOLUME;
@@ -146,13 +151,13 @@ void logVoltage() {
 	
 //	if ((context.isStopped || context.isPaused) && (time > (timeInitialized + 2)))     // 2-3 second delay)
 	if (VOLTAGE_SAMPLE_FREQ_SEC && (context.isStopped || context.isPaused) && time > (timeLastSample+VOLTAGE_SAMPLE_FREQ_SEC)) { 	
-		sample = getCurVoltageSample(time);
+		sample = getCurVoltageSample();
 		strcpy(buffer,"V:");
 	 	longToHexString(((long)vThresh_1 & 0xffff),buffer+strlen(buffer),1);
 	 	strcat(buffer," | ");
 	 	
 		if(sample == 0xffff) {
-			sample = getCurVoltageSample(time);
+			sample = getCurVoltageSample();
 			if(sample == 0xffff)
 				return;
 		}
@@ -170,12 +175,9 @@ void logVoltage() {
 }
 
 unsigned int
-getCurVoltageSample(unsigned long time) {	
+getCurVoltageSample() {	
 	unsigned ret = 0xffff;
 	APP_IRAM static BOOL wasSampleStarted = FALSE;
-
-	if(time == 0L)
-		time = getRTCinSeconds();
 
 	if (!wasSampleStarted) {
 		*P_ADC_Setup |= 0x4000;
@@ -193,10 +195,12 @@ getCurVoltageSample(unsigned long time) {
 	 	*P_ADC_Setup &= ~0x4000; // disable ADCEN to save power
 		wasSampleStarted = FALSE;
 		vThresh_1 <<= 1;
-#define V_THRESH 262
-// RHM: above set for testing on my system, change to a meaningful value and move to a header file
-		if(ret < V_THRESH)	// if voltage < 2.62 set a bit in vThresh_1, all ones in vThresh means 16 samples in a row below 
+		if(ret < vCur_1)	// if voltage < vCur_1 set a bit in vThresh_1, all ones in vThresh means 16 samples in a row below 
 			vThresh_1 |= 1;
+		if(vThresh_1 == 0xffff) {
+			--vCur_1;	// drop current nominal voltage
+			vThresh_1 = 0;	// reset threshold bits
+		}
 	}
 	return(ret);
 }
@@ -342,5 +346,31 @@ Log_ClockCtrl() {
  	r1 = *P_IOB_Buffer;
 	longToHexString((long)r1,buffer+strlen(buffer),1);
 	logString(buffer,ASAP);
+}
+void
+refuse_lowvoltage(int die)
+{
+	extern void playDing(void);
+	playDing();
+	playDing();
+	if(die != 0) {
+		wait(500);
+		setOperationalMode((int)P_SLEEP);
+	}
+}
+void
+set_voltmaxvolume()
+{
+	int	wrk = V_MIN_RUN_VOLTAGE - vCur_1;
+	if(wrk > 0) {
+		wrk >> 1;
+		wrk = 16 - wrk;
+		if(wrk <= 1) wrk = 2;
+		if(wrk < MAX_VOLUME) {
+			MAX_VOLUME = wrk;
+			if (volume > MAX_VOLUME)  
+				volume = MAX_VOLUME;
+		}
+	}
 }
 

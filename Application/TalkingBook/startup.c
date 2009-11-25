@@ -52,6 +52,9 @@ APP_IRAM char *MACRO_FILE;
 APP_IRAM int VOLTAGE_SAMPLE_FREQ_SEC, USB_CLIENT_POLL_INTERVAL;
 APP_IRAM int LOG_WARNINGS, LOG_KEYS;
 APP_IRAM unsigned int CLOCK_RATE;
+//if most recent 16 voltage readings are below vCur_1 (vThresh_1 == 0xffff),
+//   subtract 1 from vCur_1 and zero vThreah_1
+APP_IRAM unsigned int vCur_1;
 APP_IRAM int vThresh_1;
 
 static void setDefaults(void) {
@@ -77,6 +80,7 @@ static void setDefaults(void) {
 
 void startUp(void) {
 	APP_IRAM static unsigned long timeInitialized = -1;
+	int i, j, sumv;
 
 	char buffer[100];
 	int key;
@@ -86,35 +90,54 @@ void startUp(void) {
 	setDefaults();
 	setLED(LED_RED,FALSE);  // red light can be left on after reprog restart
 	setLED(LED_GREEN,TRUE);  // red light can be left on after reprog restart
-
+	
 	//to stop user from wondering if power is on and possibly cycling too quickly,
 	playDing();  // it is important to play a sound immediately 
-
-	key = keyCheck(1);  // long keycheck 
-	if (key == KEY_STAR || key == KEY_MINUS) {
-		// allows USB device mode no matter what is on memory card
-		Snd_Stop();
-		SystemIntoUDisk(1);	
-		loadConfigFile();
-		processInbox();
-		resetSystem();
-	} else if (key == KEY_PLUS) {
-		// outbox mode: copy outbox files to connecting device
-		loadConfigFile();
-		copyOutbox();
-		resetSystem();
-	}
-
-	// check for new firmware first
-	check_new_sd_flash();
-
-// init battery voltage sensing	
-	vThresh_1 = 0;
+	
+	// init battery voltage sensing	
 	*P_ADC_Setup |= 0x8000;  // enable ADBEN
 	*P_MADC_Ctrl &= ~0x05;  // clear CHSEL (channel select)
 	*P_MADC_Ctrl |=  0x02;  // select LINEIN1 
 	timeInitialized = 0;
-		
+
+	for(i=0, j=0, sumv=0; i<8; ) {	//establish startup voltage
+		int v;
+		while((v = getCurVoltageSample()) == 0xffff)
+			;
+		if(j++ >= 4) {
+			sumv += v;
+			i++;
+		}
+	}
+	vCur_1 = sumv >> 3; // average 8 readings
+	vThresh_1 = 0;
+	
+	if(vCur_1 < V_MIN_RUN_VOLTAGE) {
+		refuse_lowvoltage(1);
+		// not reached
+	}
+	
+	key = keyCheck(1);  // long keycheck 
+	
+	// only do usb stuff and/or flash reprogramming if voltage is ok
+	if(vCur_1 >= V_MIN_USB_VOLTAGE) {
+		if (key == KEY_STAR || key == KEY_MINUS) {
+			// allows USB device mode no matter what is on memory card
+			Snd_Stop();
+			SystemIntoUDisk(1);	
+			loadConfigFile();
+			processInbox();
+			resetSystem();
+		} else if (key == KEY_PLUS) {
+			// outbox mode: copy outbox files to connecting device
+			loadConfigFile();
+			copyOutbox();
+			resetSystem();
+		}	
+		// check for new firmware first
+		check_new_sd_flash();
+	}	
+	
 	loadConfigFile();
 	
 	SysDisableWaitMode(WAITMODE_CHANNEL_A);

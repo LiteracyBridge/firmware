@@ -40,6 +40,10 @@ extern void DrvEnableReminderISR( void );
 extern void DrvDisableReminderISR( void );
 extern unsigned int CLOCK_RATE;
 
+extern APP_IRAM unsigned int vCur_1;
+extern void refuse_lowvoltage(int);
+
+
 #if SIMULATOR  //add by haoyu for no err 2006.2.6
 int _NAND_ReadSector_USB(unsigned long  LABAddr, unsigned int blkcnt, unsigned long StoreAddr, unsigned int DMA_Channel) {};
 int _NAND_WriteSector_USB(unsigned long  LABAddr, unsigned int blkcnt, unsigned long StoreAddr, unsigned int DMA_Channel,unsigned int DMA_RB_Flag) {};
@@ -144,6 +148,11 @@ int SystemIntoUDisk(unsigned int serviceloop)
 	int flash_execution_buf[fl_size];
 	RHM_FlashPtr = &FL;
 
+	if(vCur_1 < V_MIN_USB_VOLTAGE) {
+		refuse_lowvoltage(0);
+		return(2);
+	}
+	
 	for(i=0; i<N_USB_LUN; i++) {
 		FP_USB_Lun_Define[i] = &USB_Lun_Define[i];
 		if( USB_Lun_Define[i].unLunType == LunType_NOR) {
@@ -227,7 +236,6 @@ xxx:
 	}
 	SysEnableWaitMode( 3 );
 	
-	R_USB_State_Machine == 0xf5f5; //CS: THIS LOOKS LIKE A BUG -- A TEST; NOT AN ASSIGNMENT!
 	RHM_FlashPtr = 0;
 	
 	if (LED_RED)
@@ -269,7 +277,11 @@ int setUSBHost(BOOL enter) {
 	int trials, x;
 	const int maxTrials = 20;
 	
-
+	if(vCur_1 < V_MIN_USB_VOLTAGE) {
+		refuse_lowvoltage(0);
+		return(2);
+	}
+	
 	if (enter){		
 		SetSystemClockRate(48);  //48MHz for Host mode
 		setLED(LED_GREEN,FALSE);

@@ -8,11 +8,16 @@
 #include "./Application/TalkingBook/Include/files.h"
 #include "./Application/TalkingBook/Include/audio.h"
 #include "./Application/TalkingBook/Include/app_exception.h"
+extern APP_IRAM unsigned int vCur_1;
+extern void refuse_lowvoltage(int);
 
 void logException(unsigned int errorCode, const char * pStrError, int resetOrUSB) {
 	// errorcode == 1 means memory error from BodyInit() and ucBSInit()
 	int i; 
 	char errorString[80];
+	
+	if(vCur_1 < V_MIN_SDWRITE_VOLTAGE) {
+	}
 	
 	if (resetOrUSB || LOG_WARNINGS) {
 		strcpy(errorString,"\x0d\x0a" "*** ERROR! (cycle "); //cycle number

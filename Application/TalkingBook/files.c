@@ -9,6 +9,9 @@ APP_IRAM static long filePosition;
 APP_IRAM char logBuffer[LOG_BUFFER_SIZE];
 APP_IRAM int idxLogBuffer;
 
+extern APP_IRAM unsigned int vCur_1;
+extern void refuse_lowvoltage(int);
+
 BOOL nextNameValuePair (int handle, char *buffer, char delimiter, char **name, char **value) {
 	BOOL ret;
 	char *cursor;
@@ -31,6 +34,11 @@ BOOL nextNameValuePair (int handle, char *buffer, char delimiter, char **name, c
 void clearStaleLog() {
 	int handle, ret;
 	char buffer[LOG_CARRYOVER_BYTES / 2];
+	
+	if(vCur_1 < V_MIN_SDWRITE_VOLTAGE) {
+		refuse_lowvoltage(0);
+		return;
+	}
 	
 	if (LOG_FILE) {
 		handle = tbOpen((LPSTR)(LOG_FILE),O_RDONLY);
@@ -99,6 +107,11 @@ int insertStringInFile(const char * filename, char * strText, long posInsert) {
 	char tempLine[80];
 	int MAX_BYTES = 2 * READ_LENGTH;
 
+	if(vCur_1 < V_MIN_SDWRITE_VOLTAGE) {
+		refuse_lowvoltage(0);
+		return;
+	}
+
 	strcpy(wFilepath,"temp.txt");
 	rHandle = tbOpen((LPSTR)(filename),O_RDONLY);
 	wHandle = tbOpen((LPSTR)wFilepath,O_CREAT|O_TRUNC|O_WRONLY);
@@ -153,7 +166,12 @@ int appendStringToFile(const char * filename, char * strText) {
 		strCharText[READ_LENGTH] = '\0';
 	} else
 		strcpy(strCharText,strText);
-*/	
+*/
+	if(vCur_1 < V_MIN_SDWRITE_VOLTAGE) {
+		refuse_lowvoltage(0);
+		return;
+	}
+
 	ret = -1;
 	handle = tbOpen((LPSTR)filename,O_RDWR);
 	if (handle == -1) {
@@ -255,6 +273,11 @@ int findDeleteStringFromFile(char *path, char *filename, const char * string, BO
 	int unequal;
 	char find[PATH_LENGTH];
 	
+	if(vCur_1 < V_MIN_SDWRITE_VOLTAGE) {
+		refuse_lowvoltage(0);
+		return;
+	}
+		
 	LBstrncpy(find,string,PATH_LENGTH);
 	buffer[READ_LENGTH] = '\0';
 	

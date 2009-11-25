@@ -9,11 +9,19 @@
 #include "Include/files.h"
 #include "Include/sys_counters.h"
 
+extern APP_IRAM unsigned int vCur_1;
+extern void refuse_lowvoltage(int);
+
 APP_IRAM SystemCounts systemCounts;
 
 void saveSystemCounts() {
 	int handle, ret, i;
-	
+
+	if(vCur_1 < V_MIN_SDWRITE_VOLTAGE) {
+		refuse_lowvoltage(0);
+		return;
+	}
+		
 	i = 0;
 	do {
  		ret = unlink((LPSTR)(SYSTEM_VARIABLE_FILE));

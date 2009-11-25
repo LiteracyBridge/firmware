@@ -6,6 +6,10 @@
 #include "Include/audio.h"
 #include "Include/containers.h"
 #include "Include/lists.h"
+#include "Include/device.h"
+
+extern APP_IRAM unsigned int vCur_1;
+extern void refuse_lowvoltage(int);
 
 static int openList(ListItem *, char *);
 //static int moveToTop(char *, char *); --- not currently used
@@ -260,6 +264,11 @@ int insertIntoList(ListItem *list, long posInsert, char * string) {
 	char buffer[READ_LENGTH+1];
 	char tempLine[LIST_ITEM_LENGTH];
 	int MAX_BYTES = 2 * READ_LENGTH;
+
+	if(vCur_1 < V_MIN_SDWRITE_VOLTAGE) {
+		refuse_lowvoltage(0);
+		return;
+	}
 
 	strcpy(rFilepath,LIST_PATH);
 	strcpy(wFilepath,LIST_PATH);
