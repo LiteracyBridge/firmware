@@ -507,9 +507,6 @@ void mainLoop (void) {
 	
 	while(1) {
 		
-		logVoltage(); //debug
-		
-		
 		// check if need to load in a new package
 		if (context.queuedPackageType > PKG_NONE) {
 			if (context.queuedPackageNameIndex != -1)
@@ -545,12 +542,11 @@ void mainLoop (void) {
 			}
 		}
 		if (++inactivityCheckCounter > 10) {
-			int testctr = 0;
 			checkInactivity(!context.isStopped && !context.isPaused);
 			inactivityCheckCounter = 0;
-			if(!context.isStopped && !context.isPaused) {
-				if(vCur_1 < 0xff)
-					testctr++;
+			if(vCur_1 < V_MIN_RUN_VOLTAGE) {
+				refuse_lowvoltage(1);
+				// not reached
 			}
 		}
 		keyResponse();

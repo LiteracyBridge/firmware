@@ -18,6 +18,8 @@ static int getFileHandle (CtnrFile *);
 static void playLongInt(CtnrFile *, unsigned long);
 static int recordAudio(char *, char *);
 APP_IRAM static char lastFilenameRecorded[FILE_LENGTH];
+extern APP_IRAM unsigned int vCur_1;
+
 
 void playDing(void) {
 	Snd_SACM_PlayMemory(C_CODEC_AUDIO1800,RES_DING_A18_SA);	
@@ -217,6 +219,7 @@ static int recordAudio(char *pkgName, char *cursor) {
 	long start, end, prev;
 	CtnrFile *file;
 	int key;
+	int low_voltage, v;
 	
 	strcpy(filepath,USER_PATH);
 	strcat(filepath,pkgName);
@@ -242,6 +245,7 @@ static int recordAudio(char *pkgName, char *cursor) {
 		playBip();
 		while (SACM_Status());
 		Snd_SACM_RecFAT(handle, C_CODEC_AUDIO1800, BIT_RATE);
+		low_voltage = 0;
 		do {
 			end = getRTCinSeconds();	
 			if (0==(end%2) && (prev != end)) { // blink LED every three seconds
@@ -249,6 +253,10 @@ static int recordAudio(char *pkgName, char *cursor) {
 				setLED(LED_RED,FALSE);
 				wait (100);
 				setLED(LED_RED,TRUE);
+				while((v = getCurVoltageSample()) == 0xffff);
+				if(vCur_1 < V_MIN_SDWRITE_VOLTAGE) {
+					low_voltage = 1;
+				}
 			}
 			key = keyCheck(0);
 			if (key == KEY_PLAY) { // pause  TODO: this key press to pause shouldn't be hard coded
@@ -260,7 +268,7 @@ static int recordAudio(char *pkgName, char *cursor) {
 				setLED(LED_RED,TRUE);
 				SACM_Resume();
 			}
-		} while (key != KEY_STAR); // TODO: this key press to stop shouldn't be hard coded
+		} while ((key != KEY_STAR) && (low_voltage == 0)); // TODO: this key press to stop shouldn't be hard coded
 //		while ((end - start) < 3) { // must be at least 2.0 second recording
 //			end = getRTCinSeconds();			
 //		}
