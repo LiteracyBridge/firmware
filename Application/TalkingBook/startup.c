@@ -79,9 +79,6 @@ static void setDefaults(void) {
 }
 
 void startUp(void) {
-	APP_IRAM static unsigned long timeInitialized = -1;
-	int i, j, sumv;
-
 	char buffer[100];
 	int key;
 	
@@ -94,49 +91,27 @@ void startUp(void) {
 	//to stop user from wondering if power is on and possibly cycling too quickly,
 	playDing();  // it is important to play a sound immediately 
 	
-	// init battery voltage sensing	
-	*P_ADC_Setup |= 0x8000;  // enable ADBEN
-	*P_MADC_Ctrl &= ~0x05;  // clear CHSEL (channel select)
-	*P_MADC_Ctrl |=  0x02;  // select LINEIN1 
-	timeInitialized = 0;
-
-	for(i=0, j=0, sumv=0; i<8; ) {	//establish startup voltage
-		int v;
-		while((v = getCurVoltageSample()) == 0xffff)
-			;
-		if(j++ >= 4) {
-			sumv += v;
-			i++;
-		}
-	}
-	vCur_1 = sumv >> 3; // average 8 readings
-	vThresh_1 = 0;
-	
-	if(vCur_1 < V_MIN_RUN_VOLTAGE) {
-		refuse_lowvoltage(1);
-		// not reached
-	}
-	
 	key = keyCheck(1);  // long keycheck 
 	
-	// only do usb stuff and/or flash reprogramming if voltage is ok
-	if(vCur_1 >= V_MIN_USB_VOLTAGE) {
-		if (key == KEY_STAR || key == KEY_MINUS) {
-			// allows USB device mode no matter what is on memory card
-			Snd_Stop();
-			SystemIntoUDisk(1);	
-			loadConfigFile();
-			processInbox();
-			resetSystem();
-		} else if (key == KEY_PLUS) {
-			// outbox mode: copy outbox files to connecting device
-			loadConfigFile();
-			copyOutbox();
-			resetSystem();
-		}	
-		// check for new firmware first
-		check_new_sd_flash();
+	// voltage checks in SystemIntoUSB.c
+	if (key == KEY_STAR || key == KEY_MINUS) {
+		// allows USB device mode no matter what is on memory card
+		Snd_Stop();
+		SystemIntoUDisk(1);	
+		loadConfigFile();
+		processInbox();
+		resetSystem();
+	} else if (key == KEY_PLUS) {
+		// outbox mode: copy outbox files to connecting device
+		loadConfigFile();
+		copyOutbox();
+		resetSystem();
 	}	
+	
+	// check for new firmware first, but don't flash if voltage is low
+	if(V_MIN_SDWRITE_VOLTAGE <= vCur_1) {
+		check_new_sd_flash();
+	}
 	
 	loadConfigFile();
 	
@@ -288,4 +263,34 @@ static void loadDefaultPackage(void) {
 	
 	pkgDefault.pkg_type = PKG_MSG;
 	parseControlFile (CONTROL_TEMPLATE, &pkgDefault);
+}
+void initVoltage()
+{
+	extern void set_voltmaxvolume();
+	APP_IRAM static unsigned long timeInitialized = -1;
+	int i, j, sumv;
+
+	// init battery voltage sensing	
+	*P_ADC_Setup |= 0x8000;  // enable ADBEN
+	*P_MADC_Ctrl &= ~0x05;  // clear CHSEL (channel select)
+	*P_MADC_Ctrl |=  0x02;  // select LINEIN1 
+	timeInitialized = 0;
+
+	for(i=0, j=0, sumv=0; i<8; ) {	//establish startup voltage
+		int v;
+		while((v = getCurVoltageSample()) == 0xffff)
+			;
+		if(j++ >= 4) {
+			sumv += v;
+			i++;
+		}
+	}
+	vCur_1 = sumv >> 3; // average 8 readings
+	vThresh_1 = 0;
+	
+	if(vCur_1 < V_MIN_RUN_VOLTAGE) {
+		refuse_lowvoltage(1);
+		// not reached
+	}
+	set_voltmaxvolume();
 }

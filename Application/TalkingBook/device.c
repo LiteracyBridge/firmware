@@ -351,19 +351,27 @@ void
 refuse_lowvoltage(int die)
 {
 	extern void playDing(void);
-	playDing();
-	playDing();
 	if(die != 0) {
+		setLED(LED_ALL, FALSE);
 		wait(500);
+		setLED(LED_RED, TRUE);
+		wait(250);
+		setLED(LED_RED, FALSE);
+		wait(500);
+		setLED(LED_RED, FALSE);
 		setOperationalMode((int)P_SLEEP);
+	} else {
+		playDing();
+		playDing();
 	}
 }
 void
 set_voltmaxvolume()
 {
-	int	wrk = V_MIN_RUN_VOLTAGE - vCur_1;
+	int	wrk = V_MIN_VOL_VOLTAGE - vCur_1;
 	if(wrk > 0) {
-		wrk >> 1;
+		wrk >>= 1;
+		// for every .02 volt below V_MIN_VOL_VOLTAGE subtract 1 from MAX_VOLUME
 		wrk = 16 - wrk;
 		if(wrk <= 1) wrk = 2;
 		if(wrk < MAX_VOLUME) {

@@ -6,16 +6,20 @@
 
 #include ".\Component\Include\component_head.h"
 
-//V_MIN_USB_VOLTAGE refuse to record if voltage below this value (hundredths of volts)
-#define V_MIN_USB_VOLTAGE 120
-//V_MIN_RECORD_VOLTAGE refuse to record if voltage below this value (hundredths of volts)
-#define V_MIN_RECORD_VOLTAGE 120
-//V_MIN_SDWRITE_VOLTAGE refuse to record if voltage below this value (hundredths of volts)
-#define V_MIN_SDWRITE_VOLTAGE 110
-//V_MIN_RUN_VOLTAGE refuse to record if voltage below this value (hundredths of volts)
-#define V_MIN_RUN_VOLTAGE 100
-//V_VOL_BASE voltage at or below this value enforce maximum voilume settings
-#define V_MIN_RUN_VOLTAGE 140
+//refuse to go into usb mode if voltage below this value
+#define V_MIN_USB_VOLTAGE 210
+
+//refuse to record if voltage below this value (hundredths of volts)
+#define V_MIN_RECORD_VOLTAGE 200
+
+//refuse to write to sd if voltage below this value (hundredths of volts)
+#define V_MIN_SDWRITE_VOLTAGE 200
+
+//refuse to run if voltage below this value (hundredths of volts)
+#define V_MIN_RUN_VOLTAGE 175
+
+//voltage at or below this value enforce maximum volume settings
+#define V_MIN_VOL_VOLTAGE 220
 
 extern int KEY_PLAY, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_SELECT, KEY_STAR, KEY_HOME, KEY_PLUS, KEY_MINUS;	
 extern int LED_GREEN, LED_RED, LED_ALL;

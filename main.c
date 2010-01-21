@@ -16,14 +16,17 @@
 extern long USB_ISR_PTR;
 extern long USB_INSERT_PTR;
 extern void USB_ISR(), USB_Insert_TimeOut();
+extern void initVoltage();
 
 void BodyInit(void);
 extern unsigned int CLOCK_RATE;
 
 int main (void)
 {
-	if(SYS_OFF!=SysGetState())
+	if(SYS_OFF!=SysGetState()) {
+		initVoltage();	// get initial voltage before SACM_Init in BodyInit - may never run BodyInit()
 		BodyInit();
+	}
 	
 	USB_ISR_PTR = (long)USB_ISR;
 	USB_INSERT_PTR = (long)USB_Insert_TimeOut;
