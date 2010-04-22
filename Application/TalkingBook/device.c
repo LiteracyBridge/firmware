@@ -199,8 +199,6 @@ getCurVoltageSample() {
 	if (!wasSampleStarted) {
 		*P_ADC_Setup |= 0x4000;
 		*P_MADC_Ctrl |= 0x40; // set STRCNV, starting the voltage sample
-		ret = *P_MADC_Ctrl;
-		ret = 0xffff;
 		wasSampleStarted = TRUE;
 	} else if (*P_MADC_Ctrl & 0x80) {  // checks CNVRDY (sample is ready)					
 	 	ret = (unsigned int)*P_MADC_Data;
@@ -340,6 +338,9 @@ void setOperationalMode(int newmode) {
 //	Log_ClockCtrl();
 	
 	turnAmpOff();
+	
+ 	*P_IOA_Dir  |= 0x1000;
+ 	*P_IOA_Attrib |= 0x1000; 	
     *P_IOA_Buffer  |= 0x1000;	//disable SD card
 
 	// disable NOR flash
