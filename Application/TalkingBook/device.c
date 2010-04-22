@@ -17,6 +17,8 @@ extern int SP_GetCh(void);
 
 static void logKeystroke(int);
 static void Log_ClockCtrl(void);
+static void turnSDoff(void);
+static void turnNORoff(void);
 
 APP_IRAM static int volume, speed;
 APP_IRAM static unsigned long voltage; // voltage sample 
@@ -310,47 +312,24 @@ void setOperationalMode(int newmode) {
   	SysIntoWaitMode();
     // when leaving wait mode, next instruction is executed, so we return here
     return;
-  } else if (newmode == (int)P_HALT) {
-  	stop();
-	setLED(LED_ALL,FALSE);
-//  	int save_rtc_ctrl = *P_RTC_Ctrl;
-//  	*P_RTC_Ctrl = save_rtc_ctrl & 0x7fff;  // turn off rtc??	
-	*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
-	Log_ClockCtrl();
-
-	turnAmpOff();
-    *P_IOA_Buffer  |= 0x1000;	//disable SD card
+  } else {
+     	// assume calling for sleep or halt
+		*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
+	  	stop();
+		setLED(LED_ALL,FALSE);
 	
-	// disable NOR flash
- 	*P_IOD_Dir  |= 0x0001;	 
- 	*P_IOD_Attrib |= 0x0001;
-    *P_IOD_Buffer  |= 0x0001;
-
-  	SysIntoHaltMode();
-
-	while(1);	
-
-    // cpu reset on exiting halt mode, so nothing below here executes
-  } else if (newmode == (int)P_SLEEP) {
-  	stop();
-	setLED(LED_ALL,FALSE);
-	*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
-//	Log_ClockCtrl();
+		turnAmpOff();
+		turnSDoff();
+		turnNORoff();
+	  	
+	  	if (newmode == (int)P_HALT) 
+		  	SysIntoHaltMode();
+		else // newmode == (int)P_SLEEP
+			_SystemOnOff();
 	
-	turnAmpOff();
-	
- 	*P_IOA_Dir  |= 0x1000;
- 	*P_IOA_Attrib |= 0x1000; 	
-    *P_IOA_Buffer  |= 0x1000;	//disable SD card
-
-	// disable NOR flash
- 	*P_IOD_Dir  |= 0x0001;	 
- 	*P_IOD_Attrib |= 0x0001;
-    *P_IOD_Data  |= 0x0001;
-
-	_SystemOnOff();
-	while(1);
-  }
+		while(1);	
+	    // cpu reset on exiting halt/sleep mode, so nothing below here executes
+     }
 }
 
 void
@@ -393,7 +372,7 @@ refuse_lowvoltage(int die)
 		setLED(LED_RED, FALSE);
 		wait(500);
 		setLED(LED_RED, FALSE);
-		setOperationalMode((int)P_SLEEP);
+		setOperationalMode((int)P_HALT);
 	} else {
 		playDing();
 		playDing();
@@ -428,4 +407,20 @@ turnAmpOn(void) {
 	*P_IOA_Dir  |= 0x0800;
 	*P_IOA_Attrib |= 0x0800; 	
 	*P_IOA_Buffer  |= 0x0800;    	
+}
+
+static void 
+turnSDoff(void) {
+	//disable SD card
+ 	*P_IOA_Dir  |= 0x1000;
+ 	*P_IOA_Attrib |= 0x1000; 	
+    *P_IOA_Buffer  |= 0x1000;	
+}
+
+static void 
+turnNORoff(void) {
+	// disable NOR flash
+ 	*P_IOD_Dir  |= 0x0001;	 
+ 	*P_IOD_Attrib |= 0x0001;
+    *P_IOD_Buffer  |= 0x0001;	
 }
