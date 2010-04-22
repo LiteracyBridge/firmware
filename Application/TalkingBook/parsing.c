@@ -6,6 +6,7 @@
 #include "Include/device.h"
 #include "Include/containers.h"
 #include "Include/parsing.h"
+#include <ctype.h>
 
 typedef struct OrderBlock OrderBlock;
 
@@ -60,11 +61,11 @@ static int getIndexFromLine(char *line, char *symbolMapStart) {
 // copied from above for reference
 // EnumEvent {LEFT, RIGHT, UP, DOWN, SELECT, HOME, PLAY, STAR, PLUS, MINUS, BUTTON_MARKER, START, END};
 // EnumAction {NOP = 0, STOP, PAUSE, JUMP_BLOCK, RETURN, INSERT_SOUND, START_END_MARKER,			
-//				PLAY_PAUSE, COPY, RECORD_TITLE, RECORD_MSG, PACKAGE_RECORDING, 
+//				PLAY_PAUSE, COPY, RECORD_TITLE, RECORD_MSG, PACKAGE_RECORDING, TRIM,
 //              FWD, BACK, JUMP_TIME, CALL_BLOCK, JUMP_PACKAGE, JUMP_LIST, DELETE, 
 //              ENTER_EXIT_MARKER, VOLUME_UP, VOLUME_DOWN, VOLUME_NORMAL, SPEED_UP, SPEED_DOWN, SPEED_NORMAL,  
 //				USB_MARKER, USB_DEVICE_ON, USB_HOST_ON, USB_DEVICE_OFF, USB_HOST_OFF,  
-//              LED_MARKER, LED_RED_ON, LED_GREEN_ON, LED_ALL_ON, LED_RED_OFF, LED_GREEN_OFF, LED_ALL_OFF, SLEEP};
+//              LED_MARKER, LED_RED_ON, LED_GREEN_ON, LED_ALL_ON, LED_RED_OFF, LED_GREEN_OFF, LED_ALL_OFF, HALT, SLEEP};
 
 static int getEventEnumFromChar (char *c) {
 	int ret = -1;
@@ -76,7 +77,7 @@ static int getEventEnumFromChar (char *c) {
 
 static int getActionEnumFromChar (char *c) {
 	int ret = -1;
-	const char *ACTION_CODES = "~.,[)I_PCEEEFBT(<LD_VVVSSS_UUUU_RGARGAZ";  // '_' is placeholder for marker codes
+	const char *ACTION_CODES = "~.,[)I_PCEEEMFBT(<LD_VVVSSS_UUUU_RGARGAHZ";  // '_' is placeholder for marker codes
 	// note that E is for rEcord since R should represent Red
 	// only first instance of action code is found, others are placeholders as dealt with below
 	
@@ -313,7 +314,7 @@ static BOOL parseCreateAction (char *line, Action *action, int *actionCount, cha
 				// no specified rewind time, so use default
 				setRewind(&action[*actionCount].aux,-DEFAULT_REWIND);
 		}					
-		if (actionCode == DELETE || actionCode == COPY) {
+		if (actionCode == DELETE || actionCode == COPY || actionCode == TRIM) {
 			strAction++;
 			if (*strAction == '{') { // variable-based package
 				cursor = strchr(strAction,'}');
@@ -337,10 +338,13 @@ static BOOL parseCreateAction (char *line, Action *action, int *actionCount, cha
 					ret = FALSE;
 					logException(8,strAction,0);  // syntax error in control track
 			}
-			cursor++;
-			index = getIndexFromLine(cursor,symbolMapStart);
-			if (index != -1)
-				action[*actionCount].aux = index; 			
+			if (actionCode == DELETE || actionCode == COPY ) {
+				// TRIM doesn't use aux
+				cursor++;
+				index = getIndexFromLine(cursor,symbolMapStart);
+				if (index != -1)
+					action[*actionCount].aux = index; 		
+			}	
 		}
 		if (actionCode == JUMP_BLOCK || actionCode == CALL_BLOCK ||
 			actionCode == RECORD_TITLE || actionCode == RECORD_MSG || actionCode == PACKAGE_RECORDING || 
@@ -1054,6 +1058,10 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 		if (pkg->countFiles == 0)
 			goodPass = 0;
 	}
-	if (!goodPass)
-		logException(8,0,(context.package == &pkgSystem)?USB_MODE:RESET); // not able to get a good read after MAX_ATTEMPTS trials
+	if (!goodPass) 
+		logException(8,filePath,(context.package == &pkgSystem)?USB_MODE:RESET); // not able to get a good read after MAX_ATTEMPTS trials
+//	else {
+//		logString((char *)"parsed ",BUFFER);
+//		logString(filePath,ASAP);
+//	}
 }

@@ -16,6 +16,7 @@ Obj: "C:\Documents and Settings\Administrator\My Documents\talkingbook\software\
 Obj: "C:\Documents and Settings\Administrator\My Documents\talkingbook\software\device\trunk\firmware\Debug\timeline.obj"
 Obj: "C:\Documents and Settings\Administrator\My Documents\talkingbook\software\device\trunk\firmware\Debug\util.obj"
 Obj: "C:\Documents and Settings\Administrator\My Documents\talkingbook\software\device\trunk\firmware\Debug\quiz.obj"
+Obj: "C:\Documents and Settings\Administrator\My Documents\talkingbook\software\device\trunk\firmware\Debug\edit.obj"
 Obj: "C:\Documents and Settings\Administrator\My Documents\talkingbook\software\device\trunk\firmware\Debug\SD.obj"
 Obj: "C:\Documents and Settings\Administrator\My Documents\talkingbook\software\device\trunk\firmware\Debug\FS_user_nos.obj"
 Obj: "C:\Documents and Settings\Administrator\My Documents\talkingbook\software\device\trunk\firmware\Debug\nls_ascii.obj"

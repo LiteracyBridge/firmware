@@ -315,7 +315,7 @@ void ReadMusicFile_ServiceLoop()
 	sacm_status = SACM_Status();
 	if (sacm_status & 0x4) //pause
 	{
-		SACM_Resume();
+		resume();
 	}
 	g_file_op_semaphore=0;
 }

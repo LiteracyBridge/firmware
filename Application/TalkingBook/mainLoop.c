@@ -15,6 +15,7 @@
 #include "Include/macro.h"
 #include "Include/d2d_copy.h"
 #include "Include/Inbox.h"
+#include "Include/edit.h"
 #include "Include/mainLoop.h"
 
 typedef enum EnumEnterOrExit EnumEnterOrExit;
@@ -458,11 +459,17 @@ extern int checkInactivity(BOOL resetTimer) {
 		lastUSBCheck = lastActivity = currentTime;
 		warnedUser = FALSE;
 	} else if (INACTIVITY_SECONDS && !warnedUser && currentTime - lastActivity > INACTIVITY_SECONDS) {
-		adjustVolume(MAX_VOLUME-3,FALSE,TRUE);  // todo: move this -3 to config
+//		adjustVolume(MAX_VOLUME-3,FALSE,TRUE);  // todo: move this -3 to config
 		// todo: add a check to see if earphones are used -- if so, reduce volume
-		insertSound(&pkgSystem.files[INACTIVITY_SOUND_FILE_IDX],NULL,FALSE);
-		restoreVolume(FALSE);
+//		insertSound(&pkgSystem.files[INACTIVITY_SOUND_FILE_IDX],NULL,FALSE);
+//		restoreVolume(FALSE);
 		lastActivity = currentTime;
+#ifdef TB_CAN_WAKE
+		setOperationalMode((int)P_HALT);  // keep RTC running
+#else 
+		setOperationalMode((int)P_SLEEP); // shut down completely if will require power sw recycle to turn on
+		// Might want to go back to the audio alert since old hardware uses much more current in sleep than new hw
+#endif
 	} else if (currentTime - lastActivity > 30) { //todo: move this to config file
 		// blink green light when paused/stopped to remind that power is on
 		if ((currentTime % 4) == 1) {
@@ -524,6 +531,7 @@ void mainLoop (void) {
 			// this assume that stopped means end of audio file
 			// todo: this should be checking end action for CtnrFile (doesn't exist yet)
 			context.isStopped = TRUE;
+			turnAmpOff();
 			markEndPlay(getRTCinSeconds());
 			flushLog();			
 			if (GREEN_LED_WHEN_PLAYING) {
@@ -669,9 +677,9 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			ret = d2dCopy((const char *)filename,(const char *)cursor);
 			if (ret == 0 && POST_COPY_FILE_IDX) 
 				insertSound(&pkgSystem.files[POST_COPY_FILE_IDX],NULL,TRUE); 
-			newBlock = &context.package->blocks[aux];
-			newTime = newBlock->startTime;
-			reposition = TRUE;
+//			newBlock = &context.package->blocks[aux];
+//			newTime = newBlock->startTime;
+//			reposition = TRUE;
 			break;		
 
 		case DELETE:
@@ -685,9 +693,29 @@ static void takeAction (Action *action, EnumAction actionCode) {
 				ret = deletePackage(cursor);
 			else
 				logException(29,cursor,0);
-			newBlock = &context.package->blocks[aux];
-			newTime = newBlock->startTime;
+
+			list = &context.package->lists[aux];
+			context.idxActiveList = aux;
+			newFile = getListFile(getCurrentList(list));
+			newTime = 0;
 			reposition = TRUE;
+
+//			newBlock = &context.package->blocks[aux];
+//			newTime = newBlock->startTime;
+//			reposition = TRUE;
+			break;
+			
+		case TRIM:
+			stop();
+			tempList = &context.package->lists[destination];
+			cursor = getCurrentList(tempList);
+			strcpy(filename,USER_PATH);
+			strcat(filename,cursor);  //todo: address application packages
+			strcat(filename,AUDIO_FILE_EXT);
+			edit(filename);
+			context.queuedPackageType = PKG_MSG;
+			destination = replaceStack(cursor,context.package);
+			context.queuedPackageNameIndex = destination;
 			break;
 			
 		case SPEED_UP:
@@ -777,26 +805,26 @@ static void takeAction (Action *action, EnumAction actionCode) {
 				case C_SACM_RECORD:
 				case C_SACM_PLAY:
 					context.isPaused = TRUE;
-					SACM_Pause();
+					pause();
 					break;
 				case C_SACM_PAUSE:
 					context.isPaused = FALSE;
-					SACM_Resume();	
+					resume();	
 					break;
 				default:
 					if (context.isPaused) {
 						context.isPaused = FALSE;
-						SACM_Resume();	
+						resume();	
 					} else {
 						context.isPaused = TRUE;
-						SACM_Pause();
+						pause();
 					}		
 					break;
 			}
 			break;
 			
 		case PAUSE:
-			SACM_Pause();
+			pause();
 			context.isPaused = TRUE;
 			break;
 			
@@ -949,13 +977,17 @@ static void takeAction (Action *action, EnumAction actionCode) {
 						//no action needed
 						break;
 				}
-	
+				//playActionSound(JUMP_TIME);
 				reposition = TRUE;
 			} // context is not system file
 			break;
 		case SLEEP:
 			// call sleep function
 			setOperationalMode((int)P_SLEEP); 
+			break;
+		case HALT:
+			// call sleep function
+			setOperationalMode((int)P_HALT); 
 			break;
 		case NOP:
 			// no operation
@@ -1026,6 +1058,7 @@ void loadPackage(int pkgType, const char * pkgName) {
 	char filePath[PATH_LENGTH];
 	char *fileName;
 	long timeNow;
+	char str[50];
 		
 	stop();  // better to stop audio playback before file ops  -- also flushes log buffer
 	setLED(LED_RED,FALSE);
@@ -1056,29 +1089,35 @@ void loadPackage(int pkgType, const char * pkgName) {
 			case PKG_SYS:
 				context.package = &pkgSystem;
 				strcpy(filePath,SYSTEM_PATH);
-				strcat(filePath,pkgName);
-				strcat(filePath,".txt"); //todo: move to config
+				//strcat(filePath,pkgName);
+				//strcat(filePath,".txt"); //todo: move to config
 				break;
 			case PKG_APP:
 				context.package = &pkgUser;
 				strcpy(filePath,USER_PATH);
-				strcat(filePath,pkgName);
-				strcat(filePath,"\\");
-				fileName = filePath + strlen(filePath);
-				strcat(filePath,PKG_CONTROL_FILENAME);
 				break;
 			default:
 				logException(5,0,USB_MODE);
 				break;
 		}
+		strcpy(str,pkgName);
+		strcat(filePath,pkgName);
+		strcat(filePath,"\\");
+		fileName = filePath + strlen(filePath);
+		strcat(filePath,PKG_CONTROL_FILENAME);
 		pkg = context.package;
+		//resetPackage(pkg);
 		memset(pkg,0,sizeof(CtnrPackage));
+		
 		pkg->pkg_type = pkgType;
-		ret = addTextToPkgHeap(pkgName,pkg);
+		ret = addTextToPkgHeap(str,pkg);
+		logString(pkg->strHeapStack + ret,BUFFER);
 		if (ret > -1)
 			pkg->idxName = ret;	
 		else
-			logException(11,pkgName,USB_MODE);			
+			logException(11,pkgName,USB_MODE);		
+		logString((char *)"package name",BUFFER);	
+		logString(pkg->strHeapStack + pkg->idxName,BUFFER);
 		parseControlFile(filePath, pkg);
 //		if (context.package->pkg_type == PKG_QUIZ) {
 //			strcpy(fileName,QUIZ_DATA_FILENAME);  //todo: move to config
@@ -1089,7 +1128,7 @@ void loadPackage(int pkgType, const char * pkgName) {
 	// primarily used to reset system list position when returning from user content
 	for (i=0; i < MAX_LISTS; i++) 
 		pkg->lists[i].currentFilePosition = -1;
-	pkg->recInProgress = FALSE;
+//	pkg->recInProgress = FALSE;
 	if (pkg->countPackageActions) 
 		action = pkg->actions;
 	while (action && !isEventInAction(action,START,context.isPaused))

@@ -18,10 +18,14 @@ void MemCopy();
 
 #define BASEADDR 0x30000   // base address of nor flash
 #define ENDADDR  0xaffff   // end address of nor flash
-#define REPROG_HIMEM  0xac000  // reprogramming high memory
-#define FLASH_SECTOR_SIZE 0x800 // 2048 words per flash page
-//#define FLASH_APP_ADDR 0x80000  // if want to reprog app only 
-#define FLASH_APP_ADDR BASEADDR  // reprog all flash 
+#define REPROG_STAND_ALONE  0xa0000  // reprogramming high memory
+
+// old NOR size#define FLASH_SECTOR_SIZE 0x800 // 2048 words per flash page
+#define FLASH_LOW_SECTOR_SIZE 0x800 // sector size of flash memory at 0xf800
+#define FLASH_ERASE_SIZE 0x8000 // 32 k words per flash page
+#define FLASH_SD_ERASE_MASK (unsigned long)(FLASH_ERASE_SIZE - 1)
+#define FLASH_SD_READ_SIZE 0x800 // read 2 k at a time onto stack
+#define FLASH_SD_READS_PER_ERASE (FLASH_ERASE_SIZE / FLASH_SD_READ_SIZE)
 
 typedef struct  {
 		int fileHandle;

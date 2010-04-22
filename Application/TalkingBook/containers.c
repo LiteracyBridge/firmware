@@ -3,6 +3,7 @@
 // Contact: info@literacybridge.org
 #include "Include/talkingbook.h"
 #include "Include/containers.h"
+#include <ctype.h>
 
 static const int REWIND[] = {0,500,1000,1500,2000,3000,5000,10000};
 APP_IRAM Context context;
@@ -523,3 +524,39 @@ CtnrFile *getListFile(char *name) {
 	return file;
 }
 
+void resetPackage(CtnrPackage *pkg) {
+	pkg->countBlocks = 0;
+	pkg->countFiles = 0;
+	pkg->countLists = 0;
+	pkg->countPackageActions = 0;
+	pkg->idxStrHeap = 0;
+	pkg->idxMasterList = 0;
+	pkg->tempFile.idxFilename = 0;	
+	pkg->tempFile.idxFirstBlockStart = 0;
+	pkg->tempFile.idxFirstBlockEnd = 0;
+	pkg->tempFile.idxFirstBlockInFile = 0;
+    pkg->files[0].idxFilename = 0;
+    pkg->files[0].idxFirstBlockStart = 0;
+    pkg->files[0].idxFirstBlockEnd = 0;
+    pkg->files[0].idxFirstBlockInFile = 0;
+    pkg->lists[0].idxFirstAction = 0;
+    pkg->lists[0].currentFilePosition = 0;
+    pkg->lists[0].idxListWithFilename = 0;
+    pkg->lists[0].posListWithFilename = 0;
+    pkg->lists[0].currentString[0] = 0;
+    pkg->lists[0].filename[0] = 0;
+    pkg->lists[1].idxFirstAction = 0;
+    pkg->lists[1].currentFilePosition = 0;
+    pkg->lists[1].idxListWithFilename = 0;
+    pkg->lists[1].posListWithFilename = 0;
+    pkg->lists[1].currentString[0] = 0;
+    pkg->lists[1].filename[0] = 0;
+
+
+//	CtnrFile files[MAX_FILES]; 
+//	CtnrBlock blocks[MAX_BLOCKS];
+//	Action actions[MAX_ACTIONS];
+//	ListItem lists[MAX_LISTS];
+//	char strHeapStack[PKG_HEAP_SIZE+PKG_STACK_SIZE];
+	
+}

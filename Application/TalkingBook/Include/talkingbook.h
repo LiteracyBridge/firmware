@@ -1,10 +1,12 @@
-// Copyright 2009 Literacy Bridge
+// Copyright 2009,2010 Literacy Bridge
 // CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
 // Contact: info@literacybridge.org
 #ifndef	__TALKINGBOOK_h__
 #define	__TALKINGBOOK_h__
 
-#define VERSION			"v1.37"
+#define VERSION			"v1.40f"
+#define TB_CAN_WAKE  // hardware that allows wake from sleep/halt
+//IMPORTANT: changes to TB_CAN_WAKE must also be made to system_head.inc!!!
 
 asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 #define APP_IRAM 		__attribute__((section(".APP_IRAM")))
@@ -13,24 +15,37 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 #include "./Application/TalkingBook/Include/app_exception.h"
 #include "util.h"
 
-// DONT FORGET TO CHANGE #define DEVBOARD and /Driver/IOKey/IOKeyScan.asm file
-
 // TODO LIST
+//	 * read and write new metadata scheme into audio files
+//   * change opening help-loop
+//	 * track playcount and copy count of each package
+//   * auto update VERSION with each new build (or SVN revision)
+//   * recognize when batteries have been changed (not waking from sleep/halt) -- reset clock and whatever else.
+//   * create an easy way to set a unique device id (group/unit id combo)
+//	 * store device id and all count info in NOR flash not memory card
+//   * create mechanism for one Talking Book to collect stats of others it meets
+//	 * write fct to read decimal and hex numbers for debugging purposes (and for speaking version #, etc)
+//   * add audio feedback to fwd/back time jumps
 //	 * On Startup, if no microSD card or if blank (no config.txt) then run full system test/diagnostic with reprog abiliy`
+//	 * Don't crash if 0KB audio file.  Maybe return -1 for filehandle if filesize=0.
 //   * ADC/DAC modem-like capability for xfer of control tracks and compressed audio over mobile phones
-//   * 
+//   * create new personal category (becomes subcat of OTHER)
+//   * configure device to include selected categories (or create a recording in an unlisted category)
+//   * refactor languages across system, lists, and user
 //   * registry/categories
-//     -- allow categories to be numbers, which means rethinking category/subcategory case distinction
+//     -- rethink category/subcategory case distinction
 //     -- handle universal content SUB-categories
 //     -- handle user voice tag categories
+//   * hold down button to play recording at 2x (slow scan)
+//   * change louder/quieter to a count(?)
 //   * start macro from a package
 //	 * tour guide audio within macro (or just include that within a package that is a macro)
-//   * allow pause before block begins (e.g. A$:3,[newblock] for a 3-sec delay)
+//   * allow pause before block begins (e.g. A$:3,[newblock] for a 3-sec delay) -- use for help instructions if user delays action
 //   * user recordings
 //     -- more advanced: multiple choice creation without computer (voice prompts to create) 
 //   * limit recording from filling memory card (use config setting for min free space)
-//   * tag as private
-//   * usb host mode
+//   * tag as private (not to be d2d copied)
+//   * madlibs app
 //     -- secondary scenario is Talking Book updating from Outbox
 //   * power saving
 //     -- low power sleep mode when no activity
@@ -77,7 +92,8 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 #define TEXT_ACTION_RETURN			')'
 #define TEXT_ACTION_INSERT_SOUND	'I'
 #define TEXT_ACTION_PLAY_PAUSE		'P'
-#define TEXT_ACTION_RECORD			'E'
+#define TEXT_ACTION_RECORD			'E' // need to fix these two
+#define TEXT_ACTION_TRIM			'M' // need to fix these two
 #define TEXT_ACTION_FWD				'F'
 #define TEXT_ACTION_BACK			'B'
 #define TEXT_ACTION_JUMP_TIME		'T'
@@ -109,6 +125,7 @@ enum EnumStartOrEnd {NONE, STARTING, ENDING, BOTH};
 
 // These capitalized variables are set in the config file.
 extern int KEY_PLAY, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_SELECT, KEY_STAR, KEY_HOME, KEY_PLUS, KEY_MINUS;	
+extern int ADMIN_COMBO_KEYS;
 extern int LED_GREEN, LED_RED, LED_ALL;
 extern int MAX_SPEED, NORMAL_SPEED, SPEED_INCREMENT;
 extern int NORMAL_VOLUME, MAX_VOLUME, VOLUME_INCREMENT;
@@ -122,7 +139,7 @@ extern char *AUDIO_FILE_EXT;
 extern int DEFAULT_TIME_PRECISION;
 extern int DEFAULT_REWIND;
 extern int INSERT_SOUND_REWIND_MS;
-extern int HYPERLINK_SOUND_FILE_IDX, DELETED_FILE_IDX, PRE_COPY_FILE_IDX, POST_COPY_FILE_IDX, BEEP_SOUND_FILE_IDX, BIP_SOUND_FILE_IDX, SPEAK_SOUND_FILE_IDX, 
+extern int HYPERLINK_SOUND_FILE_IDX, DELETED_FILE_IDX, PRE_COPY_FILE_IDX, POST_COPY_FILE_IDX, SPEAK_SOUND_FILE_IDX, 
     INACTIVITY_SOUND_FILE_IDX, ERROR_SOUND_FILE_IDX, EMPTY_LIST_FILE_IDX;
 extern int BLOCK_START_LEADER, BLOCK_END_LEADER;
 extern long BIT_RATE;

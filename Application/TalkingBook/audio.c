@@ -1,4 +1,4 @@
-// Copyright 2009 Literacy Bridge
+// Copyright 2009,2010 Literacy Bridge
 // CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
 // Contact: info@literacybridge.org
 #include "./system/include/system_head.h"
@@ -13,6 +13,9 @@
 
 extern unsigned long RES_DING_A18_SA;
 extern unsigned long RES_BIP_A18_SA;
+extern unsigned long User_GetCurDecodeLength(void);
+extern int SACMFileHandle;
+extern void User_SetDecodeLength(unsigned long);
 
 static int getFileHandle (CtnrFile *);
 static void playLongInt(CtnrFile *, unsigned long);
@@ -23,15 +26,129 @@ extern APP_IRAM unsigned int vCur_1;
 
 void playDing(void) {
 	Snd_SACM_PlayMemory(C_CODEC_AUDIO1800,RES_DING_A18_SA);	
+	while (SACM_Status());
 }
 
 void playBip(void) {
 	Snd_SACM_PlayMemory(C_CODEC_AUDIO1800,RES_BIP_A18_SA);	
+	while (SACM_Status());
+}
+
+void playBips(int count) {
+	int i;
+
+	for (i=0; i<count;i++)
+		playBip();	
+}
+
+void playDings(int count) {
+	int i;
+
+	for (i=0; i<count;i++)
+		playDing();	
+}
+unsigned long wordsFromFrames(unsigned long frames) {
+	unsigned long words = frames * 40;
+	return words;
+}
+
+unsigned long framesFromBytes(unsigned long bytes) {
+	unsigned long frames = bytes / 80;	
+	return frames;
+}
+
+unsigned long msecFromFrames(unsigned long frames) {
+	unsigned long msec = frames * 20;
+	return msec;
+}
+
+unsigned long framesFromMSec(unsigned long msec) {
+	unsigned long frames = msec / 20;
+	return frames;	
+}
+
+unsigned long getCurrentFrame(void) {
+	unsigned long wordsPerFrame = SACM_A1800_Mode / 800;
+	unsigned long word = ( unsigned long )User_GetCurDecodeLength();
+	unsigned long frame = word / wordsPerFrame;
+	return frame;	
+}
+
+int gotoFrame(unsigned long frameDest) {
+	//const int bytesHeaderSize = 6;
+	unsigned long wordsPerFrame = SACM_A1800_Mode / 800;
+	unsigned long byteCurrent;
+	unsigned long wordDiff;  ///, timeDiff;
+	unsigned long wordCurrent, wordDest, frames; 
+//	unsigned long timeNow, timeDest;
+	
+/*	timeNow = Snd_A1800_GetCurrentTime();	
+	timeDest = frameDest * 20;
+	timeDiff = timeDest - timeNow;
+	if (timeDiff > 0)
+		SACM_A1800FAT_SeekTime(timeDiff,0);
+	else if (timeDiff < 0)
+		SACM_A1800FAT_SeekTime(timeDiff,1);
+*/	
+	pause();
+	byteCurrent = lseek(SACMFileHandle,0,SEEK_CUR);
+	wordCurrent = ( unsigned long )User_GetCurDecodeLength();
+	frames = wordCurrent / wordsPerFrame;
+	wordCurrent = frames * wordsPerFrame;
+	wordDest = frameDest * wordsPerFrame;
+	if (wordDest > wordCurrent) {
+		wordDiff = wordDest - wordCurrent;	
+		byteCurrent = lseek(SACMFileHandle,wordDiff<<1,SEEK_CUR);
+	} else {
+		wordDiff = wordCurrent - wordDest;	
+		byteCurrent = lseek(SACMFileHandle,-wordDiff<<1,SEEK_CUR);
+	}
+	User_SetDecodeLength(wordDest);
+	resume();	
+	return 0;
+}
+
+unsigned long setFileHeader(char *filePath, unsigned long frames) {
+	//input: frames; return: bytes
+	unsigned long bytes;
+	char *header;
+	int handle;
+		
+	handle = open((LPSTR)(filePath),O_RDWR); //read&write mode
+	bytes = wordsFromFrames(frames)<<1;
+	bytes += 2; // for extra SACM Mode word
+	header = (char *)&bytes;
+	lseek(handle,0,SEEK_SET);
+	write(handle,(unsigned long)header<<1,4);
+	close(handle);
+	return bytes;
+}
+
+void playActionSound(EnumAction action) {
+	switch (action) {
+		case JUMP_TIME:
+			playBip();
+			break;
+		default:
+			playBip();
+			break;
+	}
+}
+
+void pause(void) {
+	SACM_Pause();
+	turnAmpOff();
+}	
+
+void resume(void) {
+	turnAmpOn();
+	SACM_Resume();
 }
 
 void stop(void) {
 	context.isStopped = TRUE;
 	Snd_Stop();
+	turnAmpOff();
 	if (GREEN_LED_WHEN_PLAYING) {	
 		setLED(LED_GREEN,FALSE);
 	}
@@ -60,6 +177,8 @@ static int getFileHandle (CtnrFile *newFile) {
 		switch (pkg->pkg_type) {
 			case PKG_SYS:
 				strcpy(sTemp,SYSTEM_PATH);
+				strcat(sTemp,pkg->strHeapStack + pkg->idxName);
+				strcat(sTemp,"\\");
 				break;		
 			case PKG_APP:
 				strcpy(sTemp, USER_PATH);
@@ -77,7 +196,8 @@ static int getFileHandle (CtnrFile *newFile) {
 		strcat(sTemp,pkg->strHeapStack + newFile->idxFilename);
 		strcat(sTemp,AUDIO_FILE_EXT);
 	}
-	ret = tbOpen((LPSTR)sTemp,O_RDWR);			
+	ret = tbOpen((LPSTR)sTemp,O_RDONLY);
+	logString(sTemp,ASAP);
 	return ret;
 }
 
@@ -107,7 +227,7 @@ static void playLongInt(CtnrFile *file, unsigned long lTimeNew) {
 			SACM_A1800FAT_SeekTime(ulDifference,BACKWARD_SKIP);
 		}
 		if (context.isPaused) {
-			SACM_Resume();  // todo: is it better to resume and then seek?
+			resume();  // todo: is it better to resume and then seek?
 			context.isPaused = FALSE;
 		}
 		if (GREEN_LED_WHEN_PLAYING)
@@ -123,10 +243,8 @@ static void playLongInt(CtnrFile *file, unsigned long lTimeNew) {
 		if (iFileHandle >= 0) {  //allows mistakes or dummy files to pass without problem
 			SACMGet_A1800FAT_Mode(iFileHandle,0);
 			Snd_SACM_PlayFAT(iFileHandle, C_CODEC_AUDIO1800);	
-			if (lTimeNew) {
-				SACM_Pause();
+			if (lTimeNew)
 				SACM_A1800FAT_SeekTime(lTimeNew,FORWARD_SKIP);
-			}
 			if (GREEN_LED_WHEN_PLAYING)
 				setLED(LED_GREEN,TRUE);
 			context.isStopped = FALSE;
@@ -163,12 +281,12 @@ void insertSound(CtnrFile *file, CtnrBlock *block, BOOL wait) {
 				stop();
 			 	break;
 			}
-			if (!wait && (keystroke = keyCheck(1))) {
+			if (!wait && (keystroke = keyCheck(0))) {
 				if (keystroke == KEY_PLAY && !context.isPaused) {
-					SACM_Pause();
+					pause();
 					context.isPaused = TRUE;
 				} else if (keystroke == KEY_PLAY && context.isPaused) {
-					SACM_Resume();
+					resume();
 					context.isPaused = FALSE;
 				} else
 					context.keystroke = keystroke;
@@ -177,7 +295,7 @@ void insertSound(CtnrFile *file, CtnrBlock *block, BOOL wait) {
 		context.file = lastFilePlayed;
 		playLongInt(context.file,lastPlayedPoint);
 		if (wasPaused) {
-			SACM_Pause();
+			pause();
 			context.isPaused = TRUE;
 		}
 	}
@@ -189,12 +307,12 @@ void insertSound(CtnrFile *file, CtnrBlock *block, BOOL wait) {
 				stop();
 			 	break;
 			}
-			if (!wait && (keystroke = keyCheck(1))) {
+			if (!wait && (keystroke = keyCheck(0))) {
 				if (keystroke == KEY_PLAY && !context.isPaused) {
-					SACM_Pause();
+					pause();
 					context.isPaused = TRUE;
 				} else if (keystroke == KEY_PLAY && context.isPaused) {
-					SACM_Resume();
+					resume();
 					context.isPaused = FALSE;
 				} else
 					context.keystroke = keystroke;
@@ -205,6 +323,7 @@ void insertSound(CtnrFile *file, CtnrBlock *block, BOOL wait) {
 	if (!SACM_Status()) {
 		context.isStopped = TRUE;
 		context.isPaused = FALSE;
+		turnAmpOff();
 	}
 }
 
@@ -243,7 +362,7 @@ static int recordAudio(char *pkgName, char *cursor) {
 	if (handle != -1) {
 		setLED(LED_RED,TRUE);
 		playBip();
-		while (SACM_Status());
+		turnAmpOff();
 		Snd_SACM_RecFAT(handle, C_CODEC_AUDIO1800, BIT_RATE);
 		low_voltage = 0;
 		do {
@@ -260,13 +379,13 @@ static int recordAudio(char *pkgName, char *cursor) {
 			}
 			key = keyCheck(0);
 			if (key == KEY_PLAY) { // pause  TODO: this key press to pause shouldn't be hard coded
-				SACM_Pause();
+				pause();
 				setLED(LED_RED,FALSE);
 				do
 					key = keyCheck(0);
 				while (key != KEY_PLAY && key != KEY_STAR);					
 				setLED(LED_RED,TRUE);
-				SACM_Resume();
+				resume();
 			}
 		} while ((key != KEY_STAR) && (low_voltage == 0)); // TODO: this key press to stop shouldn't be hard coded
 //		while ((end - start) < 3) { // must be at least 2.0 second recording
@@ -278,7 +397,8 @@ static int recordAudio(char *pkgName, char *cursor) {
 		close(handle);
 //		*P_WatchDog_Ctrl &= ~0x8000; // clear bit 15 to disable
 		setLED(LED_RED,FALSE);
-		insertSound(&pkgSystem.files[BEEP_SOUND_FILE_IDX],NULL,TRUE); 
+		turnAmpOn();
+		playDing();
 		insertSound(file,NULL,TRUE);  // replay subject
 
 		strcpy(temp,"TIME RECORDED (secs): ");

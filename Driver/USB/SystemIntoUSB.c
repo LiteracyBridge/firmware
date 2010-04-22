@@ -190,7 +190,8 @@ int SystemIntoUDisk(unsigned int serviceloop)
 			if(R_USB_State_Machine > 0 && R_USB_State_Machine <= SCSI_CSW_Stage) {
 				goto xxx;
 			} else {
-				if (!(j % 50)) {
+				KeyScan_ServiceLoop();
+				if (!(j % 0x40)) {
 					context.keystroke = keyCheck(0);
 					if (context.keystroke)
 						break;

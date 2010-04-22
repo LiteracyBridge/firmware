@@ -109,6 +109,7 @@ unsigned int
 SetSystemClockRate(unsigned int plln_val)
 {
 	unsigned int clk_state;
+	unsigned int interuptIOB;
 	
 	if(plln_val < 12) plln_val = 12;  //clock rate == 12MHz  
 	if(plln_val > 96) plln_val = 96; //CLOCK RATE == 96MHz 
@@ -117,6 +118,7 @@ SetSystemClockRate(unsigned int plln_val)
 	plln_val /= 3;
 		
 	clk_state = *P_Clock_Ctrl;
+	interuptIOB = clk_state & 0x0200;  // preserve status of IOB key interupts
 	
 	*P_Clock_Ctrl = clk_state & 0x7fff; // turn off fast clock bit
 	while ((*P_Power_State & 0x7) == 0) ; // wait for clock src to "settle"
@@ -126,10 +128,15 @@ SetSystemClockRate(unsigned int plln_val)
 	*P_PLLN = plln_val;   //clock rate = plln_val * 3;
 
 	if(plln_val == 32)
-		*P_Clock_Ctrl = SYS_96MCLOCK;  // restore clock state to use pll 
+		clk_state = SYS_96MCLOCK;  // restore clock state to use pll 
 	else 
-		*P_Clock_Ctrl = 0x8410;
-		
+		clk_state = 0x8610;
+	if (interuptIOB)
+		clk_state |= 0x0200;
+	else
+		clk_state &= ~0x0200;
+	*P_Clock_Ctrl = clk_state;
+
 	while ((*P_Power_State & 0x7) == 0) ; // wait for clock src to "settle"
 
 	return(*P_PLLN);

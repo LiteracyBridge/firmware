@@ -152,14 +152,14 @@ int nextMacroKey (int keystroke) {
 
 	if (keystroke == KEY_PLAY && SACM_Status() && !context.isPaused) {
 		secNow = getRTCinSeconds();
-		SACM_Pause();
+		pause();
 		do {
 			KeyScan_ServiceLoop();
 			keystroke = (int)SP_GetCh();
 		} while (keystroke != KEY_PLAY && keystroke != KEY_SELECT);					
 		if (keystroke == KEY_PLAY) {
 			secLastMacro += (getRTCinSeconds() - secNow); // don't count paused time in macro timeline
-			SACM_Resume();
+			resume();
 		}
 	}
 
@@ -168,7 +168,7 @@ int nextMacroKey (int keystroke) {
 //		stop();
 		// TODO:using pause instad of stop: when stop() called and then USB_POLL happens, device keys don't respond?
 		context.isPaused = TRUE;
-		SACM_Pause();
+		pause();
 	}
 
 	if ((idxMacro >= MAX_MACRO_ITEMS) || (macro[idxMacro].wait == -1)) {
@@ -219,13 +219,13 @@ int nextMacroKey (int keystroke) {
  		do {
 			key = keyCheck(0);
 			if (key == KEY_PLAY) { // pause  TODO: this key press to pause shouldn't be hard coded
-				SACM_Pause();
+				pause();
 				setLED(LED_RED,FALSE);
 				do
 					key = keyCheck(0);
 				while (key != KEY_PLAY && key != KEY_STAR);					
 				setLED(LED_RED,TRUE);
-				SACM_Resume();
+				resume();
 			}
 		} while (key != KEY_STAR); // TODO: this key press to stop shouldn't be hard coded
  */

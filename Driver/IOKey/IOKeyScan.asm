@@ -1,7 +1,8 @@
-// Copyright 2009 Literacy Bridge
+// Copyright 2009,2010 Literacy Bridge
 // CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
 // Contact: info@literacybridge.org
-.INCLUDE .\System\include\system\GPL162002.inc
+.INCLUDE ./Application/TalkingBook/Include/talkingbook.inc
+.INCLUDE ./System/include/system/GPL162002.inc
 
 .PUBLIC RW_G_KeyStrobe
 ///////////////////////////////////////////////////////
@@ -32,13 +33,15 @@ F_System_Initial:
  	[P_IOA_Attrib] = r1; 	// rest are set to output high
     r1 = 0xec00			// set IOA[15..0]
  	[P_IOA_Data] = r1;
-//  set up input through IOB
-// 	r1 = [P_IOB_Dir];
-// 	r1 = r1 and 0xFFF8;	
-//	[P_IOB_Dir] = r1;
-//	r1 = [P_IOB_Attrib];
-//	r1 = r1 and 0xFFF8; 
-//	[P_IOB_Attrib] = r1;
+.ifdef TB_CAN_WAKE
+	//  set up input through IOB
+ 	r1 = [P_IOB_Dir];
+ 	r1 = r1 and 0xFFF8;	
+	[P_IOB_Dir] = r1;
+	r1 = [P_IOB_Attrib];
+	r1 = r1 and 0xFFF8; 
+	[P_IOB_Attrib] = r1;
+.endif
 	call	F_Key_Scan_Initial;	
 	retf;
 	.ENDP;
@@ -105,10 +108,17 @@ F_Key_Scan_Initial: .PROC
 F_Key_Scan_ServiceLoop:	.PROC
 	
 	r1 = [P_IOA_Data];			// get key data from IOA
-//	r2 = [P_IOB_Data];			// get key data from IOB
-//	r2 = r2 and 0x07;
-	r1 = r1 and 0x3ff;			// mask out only IOA0-IOA9 -  AA
-//	r1 = r1 or r2;
+.ifndef TB_CAN_WAKE
+	r1 = r1 and 0x3ff;			// mask out only IOA0-IOA9
+.else
+	r1 = r1 and 0x7f;			// mask out only IOA0-IOA6
+	r2 = [P_IOB_Data];			// get key data from IOB
+	r2 = r2 and 0x07;			// mask out only IOB0-IOB2
+	r2 = r2 lsl 4;
+	r2 = r2 lsl 3;
+	r1 = r1 or r2;
+.endif
+
 	r2 = [RW_G_DebounceReg];		//
 	[RW_G_DebounceReg] = r1;		//
 	cmp r2,[RW_G_DebounceReg];		//

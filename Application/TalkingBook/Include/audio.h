@@ -10,7 +10,19 @@ extern void SACM_Stop(void);
 
 extern void playDing(void);
 extern void playBip(void);
+extern void playDings(int);
+extern void playBips(int);
 
+extern unsigned long wordsFromFrames(unsigned long);
+extern unsigned long framesFromBytes(unsigned long);
+extern unsigned long msecFromFrames(unsigned long);
+extern unsigned long framesFromMSec(unsigned long);
+extern unsigned long getCurrentFrame(void);
+extern int gotoFrame(unsigned long frameDest);
+extern unsigned long setFileHeader(char *, unsigned long);
+extern void playActionSound(EnumAction); 
+extern void pause(void);
+extern void resume(void);
 extern void stop(void);
 extern void play(CtnrFile *, unsigned int);
 extern void insertSound(CtnrFile *, CtnrBlock *, BOOL);

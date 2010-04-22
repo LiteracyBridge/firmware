@@ -3,7 +3,8 @@
 // Contact: info@literacybridge.org
 #include "Include/app_exception.h"
 #include "typedef.h"
-#include "Include/util.h"
+#include <string.h>
+#include <ctype.h>
 
 int strIndex (const char *str, char c) {
 	char * cursor;
@@ -162,11 +163,12 @@ int goodChar(char c, int forFilename) {
 
 	if ((c < 0x20 && c != 0x09 && c != 0x0a && c != 0x0d) || c > 0x7e) 
 		ret = 0;
-
+/*
 	if (forFilename && 
 	  (	c == '\"' || c == '*'  || c == '/'  || c == '\\' ||
 		c == '<'  || c == '>'  || c == '?'  || c == '*'  || c == '|'))
 			ret = 0;
+*/
 	return ret;
 }
 

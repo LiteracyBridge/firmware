@@ -26,4 +26,5 @@ extern INT16 tbChdir(LPSTR);
 extern int fileExists(LPSTR);
 extern int dirExists(LPSTR);
 extern int convertDoubleToSingleChar(char *, const char *, BOOL);
+extern void trimFile(char *, unsigned long, unsigned long);
 #endif

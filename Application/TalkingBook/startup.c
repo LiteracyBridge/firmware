@@ -13,20 +13,21 @@
 #include "Include/SD_reprog.h"
 #include "Include/mainLoop.h"
 #include "Include/startup.h"
+#include <ctype.h>
 
 #define SYSTEM_HEAP_SIZE 512	//config file values
-#define CONFIG_FILE		"a:\\\\config.txt"
+#define CONFIG_FILE		"a://config.txt"
 
 extern unsigned int SetSystemClockRate(unsigned int);
 extern int SystemIntoUDisk(unsigned int);
 
-static void setDefaults(void);
 static char * addTextToSystemHeap (char *);
 static void loadDefaultPackage(void);
 static void loadConfigFile (void);
 
 // These capitalized variables are set in the config file.
-APP_IRAM int KEY_PLAY, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_SELECT, KEY_STAR, KEY_HOME, KEY_PLUS, KEY_MINUS;	
+APP_IRAM int KEY_PLAY, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_SELECT, KEY_STAR, KEY_HOME, KEY_PLUS, KEY_MINUS;
+APP_IRAM int ADMIN_COMBO_KEYS;	
 APP_IRAM int LED_GREEN, LED_RED, LED_ALL;
 APP_IRAM int MAX_SPEED, NORMAL_SPEED, SPEED_INCREMENT;
 APP_IRAM int NORMAL_VOLUME, MAX_VOLUME, VOLUME_INCREMENT;
@@ -40,7 +41,7 @@ APP_IRAM  char *AUDIO_FILE_EXT;
 APP_IRAM int DEFAULT_TIME_PRECISION;
 APP_IRAM int DEFAULT_REWIND;
 APP_IRAM int INSERT_SOUND_REWIND_MS;
-APP_IRAM int HYPERLINK_SOUND_FILE_IDX, DELETED_FILE_IDX, PRE_COPY_FILE_IDX, POST_COPY_FILE_IDX, BEEP_SOUND_FILE_IDX, BIP_SOUND_FILE_IDX, SPEAK_SOUND_FILE_IDX, 
+APP_IRAM int HYPERLINK_SOUND_FILE_IDX, DELETED_FILE_IDX, PRE_COPY_FILE_IDX, POST_COPY_FILE_IDX, SPEAK_SOUND_FILE_IDX, 
     INACTIVITY_SOUND_FILE_IDX, ERROR_SOUND_FILE_IDX, EMPTY_LIST_FILE_IDX;
 APP_IRAM int BLOCK_START_LEADER, BLOCK_END_LEADER;
 APP_IRAM long BIT_RATE;
@@ -57,7 +58,7 @@ APP_IRAM unsigned int CLOCK_RATE;
 APP_IRAM unsigned int vCur_1;
 APP_IRAM int vThresh_1;
 
-static void setDefaults(void) {
+void setDefaults(void) {
 	// This function sets variables that are usually set in config file, 
 	// but they need defaults in case config file doesn't list them or isn't loaded yet
 	KEY_PLAY = DEFAULT_KEY_PLAY;
@@ -71,11 +72,20 @@ static void setDefaults(void) {
 	KEY_PLUS = DEFAULT_KEY_PLUS;
 	KEY_MINUS = DEFAULT_KEY_MINUS;
 	LED_GREEN = DEFAULT_LED_GREEN;
-	LED_ALL = LED_GREEN | LED_RED;
 	LED_RED = DEFAULT_LED_RED;
+	LED_ALL = LED_GREEN | LED_RED;
+	MIC_GAIN_NORMAL = DEFAULT_MIC_GAIN_NORMAL;
+	MIC_GAIN_HEADPHONE = DEFAULT_MIC_GAIN_HEADPHONE; 
 	CLOCK_RATE = DEFAULT_CLOCK_RATE;
 	NORMAL_VOLUME = DEFAULT_NORMAL_VOLUME;
+	MAX_VOLUME = DEFAULT_MAX_VOLUME;
+	VOLUME_INCREMENT = DEFAULT_VOLUME_INCREMENT;
 	NORMAL_SPEED = DEFAULT_NORMAL_SPEED;
+	MAX_SPEED = DEFAULT_MAX_SPEED;
+	SPEED_INCREMENT = DEFAULT_SPEED_INCREMENT;
+	BIT_RATE = DEFAULT_BIT_RATE;
+	
+	ADMIN_COMBO_KEYS = KEY_UP | KEY_DOWN;
 }
 
 void startUp(void) {
@@ -127,7 +137,9 @@ void startUp(void) {
 		systemCounts.lastLogErase = systemCounts.powerUpNumber;
 		clearStaleLog();	
 	}
+#ifndef TB_CAN_WAKE
 	resetRTC();  //  reset before saving anything to disk and running macros
+#endif	
 	saveSystemCounts();
 
 	strcpy(buffer,"\x0d\x0a" "---------------------------------------------------------\x0d\x0a" "CYCLE "); //cycle number
@@ -135,6 +147,9 @@ void startUp(void) {
 	strcat(buffer,(const char *)" - version " VERSION);
 	logString(buffer,BUFFER);
 	logSystemCounts();
+#ifdef TB_CAN_WAKE
+	logRTC();  
+#endif
 	loadPackage(PKG_SYS,BOOT_PACKAGE);	
 	SetSystemClockRate(CLOCK_RATE); // either set in config file or the default 48 MHz set at beginning of startUp()
 	mainLoop();
@@ -181,6 +196,11 @@ static void loadConfigFile(void) {
 			logException(14,0,USB_MODE); // can't open config file -- NOTE -- this can't be logged if log file comes from config
 		getLine(-1,0);  // reset in case at end from prior use
 		while (goodPass && nextNameValuePair(handle, buffer, ':', &name, &value)) {
+			if (!value)
+				continue;
+			// test there is a new line and that it isn't a comment (starting with "//")
+			if (*name == '/' && *(name+1) == '/')
+				continue; // move to next line
 			if (!goodString(name,0) || !goodString(value,0)) { 
 				goodPass = 0;
 				logException(14,0,0);
@@ -225,9 +245,6 @@ static void loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"DEFAULT_TIME_PRECISION")) DEFAULT_TIME_PRECISION=strToInt(value);
 				else if (!strcmp(name,(char *)"DEFAULT_REWIND")) DEFAULT_REWIND=strToInt(value);
 				else if (!strcmp(name,(char *)"INSERT_SOUND_REWIND_MS")) INSERT_SOUND_REWIND_MS=strToInt(value);
-				else if (!strcmp(name,(char *)"HYPERLINK_SOUND_FILE_IDX")) HYPERLINK_SOUND_FILE_IDX=strToInt(value);
-				else if (!strcmp(name,(char *)"BEEP_SOUND_FILE_IDX")) BEEP_SOUND_FILE_IDX=strToInt(value);
-				else if (!strcmp(name,(char *)"BIP_SOUND_FILE_IDX")) BIP_SOUND_FILE_IDX=strToInt(value);
 				else if (!strcmp(name,(char *)"SPEAK_SOUND_FILE_IDX")) SPEAK_SOUND_FILE_IDX=strToInt(value);
 				else if (!strcmp(name,(char *)"INACTIVITY_SOUND_FILE_IDX")) INACTIVITY_SOUND_FILE_IDX=strToInt(value);
 				else if (!strcmp(name,(char *)"ERROR_SOUND_FILE_IDX")) ERROR_SOUND_FILE_IDX=strToInt(value);
@@ -235,6 +252,7 @@ static void loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"DELETED_FILE_IDX")) DELETED_FILE_IDX=strToInt(value);
 				else if (!strcmp(name,(char *)"PRE_COPY_FILE_IDX")) PRE_COPY_FILE_IDX=strToInt(value);
 				else if (!strcmp(name,(char *)"POST_COPY_FILE_IDX")) POST_COPY_FILE_IDX=strToInt(value);
+				else if (!strcmp(name,(char *)"HYPERLINK_SOUND_FILE_IDX")) HYPERLINK_SOUND_FILE_IDX=strToInt(value);
 				else if (!strcmp(name,(char *)"BLOCK_START_LEADER")) BLOCK_START_LEADER=strToInt(value);
 				else if (!strcmp(name,(char *)"BLOCK_END_LEADER")) BLOCK_END_LEADER=strToInt(value);
 				else if (!strcmp(name,(char *)"BIT_RATE")) BIT_RATE=strToLong(value);
@@ -256,7 +274,7 @@ static void loadConfigFile(void) {
 	close(handle);
 	LED_ALL = LED_GREEN | LED_RED;
 	if (*(LOG_FILE+1) != ':')
-		LOG_FILE = 0; // should be == "a:\\....." otherwise, logging is turned off
+		LOG_FILE = 0; // should be == "a://....." otherwise, logging is turned off
 }
 
 static void loadDefaultPackage(void) {

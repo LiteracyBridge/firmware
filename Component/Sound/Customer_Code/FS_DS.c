@@ -6,6 +6,7 @@
 
 #include "math.h"
 
+
 #ifdef USBRP
 extern int SACMFileHandle;
 extern int MP3FileHandle;			//added by chengye 2007/4/23
@@ -789,8 +790,9 @@ int SACM_A4800FAT_SeekTime( long milisecond, int orientation )
 // CPU Cycle:
 // Transfer method:	stack
 //========================================================
-int Snd_SACM_PlayMemory(int _CodecType, unsigned long start_addr)
-{
+int Snd_SACM_PlayMemory(int _CodecType, unsigned long start_addr) {
+	
+	turnAmpOn();
 	USER_SetMemoryAddr(start_addr);                 		//in user_sacm.asm
 	SACM_Codec(_CodecType);
 	SACM_Play(Manual_Mode_Index, DAC1+DAC2, 0);				//Manual_Mode_Index=-1
@@ -810,9 +812,10 @@ int Snd_SACM_PlayMemory(int _CodecType, unsigned long start_addr)
 // CPU Cycle:
 // Transfer method:	stack
 //========================================================
-int Snd_SACM_PlayFAT(int FileHandle, int _CodecType)
-{
+int Snd_SACM_PlayFAT(int FileHandle, int _CodecType) {
 	struct stat_t filestatus;
+
+	turnAmpOn();
 
 	if(SACMFileHandle >= 0)
 	{

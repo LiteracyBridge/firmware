@@ -1,66 +1,113 @@
-// Copyright 2009 Literacy Bridge
+// Copyright 2009,2010 Literacy Bridge
 // CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
 // Contact: info@literacybridge.org
+
 #include "./Application\TalkingBook\Include\device.h"
 #include "./Application\TalkingBook\Include\SD_reprog.h"
 #include "./Application\TalkingBook\Include\audio.h"
 
 void Check_flash_reprog();
-void NewCurrent();
+static void NewCurrent();
 void FlashReprogHimem(flash *fp);
 void FlashReprogLomem(flash *fp, unsigned int *);
 
+// flash address 0xf800 maps to 0x3f800, but with 32k block flash device the erase at this address
+//   erases 0x38000 thru 0x3ffff, the code below reserves that 32k block, and it it not used
+//__asm__("REPROG_DUM:	.section .code, .addr=0x38000");
+//__asm__(".public _reprog_reserve");
+// reserve 0x30000 thru 0x37ffff
+//__asm__(".dw 16384 dup(?)");
+//__asm__(".dw 16384 dup(?)");
+// reserve 0x38000 until linker complains
+//__asm__("_reprog_reserve:");
+//	__asm__(".dw 16384 dup(?)");
+//	__asm__(".dw 8192 dup(?)");
+//	__asm__(".dw 4096 dup(?)");
+//	__asm__(".dw 2048 dup(?)");
+
+
 int ReprogFlash(flash *);
 
-void Try_SD_reprog(flash *fp)
-{
-	unsigned int ret = 0;
+void Try_SD_reprog(flash *fp) {
 	
-	ret = open((LPSTR)(ATTEMPTED_FN),O_RDONLY);
-		
-	if(ret >= 0) {
-		close(ret);
-		NewCurrent ();  // make attempted firmware current firmware file
-	}
-
+	NewCurrent ();  // make attempted firmware current firmware file
 	FlashReprogHimem(fp);
-
 }
 
 void
-FlashReprogHimem(flash *fp)
-{
-	int i, nbytes, nwords;
-	unsigned int buf[FLASH_SECTOR_SIZE], *addr;
+FlashReprogHimem(flash *fp) {
+	int  i, nbytes, nwords;
+	unsigned int buf[2048], *addr;
 	long pos;
 	extern void FlashReprogLomem();
+	unsigned long offset;
 	
-	pos = lseek(fp->fileHandle, REPROG_HIMEM * 2, SEEK_SET);
-
-	for (addr = (void *)REPROG_HIMEM; (unsigned long)addr < (unsigned long)ENDADDR; addr += FLASH_SECTOR_SIZE) {
-		nbytes = read(fp->fileHandle, (unsigned long)buf<<1, FLASH_SECTOR_SIZE<<1);
+	// see if high mem flash reprogramming code is in file
+	pos = lseek(fp->fileHandle, REPROG_STAND_ALONE * 2, SEEK_SET);
+	if(pos < 0) {
+		if((*((unsigned int *)(&FlashReprogLomem))) == 0xffff) {
+			return;  // should not happen
+		}
+		goto prog_himem;
+	}
+		
+	for(fp->pflash = REPROG_STAND_ALONE; fp->pflash < 0xb0000; fp->pflash += FLASH_ERASE_SIZE) {
+		fp->erasesector(fp);
+	}
+	
+	offset = 0;
+	for (addr = (void *)REPROG_STAND_ALONE; (unsigned long)addr < (unsigned long)ENDADDR; addr += 2048) {
+		nbytes = read(fp->fileHandle, (unsigned long)buf<<1, 2048<<1);
 		if(nbytes <= 0)
 			break;
 		
 		nwords = nbytes >> 1;
-		fp->pflash = addr;
-		fp->erasesector(fp);
+		
+		// write nwords to flash
 		for(i=0; i<nwords; i++) {
-			(*fp->writeword)(fp, addr + i, buf[i]);
-//			nbytes -= 2;  // remove, dbg
-		}
+			if(buf[i] == 0xffff)
+				continue;
+			(*fp->writeword)(fp, REPROG_STAND_ALONE + i + offset, buf[i]);
+	    }
+	    offset += nwords;
 	}
 	
+	
+prog_himem:
 	FlashReprogLomem(fp, buf);	
+
 }
 
 static void
 NewCurrent() {
-	unlink((LPSTR)PREV_FN);
-	rename((LPSTR)CURRENT_FN, (LPSTR)PREV_FN);
-			// move Attempt to Current
-	unlink((LPSTR)CURRENT_FN);
-	rename((LPSTR)ATTEMPTED_FN, (LPSTR)CURRENT_FN);
+	int ret;
+	struct f_info file_info;
+	char filename[40];
+	
+	ret = chdir((LPSTR)FIRMWARE_PATH);
+	ret =_findfirst((LPSTR)"*" PREV_EXT, &file_info, D_FILE);
+	if (ret >= 0) 
+		ret = unlink((LPSTR)file_info.f_name);	
+	ret =_findfirst((LPSTR)UPDATE_FN, &file_info, D_FILE);
+	if (ret >= 0) {
+#ifdef PCBTESTS
+		//CHANGE MADE BELOW JUST FOR PCB TESTS: 
+		strcpy(filename,UPDATE_FP);
+		strcat(filename,file_info.f_name);
+#else
+		strcpy(filename,file_info.f_name);
+		strcat(filename,PREV_EXT);		
+#endif		
+		rename((LPSTR)file_info.f_name,(LPSTR)filename);
+	}
+	// move Attempt to Current
+	ret =_findfirst((LPSTR)"*" ATTEMPTED_EXT, &file_info, D_FILE);
+	if (ret >=0) {
+		strcpy(filename,file_info.f_name);
+		filename[strlen(filename)-strlen(ATTEMPTED_EXT)] = 0;
+		rename((LPSTR)file_info.f_name,(LPSTR)filename);
+	}
+	
 }
 
 /*
@@ -103,13 +150,23 @@ ReprogFailed(flash *fp)
 }
 */
 
-void check_new_sd_flash()
-{
+void check_new_sd_flash() {
+	struct f_info file_info;
+	int ret;
+		
+	ret =_findfirst((LPSTR)UPDATE_FP UPDATE_FN, &file_info, D_FILE);
+	if (ret < 0)
+		file_info.f_name[0] = 0;
+	startUpdate(file_info.f_name);
+}
+
+void startUpdate(char *filenameUpdate) {
 	int ret;
 	flash  FL = {0};
 	int fl_size = USB_Flash_init((flash *)0, 0);
 	int flash_execution_buf[fl_size];
-	char strLog[40];
+	char oldPath[60], newPath[60];
+	struct f_info file_info;
 	
 	// if following file exists reprogram the flash with it
 	// rename the above to Attempted during reprogramming (the file has neither succeeded or failed)
@@ -117,18 +174,37 @@ void check_new_sd_flash()
 	//   (until it succeeds or fails)
 	// upon successful reprogramming move Current to Prev, Attempted to Current
 	
-// see if \system\firmware\update has a .bin file to place in flash
+    // be sure FIRMWARE_PATH exists
+	ret = mkdir((LPSTR)FIRMWARE_PATH); // TODO:need to create higher directories if don't exist, including top-level
+//	if (ret >= 0)
+//		playDings(3);
+//	else
+//		playBips(3);	
+	// see if new image file exists or was attempted
 	
-	FL.fileHandle = open((LPSTR)UPDATE_FN,O_RDONLY);
-	if(FL.fileHandle < 0) {
-		FL.fileHandle = open((LPSTR)ATTEMPTED_FN,O_RDONLY);
-		if(FL.fileHandle < 0) {
-			return;	// no bin file in update, return
-		}
+
+	if(filenameUpdate[0] != 0) {  // assumes only one version in update location
+		strcpy(oldPath,UPDATE_FP);
+		strcat(oldPath,filenameUpdate);
+		strcpy(newPath,FIRMWARE_PATH);
+		strcat(newPath,filenameUpdate);
+		strcat(newPath,ATTEMPTED_EXT);
+		
+		ret = rename((LPSTR)oldPath, (LPSTR)newPath); 
+		FL.fileHandle = open((LPSTR)newPath,O_RDONLY);
 	} else {
-		ret = rename((LPSTR)UPDATE_FN, (LPSTR)ATTEMPTED_FN);
+		ret =_findfirst((LPSTR)FIRMWARE_PATH "*" ATTEMPTED_EXT, &file_info, D_FILE);		
+		if (ret >= 0) {
+			strcpy(oldPath,FIRMWARE_PATH);
+			strcat(oldPath,file_info.f_name);
+			FL.fileHandle = open((LPSTR)oldPath,O_RDONLY);		
+		} else
+			FL.fileHandle = -1;
 	}
-	playBip();
+
+	if(FL.fileHandle < 0)
+			return;	// no system update image in folder, return
+	playBips(2);
 	setLED(LED_RED,TRUE);
 	
 	//commenting these two lines out since we want reprogramming to happen before config file loading where log filename is given
@@ -138,9 +214,6 @@ void check_new_sd_flash()
 	FL.flash_exe_buf = (void *) &flash_execution_buf[0];
 	USB_Flash_init(&FL, 1);
 
-    // be sure System\Firmware\Archive exists
-	mkdir((LPSTR)FIRMWARE_PATH);
-	
 	Try_SD_reprog(&FL);
 	setLED(LED_RED,FALSE);
 

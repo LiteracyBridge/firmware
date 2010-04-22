@@ -72,8 +72,10 @@ Count=0
 
 [Afterbuild]
 Description=Build System.bin
-Count=1
+Count=3
 Command0="tools\srec2bin" -q debug\System.S37 debug\System.bin
+Command1=copy debug\system.bin debug\system.img
+Command2="tools\dd" if=debug\himem.blk of=debug\system.img bs=32k count=4 seek=40
 [GPL162003_CS0Flash]
 P_MCS0_Ctrl=78f, 12
 P_MCS1_Ctrl=f, 10

@@ -32,6 +32,25 @@ void resetRTC(void) {
 	*P_Hour = 0;	
 }
 
+void logRTC(void) {
+	long h,m,s;
+	char time[12];
+
+	s = (long) *P_Second;
+	m = (long) *P_Minute;
+	h = (long) *P_Hour;	
+
+	longToDecimalString(h,time,4);
+	time[4] = 'h';
+	longToDecimalString(m,time+5,2);
+	time[7] = 'm';
+	longToDecimalString(m,time+8,2);
+	time[10] = 's';
+	time[11] = 0;
+	logString(time,ASAP);
+}
+
+
 long getRTCinSeconds(void) {
 	unsigned long ret, secH;
 	unsigned int secM, sec;
@@ -54,11 +73,10 @@ void setLED(unsigned int color, BOOL on) {
 	struct GPIO *LEDPort = (struct GPIO *)P_IOB_Data;
 	if (on) {
  		LEDPort->nDir 	 |= color;
-		LEDPort->nAttrib |= color;
-		LEDPort->nData   |= color;
-	}
-	else
-		LEDPort->nData   &= ~color;	
+		LEDPort->nAttrib |= color;  // LEDPort->nData   |= color;
+		LEDPort->nBuffer   |= color;
+	} else
+		LEDPort->nBuffer   &= ~color;  //LEDPort->nData   &= ~color;
 }
 
 int restoreVolume(BOOL normalVolume) {
@@ -72,7 +90,6 @@ int restoreVolume(BOOL normalVolume) {
 }
 
 int adjustVolume (int amount, BOOL relative, BOOL rememberOldVolume) {
-	int wrk;
 /*
 	APP_IRAM static long timeLastVolChg = 0;
 	long timeCurrent,diff;
@@ -182,6 +199,8 @@ getCurVoltageSample() {
 	if (!wasSampleStarted) {
 		*P_ADC_Setup |= 0x4000;
 		*P_MADC_Ctrl |= 0x40; // set STRCNV, starting the voltage sample
+		ret = *P_MADC_Ctrl;
+		ret = 0xffff;
 		wasSampleStarted = TRUE;
 	} else if (*P_MADC_Ctrl & 0x80) {  // checks CNVRDY (sample is ready)					
 	 	ret = (unsigned int)*P_MADC_Data;
@@ -192,6 +211,9 @@ getCurVoltageSample() {
 
 		ret /= 99;  //RHM heuristically determined to work on my board, replaced 3 lines above
 		
+		if (ret < V_MIN_POSSIBLE_VOLTAGE) // must be powered externally 
+			ret = V_NORMAL_VOLTAGE; // set ret to ensure all voltage checks pass
+
 	 	*P_ADC_Setup &= ~0x4000; // disable ADCEN to save power
 		wasSampleStarted = FALSE;
 		vThresh_1 <<= 1;
@@ -207,18 +229,19 @@ getCurVoltageSample() {
 
 int keyCheck(int longCheck) {
 	// get key press or use macro
-	int i, loops, keystroke;
+	int i, keystroke;
 	
 	// loop allows time for service loop to stabilize on keys
 	// based on C_DebounceCnt = 8 in IOKeyScan.asm (i < 12 was too short)	
+	KeyScan_ServiceLoop();
 	if (longCheck)
-		loops = 15;
-	else
-		loops = 1;
+		for (i = 0; i < 15; i++)
+			KeyScan_ServiceLoop();
 		
-	for (i = 0; i < loops; i++)
-		KeyScan_ServiceLoop();
 	keystroke = (int)SP_GetCh();
+	// BUG: Combo keys are not working. Not sure why yet.
+//	if (keystroke == ADMIN_COMBO_KEYS)
+//		adminOptions();  //might also want to move this to control tracks
 	if (MACRO_FILE)
 		keystroke = nextMacroKey(keystroke);
 	if (keystroke)
@@ -249,11 +272,10 @@ void wait(int t) { //t=time in msec
 void resetSystem(void) {
 	// set watchdog timer to reset device; 0x780A (Watchdog Reset Control Register)
 	// see GPL Programmer's Manual (V1.0 Dec 20,2006), Section 3.5, page 18
-	flushLog();
+	stop(); //includes flushLog();
 	fs_safexit(); // should close all open files
-	*P_WatchDog_Ctrl &= ~0x1; // clear bit 0 for 0.125 sec 
+	*P_WatchDog_Ctrl &= ~0x4001; // clear bits 14 and 0 for resetting system and time=0.125 sec 	
 	*P_WatchDog_Ctrl |= 0x8004; // set bits 2 and 15 for 0.125 sec, system reset, and enable watchdog
-	*P_WatchDog_Clear = 0; // should immediately reset
 	while(1);	
 }
 
@@ -292,29 +314,33 @@ void setOperationalMode(int newmode) {
     return;
   } else if (newmode == (int)P_HALT) {
   	stop();
+	setLED(LED_ALL,FALSE);
 //  	int save_rtc_ctrl = *P_RTC_Ctrl;
 //  	*P_RTC_Ctrl = save_rtc_ctrl & 0x7fff;  // turn off rtc??	
-  	SysIntoHaltMode();
-    //
-    // cpu reset on exiting halt mode, so nothing below here executes
-  } else if (newmode == (int)P_SLEEP) {
-
-  	stop();
-  	
-  	//disable ADC and DAC
-  	*P_DAC_Ctrl |= 0x000c; // set PWDAL and PWDAR to power down
-  	*P_DAC_Ctrl &= ~0x0001; // clear DACLK
-	*P_ADC_Setup = 0;  //&= ~0xc000; // disable ADBEN and ADCEN 
-	*P_HQADC_Ctrl = 0x000E;
-
 	*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
 	Log_ClockCtrl();
+
+	turnAmpOff();
+    *P_IOA_Buffer  |= 0x1000;	//disable SD card
 	
-	//disable speaker driver & SD card
- 	*P_IOA_Dir  |= 0x1800;
- 	*P_IOA_Attrib |= 0x1800; 	
-    *P_IOA_Data  |= 0x1000;
-    *P_IOA_Data  &= ~0x0800;    	
+	// disable NOR flash
+ 	*P_IOD_Dir  |= 0x0001;	 
+ 	*P_IOD_Attrib |= 0x0001;
+    *P_IOD_Buffer  |= 0x0001;
+
+  	SysIntoHaltMode();
+
+	while(1);	
+
+    // cpu reset on exiting halt mode, so nothing below here executes
+  } else if (newmode == (int)P_SLEEP) {
+  	stop();
+	setLED(LED_ALL,FALSE);
+	*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
+//	Log_ClockCtrl();
+	
+	turnAmpOff();
+    *P_IOA_Buffer  |= 0x1000;	//disable SD card
 
 	// disable NOR flash
  	*P_IOD_Dir  |= 0x0001;	 
@@ -322,15 +348,7 @@ void setOperationalMode(int newmode) {
     *P_IOD_Data  |= 0x0001;
 
 	_SystemOnOff();
-
 	while(1);
-
-	// setup wakeup
-	*P_IOB_Attrib |= 0x0005; 
-	*P_MINT_Ctrl |= 0x5800;  // KC1EN enable IOB1 key change wakeup
-  	*P_IOB_Latch = *P_IOB_Data;	// save current state so change is detected  	
-    *P_SLEEP = 0xa00a;  // write a00a to sleep register
-    // system reset exiting sleep mode, so nothing below executes
   }
 }
 
@@ -347,10 +365,25 @@ Log_ClockCtrl() {
 	longToHexString((long)r1,buffer+strlen(buffer),1);
 	logString(buffer,ASAP);
 }
+
+int logLongHex(unsigned long data) {
+	char strHex[7];
+	int ret;
+
+	longToHexString((long)data, (char *)strHex, 1);
+	//bytesToWrite = convertDoubleToSingleChar(strHex,strHex,TRUE);
+	//ret = write(handle,strHex<<1,bytesToWrite);
+	ret=appendStringToFile((const char *)"data.txt",(char *)strHex);	
+	return ret;
+}
+
+
 void
 refuse_lowvoltage(int die)
 {
 	extern void playDing(void);
+	playDing();
+	playDing();
 	if(die != 0) {
 		setLED(LED_ALL, FALSE);
 		wait(500);
@@ -382,3 +415,16 @@ set_voltmaxvolume()
 	}
 }
 
+void
+turnAmpOff(void) {
+	*P_IOA_Dir  |= 0x0800;
+	*P_IOA_Attrib |= 0x0800; 	
+	*P_IOA_Buffer  &= ~0x0800;    	
+}
+
+void
+turnAmpOn(void) {
+	*P_IOA_Dir  |= 0x0800;
+	*P_IOA_Attrib |= 0x0800; 	
+	*P_IOA_Buffer  |= 0x0800;    	
+}

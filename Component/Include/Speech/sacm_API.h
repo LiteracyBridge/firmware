@@ -129,8 +129,8 @@ extern int SACM_A1800FAT_SeekTime( long milisecond, int orientation );
 extern unsigned long Snd_A1800_GetCurrentTime(void);
 //added by chengye 2007/4/25
 extern unsigned int CheckStatus_Snd(void);
-extern int NFAT_DS_GetData( LPTR dest_addr,unsigned int length);
-extern void NFAT_DS_WriteData_Rec( LPTR dest_addr,unsigned int length);
+extern int NFAT_DS_GetData(LPTR dest_addr,unsigned int length);
+extern void NFAT_DS_WriteData_Rec(LPTR dest_addr,unsigned int length);
 extern void USER_SetFSLength(unsigned long);
 
 //For ETTSV2 added by chengye 2007/4/20

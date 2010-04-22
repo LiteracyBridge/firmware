@@ -1,4 +1,4 @@
-// Copyright 2009 Literacy Bridge
+// Copyright 2009, 2010 Literacy Bridge
 // CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
 // Contact: info@literacybridge.org
 #include "./system/include/system_head.h"
@@ -64,17 +64,31 @@ again:
 void EraseSector(flash *fp)
 {
 	unsigned int i;
+	unsigned int sst_flash = 0; // rhm remove
+	unsigned int *baseaddr = ((unsigned long)fp->pflash < BASEADDR) ? 0x0000f800 : BASEADDR;
 
-	*(WORD *) (BASEADDR + 0x5555) = 0x00AA;     // write data 0x00AA to device addr 5555H
-	*(WORD *) (BASEADDR + 0x2AAA) = 0x0055;     // write data 0x0055 to device addr 2AAAH
-	*(WORD *) (BASEADDR + 0x5555) = 0x0080;     // write data 0x0080 to device addr 5555H
-	*(WORD *) (BASEADDR + 0x5555) = 0x00AA;     // write data 0x00AA to device addr 5555H
-	*(WORD *) (BASEADDR + 0x2AAA) = 0x0055;     // write data 0x0055 to device addr 2AAAH
-	
-	*(WORD *) (fp->pflash) = 0x0030;     // write data 0x0030 to device sector addr 5555H
+	if(sst_flash) {
+		*(WORD *) (baseaddr + 0x5555) = 0x00AA;     // write data 0x00AA to device addr 5555H
+		*(WORD *) (baseaddr + 0x2AAA) = 0x0055;     // write data 0x0055 to device addr 2AAAH
+		*(WORD *) (baseaddr + 0x5555) = 0x0080;     // write data 0x0080 to device addr 5555H
+		*(WORD *) (baseaddr + 0x5555) = 0x00AA;     // write data 0x00AA to device addr 5555H
+		*(WORD *) (baseaddr + 0x2AAA) = 0x0055;     // write data 0x0055 to device addr 2AAAH
+	} else {
+		*(WORD *) (baseaddr + 0x555) = 0x00AA;     // write data 0x00AA to device addr 555H
+		*(WORD *) (baseaddr + 0x2AA) = 0x0055;     // write data 0x0055 to device addr 2AAH
+		*(WORD *) (baseaddr + 0x555) = 0x0080;     // write data 0x0080 to device addr 555H
+		*(WORD *) (baseaddr + 0x555) = 0x00AA;     // write data 0x00AA to device addr 555H
+		*(WORD *) (baseaddr + 0x2AA) = 0x0055;     // write data 0x0055 to device addr 2AAH
+	}
+
+	if(sst_flash & (baseaddr >= BASEADDR)) {
+		*(WORD *) (fp->pflash) = 0x0050;     // write data 0x0030 to block erase
+	} else {
+		*(WORD *) (fp->pflash) = 0x0030;     // write data 0x0030 to device sector addr
+	}
 
 	for(i = *(WORD *) (fp->pflash);  (i & 0x0080) == 0; ) {
-		i = *(WORD *) (BASEADDR);
+		i = *(WORD *) (baseaddr);
 	}
 
 	(*fp->nanopause)(1000);
@@ -106,10 +120,18 @@ void
 WriteWord(flash *fp, WORD *addr, unsigned int dataword)
 {
     unsigned int i, j = 10000;
-    
-    *(WORD *) (BASEADDR + 0x5555 ) = 0x00AA;  // 1st write data 0x00AA to device addr 5555H
-    *(WORD *) (BASEADDR + 0x2AAA) = 0x0055;  // 2nd write data 0x0055 to device addr 2AAAH
-    *(WORD *) (BASEADDR + 0x5555) = 0x00A0;  // 3rd write data 0x00A0 to device addr 5555H
+	unsigned int sst_flash = 0; //rhm remove
+	unsigned int *baseaddr = ((unsigned long)fp->pflash < BASEADDR) ? 0x0000f800 : BASEADDR;
+  
+  if(sst_flash) {
+	    *(WORD *) (baseaddr + 0x5555) = 0x00AA;  // 1st write data 0x00AA to device addr 5555H
+	    *(WORD *) (baseaddr + 0x2AAA) = 0x0055;  // 2nd write data 0x0055 to device addr 2AAAH
+	    *(WORD *) (baseaddr + 0x5555) = 0x00A0;  // 3rd write data 0x00A0 to device addr 5555H
+  } else {
+ 	    *(WORD *) (baseaddr + 0x555) = 0x00AA;  // 1st write data 0x00AA to device addr 5555H
+	    *(WORD *) (baseaddr + 0x2AA) = 0x0055;  // 2nd write data 0x0055 to device addr 2AAAH
+	    *(WORD *) (baseaddr + 0x555) = 0x00A0;  // 3rd write data 0x00A0 to device addr 5555H
+}
     
     *addr = dataword; // 4th write data word into destination address Dst
 

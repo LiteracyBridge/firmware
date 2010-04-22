@@ -1114,8 +1114,10 @@ void  FP_USB_ServiceLoop(unsigned int unUseLoop)
 			
 			__asm__("irq off");
 			__asm__("fiq off");
-//rhm1			
-			(*RHM_FlashPtr->erasesector)(pflash);
+//rhm1            
+            if(((unsigned long) RHM_FlashPtr->pflash & FLASH_SD_ERASE_MASK) == 0) { // erase at each NOR page boundary 		
+				(*RHM_FlashPtr->erasesector)(RHM_FlashPtr);
+            }
 //rhm1			
 			for(i=0; i<RHM_USBreprogBuf_Full; i++) {
 				{

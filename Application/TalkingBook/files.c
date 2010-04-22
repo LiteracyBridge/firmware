@@ -3,6 +3,7 @@
 // Contact: info@literacybridge.org
 #include "Include/talkingbook.h"
 #include "Include/device.h"
+#include "Include/audio.h"
 #include "Include/files.h"
 
 APP_IRAM static long filePosition;
@@ -24,7 +25,7 @@ BOOL nextNameValuePair (int handle, char *buffer, char delimiter, char **name, c
 		if (*value != NULL) {
 			**value = 0;
 			(*value)++;
-		}
+		} 
 	}
 	else
 		ret = FALSE;
@@ -109,7 +110,7 @@ int insertStringInFile(const char * filename, char * strText, long posInsert) {
 
 	if(vCur_1 < V_MIN_SDWRITE_VOLTAGE) {
 		refuse_lowvoltage(0);
-		return;
+		return -1;
 	}
 
 	strcpy(wFilepath,"temp.txt");
@@ -169,7 +170,7 @@ int appendStringToFile(const char * filename, char * strText) {
 */
 	if(vCur_1 < V_MIN_SDWRITE_VOLTAGE) {
 		refuse_lowvoltage(0);
-		return;
+		return -1;
 	}
 
 	ret = -1;
@@ -275,7 +276,7 @@ int findDeleteStringFromFile(char *path, char *filename, const char * string, BO
 	
 	if(vCur_1 < V_MIN_SDWRITE_VOLTAGE) {
 		refuse_lowvoltage(0);
-		return;
+		return -1;
 	}
 		
 	LBstrncpy(find,string,PATH_LENGTH);
@@ -330,6 +331,54 @@ int findDeleteStringFromFile(char *path, char *filename, const char * string, BO
 long getFilePosition() {
 	return filePosition;
 }
+
+void trimFile(char * filePath, unsigned long frameStart, unsigned long frameEnd) {
+	const char tempFilename[15] = "a:\\trimmed.tmp";
+	const int wordsHeaderSize = 3;
+	const int wordsPerFrame = 40;
+	const int bigBufferSize = wordsPerFrame * 10;
+	const int sacm_mode = 0x7d00;
+	int wHandle,rHandle;
+	int bufferBig[bigBufferSize];
+	int *pBuffer;
+	unsigned long wordStart, wordsNewSize,wordsRemaining;
+	char header[3];
+	char *pHeader;
+	long *pSize;
+	int ret;
+		
+	pBuffer = (int *)&bufferBig;
+	pHeader = (char *)&header;
+	pSize = (long *)&header;
+	wordStart = wordsFromFrames(frameStart) + wordsHeaderSize;
+	wordsNewSize = wordsFromFrames(frameEnd-frameStart+1);
+	*pSize = (long)((wordsNewSize<<1) + 2);
+	*(pHeader+2) = sacm_mode;
+	rHandle = open((LPSTR)filePath,O_RDONLY);	
+	lseek(rHandle,wordStart<<1,SEEK_SET);
+	
+	wHandle = open((LPSTR)tempFilename,O_CREAT|O_RDWR|O_TRUNC);	
+	ret = write(wHandle,(unsigned long)pHeader<<1,6);
+	
+	for(wordsRemaining=wordsNewSize;wordsRemaining > bigBufferSize;wordsRemaining -= bigBufferSize) {
+		ret = read(rHandle,(unsigned long)pBuffer<<1,bigBufferSize<<1);
+		ret = write(wHandle,(unsigned long)pBuffer<<1,bigBufferSize<<1);
+	}
+	for(;wordsRemaining > 0; wordsRemaining -= wordsPerFrame) {
+		ret = read(rHandle,(unsigned long)pBuffer<<1,wordsPerFrame<<1);
+		ret = write(wHandle,(unsigned long)pBuffer<<1,wordsPerFrame<<1);
+	}
+	ret = close(rHandle);
+	ret = close(wHandle);
+	ret = unlink((LPSTR)filePath);
+	wait(100);
+	ret = unlink((LPSTR)filePath);
+	ret = chdir((LPSTR)USER_PATH);
+	pHeader = filePath + strlen(USER_PATH);
+	ret = unlink((LPSTR)pHeader);
+	ret = rename((LPSTR)tempFilename,(LPSTR)filePath);	
+}
+
 
 BOOL readBuffer(int handle, char *buffer, int bytesToRead) {
 	// returns TRUE if still more to read and FALSE if last buffer

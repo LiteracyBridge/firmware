@@ -41,12 +41,12 @@ enum EnumEvent {
 	LEFT, RIGHT, UP, DOWN, SELECT, HOME, PLAY, STAR, PLUS, MINUS, BUTTON_MARKER, START, END
 };
 enum EnumAction {NOP = 0, STOP, PAUSE, JUMP_BLOCK, RETURN, INSERT_SOUND, START_END_MARKER,			
-				PLAY_PAUSE, COPY, RECORD_TITLE, RECORD_MSG, PACKAGE_RECORDING, 
+				PLAY_PAUSE, COPY, RECORD_TITLE, RECORD_MSG, PACKAGE_RECORDING, TRIM,
 				FWD, BACK, JUMP_TIME, CALL_BLOCK, JUMP_PACKAGE, JUMP_LIST, DELETE, 
                 ENTER_EXIT_MARKER, VOLUME_UP, VOLUME_DOWN, VOLUME_NORMAL, SPEED_UP, SPEED_DOWN, SPEED_NORMAL,  
 				USB_MARKER, USB_DEVICE_ON, USB_HOST_ON, USB_DEVICE_OFF, USB_HOST_OFF,  
                 LED_MARKER, LED_RED_ON, LED_GREEN_ON, LED_ALL_ON, LED_RED_OFF, LED_GREEN_OFF, LED_ALL_OFF,
-                SLEEP, EOL_MARKER}; //end-of-list marker
+                HALT, SLEEP, EOL_MARKER}; //end-of-list marker
 enum EnumBorderCrossing {PLAYING, FORWARD_JUMPING, BACKWARD_JUMPING};
 
 struct CtnrFile {
@@ -163,7 +163,7 @@ struct CtnrPackage {
 	char strHeapStack[PKG_HEAP_SIZE+PKG_STACK_SIZE];
 	int idxStrHeap;
 	int timePrecision;  
-	BOOL recInProgress;
+	//BOOL recInProgress;
 	int idxLanguageCode;
 	//TODO:unsigned int length;
 	//TODO:unsigned int playCount;
@@ -230,5 +230,5 @@ extern Action *getBlockActions(CtnrBlock *);
 extern Action *getListActions(ListItem *);
 extern int replaceStack (char *, CtnrPackage *);
 extern CtnrFile *getListFile(char *); 
-
+extern void resetPackage(CtnrPackage *);
 #endif

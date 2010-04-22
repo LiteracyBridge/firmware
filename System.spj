@@ -151,6 +151,13 @@ PARAM=
 ID=
 EXPORT=3
 # End Source File
+# Begin Source File
+SOURCE=Application\TalkingBook\edit.c
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
 # End Group
 # Begin Group "Component"
 #PROP Default_Filter=
@@ -629,6 +636,20 @@ PARAM=
 ID=
 EXPORT=3
 # End Source File
+# Begin Source File
+SOURCE=Application\TalkingBook\Include\edit.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Application\TalkingBook\Include\talkingbook.inc
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
 # End Group
 # Begin Group "External Dependencies"
 #PROP Default_Filter=
@@ -906,6 +927,13 @@ USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Component\Include\FS\DriverLayer.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=0
 # End Source File
 # End Group
 # End SubItem
@@ -1055,6 +1083,13 @@ PARAM=
 ID=
 EXPORT=3
 # End Source File
+# Begin Source File
+SOURCE=Application\TalkingBook\edit.c
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
 # End Group
 # Begin Group "Component"
 #PROP Default_Filter=
@@ -1533,6 +1568,20 @@ PARAM=
 ID=
 EXPORT=3
 # End Source File
+# Begin Source File
+SOURCE=Application\TalkingBook\Include\edit.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Application\TalkingBook\Include\talkingbook.inc
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
 # End Group
 # Begin Group "External Dependencies"
 #PROP Default_Filter=
@@ -1810,6 +1859,13 @@ USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Component\Include\FS\DriverLayer.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=0
 # End Source File
 # End Group
 # End SubItem

@@ -1,12 +1,13 @@
 //------------------------------------------------------------------------------
 .include .\system\include\system_head.inc
 
-.public _RESET, __sn_loop, __sn_loop2
+.public _RESET, __sn_loop, __sn_loop2, _RESETPCB
 .external __sn_init_table, _main, __sn_sp_val
 
 //------------------------------------------------------------------------------
 unSP_StartUp: .section .text, .addr = 0xF800
 StartUp: .proc
+_RESETPCB:
 _RESET:
 	int off
 	

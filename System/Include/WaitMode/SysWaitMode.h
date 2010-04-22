@@ -29,8 +29,9 @@
 #define C_SystemClock	96000000
 #define C_LowSystemClock	12000000
 
-#define SYS_96MCLOCK		0x8418
-#define SYS_12MCLOCK		0x0400
+#define SYS_96MCLOCK		0x8618  // assumes we want IOB0-2 interupt  (bit 9 is set)
+#define SYS_12MCLOCK		0x0600  // assumes we want IOB0-2 interupt  (bit 9 is set)
+
 #define LCD_96MCLOCK		(C_SystemClock/C_LCD_Segment/C_LCD_Common/C_LCD_FrameRate-2)
 #define LCD_12MCLOCK		(C_LowSystemClock/C_LCD_Segment/C_LCD_Common/C_LCD_FrameRate-2)
 

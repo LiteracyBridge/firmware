@@ -21,11 +21,20 @@
 //voltage at or below this value enforce maximum volume settings
 #define V_MIN_VOL_VOLTAGE 220
 
+// must be powered externally if less than this (hundredths of volts)
+#define V_MIN_POSSIBLE_VOLTAGE 80
+
+//used when powered externally to ensure all voltage checks pass (hundredths of volts)
+#define V_NORMAL_VOLTAGE 330
+
 extern int KEY_PLAY, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_SELECT, KEY_STAR, KEY_HOME, KEY_PLUS, KEY_MINUS;	
 extern int LED_GREEN, LED_RED, LED_ALL;
 extern int MAX_SPEED, NORMAL_SPEED, SPEED_INCREMENT;
 extern int NORMAL_VOLUME, MAX_VOLUME, VOLUME_INCREMENT;
 
+extern void KeyScan_ServiceLoop(void);
+
+extern void logRTC(void);
 extern void resetRTC(void);
 extern long getRTCinSeconds(void);
 extern void setLED(unsigned int, BOOL);
@@ -42,4 +51,9 @@ extern int waitForButton(int);
 extern void wait(int);
 extern void resetSystem(void);
 extern void setOperationalMode(int);
+extern int logLongHex(unsigned long);
+extern void refuse_lowvoltage(int die);
+extern void turnAmpOff(void);
+extern void turnAmpOn(void);
+
 #endif
