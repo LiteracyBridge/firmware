@@ -35,8 +35,8 @@ int main (void) {
  	}
 #endif
 
+	initVoltage();	// get initial voltage before SACM_Init in BodyInit - may never run BodyInit()
 	if(SYS_OFF!=SysGetState()) {
-		initVoltage();	// get initial voltage before SACM_Init in BodyInit - may never run BodyInit()
 		BodyInit();
 	}
 	
