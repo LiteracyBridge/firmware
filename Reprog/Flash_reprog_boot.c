@@ -16,23 +16,50 @@ extern int REPROG_IN_Progress;
 #define	USB_TIME_OUT	3			// timeout  3s
 //RHM extern USBHostType  USBHost_Flag;
 
-extern void (*ReprogJump)();
+typedef str_USB_Lun_Info 	*pluninfo[];
+extern void (*ReprogJump)(void *);
+
 extern flash *RHM_FlashPtr;
 void FP_USB_Insert_TimeOut(void);
-long RHMdbg_pflash;
+//long RHMdbg_pflash;
 extern unsigned int RHM_USBreprogBuf_Full;
 extern unsigned int *RHM_FlashBuf;
 
 //FP_Flashing_EP must be first function 
-void FP_Flashing_EP()
+void FP_Flashing_EP(void *pi)
 {
+	unsigned int i;
 	extern long USB_ISR_PTR;
 	extern long USB_INSERT_PTR;
+	extern str_USB_Lun_Info *FP_USB_Lun_Define[];
 	
 	void FP_USB_ISR(), FP_USB_Insert_TimeOut();
+		
+	for(i=0; i<N_USB_LUN; i++) {
+		pluninfo *plun = (pluninfo *) pi;
+		FP_USB_Lun_Define[i] = (*plun)[i];	
+		if(FP_USB_Lun_Define[i]->unLunType == LunType_NOR) {
+			RHM_FlashPtr = FP_USB_Lun_Define[i]->rhmLunData;
+		}
+	}
+
+	{unsigned len;
+	 unsigned int *to = (unsigned int *)(&CSW_Residue);
+	 unsigned int *from = (unsigned int *)((unsigned long)RHM_FlashPtr->usbram);
+	 from += 512;
+	 len = (unsigned long)&ReprogJump  - (unsigned long)&CSW_Residue;
+	 for(i=0; i<len; i++) {
+	 	*to++ = *from++;
+	 }
 	
-	USB_ISR_PTR = (long) FP_USB_ISR;
-	USB_INSERT_PTR = (long) FP_USB_Insert_TimeOut;
+//	USB_ISR_PTR = (long) FP_USB_ISR;
+	to = from - 4;
+//	USB_INSERT_PTR = (long) FP_USB_Insert_TimeOut;
+	*((long *)to) = FP_USB_Insert_TimeOut;
+	to += 2;
+	*((long *)to) = FP_USB_ISR;
+	}
+	
 	RHM_USBreprogBuf_Full = 0;
 	ReprogJump = 0;
 
@@ -922,6 +949,7 @@ void  FP_USB_ServiceLoop(unsigned int unUseLoop)
 	unsigned a;
 //	unsigned int FP_RHM_USBreprogBuf[2048];
 	int i, reprog_delay;
+	unsigned long ltmp;
 
 	#ifdef print	
 	init_uart();
@@ -1096,8 +1124,15 @@ void  FP_USB_ServiceLoop(unsigned int unUseLoop)
 		
 		if(ReprogJump != 0) {
 			if(++reprog_delay > 1000) {
+				unsigned int *wrk = (unsigned int *)0x98000;
+				asm("int off");
 				REPROG_IN_Progress = 0;
-				(*ReprogJump)();
+				RHM_FlashPtr->pflash = 0x38000;
+				(*RHM_FlashPtr->erasesector)(RHM_FlashPtr);
+				for(ltmp=0; ltmp<0x8000; ltmp++) {
+					(*RHM_FlashPtr->writeword)(RHM_FlashPtr, RHM_FlashPtr->pflash + ltmp, wrk[ltmp]);
+				}
+				(*ReprogJump)((void *)0);
 				// below not reached
 				ReprogJump = 0;	
 				reprog_delay = 0;
@@ -1114,8 +1149,23 @@ void  FP_USB_ServiceLoop(unsigned int unUseLoop)
 			
 			__asm__("irq off");
 			__asm__("fiq off");
-//rhm1            
-            if(((unsigned long) RHM_FlashPtr->pflash & FLASH_SD_ERASE_MASK) == 0) { // erase at each NOR page boundary 		
+//rhm1     
+			if((RHM_FlashPtr->pflash >= 0x37000) && (RHM_FlashPtr->pflash < 0x38000)) {
+					goto skip_app_flash;
+			}
+    
+			ltmp = (unsigned long) RHM_FlashPtr->pflash;
+			if((ltmp >= 0x30000) && (ltmp < 0x37000)) { // skip app_flash_data at 37000  
+				if((ltmp & 0xfff) == 0) { // 0-x30000 thru 0x37fff reprogrammed in 8 4k blocks
+					(*RHM_FlashPtr->erasesector)(RHM_FlashPtr);
+				}
+			} else if((ltmp >= 0x38000) && (ltmp < 0x40000)) {
+				RHM_FlashPtr->pflash += 0x60000; // do it at 0x98000 for now
+				if(RHM_FlashPtr->pflash == 0x98000) {
+					(*RHM_FlashPtr->erasesector)(RHM_FlashPtr);
+				}
+			}
+            else if(((unsigned long) RHM_FlashPtr->pflash & FLASH_SD_ERASE_MASK) == 0) { // erase at each NOR page boundary 		
 				(*RHM_FlashPtr->erasesector)(RHM_FlashPtr);
             }
 //rhm1			
@@ -1125,10 +1175,9 @@ void  FP_USB_ServiceLoop(unsigned int unUseLoop)
 					RHM_DEBUG_LAST_WRITE = RHM_FlashPtr->pflash + i;
 				}
 				(*RHM_FlashPtr->writeword)(RHM_FlashPtr, RHM_FlashPtr->pflash + i, RHM_FlashBuf[i]);
-	   			//Nor_WordWrite(RHM_FlashAddr, RHM_USBreprogBuf_Full, (unsigned short)RHM_USBreprogBuf);
-	   			//WriteWord(RHM_FlashPtr, RHM_FlashPtr->pflash + i, RHM_USBreprogBuf[i]);
 			}
-	   		
+			
+skip_app_flash:	   		
 	   		__asm__("irq on");
 			__asm__("fiq on");
 
@@ -1481,18 +1530,25 @@ void FP_fUSB_SDCardPullOut()
 		}
 	}
 }
-const unsigned int FP_szKeyTable4[16]={0xE7,0x53,0xED,0x50,0x82,0x68,0x93,0x29,0x88,0x6F,0x34,0x89,0xB7,0x1E,0x19,0xDC};
+/*
+unsigned int FP_szKeyTable4[16]={0xE7,0x53,0xED,0x50,0x82,0x68,0x93,0x29,0x88,0x6F,0x34,0x89,0xB7,0x1E,0x19,0xDC};
 
-const unsigned int FP_szKeyTable1[16]={0xBB,0x8E,0xD9,0xAE,0x92,0x99,0x1D,0xB3,0xC7,0x58,0x33,0x98,0x3A,0xD4,0xC1,0x69};
+unsigned int FP_szKeyTable1[16]={0xBB,0x8E,0xD9,0xAE,0x92,0x99,0x1D,0xB3,0xC7,0x58,0x33,0x98,0x3A,0xD4,0xC1,0x69};
 
-const unsigned int FP_szKeyTable3[16]={0xE1,0x69,0x7F,0x6E,0x08,0x22,0xAA,0xC0,0x53,0x4F,0xF0,0x65,0x7A,0x4B,0xD9,0x5D};
+unsigned int FP_szKeyTable3[16]={0xE1,0x69,0x7F,0x6E,0x08,0x22,0xAA,0xC0,0x53,0x4F,0xF0,0x65,0x7A,0x4B,0xD9,0x5D};
 
-const unsigned int FP_szKeyTable2[16]={0xB1,0xA9,0x66,0xE9,0x81,0x39,0x59,0xC9,0xE5,0xAC,0x02,0x9E,0x06,0x43,0xC7,0x58};
-
+unsigned int FP_szKeyTable2[16]={0xB1,0xA9,0x66,0xE9,0x81,0x39,0x59,0xC9,0xE5,0xAC,0x02,0x9E,0x06,0x43,0xC7,0x58};
+*/
 					
 					
 int FP_SetVenderID()
 {
+	extern unsigned int FP_szKeyTable4[16];
+	extern unsigned int FP_szKeyTable1[16];
+	extern unsigned int FP_szKeyTable3[16];
+	extern unsigned int FP_szKeyTable2[16];
+
+
 	unsigned int unTmp, unTmp1, unBase, unKeyID, unShiftByte, unShiftBit, unKeyBuffer[81], unGetData, unReplyData[11];
 	int			 i, nRlt=0;
 	

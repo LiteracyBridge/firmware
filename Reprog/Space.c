@@ -19,8 +19,8 @@
 #define		CREAT_DRIVERLAYER_STRUCT
 #define		CREATUSBHOSTVAR
 
-#include	"typedef.h"
-#include	"DriverLayer.h"
+#include	"component/include/fs/typedef.h"
+#include	"component/include/fs/DriverLayer.h"
 #include	"./Driver/Include/USBHost/USBHostMSDC.h"	
 #include	"./Driver/Include/USBHost/USB_Host_RAM.h"
 
@@ -146,7 +146,7 @@ void (*ReprogJump)() = 0;
 // frome (replacing) DrvStruct.c
 
 #define		CREAT_DRIVERLAYER_STRUCT
-#include	"DriverLayer.h"
+//#include	"DriverLayer.h"
 //NAND FLASH partition define
 const  UINT32 Nand_Part0_Offset = NAND_PART0_OFFSET;
 const  UINT32 Nand_Part0_Size = NAND_PART0_SIZE;

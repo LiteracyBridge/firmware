@@ -69,6 +69,7 @@ typedef struct  {
 //		void (*reprogfailed)();
 //		void (*newbyte)();
 //		void (*readbytes)();
+		void *usbram;
 } flash;
 
 

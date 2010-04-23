@@ -2322,3 +2322,86 @@ BB1_PU9:	// 0x514
 	     pop BP, PC from [SP]     	// [2:623]  
 	.endp
 	
+	
+	.code
+.public	_FP_szKeyTable4
+_FP_szKeyTable4:	// 0x0
+	.dw	231
+	.dw	83
+	.dw	237
+	.dw	80
+	.dw	130
+	.dw	104
+	.dw	147
+	.dw	41
+	.dw	136
+	.dw	111
+	.dw	52
+	.dw	137
+	.dw	183
+	.dw	30
+	.dw	25
+	.dw	220
+	// end of initialization for FP_szKeyTable4
+	     .stabs "FP_szKeyTable1:G19",32,0,0,_FP_szKeyTable1
+.public	_FP_szKeyTable1
+_FP_szKeyTable1:	// 0x10
+	.dw	187
+	.dw	142
+	.dw	217
+	.dw	174
+	.dw	146
+	.dw	153
+	.dw	29
+	.dw	179
+	.dw	199
+	.dw	88
+	.dw	51
+	.dw	152
+	.dw	58
+	.dw	212
+	.dw	193
+	.dw	105
+	// end of initialization for FP_szKeyTable1
+	     .stabs "FP_szKeyTable3:G19",32,0,0,_FP_szKeyTable3
+.public	_FP_szKeyTable3
+_FP_szKeyTable3:	// 0x20
+	.dw	225
+	.dw	105
+	.dw	127
+	.dw	110
+	.dw	8
+	.dw	34
+	.dw	170
+	.dw	192
+	.dw	83
+	.dw	79
+	.dw	240
+	.dw	101
+	.dw	122
+	.dw	75
+	.dw	217
+	.dw	93
+	// end of initialization for FP_szKeyTable3
+	     .stabs "FP_szKeyTable2:G19",32,0,0,_FP_szKeyTable2
+.public	_FP_szKeyTable2
+_FP_szKeyTable2:	// 0x30
+	.dw	177
+	.dw	169
+	.dw	102
+	.dw	233
+	.dw	129
+	.dw	57
+	.dw	89
+	.dw	201
+	.dw	229
+	.dw	172
+	.dw	2
+	.dw	158
+	.dw	6
+	.dw	67
+	.dw	199
+	.dw	88
+	// end of initialization for FP_szKeyTable2
+
+	

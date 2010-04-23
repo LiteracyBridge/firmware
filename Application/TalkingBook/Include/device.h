@@ -7,7 +7,7 @@
 #include ".\Component\Include\component_head.h"
 
 //refuse to go into usb mode if voltage below this value
-#define V_MIN_USB_VOLTAGE 210
+#define V_MIN_USB_VOLTAGE 190
 
 //refuse to record if voltage below this value (hundredths of volts)
 #define V_MIN_RECORD_VOLTAGE 200

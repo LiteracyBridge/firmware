@@ -45,7 +45,7 @@ FlashReprogLomem(flash *fp, unsigned int *buf)
 	
 
 // erase 30000 in eight 4k blocks - all others are 32k blocks	
-	for(pos=BASEADDR; pos<0x38000; pos+= 0x1000) {
+	for(pos=BASEADDR; pos<0x37000; pos+= 0x1000) {
 		fp->pflash = pos;
 		fp->erasesector(fp);
 	}
@@ -60,7 +60,10 @@ FlashReprogLomem(flash *fp, unsigned int *buf)
 			
 	for (addr = BASEADDR, /*offset = 0,*/ nwords = 0; addr < REPROG_STAND_ALONE; addr += FLASH_SD_READ_SIZE)
 	{
-		if(addr == 0x3f800) {  //monkey business -- 0xf800 maps to 38000, leave until last
+		if(addr == 0x37000) { //app_flash_data
+			pos = lseek(newfp->fileHandle, 0x38000 * 2, SEEK_SET);
+			addr = 0x38000;
+		} else if(addr == 0x3f800) {  //monkey business -- 0xf800 maps to 38000, leave until last
 			pos = lseek(newfp->fileHandle, 0x40000 * 2, SEEK_SET);
 			addr = 0x40000;
 		}

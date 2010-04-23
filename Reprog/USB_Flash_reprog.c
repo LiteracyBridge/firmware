@@ -152,3 +152,29 @@ void EndFlashProg()
 }
 
 
+
+
+void write_app_flash(int *bufp, int len, unsigned int fill)
+{
+	flash  FL = {0}, *newfp; 
+	int fl_size = USB_Flash_init((flash *)0, 0), i;
+	int flash_execution_buf[fl_size];
+	FL.flash_exe_buf = (void *) &flash_execution_buf[0];
+	USB_Flash_init(&FL, 1);
+	(flash *)newfp = &FL;
+	
+	if(len > 4096)
+		len = 4096;
+	
+	newfp->pflash = 0x37000;
+	newfp->erasesector(newfp);
+	
+	for(i=0; i<4096; i++) {
+		(*newfp->writeword)(newfp, 0x37000 + i, (i >= len) ? fill : bufp[i]);
+	}
+}
+// define app flash data, 4k located at 0x37000 
+	asm("APP_FLASH_DATA:	.section .data,.addr=0x37000");
+	asm(".public _app_flash_data");
+	asm("_app_flash_data:");
+	asm(".dw 4096 dup(0)");
