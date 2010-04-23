@@ -151,9 +151,23 @@ ReprogFailed(flash *fp)
 */
 
 void check_new_sd_flash() {
+	extern void write_app_flash(int *, int, unsigned int);
 	struct f_info file_info;
 	int ret;
-		
+	
+	// see if a .tsn file is present
+	ret =_findfirst((LPSTR)UPDATE_FP SERIAL_FN, &file_info, D_FILE);
+	if(ret >= 0) {
+		char *dot;
+		dot = strchr(file_info.f_name, '.');
+		unlink(file_info.f_name);
+		if(dot != NULL) {
+			int vlen = strlen(file_info.f_name) - 3; //skip tsn
+			*dot = 0;
+			write_app_flash((int *)file_info.f_name, vlen, (unsigned int)0xffff);
+		}
+	}
+			
 	ret =_findfirst((LPSTR)UPDATE_FP UPDATE_FN, &file_info, D_FILE);
 	if (ret < 0)
 		file_info.f_name[0] = 0;

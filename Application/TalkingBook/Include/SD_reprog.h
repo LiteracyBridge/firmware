@@ -13,6 +13,7 @@
 
 #define FIRMWARE_PATH	"a:/Firmware/"
 #define UPDATE_FP    	"a:/"
+#define SERIAL_FN  		"*.tsn"
 #define UPDATE_FN    	"*.img"
 #define ATTEMPTED_EXT	".att"
 #define PREV_EXT		".old"
