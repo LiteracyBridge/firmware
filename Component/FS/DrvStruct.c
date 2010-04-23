@@ -1,5 +1,5 @@
 //#define		CREAT_DRIVERLAYER_STRUCT
-#include	"DriverLayer.h"
+#include	"./component/include/fs/DriverLayer.h"
 //NAND FLASH partition define
 const  UINT32 Nand_Part0_Offset = NAND_PART0_OFFSET;
 const  UINT32 Nand_Part0_Size = NAND_PART0_SIZE;

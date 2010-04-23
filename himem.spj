@@ -3,9 +3,7 @@
 #**DO NOT EDIT**
 #TARTYPE (GPL162003_CS0Flash)Application
 CFG=Debug
-
-VER=3.0.1 
-# Begin Project
+ VER=3.0.1  # Begin Project
 #Name Begin GPL162003_CS0Flash-Debug
 # Begin SubItem "System  files"
 # Begin Group "Source Files"
@@ -38,21 +36,21 @@ USEPARAM=FALSE
 PARAM=
 EXPORT=3
 # Begin Source File
-SOURCE=Component\FS\SD.c
+SOURCE=..\firmware\Component\FS\SD.c
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Component\FS\FS_user_nos.c
+SOURCE=..\firmware\Component\FS\nls_codepage.c
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Component\FS\nls_ascii.c
+SOURCE=..\firmware\Component\FS\nls_ascii.c
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -66,7 +64,7 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Component\FS\nls_codepage.c
+SOURCE=Component\FS\FS_user_nos.c
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -99,25 +97,11 @@ PARAM=
 ID=
 EXPORT=3
 # End Source File
-# Begin Source File
-SOURCE=System\ServiceLoop.c
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
 # Begin Group "WaitMode"
 #PROP Default_Filter=
 USEPARAM=FALSE
 PARAM=
 EXPORT=3
-# Begin Source File
-SOURCE=System\WaitMode\SysWaitMode.c
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
 # Begin Source File
 SOURCE=System\WaitMode\SysOn2OffHook.asm
 USEPARAM=FALSE
@@ -148,6 +132,13 @@ EXPORT=3
 # End Source File
 # Begin Source File
 SOURCE=System\WaitMode\SysIntoHaltMode.asm
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=..\firmware\System\WaitMode\SysWaitMode.c
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -214,23 +205,58 @@ EXPORT=3
 #PROP Default_Filter=
 USEPARAM=FALSE
 PARAM=
-EXPORT=0
+EXPORT=3
 # Begin Source File
-SOURCE=reprog1\SD_reprog_finish.c
+SOURCE=..\firmware\Reprog\SD_reprog_finish.c
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=reprog1\USB_Flash_reprog.c
+SOURCE=..\firmware\Reprog\USB_Flash_reprog.c
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=reprog1\USB_Flash_reprog.h
+SOURCE=..\firmware\Reprog\USBD_Drv.asm
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=..\firmware\Reprog\USB_ID.asm
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=..\firmware\Reprog\Flash_reprog_boot.c
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=..\firmware\Driver\USB\SCSI_Table.asm
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=..\firmware\Reprog\Flash_reprog_Drv.asm
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Application\Space.c
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -282,7 +308,7 @@ EXPORT=3
 #PROP Default_Filter=
 USEPARAM=FALSE
 PARAM=
-EXPORT=0
+EXPORT=2048
 # Begin Source File
 SOURCE=system\include\system_head.h
 USEPARAM=FALSE
@@ -298,7 +324,7 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=component\include\component_head.h
+SOURCE=..\firmware\Reprog\USB_Flash_reprog.h
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -312,119 +338,182 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Component\Include\FS\typedef.h
+SOURCE=component\include\component_head.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=System\include\system\GPL162002.h
+SOURCE=Driver\Include\USB\USBD_Define.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=System\include\system\GPL162001ISR.h
+SOURCE=Driver\Include\USB\USBD.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=System\include\system\SysException.h
+SOURCE=..\firmware\Reprog\GPL162002.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=System\include\system\Sys_GV.h
+SOURCE=.\Component/Include/FS/typedef.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=System\include\WaitMode\SysWaitMode.h
+SOURCE=.\System\include\system\GPL162002.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=System\include\Message\Message.h
+SOURCE=.\System\include\system\GPL162001ISR.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=System\include\ExtMem\unExtMem.h
+SOURCE=.\System\include\system\SysException.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=System\include\buddy\ucBS.h
+SOURCE=.\System\include\system\Sys_GV.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=system\include\system\unSPMACRO.h
+SOURCE=.\System\include\WaitMode\SysWaitMode.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=driver\include\SD\SDCDriver.h
+SOURCE=.\System\include\Message\Message.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=driver\include\NandDriver\Nand2_Oper.h
+SOURCE=.\System\include\ExtMem\unExtMem.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=driver\include\NandDriver\nanddriver.h
+SOURCE=.\System\include\buddy\ucBS.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Component\Include\FS\vfs.h
+SOURCE=.\system\include\system\unSPMACRO.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Component\Include\speech\algorithm.h
+SOURCE=.\driver\include\SD\SDCDriver.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Component\Include\speech\sacm_API.h
+SOURCE=.\driver\include\NandDriver\Nand2_Oper.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Component\Include\speech\MP3.h
+SOURCE=.\driver\include\NandDriver\nanddriver.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Component\Include\FS\typedef.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Component\Include\FS\vfs.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Component\Include\speech\algorithm.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Component\Include\speech\sacm_API.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Component\Include\speech\MP3.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\System\include\system\GPL162002.inc
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Driver\Include\USB\USBD.inc
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Driver\Include\USB\USBD_Define.inc
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\component/include/fs/DriverLayer.h
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -465,21 +554,21 @@ USEPARAM=FALSE
 PARAM=
 EXPORT=3
 # Begin Source File
-SOURCE=Component\FS\SD.c
+SOURCE=..\firmware\Component\FS\SD.c
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Component\FS\FS_user_nos.c
+SOURCE=..\firmware\Component\FS\nls_codepage.c
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Component\FS\nls_ascii.c
+SOURCE=..\firmware\Component\FS\nls_ascii.c
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -493,7 +582,7 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Component\FS\nls_codepage.c
+SOURCE=Component\FS\FS_user_nos.c
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -526,25 +615,11 @@ PARAM=
 ID=
 EXPORT=3
 # End Source File
-# Begin Source File
-SOURCE=System\ServiceLoop.c
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
 # Begin Group "WaitMode"
 #PROP Default_Filter=
 USEPARAM=FALSE
 PARAM=
 EXPORT=3
-# Begin Source File
-SOURCE=System\WaitMode\SysWaitMode.c
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
 # Begin Source File
 SOURCE=System\WaitMode\SysOn2OffHook.asm
 USEPARAM=FALSE
@@ -575,6 +650,13 @@ EXPORT=3
 # End Source File
 # Begin Source File
 SOURCE=System\WaitMode\SysIntoHaltMode.asm
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=..\firmware\System\WaitMode\SysWaitMode.c
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -641,23 +723,58 @@ EXPORT=3
 #PROP Default_Filter=
 USEPARAM=FALSE
 PARAM=
-EXPORT=0
+EXPORT=3
 # Begin Source File
-SOURCE=reprog1\SD_reprog_finish.c
+SOURCE=..\firmware\Reprog\SD_reprog_finish.c
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=reprog1\USB_Flash_reprog.c
+SOURCE=..\firmware\Reprog\USB_Flash_reprog.c
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=reprog1\USB_Flash_reprog.h
+SOURCE=..\firmware\Reprog\USBD_Drv.asm
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=..\firmware\Reprog\USB_ID.asm
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=..\firmware\Reprog\Flash_reprog_boot.c
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=..\firmware\Driver\USB\SCSI_Table.asm
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=..\firmware\Reprog\Flash_reprog_Drv.asm
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Application\Space.c
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -709,7 +826,7 @@ EXPORT=3
 #PROP Default_Filter=
 USEPARAM=FALSE
 PARAM=
-EXPORT=0
+EXPORT=2048
 # Begin Source File
 SOURCE=system\include\system_head.h
 USEPARAM=FALSE
@@ -725,7 +842,7 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=component\include\component_head.h
+SOURCE=..\firmware\Reprog\USB_Flash_reprog.h
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -739,119 +856,182 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Component\Include\FS\typedef.h
+SOURCE=component\include\component_head.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=System\include\system\GPL162002.h
+SOURCE=Driver\Include\USB\USBD_Define.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=System\include\system\GPL162001ISR.h
+SOURCE=Driver\Include\USB\USBD.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=System\include\system\SysException.h
+SOURCE=..\firmware\Reprog\GPL162002.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=System\include\system\Sys_GV.h
+SOURCE=.\Component/Include/FS/typedef.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=System\include\WaitMode\SysWaitMode.h
+SOURCE=.\System\include\system\GPL162002.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=System\include\Message\Message.h
+SOURCE=.\System\include\system\GPL162001ISR.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=System\include\ExtMem\unExtMem.h
+SOURCE=.\System\include\system\SysException.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=System\include\buddy\ucBS.h
+SOURCE=.\System\include\system\Sys_GV.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=system\include\system\unSPMACRO.h
+SOURCE=.\System\include\WaitMode\SysWaitMode.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=driver\include\SD\SDCDriver.h
+SOURCE=.\System\include\Message\Message.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=driver\include\NandDriver\Nand2_Oper.h
+SOURCE=.\System\include\ExtMem\unExtMem.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=driver\include\NandDriver\nanddriver.h
+SOURCE=.\System\include\buddy\ucBS.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Component\Include\FS\vfs.h
+SOURCE=.\system\include\system\unSPMACRO.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Component\Include\speech\algorithm.h
+SOURCE=.\driver\include\SD\SDCDriver.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Component\Include\speech\sacm_API.h
+SOURCE=.\driver\include\NandDriver\Nand2_Oper.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Component\Include\speech\MP3.h
+SOURCE=.\driver\include\NandDriver\nanddriver.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Component\Include\FS\typedef.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Component\Include\FS\vfs.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Component\Include\speech\algorithm.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Component\Include\speech\sacm_API.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Component\Include\speech\MP3.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\System\include\system\GPL162002.inc
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Driver\Include\USB\USBD.inc
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Driver\Include\USB\USBD_Define.inc
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\component/include/fs/DriverLayer.h
 USEPARAM=FALSE
 PARAM=
 ID=
