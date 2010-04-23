@@ -23,7 +23,7 @@ extern flash *RHM_FlashPtr;
 extern unsigned int *RHM_FlashBuf;
 extern long USB_INSERT_PTR;
 extern long USB_ISR_PTR;
-extern void (*ReprogJump)();
+extern void (*ReprogJump)(void *);
 
 #endif
 
@@ -848,6 +848,7 @@ void USB_ServiceLoop(unsigned int unUseLoop)
 {
 	unsigned a;
 #ifdef USBRP
+	extern str_USB_Lun_Info 	*FP_USB_Lun_Define[];
 	unsigned int RHM_USBreprogBuf[2048];
 	void (*PF)() = 0;
 	int reprogwait = -1;
@@ -869,8 +870,10 @@ void USB_ServiceLoop(unsigned int unUseLoop)
 	{
 #ifdef USBRP
 		if(ReprogJump != 0) {
-			if (reprogwait++ >= 0) //go through state machine once to keep usb happy
-				(*ReprogJump)();
+			if (reprogwait++ >= 0) { //go through state machine once to keep usb happy				
+				RHM_FlashPtr->usbram = GetBufferPointer();
+				(*ReprogJump)(&FP_USB_Lun_Define);
+			}
 		}
 #endif 
 	
@@ -1041,7 +1044,8 @@ void USB_ServiceLoop(unsigned int unUseLoop)
 			__asm__("irq off");
 			__asm__("fiq off");
 			
-			(*RHM_FlashPtr->erasesector)(RHM_FlashPtr);
+			if((((unsigned long)(RHM_FlashPtr->pflash)) & 0x7fff) == 0)
+				(*RHM_FlashPtr->erasesector)(RHM_FlashPtr);
 			
 			for(i=0; i<RHM_USBreprogBuf_Full; i++) {
 				(*RHM_FlashPtr->writeword)(RHM_FlashPtr, RHM_FlashPtr->pflash + i, RHM_USBreprogBuf[i]);
