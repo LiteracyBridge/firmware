@@ -11,7 +11,7 @@
 extern APP_IRAM unsigned int vCur_1;
 extern void refuse_lowvoltage(int);
 
-void logException(unsigned int errorCode, const char * pStrError, int resetOrUSB) {
+void logException(unsigned int errorCode, const char * pStrError, int takeAction) {
 	// errorcode == 1 means memory error from BodyInit() and ucBSInit()
 	int i; 
 	char errorString[80];
@@ -19,12 +19,12 @@ void logException(unsigned int errorCode, const char * pStrError, int resetOrUSB
 	if(vCur_1 < V_MIN_SDWRITE_VOLTAGE) {
 	}
 	
-	if (resetOrUSB || LOG_WARNINGS) {
+	if (takeAction || LOG_WARNINGS) {
 		strcpy(errorString,"\x0d\x0a" "*** ERROR! (cycle "); //cycle number
 		longToDecimalString(systemCounts.powerUpNumber,(char *)(errorString+strlen(errorString)),4);
 		strcat(errorString," - version " VERSION ")\x0d\x0a*** #");
 		longToDecimalString((long)errorCode,(char *)(errorString+strlen(errorString)),3);
-		if (resetOrUSB) {
+		if (takeAction) {
 			strcat(errorString,"-fatal");
 			stop();						
 		}
@@ -48,7 +48,7 @@ void logException(unsigned int errorCode, const char * pStrError, int resetOrUSB
 	}		
 	//todo: put a parameter in fct to return instead of reset or USB
 	//maybe a choice of the three RETURN, RESET, USB
-	if (resetOrUSB) {
+	if (takeAction) {
 // 		commenting out code to alert user of error -- just use lights and auto-reset to welcome msg
 //		if (errorCode != 10 && errorCode != 14)  // can't access config or system boot 
 //			insertSoundFile(ERROR_SOUND_FILE_IDX);
@@ -61,10 +61,12 @@ void logException(unsigned int errorCode, const char * pStrError, int resetOrUSB
 				setLED(LED_GREEN,TRUE);
 				wait(500);
 			}
-		if (resetOrUSB == USB_MODE) // can't load config
+		if (takeAction == USB_MODE) // can't load config
 			setUSBDevice (TRUE);
-		else if (resetOrUSB == RESET)
+		else if (takeAction == RESET)
 			resetSystem();
+		else if (takeAction ==  SHUT_DOWN)
+			setOperationalMode((int)P_HALT);
 	}
 }
 

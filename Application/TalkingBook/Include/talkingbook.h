@@ -4,7 +4,7 @@
 #ifndef	__TALKINGBOOK_h__
 #define	__TALKINGBOOK_h__
 
-#define VERSION			"v1.40f"
+#define VERSION			"v1.40g"
 #define TB_CAN_WAKE  // hardware that allows wake from sleep/halt
 //IMPORTANT: changes to TB_CAN_WAKE must also be made to system_head.inc!!!
 
@@ -17,6 +17,8 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 
 // TODO LIST
 //	 * read and write new metadata scheme into audio files
+//	 * take a recording and make a translation on the device (keeping it linked) 
+//	 * copy entire category
 //   * change opening help-loop
 //	 * track playcount and copy count of each package
 //   * auto update VERSION with each new build (or SVN revision)
@@ -46,7 +48,7 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 //   * limit recording from filling memory card (use config setting for min free space)
 //   * tag as private (not to be d2d copied)
 //   * madlibs app
-//     -- secondary scenario is Talking Book updating from Outbox
+//   * secondary scenario is Talking Book updating from Outbox
 //   * power saving
 //     -- low power sleep mode when no activity
 //     -- limiting volume when voltage is dropping

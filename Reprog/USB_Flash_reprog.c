@@ -4,6 +4,7 @@
 #include "./system/include/system_head.h"
 #include "./driver/include/driver_head.h"
 #include "./component/include/component_head.h"
+#include "./Application/TalkingBook/Include/device.h"
 
 #include "USB_Flash_reprog.h"
 
@@ -166,15 +167,15 @@ void write_app_flash(int *bufp, int len, unsigned int fill)
 	if(len > 4096)
 		len = 4096;
 	
-	newfp->pflash = 0x37000;
+	newfp->pflash = (unsigned int *)TB_SERIAL_NUMBER_ADDR;
 	newfp->erasesector(newfp);
 	
 	for(i=0; i<4096; i++) {
-		(*newfp->writeword)(newfp, 0x37000 + i, (i >= len) ? fill : bufp[i]);
+		(*newfp->writeword)(newfp, TB_SERIAL_NUMBER_ADDR + i, (i >= len) ? fill : bufp[i]);
 	}
 }
-// define app flash data, 4k located at 0x37000 
-	asm("APP_FLASH_DATA:	.section .data,.addr=0x37000");
+// define app flash data, 4k located at 0x37000 (TB_SERIAL_NUMBER_ADDR)
+	asm("APP_FLASH_DATA:	.section .data,.addr="TB_SERIAL_NUMBER_ADDR_TEXT);
 	asm(".public _app_flash_data");
 	asm("_app_flash_data:");
 	asm(".dw 4096 dup(0)");

@@ -14,6 +14,7 @@
 #define FIRMWARE_PATH	"a:/Firmware/"
 #define UPDATE_FP    	"a:/"
 #define SERIAL_FN  		"*.tsn"
+#define ERASE_SN_CODE	"-erase-"
 #define UPDATE_FN    	"*.img"
 #define ATTEMPTED_EXT	".att"
 #define PREV_EXT		".old"

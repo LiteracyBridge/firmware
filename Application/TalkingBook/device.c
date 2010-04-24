@@ -272,7 +272,9 @@ void wait(int t) { //t=time in msec
 void resetSystem(void) {
 	// set watchdog timer to reset device; 0x780A (Watchdog Reset Control Register)
 	// see GPL Programmer's Manual (V1.0 Dec 20,2006), Section 3.5, page 18
-	stop(); //includes flushLog();
+	stop(); 
+	logString((char *)"Reset",BUFFER);
+	logRTC();
 	fs_safexit(); // should close all open files
 	*P_WatchDog_Ctrl &= ~0x4001; // clear bits 14 and 0 for resetting system and time=0.125 sec 	
 	*P_WatchDog_Ctrl |= 0x8004; // set bits 2 and 15 for 0.125 sec, system reset, and enable watchdog
@@ -315,6 +317,11 @@ void setOperationalMode(int newmode) {
   } else {
      	// assume calling for sleep or halt
 		*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
+		if (newmode == (int)P_HALT)
+			logString((char *)"Halting",BUFFER);
+		else // newmode == (int)P_SLEEP
+			logString((char *)"Sleeping",BUFFER);			
+		logRTC();
 	  	stop();
 		setLED(LED_ALL,FALSE);
 	
@@ -423,4 +430,23 @@ turnNORoff(void) {
  	*P_IOD_Dir  |= 0x0001;	 
  	*P_IOD_Attrib |= 0x0001;
     *P_IOD_Buffer  |= 0x0001;	
+}
+
+int
+SNexists(void) {
+	int snCode;
+	
+	snCode = *P_TB_SERIAL_PREFIX;
+	if (!strncmp(P_TB_SERIAL_PREFIX,CONST_TB_SERIAL_PREFIX,CONST_TB_SERIAL_PREFIX_LEN))
+		return TRUE;
+	else
+		return FALSE;
+}
+
+char *
+getDeviceSN(int includePrefix) {
+	if (includePrefix)
+		return P_TB_SERIAL_PREFIX;
+	else
+		return P_TB_SERIAL_NUMBER;	
 }

@@ -123,8 +123,10 @@ void startUp(void) {
 		check_new_sd_flash();
 	}
 	
-	loadConfigFile();
-	
+	loadConfigFile();	
+	if (!SNexists())
+		logException(32,(const char *)"no serial number",SHUT_DOWN);		
+
 	SysDisableWaitMode(WAITMODE_CHANNEL_A);
 	adjustVolume(NORMAL_VOLUME,FALSE,FALSE);
 	adjustSpeed(NORMAL_SPEED,FALSE);
@@ -146,6 +148,7 @@ void startUp(void) {
 	longToDecimalString(systemCounts.powerUpNumber,(char *)(buffer+strlen(buffer)),4);
 	strcat(buffer,(const char *)" - version " VERSION);
 	logString(buffer,BUFFER);
+	logString(getDeviceSN(1),BUFFER);
 	logSystemCounts();
 #ifdef TB_CAN_WAKE
 	logRTC();  
