@@ -123,6 +123,8 @@ str_USB_Lun_Info 	*FP_USB_Lun_Define[N_USB_LUN];
 
 #include "./Reprog/USB_Flash_reprog.h"
 
+/* see usbd.inc for these vars
+
 USBHostType  USBHost_Flag;
 
 extern int fl_size;
@@ -135,7 +137,7 @@ unsigned int *RHM_FlashBuf;
 long USB_INSERT_PTR;
 long USB_ISR_PTR;
 void (*ReprogJump)(void *);
-
+*/
 
 // frome (replacing) DrvStruct.c
 
