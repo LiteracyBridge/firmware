@@ -129,18 +129,19 @@ str_USB_Lun_Info 	*FP_USB_Lun_Define[N_USB_LUN];
 
 #include "./Reprog/USB_Flash_reprog.h"
 
-USBHostType  USBHost_Flag;
-
-int fl_size;
-unsigned int REPROG_IN_Progress;
-unsigned int RHM_USBreprogBuf_Full;
-unsigned int *RHM_DEBUG_LAST_LBA;
-unsigned int *RHM_DEBUG_LAST_WRITE;
-flash *RHM_FlashPtr;
-unsigned int *RHM_FlashBuf;
-long USB_INSERT_PTR;
-long USB_ISR_PTR;
-void (*ReprogJump)() = 0;
+// see USBD.inc for these vars
+//
+//USBHostType  USBHost_Flag;
+//int fl_size;
+//unsigned int REPROG_IN_Progress;
+//unsigned int RHM_USBreprogBuf_Full;
+//unsigned int *RHM_DEBUG_LAST_LBA;
+//unsigned int *RHM_DEBUG_LAST_WRITE;
+//flash *RHM_FlashPtr;
+//unsigned int *RHM_FlashBuf;
+//long USB_INSERT_PTR;
+//long USB_ISR_PTR;
+//void (*ReprogJump)() = 0;
 
 
 // frome (replacing) DrvStruct.c

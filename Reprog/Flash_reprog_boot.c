@@ -26,7 +26,7 @@ extern unsigned int RHM_USBreprogBuf_Full;
 extern unsigned int *RHM_FlashBuf;
 
 //FP_Flashing_EP must be first function 
-void FP_Flashing_EP(void *pi)
+void FP_Flashing_EP(void *pi[])
 {
 	unsigned int i;
 	extern long USB_ISR_PTR;
@@ -36,8 +36,7 @@ void FP_Flashing_EP(void *pi)
 	void FP_USB_ISR(), FP_USB_Insert_TimeOut();
 		
 	for(i=0; i<N_USB_LUN; i++) {
-		pluninfo *plun = (pluninfo *) pi;
-		FP_USB_Lun_Define[i] = (*plun)[i];	
+		FP_USB_Lun_Define[i] = pi[i];	
 		if(FP_USB_Lun_Define[i]->unLunType == LunType_NOR) {
 			RHM_FlashPtr = FP_USB_Lun_Define[i]->rhmLunData;
 		}

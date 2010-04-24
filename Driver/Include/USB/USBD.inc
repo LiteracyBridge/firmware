@@ -65,7 +65,7 @@
 //.external _CheckCDRomValid
 
 ////////////////////////////////Global Valuable/////////////////////////////////////////////////////
-USB_RAM_Section:	.section	.ORAM//,	.addr=0x40000//.addr=0x6C00
+USB_RAM_Section:	.section	.IRAM//,	.addr=0x40000//.addr=0x6C00
 USB_RW_Buffer:
 	.dw		512		dup(?)
 
@@ -103,9 +103,41 @@ _ptr_USB_LUN_Info:	.dw 2 dup(?)
 	.var 	_CDROMDelay
 	.var	_USBD_PlugIn			//0:Device not connect to PC, 1:Device connect to PC
 _Max_LUN:
-	.var	_MaxLUN					//Lun number, 0=1 lun, 1=2 luns.
+	.var	_MaxLUN	
+					//Lun number, 0=1 lun, 1=2 luns.
+.public _USBHost_Flag
+_USBHost_Flag:
+	.var    _USBHostFlag
+	
+.public _fl_size
+_fl_size: .dw 1
 
+.public _REPROG_IN_Progress
+	.var _REPROG_IN_Progress
 
+.public _RHM_USBreprogBuf_Full
+	.var _RHM_USBreprogBuf_Full
+	
+.public _RHM_DEBUG_LAST_LBA
+_RHM_DEBUG_LAST_LBA: .dw 2 dup(?)
+
+.public _RHM_DEBUG_LAST_WRITE
+_RHM_DEBUG_LAST_WRITE: .dw 2 dup(?)
+
+.public _RHM_FlashPtr
+_RHM_FlashPtr: .dw 2 dup(?)
+
+.public _RHM_FlashBuf
+_RHM_FlashBuf: .dw 2 dup(?)
+
+.public _USB_INSERT_PTR
+_USB_INSERT_PTR: .dw 2 dup(?)
+
+.public _USB_ISR_PTR
+_USB_ISR_PTR: .dw 2 dup(?)
+
+.public _ReprogJump
+_ReprogJump: .dw 2 dup(0)
 
 .endif	
 /////////////////////////
