@@ -9,6 +9,7 @@
 //Version history:
 //========================================================================================
 .INCLUDE ./system/include/system_head.inc
+.INCLUDE ./Application/TalkingBook/Include/talkingbook.inc
 
 
 .define C_USBDiskPlugIn   	0x01
@@ -61,7 +62,21 @@ _BREAK:
 // Interrupt Subroutine for FIQ
 //========================================================================================
 _FIQ:
-	JMP $
+.ifdef TB_CAN_WAKE
+	M_IntSaveContext
+
+	R1 = [P_INT_Status1]
+	TEST R1,INT_KEY_MASK
+	JNZ ?L_INT_KEY
+
+   	JMP ?L_Exit
+
+?L_INT_KEY:
+    CALL ExecuteIF_KEY
+	
+?L_Exit:
+	M_IntRestoreContext
+.endif	
 	RETI
 
 //========================================================================================
@@ -439,6 +454,15 @@ ExecuteIF_CMOS_FULL:
 	RETF
 
 ExecuteIF_KEY:
+.ifdef TB_CAN_WAKE
+	R2 = 0x2800 // black button and play keys
+	R1 = [P_MINT_Ctrl]
+	R3 = R2 or [P_MINT_Ctrl]  // clear either flag
+	[P_MINT_Ctrl] = R3
+	R1 = R1 and R2
+	CMP R1, R2	
+	JE ResetSys
+.endif
 	RETF
 
 ExecuteIF_NANDFLASH:
@@ -476,3 +500,15 @@ ExecuteIF_TIMER_BASEA:
 
 ExecuteIF_TIMER_BASEB:
 	RETF
+	
+.ifdef TB_CAN_WAKE
+ResetSys:
+	r1 = 0xFFFF
+	[P_INT_Status1] = r1   //	[P_INT_Status1] did not equal zero because a key int was fired, so reset it
+	r1 = [P_WatchDog_Ctrl]
+	r1 = r1  and 0xBFFE	 // clear bits 14 and 0 for resetting system and time=0.125 sec
+	r1 = r1 or 0x8004 	// set bits 2 and 15 for 0.125 sec, system reset, and enable watchdog
+	[P_WatchDog_Ctrl] = r1
+	JMP $
+	RETF
+.endif
