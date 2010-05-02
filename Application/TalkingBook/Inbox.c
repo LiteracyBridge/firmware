@@ -54,9 +54,6 @@ processInbox(void) {
 	playBip();
 	setLED(LED_RED,TRUE);
 
-	strcpy(strLog, "processInbox");	
-	logString(strLog, ASAP);
-	//logSystemCounts();
 	nc = processNewPackages();
 	processSystemFiles(); //copy system files, including firmware
 	queueNewPackage(nc);

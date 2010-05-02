@@ -4,7 +4,7 @@
 #ifndef	__TALKINGBOOK_h__
 #define	__TALKINGBOOK_h__
 
-#define VERSION			"v1.40g"
+#define VERSION			"v1.40-r79"
 #define TB_CAN_WAKE  // hardware that allows wake from sleep/halt
 //IMPORTANT: changes to TB_CAN_WAKE must also be made to system_head.inc!!!
 
@@ -16,6 +16,9 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 #include "util.h"
 
 // TODO LIST
+//	 * BUG: shutdown to HALT sometimes doesn't wake up with IOB buttons - seems to now be limited to after USB activity
+//	 * BUG: after 2 non-.old firmwares are in /firmware dir, new one will not work.
+//   * reset RTC with specially named file
 //	 * read and write new metadata scheme into audio files
 //	 * take a recording and make a translation on the device (keeping it linked) 
 //	 * copy entire category

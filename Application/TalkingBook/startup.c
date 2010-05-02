@@ -89,7 +89,8 @@ void setDefaults(void) {
 }
 
 void startUp(void) {
-	char buffer[100];
+	char buffer[200];
+	char strCounts[20];
 	int key;
 	
 	SetSystemClockRate(MAX_CLOCK_SPEED); // to speed up initial startup -- set CLOCK_RATE later
@@ -143,13 +144,20 @@ void startUp(void) {
 	resetRTC();  //  reset before saving anything to disk and running macros
 #endif	
 	saveSystemCounts();
-
-	strcpy(buffer,"\x0d\x0a" "---------------------------------------------------------\x0d\x0a" "CYCLE "); //cycle number
+	
+	strcpy(buffer,"\x0d\x0a" "---------------------------------------------------\x0d\x0a");
+	strcat(buffer,getDeviceSN(1));
+	strcpy(strCounts,(char *)" counts:S");
+	longToDecimalString(systemCounts.powerUpNumber, strCounts+9, 4); 
+	strcat(strCounts,(char *)"P");
+	longToDecimalString(systemCounts.packageNumber, strCounts+14, 4); 
+	strcat(strCounts,(char *)"R");
+	longToDecimalString(systemCounts.revdPkgNumber, strCounts+19, 4);
+	strcat(buffer,strCounts); 
+	strcat(buffer,"\x0d\x0a" "CYCLE "); //cycle number
 	longToDecimalString(systemCounts.powerUpNumber,(char *)(buffer+strlen(buffer)),4);
 	strcat(buffer,(const char *)" - version " VERSION);
 	logString(buffer,BUFFER);
-	logString(getDeviceSN(1),BUFFER);
-	logSystemCounts();
 #ifdef TB_CAN_WAKE
 	logRTC();  
 #endif

@@ -19,6 +19,7 @@
 #include ".\Application\Talkingbook\Include\talkingbook.h"
 #include ".\Application\Talkingbook\Include\device.h"
 #include ".\Application\Talkingbook\Include\containers.h"
+#include ".\Application\Talkingbook\Include\files.h"
 
 //unsigned int R_Write_protect = 0;//add by haoyu for no err
 extern unsigned int	_Nand_ErasePhysicalBlock(unsigned long BlockAddr);
@@ -142,6 +143,7 @@ int SystemIntoUDisk(unsigned int serviceloop)
 {
 	extern flash *RHM_FlashPtr; //RHM , *FP_RHM_FlashPtr;
 	int i;
+	char strLog[60];
 #ifdef USBRP
 	int fl_size = USB_Flash_init((flash *)0, 0);
 	flash FL;
@@ -167,6 +169,10 @@ int SystemIntoUDisk(unsigned int serviceloop)
 	SetSystemClockRate(48);
 
 	if(serviceloop) {
+		if (serviceloop == USB_CLIENT_SVC_LOOP_CONTINUOUS) { //log before unmounting disk
+			strcpy(strLog, "entering USB Device Mode");	
+			logString(strLog, ASAP);
+		}			
 		R_NAND_Present=0;
 		MaxLUN = 0;
 		R_SDC_Present=1;
@@ -223,9 +229,11 @@ xxx:
 		setLED(LED_RED,TRUE);
 	else // for USB before reading config file, or if config corrupted
 		setLED(0x200,TRUE);		
-	
-	//TODO: log entering USB device mode
-	
+		
+	if (serviceloop != USB_CLIENT_SVC_LOOP_CONTINUOUS) { //already logged this for continuous loop before unmounting
+		strcpy(strLog, "entering USB Device Mode");	
+		logString(strLog, ASAP);
+	}			
 	USB_ServiceLoop(1);
 
 	*P_USBD_Config=0x00;
@@ -238,6 +246,9 @@ xxx:
 	SysEnableWaitMode( 3 );
 	
 	RHM_FlashPtr = 0;
+	
+	strcpy(strLog, "returned from USB Device Mode");	
+	logString(strLog, ASAP);
 	
 	if (LED_RED)
 		setLED(LED_RED,FALSE);

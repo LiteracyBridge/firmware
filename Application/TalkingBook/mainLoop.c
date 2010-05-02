@@ -501,7 +501,6 @@ extern int checkInactivity(BOOL resetTimer) {
 		if (!usbret) { //USB connection was made
 			lastActivity = currentTime; //	count being in usb as active
 			processInbox();
-			setLED(LED_ALL,FALSE);
 		}
 	}
 }
@@ -767,7 +766,6 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 			
 		case USB_DEVICE_ON:
-			stop();
 			setUSBDevice(TRUE);
 			newBlock = &context.package->blocks[destination];
 			newTime = newBlock->startTime;
@@ -977,7 +975,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 						//no action needed
 						break;
 				}
-				//playActionSound(JUMP_TIME);
+				playActionSound(JUMP_TIME);
 				reposition = TRUE;
 			} // context is not system file
 			break;
@@ -1111,13 +1109,13 @@ void loadPackage(int pkgType, const char * pkgName) {
 		
 		pkg->pkg_type = pkgType;
 		ret = addTextToPkgHeap(str,pkg);
-		logString(pkg->strHeapStack + ret,BUFFER);
+//		logString(pkg->strHeapStack + ret,BUFFER);
 		if (ret > -1)
 			pkg->idxName = ret;	
 		else
 			logException(11,pkgName,USB_MODE);		
-		logString((char *)"package name",BUFFER);	
-		logString(pkg->strHeapStack + pkg->idxName,BUFFER);
+//		logString((char *)"package name",BUFFER);	
+//		logString(pkg->strHeapStack + pkg->idxName,BUFFER);
 		parseControlFile(filePath, pkg);
 //		if (context.package->pkg_type == PKG_QUIZ) {
 //			strcpy(fileName,QUIZ_DATA_FILENAME);  //todo: move to config

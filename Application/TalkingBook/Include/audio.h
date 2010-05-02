@@ -28,6 +28,7 @@ extern void play(CtnrFile *, unsigned int);
 extern void insertSound(CtnrFile *, CtnrBlock *, BOOL);
 extern void insertSoundFile(int);
 extern int createRecording(char *, int, char *);
+#define MINIMUM_PLAY_SEC_TO_LOG 	3
 extern void markEndPlay(long);
 extern void markStartPlay(long, const char *);
 

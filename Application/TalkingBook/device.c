@@ -35,18 +35,18 @@ void resetRTC(void) {
 }
 
 void logRTC(void) {
-	long h,m,s;
+	unsigned long h,m,s;
 	char time[12];
 
-	s = (long) *P_Second;
-	m = (long) *P_Minute;
-	h = (long) *P_Hour;	
+	h = (unsigned long) *P_Hour;	
+	m = (unsigned long) *P_Minute;
+	s = (unsigned long) *P_Second;
 
 	longToDecimalString(h,time,4);
 	time[4] = 'h';
 	longToDecimalString(m,time+5,2);
 	time[7] = 'm';
-	longToDecimalString(m,time+8,2);
+	longToDecimalString(s,time+8,2);
 	time[10] = 's';
 	time[11] = 0;
 	logString(time,ASAP);
@@ -155,7 +155,8 @@ int getSpeed(void) {
 void setUSBDevice (BOOL set) {		
 	if (set) {
 		Snd_Stop();
-		SystemIntoUDisk(1);	
+		flushLog();
+		SystemIntoUDisk(USB_CLIENT_SVC_LOOP_CONTINUOUS);	
 		processInbox();
 		setLED(LED_ALL,FALSE);
 	}
@@ -291,7 +292,7 @@ static void logKeystroke(int intKey) {
 		secNow = getRTCinSeconds();
 		diff = secNow - secLastKey;
 		secLastKey = secNow;
-		longToDecimalString(diff,str,3);
+		longToDecimalString(diff,str,4);
 		strcat(str,", ");
 		i = strlen(str)-1;
 		if (intKey == KEY_LEFT) str[i] = TEXT_EVENT_LEFT;

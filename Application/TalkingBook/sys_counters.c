@@ -88,16 +88,3 @@ void nextListNumber(char *name) {
 	saveSystemCounts();
 }	
 */
-
-void logSystemCounts() {
-	char str[50];
-
-	strcpy(str,(char *)"S");
-	longToDecimalString(systemCounts.powerUpNumber, str+1, 4); 
-	strcat(str,(char *)"P");
-	longToDecimalString(systemCounts.packageNumber, str+6, 4); 
-	strcat(str,(char *)"R");
-	longToDecimalString(systemCounts.revdPkgNumber, str+11, 4); 
-	logString(str,ASAP);
-}
-

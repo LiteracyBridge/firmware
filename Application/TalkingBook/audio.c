@@ -197,7 +197,7 @@ static int getFileHandle (CtnrFile *newFile) {
 		strcat(sTemp,AUDIO_FILE_EXT);
 	}
 	ret = tbOpen((LPSTR)sTemp,O_RDONLY);
-	logString(sTemp,ASAP);
+//	logString(sTemp,ASAP);
 	return ret;
 }
 
@@ -348,7 +348,7 @@ static int recordAudio(char *pkgName, char *cursor) {
 	insertSound(file,NULL,TRUE);
 	start = getRTCinSeconds();
 	strcpy(temp,"\x0d\x0a");
-	longToDecimalString(start,temp+2,5);
+	longToDecimalString(start,temp+2,8);
 	strcat(temp,(const char *)": RECORD ");
 	LBstrncat(temp,pkgName,60);
 	LBstrncat(temp," -> ",60);
@@ -453,7 +453,7 @@ void markEndPlay(long timeNow) {
 	if (context.packageStartTime) {
 		timeDiff = timeNow - context.packageStartTime;
 		context.packageStartTime = 0;
-		if (context.package->pkg_type != PKG_SYS) {
+		if (timeDiff > MINIMUM_PLAY_SEC_TO_LOG) {
 			strcpy (log,"TIME PLAYED: ");
 			longToDecimalString(timeDiff,log+strlen(log),4);
 			strcat(log," sec at VOL=");
@@ -469,8 +469,9 @@ void markStartPlay(long timeNow, const char * name) {
 	char log[LOG_LENGTH];
 	
 	context.packageStartTime = timeNow;
-	strcpy(log,"\x0d\x0a");
-	longToDecimalString(timeNow,log+2,5);
+//	strcpy(log,"\x0d\x0a");
+//	longToDecimalString(timeNow,log+2,8);
+	longToDecimalString(timeNow,log,8);
 	strcat((char *)log,(const char *)": PLAY ");
 	if (LBstrncat((char *)log,name,LOG_LENGTH) == LOG_LENGTH-1)
 		log[LOG_LENGTH-2] = '~';
