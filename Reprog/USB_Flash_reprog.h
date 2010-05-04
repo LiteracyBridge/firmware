@@ -2,6 +2,9 @@
 #define	__USB_FLASH_REPROG_h__
 //	write your header here
 
+#define	SST_MID			0xBF
+#define MX_MID          0xc2
+
 void EraseSector();
 void EndFlashProg();
 void NanoPause();
@@ -9,6 +12,7 @@ void EraseSector();
 int USB_Flash_init();
 void WriteWord();
 void MemCopy();
+unsigned int Nor_FlashID();
 
 #ifdef USBRP
 #define N_USB_LUN 3
@@ -63,13 +67,15 @@ typedef struct  {
 		void (*nanopause)();
 		void (*erasesector)();
 		void (*writeword)();
-		void (*memcopy)();
+//		void (*memcopy)();
 //		int (*flashreprog)();
 //		void (*newcurrent)();
 //		void (*reprogfailed)();
 //		void (*newbyte)();
 //		void (*readbytes)();
 		void *usbram;
+		unsigned int (*flashtype)();
+		unsigned int Flash_type;
 } flash;
 
 

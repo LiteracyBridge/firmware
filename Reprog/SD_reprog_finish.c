@@ -44,14 +44,23 @@ FlashReprogLomem(flash *fp, unsigned int *buf)
 		return;  // should not happen
 	
 
-// erase 30000 in eight 4k blocks - all others are 32k blocks	
-	for(pos=BASEADDR; pos<0x37000; pos+= 0x1000) {
-		fp->pflash = pos;
-		fp->erasesector(fp);
-	}
-	for(pos = 0x38000; pos < REPROG_STAND_ALONE; pos += FLASH_ERASE_SIZE) { 
-		fp->pflash = pos;
-		fp->erasesector(fp);
+// erase 30000 in eight 4k blocks - all others are 32k blocks
+	if(fp->Flash_type == MX_MID) {	
+		for(pos=BASEADDR; pos<0x37000; pos+= 0x1000) {
+			fp->pflash = pos;
+			fp->erasesector(fp);
+		}
+		for(pos = 0x38000; pos < REPROG_STAND_ALONE; pos += FLASH_ERASE_SIZE) { 
+			fp->pflash = pos;
+			fp->erasesector(fp);
+		}
+	} else {
+		for(pos = 0x30000; pos < REPROG_STAND_ALONE; pos += 0x800) {
+			fp->pflash = pos;
+			fp->erasesector(fp);
+		}
+		fp->pflash = 0xf800;   // to be safe, maps to 0x3f800
+		fp->erasesector(fp);		
 	}
 	
 	fp->pflash = BASEADDR;
