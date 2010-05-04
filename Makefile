@@ -1,6 +1,6 @@
 #####################################################################
 #																	 
-#	Created by u'nSP IDE		10:42:07	04/23/10
+#	Created by u'nSP IDE		16:08:08	05/04/10
 #
 #####################################################################
 
@@ -55,7 +55,6 @@ OBJFILES	= \
 	"$(OUTDIR)\nls_ascii.obj" \
 	"$(OUTDIR)\DrvStruct.obj" \
 	"$(OUTDIR)\FS_user_nos.obj" \
-	"$(OUTDIR)\nordriver.obj" \
 	"$(OUTDIR)\startup_Data.obj" \
 	"$(OUTDIR)\SysOn2OffHook.obj" \
 	"$(OUTDIR)\SysIntoHighSpeed.obj" \
@@ -116,9 +115,6 @@ OBJFILES	= \
 
 "$(OUTDIR)\FS_user_nos.obj": "$(OUTDIR)\FS_user_nos.asm"
 	$(AS) $(CASFLAGS) $(INCLUDES) -o "$(OUTDIR)\FS_user_nos.obj" "$(OUTDIR)\FS_user_nos.asm" 
-
-"$(OUTDIR)\nordriver.obj": "C:\LiteracyBridge\SVN\Himem\Driver\NOR\nordriver.asm" 
-	$(AS) $(ASFLAGS) $(INCLUDES) -o "$(OUTDIR)\nordriver.obj" "C:\LiteracyBridge\SVN\Himem\Driver\NOR\nordriver.asm" 
 
 "$(OUTDIR)\startup_Data.obj": "C:\LiteracyBridge\SVN\Himem\System\startup_Data.asm" 
 	$(AS) $(ASFLAGS) $(INCLUDES) -o "$(OUTDIR)\startup_Data.obj" "C:\LiteracyBridge\SVN\Himem\System\startup_Data.asm" 
@@ -257,8 +253,6 @@ clean :
 	$(RM) "$(OUTDIR)\FS_user_nos.obj" 
 	$(RM) "$(OUTDIR)\FS_user_nos.lst" 
 	$(RM) "$(OUTDIR)\FS_user_nos.asm" 
-	$(RM) "$(OUTDIR)\nordriver.obj" 
-	$(RM) "$(OUTDIR)\nordriver.lst" 
 	$(RM) "$(OUTDIR)\startup_Data.obj" 
 	$(RM) "$(OUTDIR)\startup_Data.lst" 
 	$(RM) "$(OUTDIR)\SysOn2OffHook.obj" 

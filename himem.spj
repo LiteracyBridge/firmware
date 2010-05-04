@@ -3,7 +3,9 @@
 #**DO NOT EDIT**
 #TARTYPE (GPL162003_CS0Flash)Application
 CFG=Debug
- VER=3.0.1  # Begin Project
+
+VER=3.0.1 
+# Begin Project
 #Name Begin GPL162003_CS0Flash-Debug
 # Begin SubItem "System  files"
 # Begin Group "Source Files"
@@ -77,13 +79,6 @@ EXPORT=3
 USEPARAM=FALSE
 PARAM=
 EXPORT=3
-# Begin Source File
-SOURCE=Driver\NOR\nordriver.asm
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
 # End Group
 # Begin Group "System"
 #PROP Default_Filter=
@@ -308,7 +303,7 @@ EXPORT=3
 #PROP Default_Filter=
 USEPARAM=FALSE
 PARAM=
-EXPORT=2048
+EXPORT=27939800
 # Begin Source File
 SOURCE=system\include\system_head.h
 USEPARAM=FALSE
@@ -360,6 +355,20 @@ EXPORT=3
 # End Source File
 # Begin Source File
 SOURCE=..\firmware\Reprog\GPL162002.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Component\Include\FS\typedef.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Component\Include\FS\vfs.h
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -451,20 +460,6 @@ EXPORT=3
 # End Source File
 # Begin Source File
 SOURCE=.\driver\include\NandDriver\nanddriver.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=.\Component\Include\FS\typedef.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=.\Component\Include\FS\vfs.h
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -595,13 +590,6 @@ EXPORT=3
 USEPARAM=FALSE
 PARAM=
 EXPORT=3
-# Begin Source File
-SOURCE=Driver\NOR\nordriver.asm
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
 # End Group
 # Begin Group "System"
 #PROP Default_Filter=
@@ -826,7 +814,7 @@ EXPORT=3
 #PROP Default_Filter=
 USEPARAM=FALSE
 PARAM=
-EXPORT=2048
+EXPORT=27939800
 # Begin Source File
 SOURCE=system\include\system_head.h
 USEPARAM=FALSE
@@ -878,6 +866,20 @@ EXPORT=3
 # End Source File
 # Begin Source File
 SOURCE=..\firmware\Reprog\GPL162002.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Component\Include\FS\typedef.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Component\Include\FS\vfs.h
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -969,20 +971,6 @@ EXPORT=3
 # End Source File
 # Begin Source File
 SOURCE=.\driver\include\NandDriver\nanddriver.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=.\Component\Include\FS\typedef.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=.\Component\Include\FS\vfs.h
 USEPARAM=FALSE
 PARAM=
 ID=
