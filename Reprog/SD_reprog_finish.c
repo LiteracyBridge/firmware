@@ -56,6 +56,9 @@ FlashReprogLomem(flash *fp, unsigned int *buf)
 		}
 	} else {
 		for(pos = 0x30000; pos < REPROG_STAND_ALONE; pos += 0x800) {
+			if((pos >= 0x37000) && (pos < 0x38000)) { 
+				continue;
+			}
 			fp->pflash = pos;
 			fp->erasesector(fp);
 		}
