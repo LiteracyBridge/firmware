@@ -23,6 +23,20 @@ static int recordAudio(char *, char *);
 APP_IRAM static char lastFilenameRecorded[FILE_LENGTH];
 extern APP_IRAM unsigned int vCur_1;
 
+// added for meta data 
+#define CURRENT_POS 0xffffffffL
+#define DC_IDENTIFIER 10 
+#define METADATA_VERSION 1
+
+int writeLE32(int filehandle,long value, long offset);
+int writeLE16(int handle, unsigned int value, long offset);
+int addField(int handle, unsigned int field_id, char *field_value);
+
+APP_IRAM long metadata_start;
+APP_IRAM long metadata_numfields;
+#include "Include/sys_counters.h"
+extern APP_IRAM SystemCounts systemCounts;
+// end meta data additions
 
 void playDing(void) {
 	Snd_SACM_PlayMemory(C_CODEC_AUDIO1800,RES_DING_A18_SA);	
@@ -335,10 +349,12 @@ static int recordAudio(char *pkgName, char *cursor) {
 	int handle, ret = -1;
 	char temp[PATH_LENGTH];
 	char filepath[PATH_LENGTH];
+    char unique_id[PATH_LENGTH], digits[8];
 	long start, end, prev;
 	CtnrFile *file;
 	int key;
 	int low_voltage, v;
+	unsigned long wrk1;
 	
 	strcpy(filepath,USER_PATH);
 	strcat(filepath,pkgName);
@@ -394,7 +410,36 @@ static int recordAudio(char *pkgName, char *cursor) {
 		SACM_Stop();		//Snd_Stop(); // no need to call stop() and flush the log
 		//lseek(handle, 6, SEEK_SET );			//Seek to the start of the file input
 		//write(handle,(LPSTR)header<<1,6);
+ 
+// write meta data to end of file
+               
+        close(handle);	// rhm:  I think its already closed, I can't write to it here
+        
+       	handle = tbOpen((LPSTR)filepath,O_RDWR);
+       	
+       	metadata_start = lseek(handle, 0L, SEEK_END);  // offset to start of metadata
+        metadata_numfields = 0L; // init num fields
+       
+		wrk1 = METADATA_VERSION;
+        writeLE32(handle, wrk1, CURRENT_POS);  //meta data version = 1
+        writeLE32(handle, metadata_numfields, CURRENT_POS); // 4 byte for num fields
+        
+        strcpy(unique_id, TB_SERIAL_NUMBER_ADDR);
+        strcat(unique_id, "_");       
+		longToDecimalString(systemCounts.packageNumber,digits,5);
+        strcat(unique_id, digits);
+        
+        addField(handle, DC_IDENTIFIER, unique_id);
+        
+        metadata_numfields += 1;
+        
+        // add other fields here
+        
+        writeLE32(handle, metadata_numfields, metadata_start + 4); // write correct num meta data fields
+        
 		close(handle);
+// done with meta data
+        
 //		*P_WatchDog_Ctrl &= ~0x8000; // clear bit 15 to disable
 		setLED(LED_RED,FALSE);
 		turnAmpOn();
@@ -476,4 +521,61 @@ void markStartPlay(long timeNow, const char * name) {
 	if (LBstrncat((char *)log,name,LOG_LENGTH) == LOG_LENGTH-1)
 		log[LOG_LENGTH-2] = '~';
 	logString(log,BUFFER);	
+}
+
+int writeLE32(int handle, long value, long offset) {
+	int ret = 0;
+	unsigned char wrk;
+	unsigned long wrkl;
+    long curpos = lseek(handle, 0, SEEK_CUR);
+    if(offset != CURRENT_POS) {
+        wrkl = lseek(handle, offset, SEEK_SET);
+    }
+    wrk = value & 0xff;
+    ret += write(handle, (unsigned long) &wrk << 1, 1);
+    wrk = (value >> 8) & 0xff;
+    ret += write(handle, (unsigned long) &wrk << 1, 1);
+    wrk = (value >> 16) & 0xff;
+    ret += write(handle, (unsigned long) &wrk << 1, 1);
+    wrk = (value >> 24) & 0xff;
+    ret += write(handle, (unsigned long) &wrk << 1, 1);
+   
+ 	if(offset != CURRENT_POS) {
+    	lseek(handle, curpos, SEEK_SET);
+ 	}
+    
+    return(ret);
+}
+int writeLE16(int handle, unsigned int value, long offset) {
+	int ret = 0;
+	unsigned char wrk;
+	unsigned long wrkl;
+	long curpos = lseek(handle, 0, SEEK_CUR);
+	if(offset != CURRENT_POS) {
+		wrkl = lseek(handle, offset, SEEK_SET);
+	}
+    wrk = value & 0xff;
+    ret += write(handle, (unsigned long) &wrk << 1, 1);
+    wrk = (value >> 8) & 0xff;
+    ret += write(handle, (unsigned long) &wrk << 1, 1);
+    
+ 	if(offset != CURRENT_POS) {
+    	lseek(handle, curpos, SEEK_SET);
+ 	}
+    
+	return(ret);
+}
+int addField(int handle, unsigned int field_id, char *field_value) {
+    int i;
+	int ret = 0;
+    long field_length = strlen(field_value);
+    ret = writeLE16(handle, field_id, CURRENT_POS);
+    ret += writeLE32(handle, field_length, CURRENT_POS);
+    for(i=0; i<field_length; i++) {
+       write(handle, (unsigned long)&field_value[i] << 1, 1);
+       ret += 1;
+   }
+//    ret += write(handle, (unsigned long) &field_value << 1, field_length + 1);
+    
+    return(ret);
 }
