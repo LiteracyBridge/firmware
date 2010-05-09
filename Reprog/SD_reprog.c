@@ -50,9 +50,15 @@ FlashReprogHimem(flash *fp) {
 		}
 		goto prog_himem;
 	}
-		
-	for(fp->pflash = REPROG_STAND_ALONE; fp->pflash < 0xb0000; fp->pflash += FLASH_ERASE_SIZE) {
-		fp->erasesector(fp);
+	
+	if(fp->Flash_type == MX_MID) {		
+		for(fp->pflash = REPROG_STAND_ALONE; fp->pflash < 0xb0000; fp->pflash += FLASH_ERASE_SIZE) {
+			fp->erasesector(fp);
+		}
+	} else {  // SST memory
+		for(fp->pflash = REPROG_STAND_ALONE; fp->pflash < 0xb0000; fp->pflash += FLASH_LOW_SECTOR_SIZE) {
+			fp->erasesector(fp);
+		}
 	}
 	
 	offset = 0;

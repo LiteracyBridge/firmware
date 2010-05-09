@@ -44,9 +44,9 @@ FlashReprogLomem(flash *fp, unsigned int *buf)
 		return;  // should not happen
 	
 
-// erase 30000 in eight 4k blocks - all others are 32k blocks
+// MX memory erase 30000 in eight 4k blocks - all others are 32k blocks
 	if(fp->Flash_type == MX_MID) {	
-		for(pos=BASEADDR; pos<0x37000; pos+= 0x1000) {
+		for(pos=BASEADDR; pos<0x37000; pos+= 0x1000) { // 0x37000 is serial number flash, skip
 			fp->pflash = pos;
 			fp->erasesector(fp);
 		}
@@ -54,16 +54,16 @@ FlashReprogLomem(flash *fp, unsigned int *buf)
 			fp->pflash = pos;
 			fp->erasesector(fp);
 		}
-	} else {
-		for(pos = 0x30000; pos < REPROG_STAND_ALONE; pos += 0x800) {
-			if((pos >= 0x37000) && (pos < 0x38000)) { 
-				continue;
+	} else { // SST memory
+		for(pos = 0x30000; pos < REPROG_STAND_ALONE; pos += FLASH_LOW_SECTOR_SIZE) {
+			if(pos == 0x37000) {
+				pos = 0x38000;  // 0x37000 is serial number flash, skip
 			}
 			fp->pflash = pos;
 			fp->erasesector(fp);
 		}
-		fp->pflash = 0xf800;   // to be safe, maps to 0x3f800
-		fp->erasesector(fp);		
+//		fp->pflash = 0xf800;   // to be safe, maps to 0x3f800
+//		fp->erasesector(fp);		
 	}
 	
 	fp->pflash = BASEADDR;

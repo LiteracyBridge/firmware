@@ -8,6 +8,8 @@
 #include ".\Reprog\USBD.h"
 
 #include "USB_Flash_reprog.h"
+#include "..\application\talkingbook\include\device.h"
+
 extern int SetVenderID();
 extern unsigned int R_CBW_PKT[31];
 extern int REPROG_IN_Progress;
@@ -1127,7 +1129,17 @@ void  FP_USB_ServiceLoop(unsigned int unUseLoop)
 				asm("int off");
 				REPROG_IN_Progress = 0;
 				RHM_FlashPtr->pflash = 0x38000;
-				(*RHM_FlashPtr->erasesector)(RHM_FlashPtr);
+				if(RHM_FlashPtr->Flash_type == MX_MID) {		
+					(*RHM_FlashPtr->erasesector)(RHM_FlashPtr);
+				} else { // SST memory
+					for(i = 0x38000; i < 0x40000; i += FLASH_LOW_SECTOR_SIZE) {
+						RHM_FlashPtr->pflash = i;
+						RHM_FlashPtr->erasesector(RHM_FlashPtr);
+					}
+					RHM_FlashPtr->pflash = 0xf800;   // to be safe, maps to 0x3f800
+					RHM_FlashPtr->erasesector(RHM_FlashPtr);		
+				}
+				RHM_FlashPtr->pflash = 0x38000;
 				for(ltmp=0; ltmp<0x8000; ltmp++) {
 					(*RHM_FlashPtr->writeword)(RHM_FlashPtr, RHM_FlashPtr->pflash + ltmp, wrk[ltmp]);
 				}
@@ -1149,24 +1161,34 @@ void  FP_USB_ServiceLoop(unsigned int unUseLoop)
 			__asm__("irq off");
 			__asm__("fiq off");
 //rhm1     
-			if((RHM_FlashPtr->pflash >= 0x37000) && (RHM_FlashPtr->pflash < 0x38000)) {
+			if((RHM_FlashPtr->pflash >= TB_SERIAL_NUMBER_ADDR_TEXT) && (RHM_FlashPtr->pflash < 0x38000)) {
 					goto skip_app_flash;
 			}
     
 			ltmp = (unsigned long) RHM_FlashPtr->pflash;
-			if((ltmp >= 0x30000) && (ltmp < 0x37000)) { // skip app_flash_data at 37000  
-				if((ltmp & 0xfff) == 0) { // 0-x30000 thru 0x37fff reprogrammed in 8 4k blocks
-					(*RHM_FlashPtr->erasesector)(RHM_FlashPtr);
+			
+			if(RHM_FlashPtr->Flash_type == MX_MID) {	
+				if((ltmp >= 0x30000) && (ltmp < 0x38000)) { // skip app_flash_data at 37000  
+					if((ltmp & 0xfff) == 0 && ltmp != TB_SERIAL_NUMBER_ADDR_TEXT) { // 0-x30000 thru 0x37fff reprogrammed in 8 4k blocks
+						(*RHM_FlashPtr->erasesector)(RHM_FlashPtr);
+					}
+				} else if((ltmp >= 0x38000) && (ltmp < 0x40000)) {
+					RHM_FlashPtr->pflash += 0x60000; // do it at 0x98000 for now
+					if(RHM_FlashPtr->pflash == 0x98000) {
+						(*RHM_FlashPtr->erasesector)(RHM_FlashPtr);
+					}
 				}
-			} else if((ltmp >= 0x38000) && (ltmp < 0x40000)) {
-				RHM_FlashPtr->pflash += 0x60000; // do it at 0x98000 for now
-				if(RHM_FlashPtr->pflash == 0x98000) {
-					(*RHM_FlashPtr->erasesector)(RHM_FlashPtr);
+	            else if(((unsigned long) RHM_FlashPtr->pflash & FLASH_SD_ERASE_MASK) == 0) { // erase at each NOR page boundary 		
+						(*RHM_FlashPtr->erasesector)(RHM_FlashPtr);
+	            }
+			} else { // SST memory, reprog in 2k chunks
+				if((ltmp >= 0x38000) && (ltmp < 0x40000)) {
+					RHM_FlashPtr->pflash += 0x60000; // do it at 0x98000 for now
+				} else if(((unsigned long) RHM_FlashPtr->pflash & 0x7ff) == 0 ) { // SST erase at 2k boundary 
+					if((RHM_FlashPtr->pflash != TB_SERIAL_NUMBER_ADDR_TEXT) && (RHM_FlashPtr->pflash != TB_SERIAL_NUMBER_ADDR_TEXT + 0x800))
+						(*RHM_FlashPtr->erasesector)(RHM_FlashPtr);
 				}
 			}
-            else if(((unsigned long) RHM_FlashPtr->pflash & FLASH_SD_ERASE_MASK) == 0) { // erase at each NOR page boundary 		
-				(*RHM_FlashPtr->erasesector)(RHM_FlashPtr);
-            }
 //rhm1			
 			for(i=0; i<RHM_USBreprogBuf_Full; i++) {
 				{
@@ -1991,12 +2013,6 @@ int FP_Write_10(unsigned long	lUSB_LUN_Write)
 			}
 		}
 		
-		//RHM test
-//rhm1		if(((unsigned long)pflash->pflash) < 0xac000) {
-//rhm1			pflash->erasesector(pflash);
-//rhm1		}
-		//RHM test
-
 		for(j=0; j<SCSI_Transfer_Length; j++)
 		{				
 			//=================================================================================================

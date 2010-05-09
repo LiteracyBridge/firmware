@@ -1044,8 +1044,13 @@ void USB_ServiceLoop(unsigned int unUseLoop)
 			__asm__("irq off");
 			__asm__("fiq off");
 			
-			if((((unsigned long)(RHM_FlashPtr->pflash)) & 0x7fff) == 0)
-				(*RHM_FlashPtr->erasesector)(RHM_FlashPtr);
+			if(RHM_FlashPtr->Flash_type == MX_MID) {	
+				if((((unsigned long)(RHM_FlashPtr->pflash)) & 0x7fff) == 0) // all himem 32k sectore
+					(*RHM_FlashPtr->erasesector)(RHM_FlashPtr);
+			} else { // SST memory
+				if((((unsigned long)(RHM_FlashPtr->pflash)) & 0x7ff) == 0) // all memory 2k pages
+					(*RHM_FlashPtr->erasesector)(RHM_FlashPtr);
+			}
 			
 			for(i=0; i<RHM_USBreprogBuf_Full; i++) {
 				(*RHM_FlashPtr->writeword)(RHM_FlashPtr, RHM_FlashPtr->pflash + i, RHM_USBreprogBuf[i]);

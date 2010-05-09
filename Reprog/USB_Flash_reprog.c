@@ -70,13 +70,9 @@ void EraseSector(flash *fp)
 		*(WORD *) (baseaddr + 0x2AA) = 0x0055;     // write data 0x0055 to device addr 2AAH
 	}
 
-	if((fp->Flash_type != MX_MID) & (baseaddr >= BASEADDR)) {
-		*(WORD *) (fp->pflash) = 0x0050;     // write data 0x0030 to block erase
-	} else {
 		*(WORD *) (fp->pflash) = 0x0030;     // write data 0x0030 to device sector addr
-	}
 
-	for(i = *(WORD *) (fp->pflash);  (i & 0x0080) == 0; ) {
+	for(i = *(WORD *) (fp->pflash);  ((i & 0x0080) == 0); ) {
 		i = *(WORD *) (baseaddr);
 	}
 
@@ -177,10 +173,22 @@ void write_app_flash(int *bufp, int len, unsigned int fill)
 		len = 4096;
 	
 	newfp->pflash = (unsigned int *)TB_SERIAL_NUMBER_ADDR;
-	newfp->erasesector(newfp);
+	if(newfp->Flash_type == MX_MID) {	// MX memory, erase 1 4k chunk at 0x37000
+		newfp->erasesector(newfp);
+	} else { // SST memory, erase 2 2k chunks
+		newfp->erasesector(newfp);
+		newfp->pflash = (unsigned int *)TB_SERIAL_NUMBER_ADDR + 0x800;
+		newfp->erasesector(newfp);
+		newfp->pflash = (unsigned int *)TB_SERIAL_NUMBER_ADDR;
+	}
 	
-	for(i=0; i<4096; i++) {
-		(*newfp->writeword)(newfp, TB_SERIAL_NUMBER_ADDR + i, (i >= len) ? fill : bufp[i]);
+	for(i=0; i<len; i++) {
+		(*newfp->writeword)(newfp, TB_SERIAL_NUMBER_ADDR + i, bufp[i]);
+	}
+	if(fill == 0xffff)
+		return;
+	for(; i<4095; i++) {
+		(*newfp->writeword)(newfp, TB_SERIAL_NUMBER_ADDR + i, fill);
 	}
 }
 // define app flash data, 4k located at 0x37000 (TB_SERIAL_NUMBER_ADDR)
