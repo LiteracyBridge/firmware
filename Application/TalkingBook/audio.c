@@ -10,6 +10,7 @@
 #include "Include/device.h"
 #include "Include/containers.h"
 #include "Include/audio.h"
+#include "Include/metadata.h"
 
 extern unsigned long RES_DING_A18_SA;
 extern unsigned long RES_BIP_A18_SA;
@@ -23,17 +24,6 @@ static int recordAudio(char *, char *);
 APP_IRAM static char lastFilenameRecorded[FILE_LENGTH];
 extern APP_IRAM unsigned int vCur_1;
 
-// added for meta data 
-#define CURRENT_POS 0xffffffffL
-#define DC_IDENTIFIER 10 
-#define METADATA_VERSION 1
-
-int writeLE32(int filehandle,long value, long offset);
-int writeLE16(int handle, unsigned int value, long offset);
-int addField(int handle, unsigned int field_id, char *field_value);
-
-APP_IRAM long metadata_start;
-APP_IRAM long metadata_numfields;
 #include "Include/sys_counters.h"
 extern APP_IRAM SystemCounts systemCounts;
 // end meta data additions
@@ -355,7 +345,10 @@ static int recordAudio(char *pkgName, char *cursor) {
 	int key;
 	int low_voltage, v;
 	unsigned long wrk1;
-	
+	char *cp, category[9];
+	long metadata_start;
+	long metadata_numfields;
+
 	strcpy(filepath,USER_PATH);
 	strcat(filepath,pkgName);
 	strcat(filepath,AUDIO_FILE_EXT);
@@ -424,15 +417,41 @@ static int recordAudio(char *pkgName, char *cursor) {
         writeLE32(handle, wrk1, CURRENT_POS);  //meta data version = 1
         writeLE32(handle, metadata_numfields, CURRENT_POS); // 4 byte for num fields
         
-        strcpy(unique_id, TB_SERIAL_NUMBER_ADDR);
+        strcpy(unique_id, TB_SERIAL_NUMBER_ADDR + 4); // skip tsn.
         strcat(unique_id, "_");       
 		longToDecimalString(systemCounts.packageNumber,digits,5);
         strcat(unique_id, digits);
         
-        addField(handle, DC_IDENTIFIER, unique_id);
-        
+        addField(handle, DC_IDENTIFIER, unique_id, 1);       
         metadata_numfields += 1;
         
+        cp = strchr(filepath, '#');
+        if(cp++ != NULL) {
+        	if(!strncmp(cp, "AGR", 3))
+        		strcpy(category, CAT_AGRICULTURE);
+        	else if(!strncmp(cp, "HEA", 3))
+        		strcpy(category, CAT_HEALTH);
+        	else if(!strncmp(cp, "EDU", 3))
+        		strcpy(category, CAT_EDUCATION);
+        	else if(!strncmp(cp, "STO", 3))
+        		strcpy(category, CAT_STORIES);
+        	else if(!strncmp(cp, "BUS", 3))
+        		strcpy(category, CAT_BUSINESS);
+        	else if(!strncmp(cp, "GOV", 3))
+        		strcpy(category, CAT_GOVERNANCE);
+        	else if(!strncmp(cp, "MUS", 3))
+        		strcpy(category, CAT_MUSIC);
+        	else if(!strncmp(cp, "DIA", 3))
+        		strcpy(category, CAT_DIARY);
+        	else
+        		strcpy(category, CAT_OTHER);
+        } else {
+        	strcpy(category, CAT_OTHER);
+        }
+        
+		addField(handle, DC_CATEGORY, category, 1);
+        metadata_numfields += 1;
+       
         // add other fields here
         
         writeLE32(handle, metadata_numfields, metadata_start + 4); // write correct num meta data fields
@@ -565,12 +584,16 @@ int writeLE16(int handle, unsigned int value, long offset) {
     
 	return(ret);
 }
-int addField(int handle, unsigned int field_id, char *field_value) {
+int addField(int handle, unsigned int field_id, char *field_value, int numfieldvalues) {
     int i;
 	int ret = 0;
     long field_length = strlen(field_value);
     ret = writeLE16(handle, field_id, CURRENT_POS);
+    field_length += 3;
     ret += writeLE32(handle, field_length, CURRENT_POS);
+    field_length -= 3;
+    ret += write(handle, (unsigned long)&numfieldvalues << 1, 1);  //numfields the 01 above
+    ret = writeLE16(handle, field_length, CURRENT_POS);
     for(i=0; i<field_length; i++) {
        write(handle, (unsigned long)&field_value[i] << 1, 1);
        ret += 1;
