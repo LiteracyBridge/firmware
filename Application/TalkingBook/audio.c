@@ -550,14 +550,8 @@ int writeLE32(int handle, long value, long offset) {
     if(offset != CURRENT_POS) {
         wrkl = lseek(handle, offset, SEEK_SET);
     }
-    wrk = value & 0xff;
-    ret += write(handle, (unsigned long) &wrk << 1, 1);
-    wrk = (value >> 8) & 0xff;
-    ret += write(handle, (unsigned long) &wrk << 1, 1);
-    wrk = (value >> 16) & 0xff;
-    ret += write(handle, (unsigned long) &wrk << 1, 1);
-    wrk = (value >> 24) & 0xff;
-    ret += write(handle, (unsigned long) &wrk << 1, 1);
+    
+    ret += write(handle, (unsigned long) &value << 1, 4);
    
  	if(offset != CURRENT_POS) {
     	lseek(handle, curpos, SEEK_SET);
@@ -573,10 +567,7 @@ int writeLE16(int handle, unsigned int value, long offset) {
 	if(offset != CURRENT_POS) {
 		wrkl = lseek(handle, offset, SEEK_SET);
 	}
-    wrk = value & 0xff;
-    ret += write(handle, (unsigned long) &wrk << 1, 1);
-    wrk = (value >> 8) & 0xff;
-    ret += write(handle, (unsigned long) &wrk << 1, 1);
+    ret += write(handle, (unsigned long) &value << 1, 2);
     
  	if(offset != CURRENT_POS) {
     	lseek(handle, curpos, SEEK_SET);
