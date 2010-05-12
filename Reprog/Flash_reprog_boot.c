@@ -1161,7 +1161,7 @@ void  FP_USB_ServiceLoop(unsigned int unUseLoop)
 			__asm__("irq off");
 			__asm__("fiq off");
 //rhm1     
-			if((RHM_FlashPtr->pflash >= TB_SERIAL_NUMBER_ADDR_TEXT) && (RHM_FlashPtr->pflash < 0x38000)) {
+			if((RHM_FlashPtr->pflash >= TB_SERIAL_NUMBER_ADDR) && (RHM_FlashPtr->pflash < 0x38000)) {
 					goto skip_app_flash;
 			}
     
@@ -1169,7 +1169,7 @@ void  FP_USB_ServiceLoop(unsigned int unUseLoop)
 			
 			if(RHM_FlashPtr->Flash_type == MX_MID) {	
 				if((ltmp >= 0x30000) && (ltmp < 0x38000)) { // skip app_flash_data at 37000  
-					if((ltmp & 0xfff) == 0 && ltmp != TB_SERIAL_NUMBER_ADDR_TEXT) { // 0-x30000 thru 0x37fff reprogrammed in 8 4k blocks
+					if((ltmp & 0xfff) == 0 && ltmp != TB_SERIAL_NUMBER_ADDR) { // 0-x30000 thru 0x37fff reprogrammed in 8 4k blocks
 						(*RHM_FlashPtr->erasesector)(RHM_FlashPtr);
 					}
 				} else if((ltmp >= 0x38000) && (ltmp < 0x40000)) {
@@ -1185,7 +1185,7 @@ void  FP_USB_ServiceLoop(unsigned int unUseLoop)
 				if((ltmp >= 0x38000) && (ltmp < 0x40000)) {
 					RHM_FlashPtr->pflash += 0x60000; // do it at 0x98000 for now
 				} else if(((unsigned long) RHM_FlashPtr->pflash & 0x7ff) == 0 ) { // SST erase at 2k boundary 
-					if((RHM_FlashPtr->pflash != TB_SERIAL_NUMBER_ADDR_TEXT) && (RHM_FlashPtr->pflash != TB_SERIAL_NUMBER_ADDR_TEXT + 0x800))
+					if((RHM_FlashPtr->pflash != TB_SERIAL_NUMBER_ADDR) && (RHM_FlashPtr->pflash != TB_SERIAL_NUMBER_ADDR + 0x800))
 						(*RHM_FlashPtr->erasesector)(RHM_FlashPtr);
 				}
 			}
