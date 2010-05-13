@@ -11,6 +11,14 @@
 #include "Include/containers.h"
 #include "Include/audio.h"
 #include "Include/metadata.h"
+#include "Include/filestats.h"
+
+APP_IRAM unsigned long stat_audio_length;
+APP_IRAM unsigned int  stat_pkg_type;
+APP_IRAM struct ondisk_filestats gFileStats;
+APP_IRAM int statINIT = 0;
+
+static char STAT_FN[FILE_LENGTH];
 
 extern unsigned long RES_DING_A18_SA;
 extern unsigned long RES_BIP_A18_SA;
@@ -201,6 +209,11 @@ static int getFileHandle (CtnrFile *newFile) {
 		strcat(sTemp,AUDIO_FILE_EXT);
 	}
 	ret = tbOpen((LPSTR)sTemp,O_RDONLY);
+	
+	if ((ret >= 0)/* && (pkg->pkg_type > PKG_SYS)*/) {
+		recordStats(sTemp, (long)ret, STAT_OPEN, pkg->pkg_type);
+	}
+	
 //	logString(sTemp,ASAP);
 	return ret;
 }
@@ -237,8 +250,15 @@ static void playLongInt(CtnrFile *file, unsigned long lTimeNew) {
 		if (GREEN_LED_WHEN_PLAYING)
 			setLED(LED_GREEN,TRUE);
 	} else {
+		
+//		if (context.package->pkg_type > PKG_SYS) {
+//			recordStats(NULL, (long)iFileHandle, STAT_CLOSE, (long)iFileHandle);
+//		}
+		
 		stop();
+		
 		close(iFileHandle);
+		
 		if (file->idxFilename != PKG_HEAP_SIZE)  // don't remember "stack-stored temp" pointers
 			context.lastFile = file;  
 		else
@@ -516,8 +536,11 @@ void markEndPlay(long timeNow) {
 	
 	if (context.packageStartTime) {
 		timeDiff = timeNow - context.packageStartTime;
+		if (context.package->pkg_type > PKG_SYS) {
+			recordStats(NULL, 0xffffffff, STAT_TIMEPLAYED, timeDiff);
+		}
 		context.packageStartTime = 0;
-		if (timeDiff > MINIMUM_PLAY_SEC_TO_LOG) {
+		if (timeDiff > 0 /*RHM MINIMUM_PLAY_SEC_TO_LOG*/) {
 			strcpy (log,"TIME PLAYED: ");
 			longToDecimalString(timeDiff,log+strlen(log),4);
 			strcat(log," sec at VOL=");
@@ -592,4 +615,77 @@ int addField(int handle, unsigned int field_id, char *field_value, int numfieldv
 //    ret += write(handle, (unsigned long) &field_value << 1, field_length + 1);
     
     return(ret);
+}
+void recordStats(char *filename, unsigned long handle, unsigned int why, unsigned long misc)
+{
+//	char msg[128];
+	char statpath[128];
+	int stathandle, ret;
+	unsigned long wrk;
+	struct ondisk_filestats tmp_file_stats;
+	
+	switch(why) {
+	case STAT_OPEN:
+		if(misc > PKG_SYS) {
+			statINIT = 1;
+			read(handle, (unsigned long)&stat_audio_length << 1, 4);
+			lseek(handle, 0L, SEEK_SET);
+			stat_pkg_type = misc;
+/*		
+			sprintf(msg, "StatLog  OPEN: handle=%ld: pkg_type=0x%lx audio length=%ld ", handle, misc, stat_audio_length);
+			strcat(msg, filename);
+			strcat(msg,"\x0d\x0a");
+			logString(msg, ASAP);
+*/
+			strcpy(STAT_FN, strrchr(filename, '\\') + 1);
+			STAT_FN[strlen(STAT_FN) - 4] = 0; //chop off ".a18"
+		} else {
+			statINIT = 0;
+		}
+		break;
+	case STAT_CLOSE:
+		if(statINIT > 0) {
+			wrk = lseek(SACMFileHandle, 0L, SEEK_CUR);
+/*
+			sprintf(msg, "StatLog CLOSE: handle=%ld: position=%d; ", misc, wrk);
+			strcat(msg, STAT_FN);
+			strcat(msg,"\x0d\x0a");
+			logString(msg, ASAP);
+*/
+			strcpy(statpath, STAT_DIR);
+			strcat(statpath, getDeviceSN(0));
+			strcat(statpath, "~");
+			strcat(statpath, STAT_FN); 
+		
+			if(stat_pkg_type > PKG_SYS) {	
+				tmp_file_stats.stat_num_opens = 0L;  
+				tmp_file_stats.stat_num_completions = 0L; 
+				
+				stathandle = tbOpen((LPSTR)statpath, O_CREAT|O_RDWR);
+				if(stathandle >= 0) {
+					ret = read(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
+					lseek(stathandle, 0L, SEEK_SET);
+					tmp_file_stats.stat_num_opens += 1; 
+					if(wrk >= stat_audio_length) {
+						tmp_file_stats.stat_num_completions += 1;
+					}
+					ret = write(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
+					close(stathandle);
+				}
+			}
+		}
+		statINIT = 0;
+		break;
+	case STAT_TIMEPLAYED:
+/*		if(statINIT > 0) {
+
+			sprintf(msg, "StatLog TIMEPLAYED: time=%ld: ", misc);
+			strcat(msg, STAT_FN);
+			strcat(msg,"\x0d\x0a");
+			logString(msg, ASAP);
+
+		}
+*/
+		break;
+	}
 }

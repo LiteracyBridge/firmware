@@ -3,9 +3,12 @@
 //==============================================
 #include "Component\Include\Component_head.h"
 #include ".\System\Include\System_head.h"
+#include "Application/Talkingbook/Include/filestats.h"
 
 #include "math.h"
 
+#define STAT_CLOSE      1
+void recordStats(char *filename, unsigned long handle, unsigned int why, unsigned long data);
 
 #ifdef USBRP
 extern int SACMFileHandle;
@@ -819,6 +822,7 @@ int Snd_SACM_PlayFAT(int FileHandle, int _CodecType) {
 
 	if(SACMFileHandle >= 0)
 	{
+		recordStats(NULL, (long)SACMFileHandle, STAT_CLOSE, (long)SACMFileHandle);
 		close(SACMFileHandle);
 		SACMFileHandle = -1;
 	}
@@ -876,6 +880,7 @@ int Snd_SACM_RecFAT(int FileHandle, int _CodecType, int BitRate)
 {
 	if(SACMFileHandle >= 0)
 	{
+		recordStats(NULL, (long)SACMFileHandle, STAT_CLOSE, (long)SACMFileHandle);
 		close(SACMFileHandle);
 		SACMFileHandle = -1;
 	}
@@ -909,6 +914,7 @@ int Snd_Stop()
 	SACM_Stop();
 	if(SACMFileHandle >= 0)
 	{
+		recordStats(NULL, (long)SACMFileHandle, STAT_CLOSE, (long)SACMFileHandle);
 		close(SACMFileHandle);
 		SACMFileHandle = -1;
 	}
@@ -1000,6 +1006,9 @@ void SACM_SetFileHeader(void)
 	Musicdata_Length = CurSACMEncodeCount<<1;
 	lseek(SACMFileHandle, 0, SEEK_SET);
 	write(SACMFileHandle, (unsigned long)TemDataLength<<1, 4);
+	
+	recordStats(NULL, (long)SACMFileHandle, STAT_CLOSE, (long)SACMFileHandle);
+
 	close(SACMFileHandle);
 	SACMFileHandle = -1;
 }
