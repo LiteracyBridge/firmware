@@ -6,11 +6,12 @@
 #define DC_IDENTIFIER 10 
 #define DC_CATEGORY    0
 #define METADATA_VERSION 1
+#define META_CURRENT_VERSION 1
 
 int writeLE32(int filehandle,long value, long offset);
 int writeLE16(int handle, unsigned int value, long offset);
 int addField(int handle, unsigned int field_id, char *field_value, int numfiledvalues);
-
+int metacat(char *filename, char *category);
 
 #define CAT_OTHER       "0" 
 #define CAT_AGRICULTURE "1"
