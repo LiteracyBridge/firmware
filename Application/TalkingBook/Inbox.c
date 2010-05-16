@@ -14,6 +14,7 @@
 #include "Include/sys_counters.h"
 #include "Include/mainLoop.h"
 #include "Include/Inbox.h"
+#include "Include/metadata.h"
 
 struct newContent {
 	char newAudioFileCat  [FILE_LENGTH];
@@ -38,6 +39,8 @@ static int copydir(char *, char *);
 static int copyfiles(char *, char *);
 
 #define D_NOTDIR (D_FILE | D_RDONLY | D_HIDDEN | D_SYSTEM | D_ARCHIVE)
+
+__attribute__((section(".code"))) char *categories[] = {"OTHER", "AGRIC", "HEALTH", "EDU", "STORIES", "BUSINESS", "GOV", "MUSIC", "DIARY" };
 
 //  called when leaving USB mode to check for files copied from other device into a:\Inbox
 //
@@ -225,7 +228,7 @@ processA18(struct f_info *fip, struct newContent *pNC) {
 			category[sizeof(category)-1] = 0;
 			unlink((LPSTR)fnbase);		
 		} else { // .a18 file without category info
-			strcpy(category, "OTHER");
+			getMetaCat(fip->f_name, category);
 			//or
 			// strcpy(category, "O");
 		}
@@ -538,4 +541,66 @@ static int copyfiles(char *fromdir, char *todir)
 		fret++;
 	}
 	return(fret);
+}
+int getMetaCat(char *filename, char *category)
+{
+	int ret = 0;
+	long wrk, numfields, fieldlen;
+	unsigned int nret, fd;
+	int fid;
+	unsigned char nfv;
+	unsigned char buf[128];
+	int i, j;
+
+	fd = open(filename, 0);
+	if(fd < 0) {
+		return(ret);
+	}
+	nret = read(fd, (unsigned long)&wrk <<1, 4);
+	wrk = lseek(fd, wrk + 4, SEEK_SET);
+	nret = read(fd, (unsigned long)&wrk << 1, 4);
+	//printf("meta data version=%ld\n", wrk);
+	if(wrk == 0 || wrk > META_CURRENT_VERSION) {
+		return(ret);
+	}
+	nret = read(fd, (unsigned long)&numfields << 1, 4);
+	//printf("num fields=%ld\n", numfields);
+
+	for(i=0; i<(int)numfields; i++) {
+		nret = read(fd, (unsigned long)&fid << 1, 2);
+		//printf("\n  field id=%d\n",fid);
+		nret = read(fd, (unsigned long)&fieldlen << 1, 4);
+		//printf("    filed length=%d\n", fieldlen);
+		nret = read(fd, (unsigned long)&nfv << 1, 1);
+		//printf("    num field values=%d\n", nfv);
+		for(j=0; j<nfv; j++) {
+			short fl;
+			nret = read(fd, (unsigned long)&fl << 1, 2);
+			//printf("    field value length[%d]=%d\n",j,fl);
+			nret = read(fd, (unsigned long)buf << 1, fl);
+			buf[fl] = 0;
+			//printf("    field value[%d]=",j);
+/*			for(k=0; k<fl; k++) {
+				printf("0x%.2x ", buf[k]);
+			}
+			printf("\n");
+*/
+			//printf("'%s'",buf);
+			if(fid == 0) { // categories
+				unsigned int m = buf[0] - '0';
+				if((m >= 0 && m < 9)) {
+					strcpy(category, categories[m]);
+					ret = 1;
+					goto done;
+				} else {
+					strcpy(category, categories[0]);
+					ret = 1;
+					goto done;
+				}
+			}
+		}
+	}
+done:
+	close(fd);
+	return(ret);
 }
