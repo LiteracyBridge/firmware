@@ -9,6 +9,7 @@
 #include "Include/Inbox.h"
 #include "Include/audio.h"
 #include "Include/device.h"
+#include "Include/startup.h"
 
 extern void _SystemOnOff(void);
 extern int SystemIntoUDisk(unsigned int);
@@ -370,20 +371,31 @@ void
 refuse_lowvoltage(int die)
 {
 	extern void playDing(void);
-	playDing();
-	playDing();
+	int no_startup_done = ((LED_GREEN == 0) && (LED_RED == 0));
+	if(no_startup_done == 1) { // haven't run startup, no sound possible
+		LED_GREEN = DEFAULT_LED_GREEN;
+		LED_RED = DEFAULT_LED_RED;
+		LED_ALL = LED_GREEN | LED_RED;
+	} else {	
+		playDing();
+		playDing();
+	}
 	if(die != 0) {
 		setLED(LED_ALL, FALSE);
 		wait(500);
 		setLED(LED_RED, TRUE);
-		wait(250);
+		wait(500);
 		setLED(LED_RED, FALSE);
+		wait(500);
+		setLED(LED_RED, TRUE);
 		wait(500);
 		setLED(LED_RED, FALSE);
 		setOperationalMode((int)P_HALT);
 	} else {
-		playDing();
-		playDing();
+		if(no_startup_done == 0) {
+			playDing();
+			playDing();
+		}
 	}
 }
 void
