@@ -297,7 +297,7 @@ void initVoltage()
 {
 	extern void set_voltmaxvolume();
 	APP_IRAM static unsigned long timeInitialized = -1;
-	int i, j, sumv;
+	int i, j, k, sumv;
 
 	// init battery voltage sensing	
 	*P_ADC_Setup |= 0x8000;  // enable ADBEN
@@ -307,8 +307,17 @@ void initVoltage()
 
 	for(i=0, j=0, sumv=0; i<8; ) {	//establish startup voltage
 		int v;
-		while((v = getCurVoltageSample()) == 0xffff)
-			;
+//		while((v = getCurVoltageSample()) == 0xffff)
+//			;
+		for(k=0; k<20; k++) {
+			v = getCurVoltageSample();
+			if(v != 0xffff)
+				break;
+			wait(20);
+		}
+		if(v == 0xffff)
+			v = 0;
+		
 		if(j++ >= 4) {
 			sumv += v;
 			i++;
@@ -317,7 +326,7 @@ void initVoltage()
 	vCur_1 = sumv >> 3; // average 8 readings
 	vThresh_1 = 0;
 	
-	if(vCur_1 < V_MIN_RUN_VOLTAGE) {
+	if((vCur_1 > V_MIN_POSSIBLE_VOLTAGE) && (vCur_1 < V_MIN_RUN_VOLTAGE)) {
 		refuse_lowvoltage(1);
 		// not reached
 	}
