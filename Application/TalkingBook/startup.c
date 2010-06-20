@@ -57,20 +57,38 @@ APP_IRAM unsigned int CLOCK_RATE;
 //   subtract 1 from vCur_1 and zero vThreah_1
 APP_IRAM unsigned int vCur_1;
 APP_IRAM int vThresh_1;
+APP_IRAM unsigned int MEM_TYPE;   // sst or mx
 
 void setDefaults(void) {
 	// This function sets variables that are usually set in config file, 
 	// but they need defaults in case config file doesn't list them or isn't loaded yet
-	KEY_PLAY = DEFAULT_KEY_PLAY;
-	KEY_LEFT = DEFAULT_KEY_LEFT;
-	KEY_RIGHT = DEFAULT_KEY_RIGHT;
-	KEY_UP = DEFAULT_KEY_UP;
-	KEY_DOWN = DEFAULT_KEY_DOWN;
-	KEY_SELECT = DEFAULT_KEY_SELECT;
-	KEY_STAR = DEFAULT_KEY_STAR;
-	KEY_HOME = DEFAULT_KEY_HOME;
-	KEY_PLUS = DEFAULT_KEY_PLUS;
-	KEY_MINUS = DEFAULT_KEY_MINUS;
+	
+	if(MEM_TYPE == MX_MID) {
+		// BELOW ARE THE GOOD KEY CODES FOR SCH 3.1+
+		KEY_DOWN   = V1_DEFAULT_KEY_DOWN;
+		KEY_STAR   = V1_DEFAULT_KEY_STAR;
+		KEY_RIGHT  = V1_DEFAULT_KEY_RIGHT;
+		KEY_LEFT   = V1_DEFAULT_KEY_LEFT;
+		KEY_UP     = V1_DEFAULT_KEY_UP;
+		KEY_MINUS  = V1_DEFAULT_KEY_MINUS;
+		KEY_PLUS   = V1_DEFAULT_KEY_PLUS;
+	 	KEY_PLAY   = V1_DEFAULT_KEY_PLAY;
+		KEY_SELECT = V1_DEFAULT_KEY_SELECT;
+		KEY_HOME   = V1_DEFAULT_KEY_HOME;
+	} else {
+		// FOR OLD HARDWARE (SCH 2.2)
+		KEY_DOWN   = V0_DEFAULT_KEY_DOWN;
+		KEY_STAR   = V0_DEFAULT_KEY_STAR;
+		KEY_RIGHT  = V0_DEFAULT_KEY_RIGHT;
+		KEY_LEFT   = V0_DEFAULT_KEY_LEFT;
+		KEY_UP     = V0_DEFAULT_KEY_UP;
+		KEY_MINUS  = V0_DEFAULT_KEY_MINUS;
+		KEY_PLUS   = V0_DEFAULT_KEY_PLUS;
+	 	KEY_PLAY   = V0_DEFAULT_KEY_PLAY;
+		KEY_SELECT = V0_DEFAULT_KEY_SELECT;
+		KEY_HOME   = V0_DEFAULT_KEY_HOME;
+	}
+	
 	LED_GREEN = DEFAULT_LED_GREEN;
 	LED_RED = DEFAULT_LED_RED;
 	LED_ALL = LED_GREEN | LED_RED;
@@ -140,9 +158,11 @@ void startUp(void) {
 		systemCounts.lastLogErase = systemCounts.powerUpNumber;
 		clearStaleLog();	
 	}
-#ifndef TB_CAN_WAKE
-	resetRTC();  //  reset before saving anything to disk and running macros
-#endif	
+//#ifndef TB_CAN_WAKE
+	if(MEM_TYPE == MX_MID) {
+		resetRTC();  //  reset before saving anything to disk and running macros
+	}
+//#endif	
 	saveSystemCounts();
 	
 	strcpy(buffer,"\x0d\x0a" "---------------------------------------------------\x0d\x0a");
@@ -158,9 +178,11 @@ void startUp(void) {
 	longToDecimalString(systemCounts.powerUpNumber,(char *)(buffer+strlen(buffer)),4);
 	strcat(buffer,(const char *)" - version " VERSION);
 	logString(buffer,BUFFER);
-#ifdef TB_CAN_WAKE
-	logRTC();  
-#endif
+//#ifdef TB_CAN_WAKE
+	if(MEM_TYPE == MX_MID) {
+		logRTC();  
+	}
+//#endif
 	loadPackage(PKG_SYS,BOOT_PACKAGE);	
 	SetSystemClockRate(CLOCK_RATE); // either set in config file or the default 48 MHz set at beginning of startUp()
 	mainLoop();
@@ -331,4 +353,17 @@ void initVoltage()
 		// not reached
 	}
 	set_voltmaxvolume();
+}
+unsigned int GetMemManufacturer()
+{
+	flash  FL = {0};
+	int fl_size = USB_Flash_init((flash *)0, 0);
+	int flash_execution_buf[fl_size];
+	
+	FL.flash_exe_buf = (void *) &flash_execution_buf[0];
+	USB_Flash_init(&FL, 1);
+	
+	return(FL.Flash_type);
+
+
 }

@@ -17,6 +17,7 @@
 #include "Include/Inbox.h"
 #include "Include/edit.h"
 #include "Include/mainLoop.h"
+#include "./Reprog/USB_Flash_reprog.h"
 
 typedef enum EnumEnterOrExit EnumEnterOrExit;
 enum EnumEnterOrExit {ENTERING, EXITING};
@@ -38,6 +39,7 @@ static void takeAction (Action *, EnumAction);
 extern APP_IRAM unsigned int vCur_1;
 extern void refuse_lowvoltage(int);
 extern void set_voltmaxvolume();
+extern unsigned int MEM_TYPE;
 
 static EnumAction getStartEndCodeFromTimeframe(int idxTimeframe, EnumBorderCrossing approach, int *actionTime, int *idxAction) {
 	// This function is used by takeAction()'s processing of relative jumps, which must look at relevant start/end actions.
@@ -464,12 +466,15 @@ extern int checkInactivity(BOOL resetTimer) {
 //		insertSound(&pkgSystem.files[INACTIVITY_SOUND_FILE_IDX],NULL,FALSE);
 //		restoreVolume(FALSE);
 		lastActivity = currentTime;
-#ifdef TB_CAN_WAKE
-		setOperationalMode((int)P_HALT);  // keep RTC running
-#else 
-		setOperationalMode((int)P_SLEEP); // shut down completely if will require power sw recycle to turn on
-		// Might want to go back to the audio alert since old hardware uses much more current in sleep than new hw
-#endif
+//#ifdef TB_CAN_WAKE
+		if(MEM_TYPE == MX_MID) {
+			setOperationalMode((int)P_HALT);  // keep RTC running
+		} else {
+//#else 
+			setOperationalMode((int)P_SLEEP); // shut down completely if will require power sw recycle to turn on
+			// Might want to go back to the audio alert since old hardware uses much more current in sleep than new hw
+		}
+//#endif
 	} else if (currentTime - lastActivity > 30) { //todo: move this to config file
 		// blink green light when paused/stopped to remind that power is on
 		if ((currentTime % 4) == 1) {
