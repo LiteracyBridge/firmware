@@ -11,6 +11,7 @@
 #include "Include/d2d_copy.h"
 
 extern int setUSBHost(BOOL enter);
+extern int testCopy2(char * from, char * to);
 static int fileCopy(char *, char *, int);
 
 int d2dCopy(const char * filenameList, const char * packageName) {
@@ -60,7 +61,7 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 			strcat(to,cursor); // to get directory name
 			strcat(to,"\\");
 			strcat(to,file_info.f_name);
-			retCopy = fileCopy(filename,to,maxTrials); //was unlink((LPSTR)filename);
+			retCopy = testCopy2(filename,to); //was unlink((LPSTR)filename);
 			if (retCopy == -1) {
 				strcpy(strLog,(const char *)"Copy Failed! ");
 				strcat(strLog,filename);
@@ -80,7 +81,7 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 		strcat(filename,AUDIO_FILE_EXT);
 		strcat(to,cursor);
 		strcat(to,AUDIO_FILE_EXT);
-		retCopy = fileCopy(filename,to,maxTrials); //was unlink((LPSTR)filename);
+		retCopy = testCopy2(filename,to); //was unlink((LPSTR)filename);
 		if (retCopy == -1) {
 			strcpy(strLog,(const char *)"Copy Failed! ");
 			strcat(strLog,filename);
@@ -104,7 +105,7 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 		strcat(to,LIST_PATH+3); // +3 removes the "a:\" but keeps "\lists\", for example
 		mkdir((LPSTR)to);
 		strcat(to,file_info.f_name);
-		retCopy = fileCopy(filename,to,maxTrials); //was unlink((LPSTR)filename);
+		retCopy = testCopy2(filename,to); //was unlink((LPSTR)filename);
 		if (retCopy == -1) {
 			strcpy(strLog,(const char *)"Copy Failed! ");
 			strcat(strLog,filename);
