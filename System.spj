@@ -490,6 +490,13 @@ ID=
 EXPORT=3
 # End Source File
 # End Group
+# Begin Source File
+SOURCE=testPCB.c
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=0
+# End Source File
 # End Group
 # Begin Group "Head Files"
 #PROP Default_Filter=
@@ -927,6 +934,34 @@ USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Application\TalkingBook\Include\metadata.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Application\TalkingBook\Include\filestats.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=0
+# End Source File
+# Begin Source File
+SOURCE=.\Application/Talkingbook/Include/filestats.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=0
+# End Source File
+# Begin Source File
+SOURCE=.\component/include/fs/DriverLayer.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=0
 # End Source File
 # Begin Source File
 SOURCE=.\Component\Include\FS\DriverLayer.h
@@ -1422,6 +1457,13 @@ ID=
 EXPORT=3
 # End Source File
 # End Group
+# Begin Source File
+SOURCE=testPCB.c
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=0
+# End Source File
 # End Group
 # Begin Group "Head Files"
 #PROP Default_Filter=
@@ -1859,6 +1901,34 @@ USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Application\TalkingBook\Include\metadata.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Application\TalkingBook\Include\filestats.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=0
+# End Source File
+# Begin Source File
+SOURCE=.\Application/Talkingbook/Include/filestats.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=0
+# End Source File
+# Begin Source File
+SOURCE=.\component/include/fs/DriverLayer.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=0
 # End Source File
 # Begin Source File
 SOURCE=.\Component\Include\FS\DriverLayer.h

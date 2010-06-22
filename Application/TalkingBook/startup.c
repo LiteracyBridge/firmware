@@ -18,12 +18,13 @@
 #define SYSTEM_HEAP_SIZE 512	//config file values
 #define CONFIG_FILE		"a://config.txt"
 
+extern int testPCB(void);
 extern unsigned int SetSystemClockRate(unsigned int);
 extern int SystemIntoUDisk(unsigned int);
 
 static char * addTextToSystemHeap (char *);
 static void loadDefaultPackage(void);
-static void loadConfigFile (void);
+static int loadConfigFile (void);
 
 // These capitalized variables are set in the config file.
 APP_IRAM int KEY_PLAY, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_SELECT, KEY_STAR, KEY_HOME, KEY_PLUS, KEY_MINUS;
@@ -142,10 +143,12 @@ void startUp(void) {
 		check_new_sd_flash();
 	}
 	
-	loadConfigFile();	
-	if (!SNexists())
-		logException(32,(const char *)"no serial number",SHUT_DOWN);		
-
+	if (loadConfigFile() == -1) // config.txt file not found
+		testPCB();	
+	if (!SNexists()) {
+		logException(32,(const char *)"no serial number",LOG_ONLY);
+		testPCB();	
+	}
 	SysDisableWaitMode(WAITMODE_CHANNEL_A);
 	adjustVolume(NORMAL_VOLUME,FALSE,FALSE);
 	adjustSpeed(NORMAL_SPEED,FALSE);
@@ -211,13 +214,14 @@ static char * addTextToSystemHeap (char *line) {
 	return startingHeap;
 }
 
-static void loadConfigFile(void) {
-	int handle;
+int loadConfigFile(void) {
+	int ret, handle;
 	char *name, *value;
 	char buffer[READ_LENGTH+1];
 	int attempt, goodPass;
 	const int MAX_RETRIES = 3;
-	
+
+	ret = 0;	
 	buffer[READ_LENGTH] = '\0'; //prevents readLine from searching for \n past buffer
 	
 	for (attempt = 0,goodPass = 0;attempt < MAX_RETRIES && !goodPass;attempt++) {
@@ -225,9 +229,12 @@ static void loadConfigFile(void) {
 		LOG_FILE = 0; //default in case no logging location in config file (turns logging off)
 		MACRO_FILE = 0; // default case if no MACRO_FILE listed
 		handle = tbOpen((unsigned long)(CONFIG_FILE),O_RDONLY);
-		if (handle == -1)
-			logException(14,0,USB_MODE); // can't open config file -- NOTE -- this can't be logged if log file comes from config
-		getLine(-1,0);  // reset in case at end from prior use
+		if (handle == -1) {
+			ret = -1;
+			goodPass = 0; //NOTE:can't be logged if log file comes from config file
+		}
+		if (goodPass)
+			getLine(-1,0);  // reset in case at end from prior use
 		while (goodPass && nextNameValuePair(handle, buffer, ':', &name, &value)) {
 			if (!value)
 				continue;
@@ -302,12 +309,15 @@ static void loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"CLOCK_RATE")) CLOCK_RATE = strToInt(value);
 		}
 	}
-	if (!goodPass)
-		logException(14,0,USB_MODE); 		
+	if (!goodPass) {
+		ret = -1;
+		logString((char *)"CONFIG_FILE NOT READ CORRECTLY",BUFFER);	  //logException(14,0,USB_MODE); 		
+	}
 	close(handle);
 	LED_ALL = LED_GREEN | LED_RED;
 	if (*(LOG_FILE+1) != ':')
 		LOG_FILE = 0; // should be == "a://....." otherwise, logging is turned off
+	return ret;
 }
 
 static void loadDefaultPackage(void) {

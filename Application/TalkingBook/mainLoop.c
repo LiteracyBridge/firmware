@@ -22,6 +22,7 @@
 typedef enum EnumEnterOrExit EnumEnterOrExit;
 enum EnumEnterOrExit {ENTERING, EXITING};
 extern int SystemIntoUDisk(unsigned int);
+extern int testPCB(void);
 
 static void processBlockEnterExit (CtnrBlock *, EnumEnterOrExit);
 static void processTimelineJump (int, int);
@@ -992,6 +993,8 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			// call sleep function
 			setOperationalMode((int)P_HALT); 
 			break;
+		case TEST_PCB:
+			testPCB();
 		case NOP:
 			// no operation
 			break;
