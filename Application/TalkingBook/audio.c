@@ -387,6 +387,7 @@ static int recordAudio(char *pkgName, char *cursor) {
 	stop();
 	start = getRTCinSeconds();
 	prev = end = start;
+	//asm("INT OFF"); // to prevent recordings with bad blocks
 	handle = tbOpen((LPSTR)filepath,O_CREAT|O_RDWR);
 	if (handle != -1) {
 		setLED(LED_RED,TRUE);
@@ -482,6 +483,7 @@ static int recordAudio(char *pkgName, char *cursor) {
         
 		close(handle);
 // done with meta data
+		//asm("INT FIQ, IRQ"); -- see INT OFF above used once to prevent corrupted recordings (now possibly handled by SD_Initial() after USB Device mode
         
 //		*P_WatchDog_Ctrl &= ~0x8000; // clear bit 15 to disable
 		setLED(LED_RED,FALSE);

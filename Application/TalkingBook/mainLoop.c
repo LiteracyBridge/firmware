@@ -23,6 +23,7 @@ typedef enum EnumEnterOrExit EnumEnterOrExit;
 enum EnumEnterOrExit {ENTERING, EXITING};
 extern int SystemIntoUDisk(unsigned int);
 extern int testPCB(void);
+extern INT16 SD_Initial(void);
 
 static void processBlockEnterExit (CtnrBlock *, EnumEnterOrExit);
 static void processTimelineJump (int, int);
@@ -505,6 +506,7 @@ extern int checkInactivity(BOOL resetTimer) {
 			usbret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_ONCE);
 		}
 		if (!usbret) { //USB connection was made
+			SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
 			lastActivity = currentTime; //	count being in usb as active
 			processInbox();
 		}

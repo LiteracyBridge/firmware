@@ -158,6 +158,7 @@ void setUSBDevice (BOOL set) {
 		Snd_Stop();
 		flushLog();
 		SystemIntoUDisk(USB_CLIENT_SVC_LOOP_CONTINUOUS);	
+		SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
 		processInbox();
 		setLED(LED_ALL,FALSE);
 	}

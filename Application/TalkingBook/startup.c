@@ -128,6 +128,7 @@ void startUp(void) {
 		// allows USB device mode no matter what is on memory card
 		Snd_Stop();
 		SystemIntoUDisk(1);	
+		SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
 		loadConfigFile();
 		processInbox();
 		resetSystem();
