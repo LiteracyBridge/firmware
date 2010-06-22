@@ -469,7 +469,7 @@ extern int checkInactivity(BOOL resetTimer) {
 		lastActivity = currentTime;
 //#ifdef TB_CAN_WAKE
 		if(MEM_TYPE == MX_MID) {
-			setOperationalMode((int)P_HALT);  // keep RTC running
+			setOperationalMode((int)P_SLEEP);  // keep RTC running
 		} else {
 //#else 
 			setOperationalMode((int)P_SLEEP); // shut down completely if will require power sw recycle to turn on

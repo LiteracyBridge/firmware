@@ -66,7 +66,7 @@ void logException(unsigned int errorCode, const char * pStrError, int takeAction
 		else if (takeAction == RESET)
 			resetSystem();
 		else if (takeAction ==  SHUT_DOWN)
-			setOperationalMode((int)P_HALT);
+			setOperationalMode((int)P_SLEEP);
 	}
 }
 

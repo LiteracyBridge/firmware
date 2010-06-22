@@ -390,7 +390,7 @@ refuse_lowvoltage(int die)
 		setLED(LED_RED, TRUE);
 		wait(500);
 		setLED(LED_RED, FALSE);
-		setOperationalMode((int)P_HALT);
+		setOperationalMode((int)P_SLEEP);
 	} else {
 		if(no_startup_done == 0) {
 			playDing();
