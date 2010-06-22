@@ -411,6 +411,7 @@ static int recordAudio(char *pkgName, char *cursor) {
 			if (key == KEY_PLAY) { // pause  TODO: this key press to pause shouldn't be hard coded
 				pause();
 				setLED(LED_RED,FALSE);
+				// insertSound(&pkgSystem.files[REC_PAUSED_FILE_IDX],NULL,FALSE); 	---need to play this from memory				
 				do
 					key = keyCheck(0);
 					// TODO: NEED CODE HERE TO SAFELY SAVE FILE WHEN PAUSED FOR EXTENDED PERIOD OF TIME (maybe 60 min?)
@@ -489,6 +490,7 @@ static int recordAudio(char *pkgName, char *cursor) {
 		setLED(LED_RED,FALSE);
 		turnAmpOn();
 		playDing();
+		insertSound(&pkgSystem.files[POST_REC_FILE_IDX],NULL,TRUE); 					
 		insertSound(file,NULL,TRUE);  // replay subject
 
 		strcpy(temp,"TIME RECORDED (secs): ");

@@ -555,6 +555,9 @@ void mainLoop (void) {
 				if (insertBlock)
 					insertSound(getFileFromBlock(insertBlock),insertBlock,FALSE);
 			}
+			if (context.package->pkg_type == PKG_MSG) {
+				insertSound(&pkgSystem.files[POST_PLAY_FILE_IDX],NULL,FALSE); 					
+			}	
 		}
 		if (++inactivityCheckCounter > 10) {
 			checkInactivity(!context.isStopped && !context.isPaused);
