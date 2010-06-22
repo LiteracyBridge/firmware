@@ -125,8 +125,8 @@ int adjustVolume (int amount, BOOL relative, BOOL rememberOldVolume) {
 
 	if (volume > MAX_VOLUME)  
 		volume = MAX_VOLUME;
-	if (volume < 0)  
-		volume = 0;
+	if (volume < 1)  
+		volume = 1;
 	SACM_Volume(volume);	
 	return volume;
 }
