@@ -164,9 +164,11 @@ void startUp(void) {
 		clearStaleLog();	
 	}
 //#ifndef TB_CAN_WAKE
-	if(MEM_TYPE == MX_MID) {
+//	if(MEM_TYPE == MX_MID) {
 		resetRTC();  //  reset before saving anything to disk and running macros
-	}
+		systemCounts.month = 1;
+		systemCounts.monthday = 1;
+//	}
 //#endif	
 	saveSystemCounts();
 	
