@@ -891,7 +891,7 @@ int Snd_SACM_RecFAT(int FileHandle, int _CodecType, int BitRate)
 	
 	if(_CodecType == C_CODEC_AUDIO1800)
 	{
-		SACM_DVR1800_BITRATE(DefaultBitRate);
+		SACM_DVR1800_BITRATE(BitRate);  // DefaultBitRate
 	}	
 	
 	SACM_Rec(RecMonitorOff,BitRate); 	// mic, bitrate
