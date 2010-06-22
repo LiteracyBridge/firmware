@@ -12,6 +12,8 @@ struct SystemCounts {
 	unsigned long listNumber;
 	unsigned long lastLogErase;
 	unsigned long revdPkgNumber;
+    unsigned short year;
+    unsigned char monthday , month;
 };
 
 extern SystemCounts systemCounts;
