@@ -629,29 +629,31 @@ static void takeAction (Action *action, EnumAction actionCode) {
 				context.idxActiveList = 0;
 			    cursor = getCurrentList(list);
 			    strcpy(filename,cursor);
-			} 
-			if (list->listType == LIST_OF_PACKAGES) {
-				// load package
-				switch (filename[0]) {
-					case SYS_PKG_CHAR:
-						context.queuedPackageType = PKG_SYS;
-						destination = replaceStack(filename+1,&pkgSystem);
-						break;
-					case APP_PKG_CHAR:
-						context.queuedPackageType = PKG_APP;
-						destination = replaceStack(filename+1,&pkgSystem);
-						break;
-					default:
-						context.queuedPackageType = PKG_MSG;
-						destination = replaceStack(filename,&pkgSystem);
-						break;
+			    reposition = FALSE;
+			} else {
+				if (list->listType == LIST_OF_PACKAGES) {
+					// load package
+					switch (filename[0]) {
+						case SYS_PKG_CHAR:
+							context.queuedPackageType = PKG_SYS;
+							destination = replaceStack(filename+1,&pkgSystem);
+							break;
+						case APP_PKG_CHAR:
+							context.queuedPackageType = PKG_APP;
+							destination = replaceStack(filename+1,&pkgSystem);
+							break;
+						default:
+							context.queuedPackageType = PKG_MSG;
+							destination = replaceStack(filename,&pkgSystem);
+							break;
+					}
+					context.queuedPackageNameIndex = destination;
+				} else { // list->listType != LIST_OF_PACKAGES
+					// play sound of subject
+					newFile = getListFile(filename);
+					newTime = 0;
+					reposition = TRUE;
 				}
-				context.queuedPackageNameIndex = destination;
-			} else { // list->listType != LIST_OF_PACKAGES
-				// play sound of subject
-				newFile = getListFile(filename);
-				newTime = 0;
-				reposition = TRUE;
 			}
 			break;
 		
