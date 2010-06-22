@@ -183,7 +183,7 @@ processSystemFiles(void) {
 static int 
 processA18(struct f_info *fip, struct newContent *pNC) {
 	char buffer[READ_LENGTH+1], *line, tmpbuf[READ_LENGTH+1];
-	char fnbase[80], category[8], subcategory[8];
+	char fnbase[80], category[40], subcategory[40];
 	int ret, len_fnbase, i, catidx, subidx, cat_base, fret;
 
 	category[0] = subcategory[0] = 0;
@@ -291,7 +291,7 @@ static int
 processDir(char *dirname, struct newContent *pNC) {
 	char savecwd[80];
 	char buffer[READ_LENGTH+1], tempbuf[80];
-	char fnbase[80], category[8], subcategory[8];
+	char fnbase[80], category[40], subcategory[40];
 	int ret, fret, catidx, subidx, len_fnbase, i, cat_base;
 
 	ret = getcwd((LPSTR)savecwd , sizeof(savecwd) - 1 );
