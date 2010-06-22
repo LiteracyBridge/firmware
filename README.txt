@@ -1,3 +1,16 @@
+v1.41 (MOFA/VSO customer firmware with bug fixes)
+ - now incorporates PCB test procedure and starts when config or serial num is missing
+ - removed voltage handling feature for now until more stable
+ - removed reset button option (concerned causing bug, but may have been fine)
+ - new d2d copy is more robust and plays bips during copy
+ - fixed bug in audio recording after USB connection is made
+ - seemed to fix the shutdown bug from bad voltage readings
+ - no longer repeats category name and instructions after "empty" message
+ - minimum volume is now 1 - which means cannot mute, but might reduce confusion when silent
+ - fixed date/time stamp problem in v1.40-release (reset RTC and month/day)
+ - fixed problem with behavior when config.txt does not exist
+
+
 V1.40 (MAJOR UPDATE)
 - system reset with SELECT + PLAY (via int fiq)
 - firmware reprogramming compat with new hw flash
