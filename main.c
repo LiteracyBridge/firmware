@@ -27,19 +27,6 @@ extern unsigned int MEM_TYPE;
 
 int main (void) {
 	MEM_TYPE = GetMemManufacturer();
-//#ifdef TB_CAN_WAKE
-	if(MEM_TYPE == MX_MID) { // newer boards, no power switch
-		// restart with system reset if waking from halt (caused by IOB key change interupt) 
-		if (*P_INT_Status1 & 0x8000) {
-	 		*P_INT_Status1 |= 0x8000;
-			*P_WatchDog_Ctrl &= ~0x4001; // clear bits 14 and 0 for system reset and time=0.125 sec 	
-			*P_WatchDog_Ctrl |= 0x0004; // set bit 2 for 0.125 sec
-			*P_WatchDog_Ctrl |= 0x8000; // set bit 15 to enable watchdog
-			while(1);	
- 		}
-	}
-//#endif
-
 	initVoltage();	// get initial voltage before SACM_Init in BodyInit - may never run BodyInit()
 	if(SYS_OFF!=SysGetState()) {
 		BodyInit();
@@ -52,13 +39,6 @@ int main (void) {
 	__asm__("irq on");
 	__asm__("fiq on");
 	
-//#ifdef	TB_CAN_WAKE
-	if(MEM_TYPE == MX_MID) {
-		*P_Clock_Ctrl |= 0x0200; // enable key-change interupt
-		*P_MINT_Ctrl |= 0x1400;  //enable key-change interupt for black button and Play 
-		*P_INT_Priority1 |= 0x8000; // set key-change to FIQ
-	}
-//#endif
 		
 	fs_init(); 	// should include call to IOKey_Initial() within BodyInit.c 
 	 			// to flip on a transistor early enough to power the microSD card
