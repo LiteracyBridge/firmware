@@ -2,7 +2,7 @@
 // CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
 // Contact: info@literacybridge.org
 #define CREATEUSBVAR				
-#define	USB_TIME_OUT	10			// timeout was  3s
+#define	USB_TIME_OUT	120			// timeout was  10s
 
 #define USB_Host		0x01
 #define USB_Devices		0x02
