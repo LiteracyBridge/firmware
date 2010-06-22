@@ -1056,6 +1056,10 @@ static void takeAction (Action *action, EnumAction actionCode) {
 		context.package = context.returnPackage;
 		context.returnPackage = NULL;
 	}
+	if (actionCode == SPEED_UP || actionCode == SPEED_DOWN) {
+		context.isPaused = FALSE;
+		resume();	
+	}
 	if (reposition)
 		play(context.file,newTime); //todo: chg to seek if same file
 	//todo: maybe for JUMP_BLOCK (not CALL_BLOCK) , allow offsets within a block (stored in first 13 bits of aux)
