@@ -4,8 +4,8 @@
 #ifndef	__TALKINGBOOK_h__
 #define	__TALKINGBOOK_h__
 
-#define VERSION			"v1.42"
-#define TB_CAN_WAKE  // hardware that allows wake from sleep/halt
+#define VERSION			"v1.40-r79"
+//#define TB_CAN_WAKE  // hardware that allows wake from sleep/halt
 //IMPORTANT: changes to TB_CAN_WAKE must also be made to system_head.inc!!!
 
 asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
@@ -145,8 +145,7 @@ extern int DEFAULT_TIME_PRECISION;
 extern int DEFAULT_REWIND;
 extern int INSERT_SOUND_REWIND_MS;
 extern int HYPERLINK_SOUND_FILE_IDX, DELETED_FILE_IDX, PRE_COPY_FILE_IDX, POST_COPY_FILE_IDX, SPEAK_SOUND_FILE_IDX, 
-    INACTIVITY_SOUND_FILE_IDX, ERROR_SOUND_FILE_IDX, EMPTY_LIST_FILE_IDX, REC_PAUSED_FILE_IDX, POST_REC_FILE_IDX,
-    POST_PLAY_FILE_IDX;
+    INACTIVITY_SOUND_FILE_IDX, ERROR_SOUND_FILE_IDX, EMPTY_LIST_FILE_IDX;
 extern int BLOCK_START_LEADER, BLOCK_END_LEADER;
 extern long BIT_RATE;
 extern int GREEN_LED_WHEN_PLAYING;

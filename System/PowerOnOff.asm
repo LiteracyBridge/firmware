@@ -1,6 +1,7 @@
 .INCLUDE ./Application/TalkingBook/Include/talkingbook.inc
 .INCLUDE ./system/include/system_head.inc
 
+.external _MEM_TYPE
 
 .code
 //*************************************************************    
@@ -99,24 +100,34 @@ delayLoop1?:
 	r1 = 0xC698;		//0xC480;
 	[P_CLK_Ctrl1] = r1;
 
-.ifdef TB_CAN_WAKE
+//.ifdef TB_CAN_WAKE
+	r1 = _MEM_TYPE
+	cmp  r1, MX_MID
+	jnz  pllwait1?
+
 	r1 = [P_MINT_Ctrl];
 	r1 |= 0x5400;  // enable IOB[0..2] key change wakeup and clear all flags
 	[P_MINT_Ctrl] = r1;
 	
 	r1 = [P_IOB_Data];
     [P_IOB_Latch] = r1;
-.endif
+//.endif
 
 pllwait1?:
 	r1 = [P_Power_State]
 	r1&= 0x0007
 	jz	pllwait1?
-.ifdef TB_CAN_WAKE
+//.ifdef TB_CAN_WAKE
+	r1 = _MEM_TYPE
+	cmp  r1, MX_MID
+	jnz  _oldbd
 	r1 = 0x0600  // disables clocks and sets IOB0-2 interupts
-.else
+	jmp _oldbd1
+//.else
+_oldbd:
 	r1 = 0x0400
-.endif
+//.endif
+_oldbd1:
 	[P_Clock_Ctrl] = r1
 	r1 = 0x0000
 	[P_PLLChange]  = r1

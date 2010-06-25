@@ -22,6 +22,8 @@ GLOBAL_System_SRAM:	.SECTION	.RAM
 .PUBLIC _SP_GetCh;
 .PUBLIC	F_SP_GetCh;
 
+.external _MEM_TYPE
+
 System_CODE:		.SECTION	.CODE
 
 .PUBLIC	_IOKey_Initial;
@@ -33,7 +35,11 @@ F_System_Initial:
  	[P_IOA_Attrib] = r1; 	// rest are set to output high
     r1 = 0xec00			// set IOA[15..0]
  	[P_IOA_Data] = r1;
-.ifdef TB_CAN_WAKE
+ 	
+//.ifdef TB_CAN_WAKE
+	r1 = _MEM_TYPE
+	cmp  r1, MX_MID
+	jnz  _oldbd
 	//  set up input through IOB
  	r1 = [P_IOB_Dir];
  	r1 = r1 and 0xFFF8;	
@@ -41,7 +47,8 @@ F_System_Initial:
 	r1 = [P_IOB_Attrib];
 	r1 = r1 and 0xFFF8; 
 	[P_IOB_Attrib] = r1;
-.endif
+//.endif
+_oldbd:
 	call	F_Key_Scan_Initial;	
 	retf;
 	.ENDP;
@@ -108,17 +115,20 @@ F_Key_Scan_Initial: .PROC
 F_Key_Scan_ServiceLoop:	.PROC
 	
 	r1 = [P_IOA_Data];			// get key data from IOA
-.ifndef TB_CAN_WAKE
+//.ifndef TB_CAN_WAKE
 	r1 = r1 and 0x3ff;			// mask out only IOA0-IOA9
-.else
+	r2 = _MEM_TYPE
+	cmp  r2, MX_MID
+	jnz  _oldbd1
+//.else
 	r1 = r1 and 0x7f;			// mask out only IOA0-IOA6
 	r2 = [P_IOB_Data];			// get key data from IOB
 	r2 = r2 and 0x07;			// mask out only IOB0-IOB2
 	r2 = r2 lsl 4;
 	r2 = r2 lsl 3;
 	r1 = r1 or r2;
-.endif
-
+//.endif
+_oldbd1:
 	r2 = [RW_G_DebounceReg];		//
 	[RW_G_DebounceReg] = r1;		//
 	cmp r2,[RW_G_DebounceReg];		//
