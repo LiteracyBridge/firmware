@@ -37,7 +37,6 @@ static void endOfTimeframe(int, BOOL);
 static void keyResponse(void);
 int checkInactivity(BOOL);
 static void takeAction (Action *, EnumAction);
-extern APP_IRAM int POST_PLAY_FILE_IDX;
 
 extern APP_IRAM unsigned int vCur_1;
 extern void refuse_lowvoltage(int);

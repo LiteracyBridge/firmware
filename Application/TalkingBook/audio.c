@@ -31,7 +31,6 @@ static void playLongInt(CtnrFile *, unsigned long);
 static int recordAudio(char *, char *);
 APP_IRAM static char lastFilenameRecorded[FILE_LENGTH];
 extern APP_IRAM unsigned int vCur_1;
-extern APP_IRAM int POST_REC_FILE_IDX;
 
 #include "Include/sys_counters.h"
 extern APP_IRAM SystemCounts systemCounts;
