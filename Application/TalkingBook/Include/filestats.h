@@ -2,7 +2,8 @@
 #define STAT_CLOSE      1
 #define STAT_TIMEPLAYED 2
 
-#define STAT_DIR "a:\\stats\\" 
+#define STAT_DIR  "a:\\stats\\" 
+#define OSTAT_DIR "a:\\ostat\\"
 
 void recordStats(char *filename, unsigned long handle, unsigned int why, unsigned long data);
 
