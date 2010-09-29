@@ -14,6 +14,7 @@ struct SystemCounts {
 	unsigned long revdPkgNumber;
     unsigned short year;
     unsigned char monthday , month;
+   	unsigned long recordingNumber;
 };
 
 extern SystemCounts systemCounts;

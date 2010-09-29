@@ -434,6 +434,9 @@ static int recordAudio(char *pkgName, char *cursor) {
                
         close(handle);	// rhm:  I think its already closed, I can't write to it here
         
+        systemCounts.recordingNumber++;  // bump global recording number
+        saveSystemCounts();
+        
        	handle = tbOpen((LPSTR)filepath,O_RDWR);
        	
        	metadata_start = lseek(handle, 0L, SEEK_END);  // offset to start of metadata
@@ -449,6 +452,16 @@ static int recordAudio(char *pkgName, char *cursor) {
         strcat(unique_id, digits);
         
         addField(handle, DC_IDENTIFIER, unique_id, 1);       
+        metadata_numfields += 1;
+
+//      add audio item id metadata initial code
+//      need to add org here 
+        strcpy(unique_id, TB_SERIAL_NUMBER_ADDR + 4); // skip tsn.
+        strcat(unique_id, "_");       
+		longToDecimalString(systemCounts.recordingNumber,digits,8);
+		strcat(unique_id, digits);
+		
+        addField(handle, DC_AUDIO_ITEM_ID, unique_id, 1);       
         metadata_numfields += 1;
         
         cp = strchr(filepath, '#');
