@@ -640,10 +640,10 @@ int addField(int handle, unsigned int field_id, char *field_value, int numfieldv
 void recordStats(char *filename, unsigned long handle, unsigned int why, unsigned long misc)
 {
 //	char msg[128];
-	char statpath[128];
+	char statpath[128], *cp;
 	int stathandle, ret;
 	unsigned long wrk;
-	struct ondisk_filestats tmp_file_stats;
+	struct ondisk_filestats tmp_file_stats = {0};
 	
 	switch(why) {
 	case STAT_OPEN:
@@ -673,15 +673,13 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 			strcat(msg,"\x0d\x0a");
 			logString(msg, ASAP);
 */
-			strcpy(statpath, STAT_DIR);
-			strcat(statpath, getDeviceSN(0));
-			strcat(statpath, "~");
-			strcat(statpath, STAT_FN); 
-		
 			if(stat_pkg_type > PKG_SYS) {	
-				tmp_file_stats.stat_num_opens = 0L;  
-				tmp_file_stats.stat_num_completions = 0L; 
 				
+				strcpy(statpath, STAT_DIR);
+				strcat(statpath, getDeviceSN(0));
+				strcat(statpath, "~");
+				strcat(statpath, STAT_FN); 
+						
 				stathandle = tbOpen((LPSTR)statpath, O_CREAT|O_RDWR);
 				if(stathandle >= 0) {
 					ret = read(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
@@ -697,6 +695,34 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 		}
 		statINIT = 0;
 		break;
+		
+	case STAT_COPIED:
+// how to eliminate PKG_SYS * PKG_NONE files ??
+
+		strcpy(STAT_FN, strrchr(filename, '\\') + 1);
+		cp = strrchr(STAT_FN, '.');
+		if(cp == NULL)
+			break;
+		if(strcmp(".a18", cp+1))
+			break;	// no a18 suffix
+		
+		STAT_FN[strlen(STAT_FN) - 4] = 0; //chop off ".a18"
+		
+		strcpy(statpath, STAT_DIR);
+		strcat(statpath, getDeviceSN(0));
+		strcat(statpath, "~");
+		strcat(statpath, STAT_FN); 
+		
+		stathandle = tbOpen((LPSTR)statpath, O_CREAT|O_RDWR);
+		if(stathandle >= 0) {
+			ret = read(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
+			lseek(stathandle, 0L, SEEK_SET);
+			tmp_file_stats.stat_num_copies += 1; 
+			ret = write(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
+			close(stathandle);
+		}
+		break;
+		
 	case STAT_TIMEPLAYED:
 /*		if(statINIT > 0) {
 

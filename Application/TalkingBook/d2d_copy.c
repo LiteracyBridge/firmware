@@ -27,6 +27,7 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 	setLED(LED_GREEN,FALSE);
 	timeNow = getRTCinSeconds();
 	markEndPlay(timeNow);
+	
 	setUSBHost(TRUE);
 
 	// code below is borrowed from the delete fct
@@ -66,8 +67,10 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 			if (retCopy == -1) {
 				strcpy(strLog,(const char *)"Copy Failed! ");
 				strcat(strLog,filename);
-			} else
+			} else {
 				strcpy(strLog,filename);
+				recordStats(filename, 0L, STAT_COPIED, PKG_SYS+1);
+			}
 			logString(strLog,BUFFER);
 			ret = _findnext(&file_info);
 		}
@@ -86,8 +89,10 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 		if (retCopy == -1) {
 			strcpy(strLog,(const char *)"Copy Failed! ");
 			strcat(strLog,filename);
-		} else
+		} else {
 			strcpy(strLog,filename);
+			recordStats(filename, 0L, STAT_COPIED, PKG_SYS+1);
+		}
 		logString(strLog,BUFFER);
 	}
 	strcpy(filename,LIST_PATH); 
@@ -112,8 +117,10 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 			strcat(strLog,filename);
 			strcat(strLog,(const char *)" ");
 			strcat(strLog,to);
-		} else
+		} else {
 			strcpy(strLog,file_info.f_name);
+			recordStats(file_info.f_name, 0L, STAT_COPIED, PKG_SYS+1);
+		}
 		logString(strLog,BUFFER);
 		ret = _findnext(&file_info);
 	}
