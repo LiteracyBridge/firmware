@@ -242,9 +242,9 @@ int loadConfigFile(void) {
 		while (goodPass && nextNameValuePair(handle, buffer, ':', &name, &value)) {
 			if (!value)
 				continue;
-			// test there is a new line and that it isn't a comment (starting with "//")
-			if (*name == '/' && *(name+1) == '/')
-				continue; // move to next line
+			// test there is a new line and that it isn't a comment (starting with "#")
+			if(*name == '#')
+				continue;
 			if (!goodString(name,0) || !goodString(value,0)) { 
 				goodPass = 0;
 				logException(14,0,0);
