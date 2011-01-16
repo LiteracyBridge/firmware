@@ -5,7 +5,7 @@
 #define	__TALKINGBOOK_h__
 
 #define VERSION			"v1.42"
-//#define TB_CAN_WAKE  // hardware that allows wake from sleep/halt
+#define TB_CAN_WAKE  // hardware that allows wake from sleep/halt
 //IMPORTANT: changes to TB_CAN_WAKE must also be made to system_head.inc!!!
 
 asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000

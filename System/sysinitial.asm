@@ -5,17 +5,11 @@
 
 .PUBLIC _Sys_Initial
 _Sys_Initial: .PROC
-//.ifdef TB_CAN_WAKE
-	r1 = _MEM_TYPE
-	cmp  r1, MX_MID
-	jnz oldbd
+.ifdef TB_CAN_WAKE
 	r1=0x8618
-	jmp oldbd1
-//.else
-_oldbd:
+.else
 	r1=0x8418
-//.endif
-_oldbd1:
+.endif
 	[P_Clock_Ctrl]=r1	//pll enable, system clock=PLL clock
 
 	r1=0x20				//PLL clock =96MHz
