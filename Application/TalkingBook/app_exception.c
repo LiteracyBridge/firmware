@@ -19,7 +19,7 @@ void logException(unsigned int errorCode, const char * pStrError, int takeAction
 	if(vCur_1 < V_MIN_SDWRITE_VOLTAGE) {
 	}
 	
-	if (takeAction || LOG_WARNINGS) {
+	if (takeAction || DEBUG_MODE) {
 		strcpy(errorString,"\x0d\x0a" "*** ERROR! (cycle "); //cycle number
 		longToDecimalString(systemCounts.powerUpNumber,(char *)(errorString+strlen(errorString)),4);
 		strcat(errorString," - version " VERSION ")\x0d\x0a*** #");

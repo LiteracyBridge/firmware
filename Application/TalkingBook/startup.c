@@ -21,9 +21,10 @@
 extern int testPCB(void);
 extern unsigned int SetSystemClockRate(unsigned int);
 extern int SystemIntoUDisk(unsigned int);
+extern INT16 SD_Initial(void);
 
 static char * addTextToSystemHeap (char *);
-static void loadDefaultPackage(void);
+static void loadDefaultUserPackage(void);
 static int loadConfigFile (void);
 
 // These capitalized variables are set in the config file.
@@ -50,10 +51,10 @@ APP_IRAM long BIT_RATE;
 APP_IRAM int GREEN_LED_WHEN_PLAYING;
 APP_IRAM int INACTIVITY_SECONDS;
 APP_IRAM int MIC_GAIN_NORMAL, MIC_GAIN_HEADPHONE;
-APP_IRAM char *CONTROL_TEMPLATE;
+APP_IRAM char *USER_CONTROL_TEMPLATE;
 APP_IRAM char *MACRO_FILE;
 APP_IRAM int VOLTAGE_SAMPLE_FREQ_SEC, USB_CLIENT_POLL_INTERVAL;
-APP_IRAM int LOG_WARNINGS, LOG_KEYS;
+APP_IRAM int DEBUG_MODE, LOG_KEYS;
 APP_IRAM unsigned int CLOCK_RATE;
 //if most recent 16 voltage readings are below vCur_1 (vThresh_1 == 0xffff),
 //   subtract 1 from vCur_1 and zero vThreah_1
@@ -104,6 +105,8 @@ void setDefaults(void) {
 	MAX_SPEED = DEFAULT_MAX_SPEED;
 	SPEED_INCREMENT = DEFAULT_SPEED_INCREMENT;
 	BIT_RATE = DEFAULT_BIT_RATE;
+	INACTIVITY_SECONDS = DEFAULT_INACTIVITY_SECONDS;
+	USB_CLIENT_POLL_INTERVAL = DEFAULT_USB_CLIENT_POLL_INTERVAL;
 	
 	ADMIN_COMBO_KEYS = KEY_UP | KEY_DOWN;
 }
@@ -154,7 +157,7 @@ void startUp(void) {
 	SysDisableWaitMode(WAITMODE_CHANNEL_A);
 	adjustVolume(NORMAL_VOLUME,FALSE,FALSE);
 	adjustSpeed(NORMAL_SPEED,FALSE);
-	loadDefaultPackage();
+	loadDefaultUserPackage();
 	if (MACRO_FILE)	
 		loadMacro();
 	loadSystemCounts();
@@ -307,11 +310,11 @@ int loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"INACTIVITY_SECONDS")) INACTIVITY_SECONDS=strToInt(value);
 				else if (!strcmp(name,(char *)"MIC_GAIN_NORMAL")) MIC_GAIN_NORMAL=strToInt(value);
 				else if (!strcmp(name,(char *)"MIC_GAIN_HEADPHONE")) MIC_GAIN_HEADPHONE=strToInt(value);
-				else if (!strcmp(name,(char *)"CONTROL_TEMPLATE")) CONTROL_TEMPLATE=addTextToSystemHeap(value);
+				else if (!strcmp(name,(char *)"USER_CONTROL_TEMPLATE")) USER_CONTROL_TEMPLATE=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"MACRO_FILE")) MACRO_FILE=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"VOLTAGE_SAMPLE_FREQ_SEC")) VOLTAGE_SAMPLE_FREQ_SEC=strToInt(value);
 				else if (!strcmp(name,(char *)"USB_CLIENT_POLL_INTERVAL")) USB_CLIENT_POLL_INTERVAL=strToInt(value);
-				else if (!strcmp(name,(char *)"LOG_WARNINGS")) LOG_WARNINGS=strToInt(value);
+				else if (!strcmp(name,(char *)"DEBUG_MODE")) DEBUG_MODE=strToInt(value);
 				else if (!strcmp(name,(char *)"LOG_KEYS")) LOG_KEYS=strToInt(value);
 				else if (!strcmp(name,(char *)"CLOCK_RATE")) CLOCK_RATE = strToInt(value);
 		}
@@ -327,10 +330,14 @@ int loadConfigFile(void) {
 	return ret;
 }
 
-static void loadDefaultPackage(void) {
+static void loadDefaultUserPackage(void) {
+	char sTemp[PATH_LENGTH];
 	
+	strcpy(sTemp,SYSTEM_PATH);
+	strcat(sTemp,USER_CONTROL_TEMPLATE);
+	strcat(sTemp,".txt"); //todo: move to config file	
 	pkgDefault.pkg_type = PKG_MSG;
-	parseControlFile (CONTROL_TEMPLATE, &pkgDefault);
+	parseControlFile (sTemp, &pkgDefault);
 }
 void initVoltage()
 {

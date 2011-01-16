@@ -75,7 +75,7 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 #define READ_LENGTH			1024
 #define FILE_LENGTH			40
 #define PATH_LENGTH			(FILE_LENGTH * 2)
-#define LOG_CARRYOVER_BYTES 512
+#define LOG_CARRYOVER_BYTES 8096
 #define TEXT_EVENT_LEFT		'<'
 #define TEXT_EVENT_RIGHT	'>'
 #define TEXT_EVENT_UP		'^'
@@ -152,8 +152,8 @@ extern long BIT_RATE;
 extern int GREEN_LED_WHEN_PLAYING;
 extern int INACTIVITY_SECONDS;
 extern int MIC_GAIN_NORMAL, MIC_GAIN_HEADPHONE;
-extern char *CONTROL_TEMPLATE;
+extern char *USER_CONTROL_TEMPLATE;
 extern char *MACRO_FILE;
 extern int VOLTAGE_SAMPLE_FREQ_SEC, USB_CLIENT_POLL_INTERVAL;
-extern int LOG_WARNINGS, LOG_KEYS;
+extern int DEBUG_MODE, LOG_KEYS;
 #endif
