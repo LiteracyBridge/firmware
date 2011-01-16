@@ -1,4 +1,10 @@
-v1.41 (MOFA/VSO customer firmware with bug fixes)
+v1.50 (ECHOES release)
+ - During PCB test procedure, become USB device with no activity
+   (which makes updates during pre-assembly easier when no config/serial# exists
+    and when no keypad is attached to force into USB mode) 
+
+
+v1.41c (MOFA/VSO customer firmware with bug fixes)
  - now incorporates PCB test procedure and starts when config or serial num is missing
  - removed voltage handling feature for now until more stable
  - removed reset button option (concerned causing bug, but may have been fine)

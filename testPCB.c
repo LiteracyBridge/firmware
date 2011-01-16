@@ -30,11 +30,13 @@ void exception(void);
 static int testCopy1(char *, char *, int);
 int testCopy2(char *, char *); 
 static void flashRed(void);
+static void checkUSB(void);
 
 extern void _SystemOnOff(void);
 extern int SystemIntoUDisk(unsigned int);
 extern int setUSBHost(BOOL);
 extern void loadConfigFile(void);
+extern INT16 SD_Initial(void);
 
 static void playStartupSound() {
 	int i;
@@ -46,7 +48,8 @@ static void playStartupSound() {
 
 int testPCB(void) {
 	int ret, key, keys;
-
+	unsigned long count = 0;
+	
 /*	logLongHex((unsigned long)*P_IOB_Dir);
 	logLongHex((unsigned long)*P_IOB_Attrib);
 	logLongHex((unsigned long)*P_IOB_Data);
@@ -79,7 +82,12 @@ int testPCB(void) {
 //	}
 	//rhm	
 	while (1) {
+		count++;
 		key = keyCheck(0);
+		if (key)
+			count = 1;
+		else if ((count % 150000) == 0)
+			checkUSB();	 
 		keys |= key;
 //		if (key)
 //			logLongHex((unsigned long)key);
@@ -119,6 +127,18 @@ int testPCB(void) {
 		}
 	}
 }
+
+static void checkUSB() {
+	int usbret;
+	usbret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY);
+	while(usbret == 1) {
+		usbret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_ONCE);
+	}
+	if (!usbret) { //USB connection was made
+		SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
+	}
+}
+
 
 void flashRed() {
 	setLED(LED_RED,TRUE);
