@@ -12,14 +12,11 @@
 #include "Include/filestats.h"
 
 extern int setUSBHost(BOOL enter);
-extern int testCopy2(char * from, char * to);
-static int fileCopy(char *, char *, int);
 
 int d2dCopy(const char * filenameList, const char * packageName) {
 	int ret, retCopy;
 	char to[PATH_LENGTH], strLog[PATH_LENGTH],filename[PATH_LENGTH], path[PATH_LENGTH];
 	char *cursor, *prefixCursor;
-	int maxTrials = 5;
 	struct f_info file_info;
 	long timeNow;
 	
@@ -63,7 +60,7 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 			strcat(to,cursor); // to get directory name
 			strcat(to,"\\");
 			strcat(to,file_info.f_name);
-			retCopy = testCopy2(filename,to); //was unlink((LPSTR)filename);
+			retCopy = fileCopy(filename,to); //was unlink((LPSTR)filename);
 			if (retCopy == -1) {
 				strcpy(strLog,(const char *)"Copy Failed! ");
 				strcat(strLog,filename);
@@ -85,7 +82,7 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 		strcat(filename,AUDIO_FILE_EXT);
 		strcat(to,cursor);
 		strcat(to,AUDIO_FILE_EXT);
-		retCopy = testCopy2(filename,to); //was unlink((LPSTR)filename);
+		retCopy = fileCopy(filename,to); //was unlink((LPSTR)filename);
 		if (retCopy == -1) {
 			strcpy(strLog,(const char *)"Copy Failed! ");
 			strcat(strLog,filename);
@@ -111,7 +108,7 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 		strcat(to,LIST_PATH+3); // +3 removes the "a:\" but keeps "\lists\", for example
 		mkdir((LPSTR)to);
 		strcat(to,file_info.f_name);
-		retCopy = testCopy2(filename,to); //was unlink((LPSTR)filename);
+		retCopy = fileCopy(filename,to); //was unlink((LPSTR)filename);
 		if (retCopy == -1) {
 			strcpy(strLog,(const char *)"Copy Failed! ");
 			strcat(strLog,filename);
@@ -143,7 +140,7 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 		strcpy(to,OSTAT_DIR);
 		to[0] = 'b'; //change a:\\ drive to b:\\ drive
 		strcat(to,file_info.f_name);
-		retCopy = testCopy2(filename,to); //was unlink((LPSTR)filename);
+		retCopy = fileCopy(filename,to); //was unlink((LPSTR)filename);
 		if (retCopy == -1) {
 			strcpy(strLog,(const char *)"Stats a to b Copy Failed! ");
 			strcat(strLog,filename);
@@ -166,7 +163,7 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 		filename[0] = 'b'; 
 		strcpy(to,OSTAT_DIR);
 		strcat(to,file_info.f_name);
-		retCopy = testCopy2(filename,to); //was unlink((LPSTR)filename);
+		retCopy = fileCopy(filename,to); //was unlink((LPSTR)filename);
 		if (retCopy == -1) {
 			strcpy(strLog,(const char *)"Stats b to a Copy Failed! ");
 			strcat(strLog,filename);
@@ -183,32 +180,4 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 
 	setUSBHost(FALSE);
 	return retCopy;
-}
-
-static int fileCopy(char * from, char * to, int maxTrials) {
-	int ret, trials;
-/*
-	long filesize;
-	int secToCopy;
-	struct f_info f_info;
-	// get filesize to estimate expected copy time
-	ret =_findfirst((LPSTR)from, &f_info, D_FILE);
-	filesize = f_info.f_size;
-*/	
-	setLED(LED_ALL,FALSE);
-
-	for (trials = 1; trials <= maxTrials; trials++) {
-		setLED(LED_RED,TRUE);		
-		
-		ret = unlink((LPSTR)to);
-		ret = _copy((LPSTR)from,(LPSTR)to);
-		wait (500);
-		setLED(LED_RED,FALSE);
-		if (ret != -1)
-			break;
-		wait (1000);
-	}
-	if (trials <= maxTrials)
-		setLED(LED_GREEN,TRUE);
-	return ret;
 }

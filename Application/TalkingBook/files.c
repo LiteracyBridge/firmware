@@ -541,3 +541,39 @@ int dirExists(LPSTR name) {
 	return ret;
 }
 
+int fileCopy(char * from, char * to) {
+	long buffer[COPY_BUFFER_SIZE];
+	long rCount, wCount;
+	int wHandle, rHandle, ret;
+	unsigned int loopCount;
+	
+	ret = 0;	
+	rHandle = open((LPSTR)from,O_RDONLY);
+	wHandle = open((LPSTR)to,O_CREAT|O_TRUNC|O_WRONLY);
+//	*P_WatchDog_Ctrl &= ~0x4007; // clear bits 0-2 for 2 sec and bit 14 to select system reset
+//	*P_WatchDog_Ctrl |= 0x8000; // set bit 15 to enable watchdog
+
+	if (rHandle >= 0 && wHandle >= 0) {
+		do {
+			loopCount++;
+//			*P_WatchDog_Clear = 0xA005; 	
+			if (!(loopCount % 64))
+				playBip();
+			rCount = read(rHandle,(unsigned long)&buffer<<1,COPY_BUFFER_SIZE<<2);
+			if (rCount > 0) {
+				wCount = write(wHandle,(unsigned long)&buffer<<1,rCount);
+				if (wCount == -1 || (wCount != rCount)) {
+					ret = -1;
+					break;
+				}
+			} else if (rCount == -1) {
+				ret = -1;
+				break;
+			}
+		} while (rCount == (COPY_BUFFER_SIZE<<2));
+	}	
+	close(wHandle);
+//	*P_WatchDog_Ctrl &= ~0x8000; // clear bit 15 to disable watchdog reset
+	close(rHandle);
+	return ret;
+}

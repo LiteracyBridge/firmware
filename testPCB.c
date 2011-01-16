@@ -27,8 +27,6 @@ int reprogram(void);
 int createTestFile(unsigned int);
 int readTestFile(void);
 void exception(void);
-static int testCopy1(char *, char *, int);
-int testCopy2(char *, char *); 
 static void flashRed(void);
 static void checkUSB(void);
 
@@ -271,7 +269,7 @@ int sendCopy(void) {
 	setUSBHost(TRUE);
 	ret = unlink((LPSTR)REMOTE_TEST_FILENAME);
 	setLED(LED_RED,TRUE);
-	ret = testCopy2((char *)LOCAL_TEST_FILENAME,(char *)REMOTE_TEST_FILENAME);
+	ret = fileCopy((char *)LOCAL_TEST_FILENAME,(char *)REMOTE_TEST_FILENAME);
 	//ret = _copy((LPSTR)LOCAL_TEST_FILENAME,(LPSTR)REMOTE_TEST_FILENAME);
 	setLED(LED_RED,FALSE);
 	unlink((LPSTR)LOCAL_TEST_FILENAME);
@@ -369,57 +367,3 @@ void exception(void) {
 	setLED(LED_RED,FALSE);
 }
 
-int testCopy1(char * from, char * to, int maxTrials) {
-	int ret, trials;
-	
-	for (trials = 1; trials <= maxTrials; trials++) {
-		setLED(LED_RED,TRUE);
-		ret = unlink((LPSTR)to);
-		playBip();
-		ret = _copy((LPSTR)from,(LPSTR)to);
-		playBip();
-		wait (500);
-		setLED(LED_RED,FALSE);				
-		if (ret != -1)
-			break;
-		wait (1000);
-	}
-	return ret;
-}
-
-int testCopy2(char * from, char * to) {
-	long testLong[LONG_SIZE];
-	long rCount, wCount;
-	int wHandle, rHandle, ret;
-	unsigned int loopCount;
-	
-	ret = 0;	
-	rHandle = open((LPSTR)from,O_RDONLY);
-	wHandle = open((LPSTR)to,O_CREAT|O_TRUNC|O_WRONLY);
-	*P_WatchDog_Ctrl &= ~0x4007; // clear bits 0-2 for 2 sec and bit 14 to select system reset
-//	*P_WatchDog_Ctrl |= 0x8000; // set bit 15 to enable watchdog
-
-	if (rHandle >= 0 && wHandle >= 0) {
-		do {
-			loopCount++;
-//			*P_WatchDog_Clear = 0xA005; 	
-			if (!(loopCount % 64))
-				playBip();
-			rCount = read(rHandle,(unsigned long)&testLong<<1,LONG_SIZE<<2);
-			if (rCount > 0) {
-				wCount = write(wHandle,(unsigned long)&testLong<<1,rCount);
-				if (wCount == -1 || (wCount != rCount)) {
-					ret = -1;
-					break;
-				}
-			} else if (rCount == -1) {
-				ret = -1;
-				break;
-			}
-		} while (rCount == (LONG_SIZE<<2));
-	}	
-	close(wHandle);
-	*P_WatchDog_Ctrl &= ~0x8000; // clear bit 15 to disable watchdog reset
-	close(rHandle);
-	return ret;
-}

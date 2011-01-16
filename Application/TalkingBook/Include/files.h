@@ -7,6 +7,7 @@
 #include ".\Component\Include\FS\vfs.h"
 
 #define LOG_BUFFER_SIZE		512
+#define COPY_BUFFER_SIZE    1024
 #define ASAP				0
 #define BUFFER				1
 
@@ -27,4 +28,5 @@ extern int fileExists(LPSTR);
 extern int dirExists(LPSTR);
 extern int convertDoubleToSingleChar(char *, const char *, BOOL);
 extern void trimFile(char *, unsigned long, unsigned long);
+extern int fileCopy(char *, char *);
 #endif
