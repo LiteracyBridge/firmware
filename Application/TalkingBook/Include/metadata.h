@@ -4,6 +4,7 @@
 // added for meta data 
 #define CURRENT_POS 0xffffffffL
 #define DC_IDENTIFIER 10 
+#define DC_LANGUAGE   12
 #define DC_CATEGORY    0
 #define DC_AUDIO_ITEM_ID 0x40   // change to match ACM
 #define METADATA_VERSION 1

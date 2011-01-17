@@ -462,6 +462,11 @@ static int recordAudio(char *pkgName, char *cursor) {
 		
         addField(handle, DC_AUDIO_ITEM_ID, unique_id, 1);       
         metadata_numfields += 1;
+
+        if (pkgSystem.idxLanguageCode != -1) {
+			strcpy(unique_id,&pkgSystem.strHeapStack[pkgSystem.idxLanguageCode]);
+			addField(handle, DC_LANGUAGE, unique_id, 1);   
+        }
         
         cp = strchr(filepath, '#');
         if(cp++ != NULL) {
