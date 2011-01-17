@@ -686,7 +686,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			cursor = getCurrentList(tempList);
 			if (PRE_COPY_FILE_IDX)
 				insertSound(&pkgSystem.files[PRE_COPY_FILE_IDX],NULL,TRUE);  
-			ret = d2dCopy((const char *)filename,(const char *)cursor);
+			ret = d2dCopy((const char *)cursor,(const char *)filename);
 			if (ret == 0 && POST_COPY_FILE_IDX) 
 				insertSound(&pkgSystem.files[POST_COPY_FILE_IDX],NULL,TRUE); 
 //			newBlock = &context.package->blocks[aux];
@@ -812,15 +812,6 @@ static void takeAction (Action *action, EnumAction actionCode) {
 						play(context.file,getCurrentTimeframeStart());
 					} else
 						play(context.file,0);
-					break;
-				case C_SACM_RECORD:
-				case C_SACM_PLAY:
-					context.isPaused = TRUE;
-					pause();
-					break;
-				case C_SACM_PAUSE:
-					context.isPaused = FALSE;
-					resume();	
 					break;
 				default:
 					if (context.isPaused) {

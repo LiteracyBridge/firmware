@@ -212,57 +212,6 @@ int convertDoubleToSingleChar(char * out, const char * in, BOOL addCRLF) {
 	}
 	return bytesToWrite;	
 }
-/*
-int createControlFromTemplate(char *packageName, char * filename) {
-	//todo: create a version without a roundtrip between single/dbl-byte chars	
-	int rHandle, wHandle, ret, bytesToWrite;
-	char buffer[READ_LENGTH+1];
-	char *rCursor, *cursor2;
-	char file1[40];
-	char line[80];
-	char tempLine[80];
-	int templateCount;
-	
-	buffer[READ_LENGTH] = '\0';
-	*line = 0;
-	templateCount = 0;
-
-	strcpy(file1,USER_PATH);
-	strcat(file1,filename);
-	wHandle = tbOpen((LPSTR)file1,O_CREAT|O_TRUNC|O_WRONLY);
-	rHandle = tbOpen((LPSTR)CONTROL_TEMPLATE,O_RDONLY);
-	if (rHandle == -1 || wHandle == -1)
-		return -1;
-	getLine(-1,0);  // reset in case at end from prior use
-	while ((rCursor = getLine(rHandle,buffer))) {
-		if (*rCursor != TEMPLATE_CHAR) {
-			bytesToWrite = convertDoubleToSingleChar(tempLine,rCursor,TRUE);
-			ret = write(wHandle,(unsigned long)tempLine<<1,bytesToWrite);
-		} else {
-			// found template line
-			rCursor++;
-			cursor2 = strchr(rCursor,TEMPLATE_CHAR);
-			if (cursor2) {
-				*cursor2 = 0;
-				bytesToWrite = convertDoubleToSingleChar(tempLine,rCursor,FALSE);
-				ret = write(wHandle,(unsigned long)tempLine<<1,bytesToWrite);
-				if (templateCount == 0) {
-					strcpy(line,packageName);  // todo: don't hard code the package/file items
-					templateCount++;
-				}
-				else if (templateCount == 1) {
-					strcpy(line,filename);  // todo: don't hard code the package/file items					
-				}
-				bytesToWrite = convertDoubleToSingleChar(tempLine,line,TRUE);
-				ret = write(wHandle,(unsigned long)tempLine<<1,bytesToWrite);				
-			}			
-		}
-	}
-	close(rHandle);
-	close(wHandle);
-	return ret;
-}
-*/
 
 int findDeleteStringFromFile(char *path, char *filename, const char * string, BOOL shouldDelete) {
 	//todo: create a version without a roundtrip between single/dbl-byte chars	
@@ -405,7 +354,10 @@ BOOL readBuffer(int handle, char *buffer, int bytesToRead) {
 }
 
 char * getLine (int fileHandle, char *buffer) {
-	// set buffer to 0 to reset DONE and move to BOF (unless fileHandle == -1, then skip BOF step)
+	//TODO: investigate need to have an array of the static variables below, indexed to filehandle
+	//      As it stands now, it can only keep track of one filehandle at a time.
+	//
+	// Set buffer to 0 to reset DONE and move to BOF (unless fileHandle == -1, then skip BOF step)
 	APP_IRAM static BOOL firstBuffer = TRUE;
 	APP_IRAM static BOOL lastBuffer;
 	APP_IRAM static BOOL done;
@@ -448,7 +400,7 @@ char * getLine (int fileHandle, char *buffer) {
 		    //skip initial whitespace
 			for (line = cursor; (*line == ' ') ||  (*line == '\t'); line++);
 			// move past eol chars and check for end of buffer
-			temp = cursor + strcspn(cursor,"\x0a\x0d");
+			temp = cursor + strcspn(cursor,"\x0a\x0d");  //TODO: does this assume MS DOS/Win eol style?
 			lastLine = (*temp == '\0');
 			if (!lastLine) {
 				*temp = '\0';

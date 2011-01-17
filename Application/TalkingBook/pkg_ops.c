@@ -10,7 +10,6 @@
 #include "Include/pkg_ops.h"
 
 void packageRecording(char * pkgName, char *listName) {
-	// copies in control track template and fills in filename and same as package name 
 	// adds name to current subject list
 	ListItem *tempList;	
 	long pos;

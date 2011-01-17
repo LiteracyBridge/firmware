@@ -13,7 +13,7 @@
 
 extern int setUSBHost(BOOL enter);
 
-int d2dCopy(const char * filenameList, const char * packageName) {
+int d2dCopy(const char * packageName,const char * filenameList) {
 	int ret, retCopy;
 	char to[PATH_LENGTH], strLog[PATH_LENGTH],filename[PATH_LENGTH], path[PATH_LENGTH];
 	char *cursor, *prefixCursor;
@@ -25,6 +25,7 @@ int d2dCopy(const char * filenameList, const char * packageName) {
 	timeNow = getRTCinSeconds();
 	markEndPlay(timeNow);
 	
+	//TODO: break (gracefully) after some time delay if never connected to another device
 	setUSBHost(TRUE);
 
 	// code below is borrowed from the delete fct

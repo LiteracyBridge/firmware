@@ -29,7 +29,6 @@ extern void User_SetDecodeLength(unsigned long);
 static int getFileHandle (CtnrFile *);
 static void playLongInt(CtnrFile *, unsigned long);
 static int recordAudio(char *, char *);
-APP_IRAM static char lastFilenameRecorded[FILE_LENGTH];
 extern APP_IRAM unsigned int vCur_1;
 
 #include "Include/sys_counters.h"
@@ -170,7 +169,6 @@ void stop(void) {
 static int getFileHandle (CtnrFile *newFile) {
 	int ret = 0; 
 	char sTemp[PATH_LENGTH];
-	BOOL getLastRecording = FALSE;
 	CtnrPackage *pkg;
 		
 	pkg = getPackageFromFile(newFile); // get package that applied to file, rather than context package
@@ -179,13 +177,10 @@ static int getFileHandle (CtnrFile *newFile) {
 	// check for list
 	if (newFile->idxFirstBlockInFile == -1)
 		strcpy(sTemp,LIST_PATH);
-	else if (newFile->idxFilename == -1) {  // use last file recorded
+	else if (newFile->idxFilename == -1) {
 		logException(0,0,USB_MODE); // this should never happen -- removed this feature
-		// check for last file recorded (parsed from $L)
-		//getLastRecording = TRUE;
-		//ret = tbChdir((unsigned long)(DRAFT_PATH));
 	} 
-	else { // not a list or last recording; just a normal file	
+	else { // not a list; just a normal file	
 		switch (pkg->pkg_type) {
 			case PKG_SYS:
 				strcpy(sTemp,SYSTEM_PATH);
@@ -202,13 +197,17 @@ static int getFileHandle (CtnrFile *newFile) {
 				break;
 		}
 	}
-	if (getLastRecording)
-		strcpy(sTemp,lastFilenameRecorded);
-	else {
-		strcat(sTemp,pkg->strHeapStack + newFile->idxFilename);
-		strcat(sTemp,AUDIO_FILE_EXT);
-	}
+	strcat(sTemp,pkg->strHeapStack + newFile->idxFilename);
+	strcat(sTemp,AUDIO_FILE_EXT);
+
 	ret = tbOpen((LPSTR)sTemp,O_RDONLY);
+	if (DEBUG_MODE) {
+		logString(sTemp,BUFFER);
+		if (ret == -1) {
+			strcpy(sTemp,"last file not found");
+			logString(sTemp,ASAP);
+		}
+	}
 	
 	if ((ret >= 0)/* && (pkg->pkg_type > PKG_SYS)*/) {
 		recordStats(sTemp, (long)ret, STAT_OPEN, pkg->pkg_type);
@@ -446,7 +445,7 @@ static int recordAudio(char *pkgName, char *cursor) {
         writeLE32(handle, wrk1, CURRENT_POS);  //meta data version = 1
         writeLE32(handle, metadata_numfields, CURRENT_POS); // 4 byte for num fields
         
-        strcpy(unique_id, TB_SERIAL_NUMBER_ADDR + 4); // skip tsn.
+        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + 4); // skip tsn.
         strcat(unique_id, "_");       
 		longToDecimalString(systemCounts.packageNumber,digits,5);
         strcat(unique_id, digits);
@@ -456,7 +455,7 @@ static int recordAudio(char *pkgName, char *cursor) {
 
 //      add audio item id metadata initial code
 //      need to add org here 
-        strcpy(unique_id, TB_SERIAL_NUMBER_ADDR + 4); // skip tsn.
+        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + 4); // skip tsn.
         strcat(unique_id, "_");       
 		longToDecimalString(systemCounts.recordingNumber,digits,8);
 		strcat(unique_id, digits);
@@ -511,7 +510,6 @@ static int recordAudio(char *pkgName, char *cursor) {
 		strcat(temp,"\x0d\x0a");
 		logString(temp,BUFFER);
 
-		strcpy(lastFilenameRecorded,filepath);
 		ret = 0;  // used to set this based on fileExists() check, but too slow
 	} else {
 		logException(16, filepath,RESET);  //can't open file for new recording
@@ -588,7 +586,6 @@ void markStartPlay(long timeNow, const char * name) {
 
 int writeLE32(int handle, long value, long offset) {
 	int ret = 0;
-	unsigned char wrk;
 	unsigned long wrkl;
     long curpos = lseek(handle, 0, SEEK_CUR);
     if(offset != CURRENT_POS) {
@@ -605,7 +602,6 @@ int writeLE32(int handle, long value, long offset) {
 }
 int writeLE16(int handle, unsigned int value, long offset) {
 	int ret = 0;
-	unsigned char wrk;
 	unsigned long wrkl;
 	long curpos = lseek(handle, 0, SEEK_CUR);
 	if(offset != CURRENT_POS) {
