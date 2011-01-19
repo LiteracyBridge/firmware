@@ -4,7 +4,7 @@
 #ifndef	__TALKINGBOOK_h__
 #define	__TALKINGBOOK_h__
 
-#define VERSION			"v1.42"
+#define VERSION			"v1.50r152"
 #define TB_CAN_WAKE  // hardware that allows wake from sleep/halt
 //IMPORTANT: changes to TB_CAN_WAKE must also be made to system_head.inc!!!
 
@@ -22,7 +22,6 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 //	 * read and write new metadata scheme into audio files
 //	 * take a recording and make a translation on the device (keeping it linked) 
 //	 * copy entire category
-//   * change opening help-loop
 //	 * track playcount and copy count of each package
 //   * auto update VERSION with each new build (or SVN revision)
 //   * recognize when batteries have been changed (not waking from sleep/halt) -- reset clock and whatever else.
@@ -124,6 +123,12 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 // run usb serviceloop[ once and return
 #define USB_CLIENT_SVC_LOOP_ONCE       0
 
+// These definitions are used with rotating system langauges. 
+// They have to be < 0 since >0 is used as a pointer to a text heap for named system packages
+#define SAME_SYSTEM	-1
+#define	PREV_SYSTEM -2
+#define NEXT_SYSTEM -3
+
 typedef enum EnumStartOrEnd EnumStartOrEnd;
 enum EnumStartOrEnd {NONE, STARTING, ENDING, BOTH};
 
@@ -134,7 +139,7 @@ extern int ADMIN_COMBO_KEYS;
 extern int LED_GREEN, LED_RED, LED_ALL;
 extern int MAX_SPEED, NORMAL_SPEED, SPEED_INCREMENT;
 extern int NORMAL_VOLUME, MAX_VOLUME, VOLUME_INCREMENT;
-extern char *BOOT_PACKAGE, *SYSTEM_PATH, *USER_PATH, *LIST_PATH;
+extern char *SYSTEM_ORDER_FILE, *SYSTEM_PATH, *LANGUAGES_PATH, *UI_SUBDIR, *TOPICS_SUBDIR, *USER_PATH, *LISTS_PATH;
 extern char *INBOX_PATH, *OUTBOX_PATH, *NEW_PKG_SUBDIR, *SYS_UPDATE_SUBDIR;
 extern int MAX_PWR_CYCLES_IN_LOG;
 extern char *SYSTEM_VARIABLE_FILE, *LOG_FILE;
@@ -149,7 +154,7 @@ extern int HYPERLINK_SOUND_FILE_IDX, DELETED_FILE_IDX, PRE_COPY_FILE_IDX, POST_C
     POST_PLAY_FILE_IDX;
 extern int BLOCK_START_LEADER, BLOCK_END_LEADER;
 extern long BIT_RATE;
-extern int GREEN_LED_WHEN_PLAYING;
+extern int GREEN_LED_WHEN_PLAYING, LONG_LIST_NAMES;
 extern int INACTIVITY_SECONDS;
 extern int MIC_GAIN_NORMAL, MIC_GAIN_HEADPHONE;
 extern char *USER_CONTROL_TEMPLATE;

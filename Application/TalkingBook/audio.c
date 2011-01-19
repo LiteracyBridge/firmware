@@ -174,28 +174,27 @@ static int getFileHandle (CtnrFile *newFile) {
 	pkg = getPackageFromFile(newFile); // get package that applied to file, rather than context package
 	// This is necessary for user packages inserting system sounds.
 
-	// check for list
-	if (newFile->idxFirstBlockInFile == -1)
-		strcpy(sTemp,LIST_PATH);
-	else if (newFile->idxFilename == -1) {
-		logException(0,0,USB_MODE); // this should never happen -- removed this feature
-	} 
-	else { // not a list; just a normal file	
-		switch (pkg->pkg_type) {
-			case PKG_SYS:
-				strcpy(sTemp,SYSTEM_PATH);
-				strcat(sTemp,pkg->strHeapStack + pkg->idxName);
-				strcat(sTemp,"\\");
-				break;		
-			case PKG_APP:
-				strcpy(sTemp, USER_PATH);
-				strcat(sTemp,pkg->strHeapStack + pkg->idxName);
-				strcat(sTemp,"\\");
-				break;
-			case PKG_MSG:	
-				strcpy(sTemp, USER_PATH);
-				break;
-		}
+	switch (pkg->pkg_type) {
+		case PKG_SYS:
+			strcpy(sTemp,LANGUAGES_PATH);
+			strcat(sTemp,pkg->strHeapStack + pkg->idxName);
+			strcat(sTemp,"/");
+			if (newFile->idxFirstBlockInFile == -1) 	// check for list
+				strcat(sTemp,TOPICS_SUBDIR);
+			else
+				strcat(sTemp,UI_SUBDIR);			
+			break;		
+		case PKG_APP:
+			strcpy(sTemp, USER_PATH);
+			strcat(sTemp,pkg->strHeapStack + pkg->idxName);
+			strcat(sTemp,"/");
+			//USERS CAN'T USE LISTS YET - ONLY THE SYSTEM PACKAGE
+			//if (newFile->idxFirstBlockInFile == -1) 	// check for list
+			//	strcat(sTemp,LISTS_SUBDIR);
+			break;
+		case PKG_MSG:	
+			strcpy(sTemp, USER_PATH);
+			break;
 	}
 	strcat(sTemp,pkg->strHeapStack + newFile->idxFilename);
 	strcat(sTemp,AUDIO_FILE_EXT);
@@ -659,7 +658,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 			strcat(msg,"\x0d\x0a");
 			logString(msg, ASAP);
 */
-			strcpy(STAT_FN, strrchr(filename, '\\') + 1);
+			strcpy(STAT_FN, strrchr(filename, '/') + 1);
 			STAT_FN[strlen(STAT_FN) - 4] = 0; //chop off ".a18"
 		} else {
 			statINIT = 0;
@@ -700,7 +699,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 	case STAT_COPIED:
 // how to eliminate PKG_SYS * PKG_NONE files ??
 
-		strcpy(STAT_FN, strrchr(filename, '\\') + 1);
+		strcpy(STAT_FN, strrchr(filename, '/') + 1);
 		cp = strrchr(STAT_FN, '.');
 		if(cp == NULL)
 			break;

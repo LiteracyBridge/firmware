@@ -52,7 +52,6 @@ processInbox(void) {
 	//       return a message saying nothing new was copied.  If just one thing was new, that is the one that should be played.
 	
 	struct newContent nc;	
-	char strLog[PATH_LENGTH];
 	
 	playBip();
 	setLED(LED_RED,TRUE);
@@ -125,7 +124,7 @@ processNewPackages(void) {
 		}	
 		ret = getcwd((LPSTR)savecwd , sizeof(savecwd) - 1 );
 		ret = chdir((LPSTR)strNewPkgPath);
-		strcat(strNewPkgPath,"\\");  // add back what was removed above
+		strcat(strNewPkgPath,"/");  // add back what was removed above
 	//  process *.a18 files in inbox - category in file name after # OR IN *.txt
 	//  this case may never happen
 	//
@@ -174,7 +173,7 @@ processSystemFiles(void) {
 	
 	strcpy(strSysUpdatePath,INBOX_PATH);
 	strcat(strSysUpdatePath,SYS_UPDATE_SUBDIR);
-	l = (long)copydir((char *)strSysUpdatePath, (char *)"a:\\");  // returns # of items copied
+	l = (long)copydir((char *)strSysUpdatePath, (char *)"a:/");  // returns # of items copied
 	if (l > 1)  // 1 is for the SYS_UPDATE_SUBDIR
 		resetSystem(); // reset to begin new firmware reprogramming or to reload new config/system control
 }
@@ -367,14 +366,17 @@ processDir(char *dirname, struct newContent *pNC) {
 
 static int 
 updateCategory(char *category, char *fnbase, char prefix) {
-	char buffer[80], tmpbuf[80];
+	char buffer[80], tmpbuf[80], path[PATH_LENGTH];
 	int ret;
 	
 // be sure category is in master-list.txt
-	strcpy(buffer, LIST_MASTER);
+	cpyTopicPath(path);
+	strcpy(buffer,path);
+	strcat(buffer,(char *)LIST_MASTER);
+	strcat(buffer,(char *)".txt");
 	strcpy(tmpbuf,category);
 	// Only add category entry if doesn't already exist.
-	// Checking for existence withuot deleting and appending preserves category order.
+	// Checking for existence without deleting and appending preserves category order.
 	ret = findDeleteStringFromFile((char *)NULL, buffer, tmpbuf, 0);
 	if (ret == -1) // not found in file
 		ret = appendStringToFile(buffer, tmpbuf); 
@@ -382,7 +384,8 @@ updateCategory(char *category, char *fnbase, char prefix) {
 // delete new file name or dir name from {category}.txt, 
 // then add it (only want it to appear once)	
 //   int findDeleteStringFromFile(char *path, char *filename, char* string, BOOL shouldDelete)
-	strcpy(buffer, LIST_PATH);
+	cpyListPath(path);
+	strcpy(buffer, path);
 	strcat(buffer, category);
 	strcat(buffer,".txt");
 	
@@ -431,8 +434,8 @@ copydir(char *fromdir, char *todir) {
 	strcpy(from, fromdir);
 	len_from = strlen(from);
 	
-	if(from[len_from-1] != '\\') {
-		strcat(from, "\\");
+	if(from[len_from-1] != '/') {
+		strcat(from, "/");
 		len_from++;
 	}
 	strcat(from, "*");
@@ -440,8 +443,8 @@ copydir(char *fromdir, char *todir) {
 	strcpy(to, todir);
 	len_to = strlen(to);
 	ret = mkdir((LPSTR)to);	// just to be safe
-	if(to[len_to-1] != '\\') {
-		strcat(to, "\\");
+	if(to[len_to-1] != '/') {
+		strcat(to, "/");
 		len_to++;
 	}
 	strcpy(fromfind,from);
@@ -476,7 +479,8 @@ copydir(char *fromdir, char *todir) {
 	from[len_from] = 0;
 	to[len_to]= 0;
 	fret += copyfiles(from, to);
-	strcpy(lastdir,LIST_PATH+2);
+	cpyTopicPath(from);
+	strcpy(lastdir,from+2);
 	if ((len = strlen(lastdir)))
 		lastdir[len-1] = 0; // remove last '\'
 	if (strstr(fromdir,lastdir))
@@ -498,8 +502,8 @@ static int copyfiles(char *fromdir, char *todir)
 	strcpy(from, fromdir);
 	len_from = strlen(from);
 	
-	if(from[len_from-1] != '\\') {
-		strcat(from, "\\");
+	if(from[len_from-1] != '/') {
+		strcat(from, "/");
 		len_from++;
 	}
 	strcat(from, "*.*");
@@ -507,8 +511,8 @@ static int copyfiles(char *fromdir, char *todir)
 	strcpy(to, todir);
 	len_to = strlen(to);
 //	mkdir(to);	// just to be safe
-	if(to[len_to-1] != '\\') {
-		strcat(to, "\\");
+	if(to[len_to-1] != '/') {
+		strcat(to, "/");
 		len_to++;
 	}
 			
@@ -552,7 +556,7 @@ int getMetaCat(char *filename, char *category)
 	unsigned char buf[128];
 	int i, j;
 
-	fd = open(filename, 0);
+	fd = open((char *)filename, 0);
 	if(fd < 0) {
 		return(ret);
 	}

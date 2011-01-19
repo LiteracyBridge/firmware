@@ -523,10 +523,21 @@ void mainLoop (void) {
 		
 		// check if need to load in a new package
 		if (context.queuedPackageType > PKG_NONE) {
-			if (context.queuedPackageNameIndex != -1)
+			if (context.queuedPackageNameIndex >= 0)
 				loadPackage(context.queuedPackageType, pkgSystem.strHeapStack + context.queuedPackageNameIndex);
-			else
-				loadPackage(context.queuedPackageType, NULL);
+			else {
+				switch (context.queuedPackageNameIndex) {
+					case SAME_SYSTEM:
+						loadPackage(context.queuedPackageType, NULL);
+						break;
+					case PREV_SYSTEM:
+						loadPackage(context.queuedPackageType,prevSystem());
+						break;
+					case NEXT_SYSTEM:
+						loadPackage(context.queuedPackageType,nextSystem());
+						break;
+				}
+			}
 		}
 		
 		// check for start or end event
@@ -586,7 +597,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 	BOOL reposition = FALSE;
 	BOOL isTooFar = FALSE;
 	ListItem *list, *tempList;
-	char filename[PATH_LENGTH];
+	char filename[PATH_LENGTH],filepath[PATH_LENGTH];
 	char *cursor, *cursor2;
 	CtnrFile *replayFile;
 		
@@ -650,7 +661,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 					context.queuedPackageNameIndex = destination;
 				} else { // list->listType != LIST_OF_PACKAGES
 					// play sound of subject
-					newFile = getListFile(filename);
+					newFile = getListFileLong(filename);
 					newTime = 0;
 					reposition = TRUE;
 				}
@@ -683,12 +694,16 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			stop();
 			tempList = &context.package->lists[destination];
 			getListFilename(filename,destination,FALSE);
-			cursor = getCurrentList(tempList);
+			if (tempList->currentFilePosition == -1) // haven't picked a msg in category yet --> copy the whole category
+				cursor = NULL;
+			else
+				cursor = getCurrentList(tempList);
 			if (PRE_COPY_FILE_IDX)
 				insertSound(&pkgSystem.files[PRE_COPY_FILE_IDX],NULL,TRUE);  
 			ret = d2dCopy((const char *)cursor,(const char *)filename);
 			if (ret == 0 && POST_COPY_FILE_IDX) 
 				insertSound(&pkgSystem.files[POST_COPY_FILE_IDX],NULL,TRUE); 
+			//TODO: return copying device to some other point.
 //			newBlock = &context.package->blocks[aux];
 //			newTime = newBlock->startTime;
 //			reposition = TRUE;
@@ -698,8 +713,9 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			stop();
 			tempList = &context.package->lists[destination];
 			getListFilename(filename,destination,TRUE);
-			cursor = getCurrentList(tempList);			
-			ret = findDeleteStringFromFile(LIST_PATH,filename,cursor,TRUE);
+			cursor = getCurrentList(tempList);		
+			cpyListPath(filepath);	
+			ret = findDeleteStringFromFile(filepath,filename,cursor,TRUE);
 			tempList->currentFilePosition = -1; // forces next list action to reload
 			if (ret != -1)
 				ret = deletePackage(cursor);
@@ -1064,7 +1080,6 @@ void loadPackage(int pkgType, const char * pkgName) {
 	CtnrBlock *block;
 	Action *action;
 	char filePath[PATH_LENGTH];
-	char *fileName;
 	long timeNow;
 	char str[50];
 		
@@ -1096,7 +1111,7 @@ void loadPackage(int pkgType, const char * pkgName) {
 		switch (pkgType) {
 			case PKG_SYS:
 				context.package = &pkgSystem;
-				strcpy(filePath,SYSTEM_PATH);
+				strcpy(filePath,LANGUAGES_PATH);
 				//strcat(filePath,pkgName);
 				//strcat(filePath,".txt"); //todo: move to config
 				break;
@@ -1110,9 +1125,17 @@ void loadPackage(int pkgType, const char * pkgName) {
 		}
 		strcpy(str,pkgName);
 		strcat(filePath,pkgName);
-		strcat(filePath,"\\");
-		fileName = filePath + strlen(filePath);
+		strcat(filePath,"/");
+		if (pkgType == PKG_SYS)
+			strcat(filePath,UI_SUBDIR);
 		strcat(filePath,PKG_CONTROL_FILENAME);
+
+		ret = fileExists((LPSTR)filePath);
+		if(ret == 0) {
+			// if no language-specific control file, just use the standard one
+			strcpy(filePath,LANGUAGES_PATH);
+			strcat(filePath,PKG_CONTROL_FILENAME);
+		}
 		pkg = context.package;
 		//resetPackage(pkg);
 		memset(pkg,0,sizeof(CtnrPackage));

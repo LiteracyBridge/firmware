@@ -3,8 +3,8 @@
 #define STAT_TIMEPLAYED 2
 #define STAT_COPIED     3
 
-#define STAT_DIR  "a:\\stats\\" 
-#define OSTAT_DIR "a:\\ostat\\"
+#define STAT_DIR  "a:/system/stats/" 
+#define OSTAT_DIR "a:/system/ostats/"
 
 void recordStats(char *filename, unsigned long handle, unsigned int why, unsigned long data);
 

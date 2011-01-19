@@ -282,7 +282,7 @@ long getFilePosition() {
 }
 
 void trimFile(char * filePath, unsigned long frameStart, unsigned long frameEnd) {
-	const char tempFilename[15] = "a:\\trimmed.tmp";
+	const char tempFilename[15] = "a:/trimmed.tmp";
 	const int wordsHeaderSize = 3;
 	const int wordsPerFrame = 40;
 	const int bigBufferSize = wordsPerFrame * 10;

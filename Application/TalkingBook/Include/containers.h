@@ -230,5 +230,6 @@ extern Action *getBlockActions(CtnrBlock *);
 extern Action *getListActions(ListItem *);
 extern int replaceStack (char *, CtnrPackage *);
 extern CtnrFile *getListFile(char *); 
+extern CtnrFile *getListFileLong(char *);
 extern void resetPackage(CtnrPackage *);
 #endif

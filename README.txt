@@ -1,8 +1,18 @@
 v1.50 (ECHOES release)
+* Breaks compatibility with prior versions! *
+ - Categories and their messages/packages are now language-specific.
+   Changing system language changes the list of categories and messages heard in each category.
+   This required a major change to the content directory layout.
+ - Aside from what was necessary for the above, other simplifications made to directory layout.
  - During PCB test procedure, become USB device with no activity
    (which makes updates during pre-assembly easier when no config/serial# exists
     and when no keypad is attached to force into USB mode) 
-
+ - Adds long category recordings for improved usability to find messages in each category
+   (Each recording asks user to press up arrow to listen to messages about the specific category.)
+ - System language control file can now use the same default control.txt in the languages\ directory.
+   But adding a control.txt file inside the {language}\instructions\ directory will override the default.
+ - Setting the available system languages and their order is now done in \languages\languages.txt
+ - Setting the available categories for each language and the order is now \{language}\topics\topics.txt
 
 v1.41c (MOFA/VSO customer firmware with bug fixes)
  - now incorporates PCB test procedure and starts when config or serial num is missing

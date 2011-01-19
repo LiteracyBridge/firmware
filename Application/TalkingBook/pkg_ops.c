@@ -70,7 +70,7 @@ int deletePackage(char * packageName) {
 			cursor = packageName + strlen(prefixCursor);
 			strcpy(path,USER_PATH);
 			strcat(path,cursor);
-			strcat(path,"\\");
+			strcat(path,"/");
 			strcat(strLog,cursor);
 			logString(strLog,ASAP);
 			strcpy(filename,path);

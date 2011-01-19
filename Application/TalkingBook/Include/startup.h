@@ -4,11 +4,17 @@
 #ifndef	__STARTUP_h__
 #define	__STARTUP_h__
 
+#define MAX_SYSTEMS			20
+
 // set BAD_MEMBRANE_SW for the old membrane switch that A-Tech has
 //#define OLD_MEMBRANE_SW 
 
 extern void startUp(void);
 extern void setDefaults(void);
+extern char *nextSystem(void);
+extern char *prevSystem(void); 
+extern unsigned int GetMemManufacturer(void);
+
 #ifndef OLD_MEMBRANE_SW 
 
 //#ifdef TB_CAN_WAKE

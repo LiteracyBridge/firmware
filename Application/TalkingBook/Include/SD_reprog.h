@@ -11,7 +11,7 @@
 #include "./Application\TalkingBook\Include\talkingbook.h"
 #include "./Application\TalkingBook\Include\files.h"
 
-#define FIRMWARE_PATH	"a:/Firmware/"
+#define FIRMWARE_PATH	"a:/system/"
 #define UPDATE_FP    	"a:/"
 #define SERIAL_FN  		"*.tsn"
 #define ERASE_SN_CODE	"-erase-"

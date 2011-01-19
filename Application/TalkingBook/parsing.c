@@ -392,17 +392,14 @@ static BOOL parseCreateAction (char *line, Action *action, int *actionCount, cha
 					action[*actionCount].aux = PKG_MSG;
 				cursor = strchr(strAction,'>');
 				if (cursor == strAction) // "<%>" indicates current system package
-					action[*actionCount].destination = -1;
+					action[*actionCount].destination = SAME_SYSTEM;
 				else {
-					if (cursor)
-						*cursor = 0;
-					index = addTextToPkgHeap(strAction,context.package);
-					if (index != -1) 
-						action[*actionCount].destination = index;
-					else {
-						ret = FALSE;
-						logException(4,0,0); //todo: text heap is full
-					}
+					if (*strAction == '+')
+						action[*actionCount].destination = NEXT_SYSTEM;
+					else if (*strAction == '-')
+						action[*actionCount].destination = PREV_SYSTEM;
+					else
+						logException(8,strAction-2,USB_MODE);
 				}
 			}
 		}
@@ -827,7 +824,9 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 							close(fileHandle);
 							logException(8,line,(context.package == &pkgSystem)?USB_MODE:RESET);//syntax error
 						}
-						charCursor += 2;  // skip any single char delimiter before list name
+						charCursor++;
+						if (*charCursor != '[') 
+							charCursor++; // skip any single char delimiter before list name, unless already at label
 						while (*charCursor && isspace(*charCursor))
 							charCursor++;
 						if (*charCursor != 0) {
@@ -851,14 +850,27 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 									strcpy(tempBuffer,"ListItem#");
 									longToDecimalString((long)pkg->countLists,tempBuffer+strlen(tempBuffer),2);
 								    logException(8,tempBuffer,(context.package == &pkgSystem)?USB_MODE:RESET); //todo: syntax error in control track
+								} else if (charCursor == charCursor2){
+									// '[' immediate follows list type -- no list filename
+									if (list->listType == LIST_OF_LISTS) { // no list filename needed for Lists of Lists (they use config master list)
+										strcpy(list->filename,LIST_MASTER);
+										charCursor++; //advance cursor from '[' to first character of list label
+									}
+									else {
+										// Lists of Packages must have list filename
+										strcpy(tempBuffer,"No list name");
+										longToDecimalString((long)pkg->countLists,tempBuffer+strlen(tempBuffer),2);
+									    logException(8,tempBuffer,(context.package == &pkgSystem)?USB_MODE:RESET); //todo: syntax error in control track
+									}
+								} else {
+									while (isspace(*(charCursor2-1)) && charCursor2 >= charCursor)
+										charCursor2--;							
+									*charCursor2++ = 0; // set null mark and move back to space or [
+									strcpy(list->filename,charCursor);
+									charCursor = charCursor2;  
+									for (;isspace(*charCursor);charCursor++); // move cursor back to '['
+									charCursor++; // move to first character of label
 								}
-								while (isspace(*(charCursor2-1)) && charCursor2 >= charCursor)
-									charCursor2--;							
-								*charCursor2++ = 0; // set null mark and move back to space or [
-								strcpy(list->filename,charCursor);
-								charCursor = charCursor2;  
-								for (;isspace(*charCursor);charCursor++); // move cursor back to '['
-								charCursor++; // move to first character of label
 							}
 							charCursor2 = strchr(charCursor,']');
 							if (charCursor2 != NULL)

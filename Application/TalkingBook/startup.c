@@ -16,7 +16,8 @@
 #include <ctype.h>
 
 #define SYSTEM_HEAP_SIZE 512	//config file values
-#define CONFIG_FILE		"a://config.txt"
+#define CONFIG_FILE		"a://system/config.txt"
+#define ALT_CONFIG_FILE		"a://config.txt"
 
 extern int testPCB(void);
 extern unsigned int SetSystemClockRate(unsigned int);
@@ -26,6 +27,8 @@ extern INT16 SD_Initial(void);
 static char * addTextToSystemHeap (char *);
 static void loadDefaultUserPackage(void);
 static int loadConfigFile (void);
+static void loadSystemNames(void);
+static char *currentSystem(void);
 
 // These capitalized variables are set in the config file.
 APP_IRAM int KEY_PLAY, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_SELECT, KEY_STAR, KEY_HOME, KEY_PLUS, KEY_MINUS;
@@ -33,7 +36,7 @@ APP_IRAM int ADMIN_COMBO_KEYS;
 APP_IRAM int LED_GREEN, LED_RED, LED_ALL;
 APP_IRAM int MAX_SPEED, NORMAL_SPEED, SPEED_INCREMENT;
 APP_IRAM int NORMAL_VOLUME, MAX_VOLUME, VOLUME_INCREMENT;
-APP_IRAM char *BOOT_PACKAGE, *SYSTEM_PATH, *USER_PATH, *LIST_PATH;
+APP_IRAM char *SYSTEM_ORDER_FILE, *SYSTEM_PATH, *LANGUAGES_PATH, *UI_SUBDIR, *TOPICS_SUBDIR, *USER_PATH, *LISTS_PATH;
 APP_IRAM char *INBOX_PATH, *OUTBOX_PATH,*NEW_PKG_SUBDIR, *SYS_UPDATE_SUBDIR;
 APP_IRAM int MAX_PWR_CYCLES_IN_LOG;
 APP_IRAM char *SYSTEM_VARIABLE_FILE, *LOG_FILE;
@@ -56,11 +59,16 @@ APP_IRAM char *MACRO_FILE;
 APP_IRAM int VOLTAGE_SAMPLE_FREQ_SEC, USB_CLIENT_POLL_INTERVAL;
 APP_IRAM int DEBUG_MODE, LOG_KEYS;
 APP_IRAM unsigned int CLOCK_RATE;
+APP_IRAM int LONG_LIST_NAMES;
 //if most recent 16 voltage readings are below vCur_1 (vThresh_1 == 0xffff),
 //   subtract 1 from vCur_1 and zero vThreah_1
 APP_IRAM unsigned int vCur_1;
 APP_IRAM int vThresh_1;
 APP_IRAM unsigned int MEM_TYPE;   // sst or mx
+
+APP_IRAM static char *pSystemNames[MAX_SYSTEMS];
+APP_IRAM static int intCurrentSystem;
+APP_IRAM static int totalSystems;
 
 void setDefaults(void) {
 	// This function sets variables that are usually set in config file, 
@@ -193,7 +201,8 @@ void startUp(void) {
 		logRTC();  
 	}
 //#endif
-	loadPackage(PKG_SYS,BOOT_PACKAGE);	
+	loadSystemNames(); 
+	loadPackage(PKG_SYS,currentSystem());	
 	SetSystemClockRate(CLOCK_RATE); // either set in config file or the default 48 MHz set at beginning of startUp()
 	mainLoop();
 }
@@ -237,8 +246,11 @@ int loadConfigFile(void) {
 		MACRO_FILE = 0; // default case if no MACRO_FILE listed
 		handle = tbOpen((unsigned long)(CONFIG_FILE),O_RDONLY);
 		if (handle == -1) {
-			ret = -1;
-			goodPass = 0; //NOTE:can't be logged if log file comes from config file
+			handle = tbOpen((unsigned long)(ALT_CONFIG_FILE),O_RDONLY);
+			if (handle == -1) {
+				ret = -1;
+				goodPass = 0; //NOTE:can't be logged if log file comes from config file
+			}
 		}
 		if (goodPass)
 			getLine(-1,0);  // reset in case at end from prior use
@@ -271,10 +283,13 @@ int loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"NORMAL_VOLUME")) NORMAL_VOLUME=strToInt(value);
 				else if (!strcmp(name,(char *)"SPEED_INCREMENT")) SPEED_INCREMENT=strToInt(value);
 				else if (!strcmp(name,(char *)"VOLUME_INCREMENT")) VOLUME_INCREMENT=strToInt(value);
-				else if (!strcmp(name,(char *)"BOOT_PACKAGE")) BOOT_PACKAGE=addTextToSystemHeap(value);
+				else if (!strcmp(name,(char *)"SYSTEM_ORDER_FILE")) SYSTEM_ORDER_FILE=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"SYSTEM_PATH")) SYSTEM_PATH=addTextToSystemHeap(value);
+				else if (!strcmp(name,(char *)"LANGUAGES_PATH")) LANGUAGES_PATH=addTextToSystemHeap(value);
+				else if (!strcmp(name,(char *)"UI_SUBDIR")) UI_SUBDIR=addTextToSystemHeap(value);
+				else if (!strcmp(name,(char *)"TOPICS_SUBDIR")) TOPICS_SUBDIR=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"USER_PATH")) USER_PATH=addTextToSystemHeap(value);
-				else if (!strcmp(name,(char *)"LIST_PATH")) LIST_PATH=addTextToSystemHeap(value);
+				else if (!strcmp(name,(char *)"LISTS_PATH")) LISTS_PATH=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"INBOX_PATH")) INBOX_PATH=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"OUTBOX_PATH")) OUTBOX_PATH=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"NEW_PKG_SUBDIR")) NEW_PKG_SUBDIR=addTextToSystemHeap(value);
@@ -317,6 +332,7 @@ int loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"DEBUG_MODE")) DEBUG_MODE=strToInt(value);
 				else if (!strcmp(name,(char *)"LOG_KEYS")) LOG_KEYS=strToInt(value);
 				else if (!strcmp(name,(char *)"CLOCK_RATE")) CLOCK_RATE = strToInt(value);
+				else if (!strcmp(name,(char *)"LONG_LIST_NAMES")) LONG_LIST_NAMES=strToInt(value);
 		}
 	}
 	if (!goodPass) {
@@ -391,3 +407,50 @@ unsigned int GetMemManufacturer()
 
 
 }
+
+
+static void loadSystemNames() {
+	int handle;
+	char *cursorRead;
+	char systemOrderFile[PATH_LENGTH];
+	char buffer[READ_LENGTH+1];
+	
+	strcpy(systemOrderFile,LANGUAGES_PATH);
+	strcat(systemOrderFile,SYSTEM_ORDER_FILE);	
+	strcat(systemOrderFile,".txt"); //todo: move to config file	
+	handle = tbOpen((LPSTR)systemOrderFile,O_RDONLY);
+	if (handle == -1) {
+		logException(33,systemOrderFile,USB_MODE);
+	}
+	getLine(-1,0);  // reset in case at end from prior use
+	while ((cursorRead = getLine(handle,buffer)) && (intCurrentSystem < MAX_SYSTEMS))	
+		pSystemNames[intCurrentSystem++] = addTextToSystemHeap(cursorRead);
+	totalSystems = intCurrentSystem;
+	intCurrentSystem = 0;
+}
+
+static char *currentSystem() {
+	char * ret;
+	
+	ret = pSystemNames[intCurrentSystem];
+	return ret;
+}
+
+char *nextSystem() {
+	char * ret;
+	
+	if (++intCurrentSystem == totalSystems)
+		intCurrentSystem = 0;
+	ret = pSystemNames[intCurrentSystem];
+	return ret;
+}
+
+char *prevSystem() {
+	char * ret;
+	
+	if (--intCurrentSystem == -1)
+		intCurrentSystem = totalSystems - 1;
+	ret = pSystemNames[intCurrentSystem];
+	return ret;
+}
+

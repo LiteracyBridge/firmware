@@ -7,21 +7,43 @@
 #include "Include/containers.h"
 #include "Include/lists.h"
 #include "Include/device.h"
+#include <ctype.h>
 
 extern APP_IRAM unsigned int vCur_1;
 extern void refuse_lowvoltage(int);
 
+static void catLangDir(char *); 
 static int openList(ListItem *, char *);
-//static int moveToTop(char *, char *); --- not currently used
+
+static void catLangDir(char * strOut) {
+	strcat(strOut,pkgSystem.strHeapStack + pkgSystem.idxName);
+	strcat(strOut,"/");	
+}
+
+void cpyListPath(char * strOut) {
+	strcpy(strOut,LISTS_PATH);
+	catLangDir(strOut);	
+}
+
+void cpyTopicPath(char * strOut) {
+	strcpy(strOut,LANGUAGES_PATH);
+	catLangDir(strOut);	
+	strcat(strOut,TOPICS_SUBDIR);	
+}
 
 static int openList(ListItem *list, char *outFilename) {
 	int ret;
 	char filename[FILE_LENGTH];
+	char filepath[PATH_LENGTH];
 	
 	stop();
-	ret = tbChdir((LPSTR)LIST_PATH);
+	if (list->listType == LIST_OF_LISTS)
+		cpyTopicPath(filepath);
+	else //LIST_OF_PACKAGES
+		cpyListPath(filepath);
+	ret = tbChdir((LPSTR)filepath);
 	if (ret == -1) {
-		logException(5,LIST_PATH,RESET); //todo: package name or path does not exist
+		logException(5,filepath,RESET); //todo: package name or path does not exist
 	}
 	if (list->filename[0])
 		strcpy(filename,list->filename);
@@ -240,23 +262,6 @@ int getListFilename(char * filename, int idList, BOOL addExtension) {
 	return 0;	
 }
 
-/*
-//not currently used
-static int moveToTop(char *filename, char * string) {
-	// filename should not include path
-	int ret;
-	char filepath[60];
-	
-	ret = findDeleteStringFromFile(LIST_PATH, filename, string, TRUE);
-	if (ret != -1) {
-		strcpy(filepath,LIST_PATH);
-		strcat(filepath,filename);
-		ret = appendStringToFile(filename, string);
-	}
-	return ret;
-}
-*/
-
 int insertIntoList(ListItem *list, long posInsert, char * string) {
 	//todo: create a version without a roundtrip between single/dbl-byte chars	
 	int rHandle, wHandle, ret, i, bytesToWrite;
@@ -267,11 +272,10 @@ int insertIntoList(ListItem *list, long posInsert, char * string) {
 
 	if(vCur_1 < V_MIN_SDWRITE_VOLTAGE) {
 		refuse_lowvoltage(0);
-		return;
+		return -1;
 	}
-
-	strcpy(rFilepath,LIST_PATH);
-	strcpy(wFilepath,LIST_PATH);
+	cpyListPath(rFilepath);
+	strcpy(wFilepath,rFilepath);
 	strcat(wFilepath,"temp.txt");  
 	rHandle = openList(list,rFilepath+strlen(rFilepath));
 	wHandle = tbOpen((LPSTR)wFilepath,O_CREAT|O_TRUNC|O_WRONLY);
