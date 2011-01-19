@@ -50,7 +50,10 @@ FlashReprogHimem(flash *fp) {
 		}
 		goto prog_himem;
 	}
-	
+
+	__asm__("irq off");
+	__asm__("fiq off");
+		
 	if(fp->Flash_type == MX_MID) {		
 		for(fp->pflash = REPROG_STAND_ALONE; fp->pflash < 0xb0000; fp->pflash += FLASH_ERASE_SIZE) {
 			fp->erasesector(fp);

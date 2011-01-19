@@ -172,6 +172,10 @@ void write_app_flash(int *bufp, int len, unsigned int fill)
 	if(len > 4096)
 		len = 4096;
 	
+	__asm__("irq off");
+	__asm__("fiq off");
+
+	
 	newfp->pflash = (unsigned int *)TB_SERIAL_NUMBER_ADDR;
 	if(newfp->Flash_type == MX_MID) {	// MX memory, erase 1 4k chunk at 0x37000
 		newfp->erasesector(newfp);
@@ -185,11 +189,16 @@ void write_app_flash(int *bufp, int len, unsigned int fill)
 	for(i=0; i<len; i++) {
 		(*newfp->writeword)(newfp, TB_SERIAL_NUMBER_ADDR + i, bufp[i]);
 	}
-	if(fill == 0xffff)
+	if(fill == 0xffff) {
+		__asm__("irq on");	
+		__asm__("fiq on");
 		return;
+	}
 	for(; i<4095; i++) {
 		(*newfp->writeword)(newfp, TB_SERIAL_NUMBER_ADDR + i, fill);
-	}
+	} 
+	__asm__("irq on");	
+	__asm__("fiq on");
 }
 // define app flash data, 4k located at 0x37000 (TB_SERIAL_NUMBER_ADDR)
 	asm("APP_FLASH_DATA:	.section .data,.addr="TB_SERIAL_NUMBER_ADDR_TEXT);
