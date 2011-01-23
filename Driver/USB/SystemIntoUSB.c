@@ -169,10 +169,10 @@ int SystemIntoUDisk(unsigned int serviceloop)
 	SetSystemClockRate(48);
 
 	if(serviceloop) {
-		if (serviceloop == USB_CLIENT_SVC_LOOP_CONTINUOUS) { //log before unmounting disk
-			strcpy(strLog, "entering USB Device Mode");	
-			logString(strLog, ASAP);
-		}			
+		//log before unmounting disk
+		strcpy(strLog, "entering USB Device Mode");	
+		logString(strLog, ASAP);
+			
 		R_NAND_Present=0;
 		MaxLUN = 0;
 		R_SDC_Present=1;
@@ -230,10 +230,6 @@ xxx:
 	else // for USB before reading config file, or if config corrupted
 		setLED(0x200,TRUE);		
 		
-	if (serviceloop != USB_CLIENT_SVC_LOOP_CONTINUOUS) { //already logged this for continuous loop before unmounting
-		strcpy(strLog, "entering USB Device Mode");	
-		logString(strLog, ASAP);
-	}			
 	USB_ServiceLoop(1);
 
 	*P_USBD_Config=0x00;
