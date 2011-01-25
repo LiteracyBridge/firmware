@@ -13,6 +13,7 @@
 #include "Include/SD_reprog.h"
 #include "Include/mainLoop.h"
 #include "Include/startup.h"
+#include "Include/filestats.h"
 #include <ctype.h>
 
 #define SYSTEM_HEAP_SIZE 512	//config file values
@@ -204,6 +205,24 @@ void startUp(void) {
 	loadSystemNames(); 
 	loadPackage(PKG_SYS,currentSystem());	
 	SetSystemClockRate(CLOCK_RATE); // either set in config file or the default 48 MHz set at beginning of startUp()
+
+	unlink (STAT_DIR SNCSV);
+	strcpy(buffer,getDeviceSN(1));
+	strcat(buffer, ",");
+	longToDecimalString(systemCounts.powerUpNumber, strCounts, 4); 
+	strcat(buffer, strCounts);
+	
+	{
+		int ret, bytesToWrite;
+		char line[80];
+		ret = open(STAT_DIR SNCSV, O_RDWR|O_CREAT);
+		if (ret >= 0) {
+			bytesToWrite = convertDoubleToSingleChar(line,buffer,TRUE);
+			write(ret, (unsigned long)line<<1, bytesToWrite);
+			close(ret);
+		}
+	}
+	
 	mainLoop();
 }
 

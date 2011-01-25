@@ -6,6 +6,11 @@
 #define STAT_DIR  "a:/system/stats/" 
 #define OSTAT_DIR "a:/system/ostats/"
 
+#define CLI_STAT_DIR "b:/system/stats/" 
+#define CLI_OSTAT_DIR "b:/system/ostats/"
+
+#define SNCSV "SN.csv"
+
 void recordStats(char *filename, unsigned long handle, unsigned int why, unsigned long data);
 
 struct ondisk_filestats {

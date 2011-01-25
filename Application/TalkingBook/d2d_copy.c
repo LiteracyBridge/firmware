@@ -157,7 +157,8 @@ static void copyListAudio(const char * listName) {
 		logString(strLog,BUFFER);
 		ret = _findnext(&file_info);
 	}
-	exchangeStats();
+//	exchangeStats();
+	exchangeStatsCSV();
 	setUSBHost(FALSE);
 	return;
 }
@@ -223,4 +224,160 @@ static void exchangeStats() {
 // Logic for which device has the most current stats for devices they both have connected to goes here
 //
 
+}
+
+static
+void exchangeStatsCSV() {
+//
+// running as usb host, A: is usb host sd card, B: is usb client sd card
+// assumes a device keeps its stats in a STAT_DIR directory 
+//         a device keeps stats from other devics in a OSTAT_DIR directory
+// create b:/OSTAT_DIR/"my serial number".csv with one line per file that has stats
+// create a:/OSTAT_DIR/"other serial number".csv with one line per file that has stats
+//   no third device stats yet
+
+	char strLog[PATH_LENGTH], filename[PATH_LENGTH], to[PATH_LENGTH], *cp;
+	int ret, retCopy, rHandle, wrk, bytesToWrite, i, j;
+	struct f_info file_info;
+	int hoststats, clientstats;
+	
+//
+//  for every file in a:/system/stats add a csv line in b:/ostats/host_serial_number.csv
+//     the first line will be host_serial_number,cycle number
+
+	mkdir((LPSTR)CLI_OSTAT_DIR);	
+	strcpy(to, CLI_OSTAT_DIR);
+//	mkdir("a:/b/system/ostats");  // remove after testing
+//	strcpy(to, "a:/b/system/ostats/");  // remove after testing with a b folder on a:
+	
+	strcat(to, TB_SERIAL_NUMBER_ADDR);
+	strcat(to, ".csv");
+	fileCopy(STAT_DIR SNCSV, to); // will create to or truncate
+	
+	hoststats = open((LPSTR)to, O_RDWR);
+	if(hoststats < 0) {
+		sprintf(strLog, "Cannot create %s - copying stats failed", to);
+		logString(strLog ,ASAP);
+		return;
+	}
+	lseek(hoststats, 0, SEEK_END);
+
+	strcpy(filename,STAT_DIR); 
+	strcat(filename,"*.*");
+	ret =_findfirst((LPSTR)filename, &file_info, D_FILE);
+	for (;ret >= 0; ret = _findnext(&file_info)) {
+		struct ondisk_filestats tmpstats = {0};
+		
+		if (!strcmp(file_info.f_name, SNCSV)) {
+			continue;
+		}
+		strcpy(filename,STAT_DIR); 
+		strcat(filename,file_info.f_name);
+				
+		rHandle = open((LPSTR)filename,O_RDONLY);	
+		if(rHandle >= 0) {
+			retCopy = read(rHandle, (UINT32)&tmpstats << 1, sizeof(tmpstats));
+			close(rHandle);
+			sprintf(to,"%s,%lu,%lu,%lu",
+					file_info.f_name,
+					tmpstats.stat_num_opens,
+					tmpstats.stat_num_completions,
+					tmpstats.stat_num_copies);
+					
+			bytesToWrite = convertDoubleToSingleChar(filename,to,TRUE);
+			
+			retCopy = write(hoststats, (UINT32)filename << 1, bytesToWrite);
+		}
+			
+		logString(to,BUFFER);		
+	}
+	
+	close(hoststats);
+
+	
+//  from b:\stats\*.* create a:\ostat\usbclientname.csv
+//  for every file in b:/system/stats add a csv line in a:/ostats/host_serial_number.csv
+//     the first line will be client_serial_number,cycle number
+
+// find out who client is
+	ret = open(CLI_STAT_DIR SNCSV, O_RDONLY);
+//	ret = open("a:/b/system/stats/SN.csv", O_RDONLY);  // for testing remove
+	if(ret < 0) {
+		sprintf(strLog, "Cannot create %s - copying client stats failed", to);
+		logString(strLog ,ASAP);
+		return;
+	}
+	wrk = read(ret, (unsigned long)&strLog << 1, sizeof(strLog));
+	close(ret);
+	
+	if(wrk <= 0) {
+		sprintf(strLog, "Cannot read %s - copying client stats failed", CLI_STAT_DIR SNCSV);
+		logString(strLog ,ASAP);
+		return;
+	}
+			
+	strcpy(to, OSTAT_DIR);	
+	i = strlen(to);
+	for(j=0; j<wrk; j++) {
+		to[i] = strLog[j] & 0xff;
+		if(to[i] == ',') 
+			to[i] = 0;
+		if(to[i++] == 0)
+			break;
+		to[i] = strLog[j] >> 8;
+		if(to[i] == ',') 
+			to[i] = 0;
+		if(to[i++] == 0)
+			break;
+	}
+	strcat(to, ".csv");
+	
+	fileCopy(CLI_STAT_DIR SNCSV, to); // will create to or truncate
+//	fileCopy("a:/b/system/stats/SN.csv", to);  // for testing , remove
+	
+	clientstats = open((LPSTR)to, O_RDWR);
+	if(clientstats < 0) {
+		sprintf(strLog, "Cannot create %s - copying client stats failed", to);
+		logString(strLog ,ASAP);
+		return;
+	}
+	lseek(clientstats, 0, SEEK_END);
+	
+	strcpy(filename,CLI_STAT_DIR);
+//	strcpy(filename, "a:/b/system/stats/");   // for testing on folder a:/b   remove for normal use
+	
+	strcat(filename,"*.*");
+	ret =_findfirst((LPSTR)filename, &file_info, D_FILE);
+	for (;ret >= 0; ret = _findnext(&file_info)) {
+		struct ondisk_filestats tmpstats = {0};
+		
+		strcpy(filename,CLI_STAT_DIR); 
+//		strcpy(filename, "a:/b/system/stats/");   // for testing on folder a:/b   remove for normal use
+		strcat(filename,file_info.f_name);
+				
+		if (!strcmp(file_info.f_name, SNCSV)) {
+			continue;
+		}
+		
+		rHandle = open((LPSTR)filename,O_RDONLY);	
+		if(rHandle >= 0) {
+			retCopy = read(rHandle, (UINT32)&tmpstats << 1, sizeof(tmpstats));
+			close(rHandle);
+			sprintf(to,"%s,%lu,%lu,%lu",
+					file_info.f_name,
+					tmpstats.stat_num_opens,
+					tmpstats.stat_num_completions,
+					tmpstats.stat_num_copies);
+					
+			bytesToWrite = convertDoubleToSingleChar(filename,to,TRUE);
+
+			retCopy = write(clientstats, (UINT32)filename << 1, bytesToWrite);
+		}	
+				
+		logString(to,BUFFER);
+	}
+	close(clientstats);
+//	
+// Logic for which device has the most current stats for devices they both have connected to goes here
+//
 }
