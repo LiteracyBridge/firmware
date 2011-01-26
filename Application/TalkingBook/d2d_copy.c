@@ -163,6 +163,7 @@ static void copyListAudio(const char * listName) {
 	return;
 }
 
+#if 0
 static void exchangeStats() {
 //
 // exchange stats 
@@ -225,6 +226,7 @@ static void exchangeStats() {
 //
 
 }
+#endif
 
 static
 void exchangeStatsCSV() {

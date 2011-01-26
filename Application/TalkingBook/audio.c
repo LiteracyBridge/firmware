@@ -676,8 +676,8 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 			if(stat_pkg_type > PKG_SYS) {	
 				
 				strcpy(statpath, STAT_DIR);
-				strcat(statpath, getDeviceSN(0));
-				strcat(statpath, "~");
+//				strcat(statpath, getDeviceSN(0));
+//				strcat(statpath, "~");
 				strcat(statpath, STAT_FN); 
 						
 				stathandle = tbOpen((LPSTR)statpath, O_CREAT|O_RDWR);
