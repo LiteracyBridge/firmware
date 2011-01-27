@@ -10,13 +10,14 @@
 #include "Include/containers.h"
 #include "Include/d2d_copy.h"
 #include "Include/filestats.h"
+#include <stdio.h>
 
 extern int setUSBHost(BOOL enter);
 static int copyApplicationOrMessage(char * packageName, char *newPkgPath);
 static int copyApplication(char * packageName, char *newPkgPath);
 static int copyMessage(char * packageName, char *newPkgPath);
 static void copyListAudio(const char * listName);
-static void exchangeStats(void);
+static void exchangeStatsCSV(void);
 
 int d2dCopy(const char * packageName,const char * filenameList) {
 	int retCopy;
@@ -238,7 +239,7 @@ void exchangeStatsCSV() {
 // create a:/OSTAT_DIR/"other serial number".csv with one line per file that has stats
 //   no third device stats yet
 
-	char strLog[PATH_LENGTH], filename[PATH_LENGTH], to[PATH_LENGTH], *cp;
+	char strLog[PATH_LENGTH], filename[PATH_LENGTH], to[PATH_LENGTH];
 	int ret, retCopy, rHandle, wrk, bytesToWrite, i, j;
 	struct f_info file_info;
 	int hoststats, clientstats;
@@ -252,7 +253,7 @@ void exchangeStatsCSV() {
 //	mkdir("a:/b/system/ostats");  // remove after testing
 //	strcpy(to, "a:/b/system/ostats/");  // remove after testing with a b folder on a:
 	
-	strcat(to, TB_SERIAL_NUMBER_ADDR);
+	strcat(to, (const char *)TB_SERIAL_NUMBER_ADDR);
 	strcat(to, ".csv");
 	fileCopy(STAT_DIR SNCSV, to); // will create to or truncate
 	
@@ -302,7 +303,7 @@ void exchangeStatsCSV() {
 //     the first line will be client_serial_number,cycle number
 
 // find out who client is
-	ret = open(CLI_STAT_DIR SNCSV, O_RDONLY);
+	ret = open((char *)(CLI_STAT_DIR SNCSV), O_RDONLY);
 //	ret = open("a:/b/system/stats/SN.csv", O_RDONLY);  // for testing remove
 	if(ret < 0) {
 		sprintf(strLog, "Cannot create %s - copying client stats failed", to);
