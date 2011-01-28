@@ -232,6 +232,7 @@ $(BINFILE) : $(OBJFILES)
 	$(LD) $(BINTYPE) $(ARYFILE) $(BINFILE) $(LDFLAGS) $(BODY) $(EXTRAFLAGS)
 	"tools\srec2bin" -q debug\himem.S37 debug\himem.bin
 	"tools\dd" if=debug\himem.bin of=debug\himem.blk bs=32k count=4 skip=40
+	copy debug\himem.blk ..\firmware\debug
 
 compile :	 $(OBJFILES)
 
