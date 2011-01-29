@@ -10,7 +10,8 @@
 #include "Include/containers.h"
 #include "Include/d2d_copy.h"
 #include "Include/filestats.h"
-#include <stdio.h>
+
+static char * longToDecimalStringZ(long l, char * string, int numberOfDigits);
 
 extern int setUSBHost(BOOL enter);
 static int copyApplicationOrMessage(char * packageName, char *newPkgPath);
@@ -229,7 +230,7 @@ static void exchangeStats() {
 }
 #endif
 
-static
+//static
 void exchangeStatsCSV() {
 //
 // running as usb host, A: is usb host sd card, B: is usb client sd card
@@ -239,7 +240,7 @@ void exchangeStatsCSV() {
 // create a:/OSTAT_DIR/"other serial number".csv with one line per file that has stats
 //   no third device stats yet
 
-	char strLog[PATH_LENGTH], filename[PATH_LENGTH], to[PATH_LENGTH];
+	char strLog[PATH_LENGTH], filename[PATH_LENGTH], to[PATH_LENGTH], num[12], *strout, *zstrout;
 	int ret, retCopy, rHandle, wrk, bytesToWrite, i, j;
 	struct f_info file_info;
 	int hoststats, clientstats;
@@ -259,7 +260,9 @@ void exchangeStatsCSV() {
 	
 	hoststats = open((LPSTR)to, O_RDWR);
 	if(hoststats < 0) {
-		sprintf(strLog, "Cannot create %s - copying stats failed", to);
+		strcpy(strLog, "Cannot create ");
+		strcat(strLog, to);
+		strcat(strLog, " - copying stats failed");
 		logString(strLog ,ASAP);
 		return;
 	}
@@ -281,11 +284,24 @@ void exchangeStatsCSV() {
 		if(rHandle >= 0) {
 			retCopy = read(rHandle, (UINT32)&tmpstats << 1, sizeof(tmpstats));
 			close(rHandle);
-			sprintf(to,"%s,%lu,%lu,%lu",
-					file_info.f_name,
-					tmpstats.stat_num_opens,
-					tmpstats.stat_num_completions,
-					tmpstats.stat_num_copies);
+//			sprintf(to,"%s,%lu,%lu,%lu",
+//					file_info.f_name,
+//					tmpstats.stat_num_opens,
+//					tmpstats.stat_num_completions,
+//					tmpstats.stat_num_copies);
+			strcpy(to, file_info.f_name);
+			strcat(to, ",");
+			strout = &num[0];
+			zstrout = longToDecimalStringZ((long) tmpstats.stat_num_opens, strout, 6);
+			strcat(to, zstrout);
+			strcat(to, ",");
+			strout = &num[0];
+			zstrout = longToDecimalStringZ((long) tmpstats.stat_num_completions, strout, 6);
+			strcat(to, zstrout);
+			strcat(to, ",");
+			strout = &num[0];
+			zstrout = longToDecimalStringZ((long) tmpstats.stat_num_copies, strout, 6);
+			strcat(to, zstrout);
 					
 			bytesToWrite = convertDoubleToSingleChar(filename,to,TRUE);
 			
@@ -303,10 +319,12 @@ void exchangeStatsCSV() {
 //     the first line will be client_serial_number,cycle number
 
 // find out who client is
-	ret = open((char *)(CLI_STAT_DIR SNCSV), O_RDONLY);
+	ret = open((LPSTR)CLI_STAT_DIR SNCSV, O_RDONLY);
 //	ret = open("a:/b/system/stats/SN.csv", O_RDONLY);  // for testing remove
 	if(ret < 0) {
-		sprintf(strLog, "Cannot create %s - copying client stats failed", to);
+		strcpy(strLog, "Cannot create ");
+		strcat(strLog, to);
+		strcat(strLog," - copying client stats failed");
 		logString(strLog ,ASAP);
 		return;
 	}
@@ -314,7 +332,9 @@ void exchangeStatsCSV() {
 	close(ret);
 	
 	if(wrk <= 0) {
-		sprintf(strLog, "Cannot read %s - copying client stats failed", CLI_STAT_DIR SNCSV);
+		strcpy(strLog, "Cannot read ");
+		strcat(strLog, CLI_STAT_DIR SNCSV);
+		strcat(strLog, " - copying client stats failed");
 		logString(strLog ,ASAP);
 		return;
 	}
@@ -340,7 +360,9 @@ void exchangeStatsCSV() {
 	
 	clientstats = open((LPSTR)to, O_RDWR);
 	if(clientstats < 0) {
-		sprintf(strLog, "Cannot create %s - copying client stats failed", to);
+		strcpy(strLog, "Cannot create ");
+		strcat(strLog, to);
+		strcat(strLog, " - copying client stats failed");
 		logString(strLog ,ASAP);
 		return;
 	}
@@ -366,11 +388,24 @@ void exchangeStatsCSV() {
 		if(rHandle >= 0) {
 			retCopy = read(rHandle, (UINT32)&tmpstats << 1, sizeof(tmpstats));
 			close(rHandle);
-			sprintf(to,"%s,%lu,%lu,%lu",
-					file_info.f_name,
-					tmpstats.stat_num_opens,
-					tmpstats.stat_num_completions,
-					tmpstats.stat_num_copies);
+//			sprintf(to,"%s,%lu,%lu,%lu",
+//					file_info.f_name,
+//					tmpstats.stat_num_opens,
+//					tmpstats.stat_num_completions,
+//					tmpstats.stat_num_copies);
+			strcpy(to, file_info.f_name);
+			strcat(to, ",");
+			strout = &num[0];
+			zstrout = longToDecimalStringZ((long) tmpstats.stat_num_opens, strout, 6);
+			strcat(to, zstrout);
+			strcat(to, ",");
+			strout = &num[0];
+			zstrout = longToDecimalStringZ((long) tmpstats.stat_num_completions, strout, 6);
+			strcat(to, zstrout);
+			strcat(to, ",");
+			strout = &num[0];
+			zstrout = longToDecimalStringZ((long) tmpstats.stat_num_copies, strout, 6);
+			strcat(to, zstrout);
 					
 			bytesToWrite = convertDoubleToSingleChar(filename,to,TRUE);
 
@@ -384,3 +419,23 @@ void exchangeStatsCSV() {
 // Logic for which device has the most current stats for devices they both have connected to goes here
 //
 }
+
+// supress leading zeros from longToDecimalString
+//
+// WARNING:  changes string
+//
+static 
+char *longToDecimalStringZ(long l, char * string, int numberOfDigits) {
+	int i;
+	char *cp;
+	
+	longToDecimalString(l, string, numberOfDigits);
+	cp = string;
+	for(i=0; i<(numberOfDigits-1); i++) {
+		if(cp[i] == '0')
+			string++;
+	} 
+	return(string);
+}
+
+

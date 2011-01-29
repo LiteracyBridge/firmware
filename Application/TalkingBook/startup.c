@@ -206,7 +206,7 @@ void startUp(void) {
 	loadPackage(PKG_SYS,currentSystem());	
 	SetSystemClockRate(CLOCK_RATE); // either set in config file or the default 48 MHz set at beginning of startUp()
 
-	unlink (STAT_DIR SNCSV);
+	unlink ((LPSTR) (STAT_DIR SNCSV));
 	strcpy(buffer,getDeviceSN(1));
 	strcat(buffer, ",");
 	longToDecimalString(systemCounts.powerUpNumber, strCounts, 4); 
@@ -215,7 +215,7 @@ void startUp(void) {
 	{
 		int ret, bytesToWrite;
 		char line[80];
-		ret = open(STAT_DIR SNCSV, O_RDWR|O_CREAT);
+		ret = open((LPSTR)(STAT_DIR SNCSV), O_RDWR|O_CREAT);
 		if (ret >= 0) {
 			bytesToWrite = convertDoubleToSingleChar(line,buffer,TRUE);
 			write(ret, (unsigned long)line<<1, bytesToWrite);
