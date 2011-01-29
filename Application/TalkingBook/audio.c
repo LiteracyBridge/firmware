@@ -640,7 +640,7 @@ int addField(int handle, unsigned int field_id, char *field_value, int numfieldv
 void recordStats(char *filename, unsigned long handle, unsigned int why, unsigned long misc)
 {
 //	char msg[128];
-	char statpath[128], *cp;
+	char statpath[PATH_LENGTH], *cp;
 	int stathandle, ret;
 	unsigned long wrk;
 	struct ondisk_filestats tmp_file_stats = {0};
@@ -703,14 +703,14 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 		cp = strrchr(STAT_FN, '.');
 		if(cp == NULL)
 			break;
-		if(strcmp(".a18", cp+1))
+		if(strcmp("a18", cp+1))
 			break;	// no a18 suffix
 		
 		STAT_FN[strlen(STAT_FN) - 4] = 0; //chop off ".a18"
 		
 		strcpy(statpath, STAT_DIR);
-		strcat(statpath, getDeviceSN(0));
-		strcat(statpath, "~");
+//		strcat(statpath, getDeviceSN(0));
+//		strcat(statpath, "~");
 		strcat(statpath, STAT_FN); 
 		
 		stathandle = tbOpen((LPSTR)statpath, O_CREAT|O_RDWR);
