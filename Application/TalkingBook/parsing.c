@@ -753,19 +753,6 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 							continue;
 						}
 					}
-					charCursor = strstr(line,"LANGUAGE"); //TODO: move to case-insensitive fct
-					if (!charCursor)
-					    charCursor = strstr(line,"language"); 
-					if (charCursor) {
-						if ((charCursor = strchr(line,DELIMITER))) {
-							charCursor++;
-							if (strlen(charCursor) <= LANG_CODE_MAX_LENGTH) {
-								ret = addTextToPkgHeap(charCursor,pkg);
-								pkg->idxLanguageCode = ret;
-								continue;
-							}
-						}
-					}
 					charCursor = strstr(line,"APP"); //TODO: handle all this in a const array of application strings
 					if (!charCursor)
 					    charCursor = strstr(line,"app"); 
