@@ -19,7 +19,7 @@ void packageRecording(char * pkgName, char *listName) {
 		pos = 0;
 	else 
 		pos = tempList->currentFilePosition + strlen(tempList->currentString) + 2;
-	insertIntoList(tempList,pos,pkgName);
+	insertIntoList(tempList,0,pkgName); //insert new recording at top of list
 	tempList->currentFilePosition = pos;
 	strcpy(tempList->currentString,pkgName); 
 }
