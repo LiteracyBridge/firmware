@@ -32,11 +32,11 @@ FlashReprogLomem(flash *fp, unsigned int *buf)
 	if (ret)
 		ret = _getfserrcode();
 
-	ret =_findfirst((LPSTR)FIRMWARE_PATH UPDATE_FN, &fInfo, D_FILE);
+	ret =_findfirst((LPSTR)DEFAULT_SYSTEM_PATH UPDATE_FN, &fInfo, D_FILE);
 	if (ret < 0)
 		return;    // should not happen
 
-	strcpy(fn, FIRMWARE_PATH);
+	strcpy(fn, DEFAULT_SYSTEM_PATH);
 	strcat(fn, fInfo.f_name);
 
 	newfp->fileHandle = open(fn, O_RDONLY);

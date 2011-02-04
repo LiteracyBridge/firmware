@@ -283,7 +283,7 @@ int reprogram(void) {
 	
 //rhm	startUpdate("System.img");
 // get name of current firmware image if possible
-	ret =_findfirst((LPSTR)FIRMWARE_PATH UPDATE_FN, &fInfo, D_FILE);
+	ret =_findfirst((LPSTR)DEFAULT_SYSTEM_PATH UPDATE_FN, &fInfo, D_FILE);
 	if (ret < 0)
 		filename[0] = 0;
 	else

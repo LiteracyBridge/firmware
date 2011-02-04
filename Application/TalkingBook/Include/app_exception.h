@@ -3,12 +3,14 @@
 // Contact: info@literacybridge.org
 #ifndef	__APP_EXCEPTION_h__
 #define	__APP_EXCEPTION_h__
+#include "./Application/TalkingBook/Include/talkingbook.h"
 
 #define RESET					1
 #define USB_MODE				2
 #define SHUT_DOWN				3
 #define LOG_ONLY				4
-#define ERROR_LOG_FILE			"a:////error//error.txt"
+
+#define ERROR_LOG_FILE			DEFAULT_SYSTEM_PATH "log.txt"
 
 void logException(unsigned int, const char *, int);
 

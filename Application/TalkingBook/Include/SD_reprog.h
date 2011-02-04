@@ -8,10 +8,9 @@
 #include "./driver/include/driver_head.h"
 #include "./component/include/component_head.h"
 #include "./Reprog/USB_Flash_reprog.h"
-#include "./Application\TalkingBook\Include\talkingbook.h"
-#include "./Application\TalkingBook\Include\files.h"
+#include "./Application/TalkingBook/Include/talkingbook.h"
+#include "./Application/TalkingBook/Include/files.h"
 
-#define FIRMWARE_PATH	"a:/system/"
 #define UPDATE_FP    	"a:/"
 #define SERIAL_FN  		"*.tsn"
 #define ERASE_SN_CODE	"-erase-"

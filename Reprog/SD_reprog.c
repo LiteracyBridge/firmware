@@ -93,7 +93,7 @@ NewCurrent() {
 	struct f_info file_info;
 	char filename[40];
 	
-	ret = chdir((LPSTR)FIRMWARE_PATH);
+	ret = chdir((LPSTR)DEFAULT_SYSTEM_PATH);
 	ret =_findfirst((LPSTR)"*" PREV_EXT, &file_info, D_FILE);
 	if (ret >= 0) 
 		ret = unlink((LPSTR)file_info.f_name);	
@@ -208,28 +208,22 @@ void startUpdate(char *filenameUpdate) {
 	//   (until it succeeds or fails)
 	// upon successful reprogramming move Current to Prev, Attempted to Current
 	
-    // be sure FIRMWARE_PATH exists
-	ret = mkdir((LPSTR)FIRMWARE_PATH); // TODO:need to create higher directories if don't exist, including top-level
-//	if (ret >= 0)
-//		playDings(3);
-//	else
-//		playBips(3);	
-	// see if new image file exists or was attempted
-	
+	ret = mkdir((LPSTR)DEFAULT_SYSTEM_PATH);
+	// see if new image file exists or was attempted	
 
 	if(filenameUpdate[0] != 0) {  // assumes only one version in update location
 		strcpy(oldPath,UPDATE_FP);
 		strcat(oldPath,filenameUpdate);
-		strcpy(newPath,FIRMWARE_PATH);
+		strcpy(newPath,DEFAULT_SYSTEM_PATH);
 		strcat(newPath,filenameUpdate);
 		strcat(newPath,ATTEMPTED_EXT);
 		
 		ret = rename((LPSTR)oldPath, (LPSTR)newPath); 
 		FL.fileHandle = open((LPSTR)newPath,O_RDONLY);
 	} else {
-		ret =_findfirst((LPSTR)FIRMWARE_PATH "*" ATTEMPTED_EXT, &file_info, D_FILE);		
+		ret =_findfirst((LPSTR)DEFAULT_SYSTEM_PATH "*" ATTEMPTED_EXT, &file_info, D_FILE);		
 		if (ret >= 0) {
-			strcpy(oldPath,FIRMWARE_PATH);
+			strcpy(oldPath,DEFAULT_SYSTEM_PATH);
 			strcat(oldPath,file_info.f_name);
 			FL.fileHandle = open((LPSTR)oldPath,O_RDONLY);		
 		} else
