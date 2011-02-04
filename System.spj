@@ -4,7 +4,7 @@
 #TARTYPE (GPL162003_CS0Flash)Application
 CFG=Debug
 
-VER=3.0.1 
+VER=3.0.5 
 # Begin Project
 #Name Begin GPL162003_CS0Flash-Debug
 # Begin SubItem "System  files"
@@ -495,7 +495,7 @@ SOURCE=testPCB.c
 USEPARAM=FALSE
 PARAM=
 ID=
-EXPORT=0
+EXPORT=3
 # End Source File
 # End Group
 # Begin Group "Head Files"
@@ -652,6 +652,13 @@ EXPORT=3
 # End Source File
 # Begin Source File
 SOURCE=Application\TalkingBook\Include\talkingbook.inc
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Application\TalkingBook\Include\filestats.h
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -936,39 +943,25 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=.\Application\TalkingBook\Include\metadata.h
+SOURCE=Application\TalkingBook\Include\metadata.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=.\Application\TalkingBook\Include\filestats.h
+SOURCE=Application/Talkingbook/Include/filestats.h
 USEPARAM=FALSE
 PARAM=
 ID=
-EXPORT=0
+EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=.\Application/Talkingbook/Include/filestats.h
+SOURCE=component/include/fs/DriverLayer.h
 USEPARAM=FALSE
 PARAM=
 ID=
-EXPORT=0
-# End Source File
-# Begin Source File
-SOURCE=.\component/include/fs/DriverLayer.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=0
-# End Source File
-# Begin Source File
-SOURCE=.\Component\Include\FS\DriverLayer.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=0
+EXPORT=3
 # End Source File
 # End Group
 # End SubItem
@@ -1462,7 +1455,7 @@ SOURCE=testPCB.c
 USEPARAM=FALSE
 PARAM=
 ID=
-EXPORT=0
+EXPORT=3
 # End Source File
 # End Group
 # Begin Group "Head Files"
@@ -1619,6 +1612,13 @@ EXPORT=3
 # End Source File
 # Begin Source File
 SOURCE=Application\TalkingBook\Include\talkingbook.inc
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Application\TalkingBook\Include\filestats.h
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -1903,39 +1903,25 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=.\Application\TalkingBook\Include\metadata.h
+SOURCE=Application\TalkingBook\Include\metadata.h
 USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=.\Application\TalkingBook\Include\filestats.h
+SOURCE=Application/Talkingbook/Include/filestats.h
 USEPARAM=FALSE
 PARAM=
 ID=
-EXPORT=0
+EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=.\Application/Talkingbook/Include/filestats.h
+SOURCE=component/include/fs/DriverLayer.h
 USEPARAM=FALSE
 PARAM=
 ID=
-EXPORT=0
-# End Source File
-# Begin Source File
-SOURCE=.\component/include/fs/DriverLayer.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=0
-# End Source File
-# Begin Source File
-SOURCE=.\Component\Include\FS\DriverLayer.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=0
+EXPORT=3
 # End Source File
 # End Group
 # End SubItem

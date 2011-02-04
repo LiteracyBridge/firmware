@@ -468,6 +468,8 @@ extern int checkInactivity(BOOL resetTimer) {
 //		insertSound(&pkgSystem.files[INACTIVITY_SOUND_FILE_IDX],NULL,FALSE);
 //		restoreVolume(FALSE);
 		lastActivity = currentTime;
+		writeVersionToDisk(); // seems like as good a time as any to check if this info logged (delay was too long on startup)
+		//	cleanUpOldRevs();	
 //#ifdef TB_CAN_WAKE
 		if(MEM_TYPE == MX_MID) {
 			setOperationalMode((int)P_SLEEP);  // keep RTC running

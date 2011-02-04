@@ -33,6 +33,7 @@
 #define CONST_TB_SERIAL_PREFIX		(char *)"tsn."
 #define CONST_TB_SERIAL_PREFIX_LEN	(strlen(CONST_TB_SERIAL_PREFIX))   // strlen of TB_SERIAL_PREFIX above
 #define P_TB_SERIAL_NUMBER      	(char *)(TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN)
+#define FILE_VERSION_EXT			".ver"
 
 extern int KEY_PLAY, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_SELECT, KEY_STAR, KEY_HOME, KEY_PLUS, KEY_MINUS;	
 extern int LED_GREEN, LED_RED, LED_ALL;
@@ -64,6 +65,6 @@ extern void turnAmpOff(void);
 extern void turnAmpOn(void);
 extern char* getDeviceSN(int);
 extern int SNexists(void);
-
+extern void writeVersionToDisk(void);
 
 #endif

@@ -464,3 +464,24 @@ getDeviceSN(int includePrefix) {
 	else
 		return P_TB_SERIAL_NUMBER;	
 }
+
+void writeVersionToDisk() {
+	char fileVersion [PATH_LENGTH];
+	int handle, ret;
+	struct f_info file_info;
+		
+	strcpy(fileVersion,DEFAULT_SYSTEM_PATH  VERSION  FILE_VERSION_EXT);
+	
+	if (!fileExists((LPSTR)fileVersion)) {
+		logString(fileVersion,ASAP);
+		mkdir((LPSTR)DEFAULT_SYSTEM_PATH); 
+		tbChdir((LPSTR)DEFAULT_SYSTEM_PATH);
+		ret =_findfirst((LPSTR)"*" FILE_VERSION_EXT, &file_info, D_FILE);
+		if (ret >= 0) {
+			ret = unlink((LPSTR)file_info.f_name);		
+		}	
+		handle = tbOpen((LPSTR)fileVersion,O_CREAT|O_RDWR|O_TRUNC);
+		close(handle);	
+	}
+}
+

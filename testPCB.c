@@ -70,6 +70,7 @@ int testPCB(void) {
 	// play startup Ding sound to test speaker and demonstrate confirmation tone
 	
 	playStartupSound();
+	writeVersionToDisk();  // being in this function usually means that the PCB was just reprogrammed (with a new version)
 	key = keyCheck(1); 	// to get rid of wake-up button press
 	
 	//rhm
