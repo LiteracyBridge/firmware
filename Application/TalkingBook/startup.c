@@ -16,10 +16,6 @@
 #include "Include/filestats.h"
 #include <ctype.h>
 
-#define SYSTEM_HEAP_SIZE 512	//config file values
-#define CONFIG_FILE		"a://system/config.txt"
-#define ALT_CONFIG_FILE		"a://config.txt"
-
 extern int testPCB(void);
 extern unsigned int SetSystemClockRate(unsigned int);
 extern int SystemIntoUDisk(unsigned int);
@@ -30,6 +26,7 @@ static void loadDefaultUserPackage(void);
 static int loadConfigFile (void);
 static void loadSystemNames(void);
 static char *currentSystem(void);
+static void cleanUpOldRevs(void);
 
 // These capitalized variables are set in the config file.
 APP_IRAM int KEY_PLAY, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_SELECT, KEY_STAR, KEY_HOME, KEY_PLUS, KEY_MINUS;
@@ -133,7 +130,7 @@ void startUp(void) {
 	
 	//to stop user from wondering if power is on and possibly cycling too quickly,
 	playDing();  // it is important to play a sound immediately 
-	
+//	cleanUpOldRevs();	
 	key = keyCheck(1);  // long keycheck 
 	
 	// voltage checks in SystemIntoUSB.c
@@ -473,3 +470,18 @@ char *prevSystem() {
 	return ret;
 }
 
+static void cleanUpOldRevs() {
+	int handle, ret;
+	struct f_info file_info;
+			
+	if (dirExists((LPSTR)"a://Firmware")) {
+		tbChdir((LPSTR)"a://Firmware");
+		ret =_findfirst((LPSTR)"*.*", &file_info, D_FILE);
+		while (ret >= 0) {
+			ret = unlink((LPSTR)file_info.f_name);
+			ret = _findnext(&file_info);	
+		}	
+		tbChdir((LPSTR)"a://");
+		rmdir((LPSTR)"a://Firmware");
+	}
+}

@@ -5,6 +5,9 @@
 #define	__STARTUP_h__
 
 #define MAX_SYSTEMS			20
+#define SYSTEM_HEAP_SIZE 512	//config file values
+#define CONFIG_FILE		"a://system/config.txt"
+#define ALT_CONFIG_FILE		"a://config.txt"
 
 // set BAD_MEMBRANE_SW for the old membrane switch that A-Tech has
 //#define OLD_MEMBRANE_SW 
