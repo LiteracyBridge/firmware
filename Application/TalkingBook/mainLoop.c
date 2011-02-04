@@ -1076,13 +1076,15 @@ static void takeAction (Action *action, EnumAction actionCode) {
 
 void loadPackage(int pkgType, const char * pkgName) {
 	CtnrPackage *pkg;
-	int i, ret;
+	int i, handle, ret, flagParse;
 	CtnrBlock *block;
 	Action *action;
 	char filePath[PATH_LENGTH];
 	long timeNow;
 	char str[50];
+	char *temp;
 		
+	flagParse = 0;
 	stop();  // better to stop audio playback before file ops  -- also flushes log buffer
 	setLED(LED_RED,FALSE);
 	
@@ -1128,33 +1130,56 @@ void loadPackage(int pkgType, const char * pkgName) {
 		strcat(filePath,"/");
 		if (pkgType == PKG_SYS)
 			strcat(filePath,UI_SUBDIR);
-		strcat(filePath,PKG_CONTROL_FILENAME);
-
-		ret = fileExists((LPSTR)filePath);
-		if(ret == 0) {
+		temp = filePath + strlen(filePath);
+		strcpy(temp,PKG_CONTROL_FILENAME_BIN);
+		handle = tbOpen((LPSTR)(filePath),O_RDONLY);
+		if (handle == -1) {
+			strcpy(temp,PKG_CONTROL_FILENAME_TXT);
+			flagParse = fileExists((LPSTR)filePath);
+		}
+		if (handle == -1 && flagParse == 0 && pkgType == PKG_SYS) {
 			// if no language-specific control file, just use the standard one
 			strcpy(filePath,LANGUAGES_PATH);
-			strcat(filePath,PKG_CONTROL_FILENAME);
-		}
-		pkg = context.package;
-		//resetPackage(pkg);
-		memset(pkg,0,sizeof(CtnrPackage));
-		
-		pkg->pkg_type = pkgType;
-		ret = addTextToPkgHeap(str,pkg);
-//		logString(pkg->strHeapStack + ret,BUFFER);
-		if (ret > -1) {
-			pkg->idxName = ret;
-			if (pkgType == PKG_SYS) {
-				// system packages use their language code as their package name (directory name)
-				pkg->idxLanguageCode = ret;	
+			temp = filePath + strlen(filePath);
+			strcpy(temp,PKG_CONTROL_FILENAME_BIN);
+			handle = tbOpen((LPSTR)(filePath),O_RDONLY);
+			if (handle == -1) {
+				strcpy(temp,PKG_CONTROL_FILENAME_TXT);
+				flagParse = fileExists((LPSTR)filePath);
 			}
 		}
-		else
-			logException(11,pkgName,USB_MODE);		
-//		logString((char *)"package name",BUFFER);	
-//		logString(pkg->strHeapStack + pkg->idxName,BUFFER);
-		parseControlFile(filePath, pkg);
+		pkg = context.package;
+		if (handle != -1) {
+			ret = read(handle,(unsigned long)pkg<<1,sizeof(CtnrPackage)<<1);
+			close (handle);
+		} else if (flagParse) {
+			// no binary control track, so must parse the text file		
+			//resetPackage(pkg);
+			memset(pkg,0,sizeof(CtnrPackage));		
+			pkg->pkg_type = pkgType;
+			ret = addTextToPkgHeap(str,pkg);
+			if (ret > -1) {
+				pkg->idxName = ret;
+				if (pkgType == PKG_SYS) {
+					// system packages use their language code as their package name (directory name)
+					pkg->idxLanguageCode = ret;	
+				}
+			}
+			else {
+				logException(11,pkgName,USB_MODE);
+			}		
+			parseControlFile(filePath, pkg);
+			// now save parsed structure to disk
+			strcpy(temp,PKG_CONTROL_FILENAME_BIN);
+			handle = tbOpen((LPSTR)(filePath),O_CREAT|O_RDWR);
+			if (handle != -1) {
+				ret = write(handle, (unsigned long)pkg<<1, sizeof(CtnrPackage)<<1);
+				close(handle);
+			}
+		} else {
+			logException(99,"no control track binary or text",USB_MODE);
+		}
+
 //		if (context.package->pkg_type == PKG_QUIZ) {
 //			strcpy(fileName,QUIZ_DATA_FILENAME);  //todo: move to config
 //			loadQuizData(filePath);
