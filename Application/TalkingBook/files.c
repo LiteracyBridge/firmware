@@ -425,7 +425,7 @@ char * getLine (int fileHandle, char *buffer) {
 }
 
 INT16 tbOpen(LPSTR path, INT16 open_flag) {
-	const int RETRIES = 3;
+	const int RETRIES = 2;
 	int i;
 	INT16 handle;
 	//todo: move number of attempts into config file, but have fall back number in define (since config has to be open)
@@ -438,11 +438,6 @@ INT16 tbOpen(LPSTR path, INT16 open_flag) {
 			break;
 		wait(100);
 	}
-/*  commenting lines below to let caller decide how to handle inability to open particular file:
-
-	if (handle < 0)
-		logException(23,(const char *)path,RESET);
-	*/
 	return handle;
 }
 

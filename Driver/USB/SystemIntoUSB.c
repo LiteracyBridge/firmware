@@ -169,10 +169,6 @@ int SystemIntoUDisk(unsigned int serviceloop)
 	SetSystemClockRate(48);
 
 	if(serviceloop) {
-		//log before unmounting disk
-		strcpy(strLog, "entering USB Device Mode");	
-		logString(strLog, ASAP);
-			
 		R_NAND_Present=0;
 		MaxLUN = 0;
 		R_SDC_Present=1;

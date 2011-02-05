@@ -1134,7 +1134,7 @@ void loadPackage(int pkgType, const char * pkgName) {
 			strcat(filePath,UI_SUBDIR);
 		temp = filePath + strlen(filePath);
 		strcpy(temp,PKG_CONTROL_FILENAME_BIN);
-		handle = tbOpen((LPSTR)(filePath),O_RDONLY);
+		handle = open((LPSTR)(filePath),O_RDONLY);
 		if (handle == -1) {
 			strcpy(temp,PKG_CONTROL_FILENAME_TXT);
 			flagParse = fileExists((LPSTR)filePath);
@@ -1144,7 +1144,7 @@ void loadPackage(int pkgType, const char * pkgName) {
 			strcpy(filePath,LANGUAGES_PATH);
 			temp = filePath + strlen(filePath);
 			strcpy(temp,PKG_CONTROL_FILENAME_BIN);
-			handle = tbOpen((LPSTR)(filePath),O_RDONLY);
+			handle = open((LPSTR)(filePath),O_RDONLY);
 			if (handle == -1) {
 				strcpy(temp,PKG_CONTROL_FILENAME_TXT);
 				flagParse = fileExists((LPSTR)filePath);
