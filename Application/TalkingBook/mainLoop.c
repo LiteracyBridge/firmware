@@ -1003,10 +1003,12 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 		case SLEEP:
 			// call sleep function
+			writeVersionToDisk(); // seems like as good a time as any to check if this info logged (delay was too long on startup)
 			setOperationalMode((int)P_SLEEP); 
 			break;
 		case HALT:
 			// call sleep function
+			writeVersionToDisk(); // seems like as good a time as any to check if this info logged (delay was too long on startup)
 			setOperationalMode((int)P_HALT); 
 			break;
 		case TEST_PCB:
