@@ -12,12 +12,14 @@
 #include "./Application/TalkingBook/Include/files.h"
 
 #define UPDATE_FP    	"a:/"
-#define SERIAL_FN  		"*.tsn"
+#define SERIAL_EXT		".srn"
+#define SERIAL_FN  		"*" SERIAL_EXT
 #define ERASE_SN_CODE	"-erase-"
 #define UPDATE_FN    	"*.img"
 #define ATTEMPTED_EXT	".att"
 #define PREV_EXT		".old"
-extern void check_new_sd_flash(void);
+extern int check_new_sd_flash(char *);
 extern void startUpdate(char *);
+extern void updateSN(void);
 
 #endif

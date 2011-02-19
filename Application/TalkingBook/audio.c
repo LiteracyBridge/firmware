@@ -444,7 +444,7 @@ static int recordAudio(char *pkgName, char *cursor) {
         writeLE32(handle, wrk1, CURRENT_POS);  //meta data version = 1
         writeLE32(handle, metadata_numfields, CURRENT_POS); // 4 byte for num fields
         
-        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + 4); // skip tsn.
+        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
         strcat(unique_id, "_");       
 		longToDecimalString(systemCounts.packageNumber,digits,5);
         strcat(unique_id, digits);
@@ -454,7 +454,7 @@ static int recordAudio(char *pkgName, char *cursor) {
 
 //      add audio item id metadata initial code
 //      need to add org here 
-        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + 4); // skip tsn.
+        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
         strcat(unique_id, "_");       
 		longToDecimalString(systemCounts.recordingNumber,digits,8);
 		strcat(unique_id, digits);

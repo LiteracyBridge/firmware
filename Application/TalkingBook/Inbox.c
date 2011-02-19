@@ -55,6 +55,7 @@ processInbox(void) {
 	
 	playBip();
 	setLED(LED_RED,TRUE);
+	writeVersionToDisk();  // make sure the version file wasn't deleted during USB device time
 
 	nc = processNewPackages();
 	processSystemFiles(); //copy system files, including firmware

@@ -159,39 +159,83 @@ ReprogFailed(flash *fp)
 }
 */
 
-void check_new_sd_flash() {
+void updateSN() {
 	extern void write_app_flash(int *, int, unsigned int);
 	struct f_info file_info;
 	char *newSN;
-	int ret;
+	char pathFrom[PATH_LENGTH], pathTo[PATH_LENGTH];
+	int ret, goodSN, sameSN;
 	
-	// see if a .tsn file is present
+	// see if a .srn file is present
 	ret =_findfirst((LPSTR)UPDATE_FP SERIAL_FN, &file_info, D_FILE);
 	if(ret >= 0) {
 		char *dot;
 		int lenEraseCode = strlen((char *)ERASE_SN_CODE);
 		int flagErase, flagSNexists;
+
 		flagSNexists = SNexists();
 		newSN = file_info.f_name;
 		dot = strrchr(newSN, '.'); //looks for last '.' to allow a '.' to exist within the pre-ext filename.
 		flagErase = !strncmp(newSN,(char *)ERASE_SN_CODE,lenEraseCode);
-		if (flagErase)
+
+		if (flagErase) {
 			newSN += lenEraseCode;
-		unlink(file_info.f_name);
-		if(dot != NULL && (!flagSNexists || (flagSNexists && flagErase)) ) {
-			int vlen = strlen(newSN) - 3; //skip tsn
-			if (newSN == dot)
-				vlen = 0;
-			else
-				*dot = 0;
-			write_app_flash((int *)newSN, vlen, (unsigned int)0xffff);
 		}
+	 	// check that sn begins with "srn."
+	 	goodSN = !strncmp(newSN,CONST_TB_SERIAL_PREFIX,CONST_TB_SERIAL_PREFIX_LEN);
+	 	
+		// move srn. file to system directory to allow file-based inspection of device SN
+		strcpy(pathFrom,(char *)UPDATE_FP);
+		strcat(pathFrom,file_info.f_name);
+		strcpy(pathTo,(char *)DEFAULT_SYSTEM_PATH);
+		ret = mkdir((LPSTR)pathTo);
+		strcat(pathTo,newSN + CONST_TB_SERIAL_PREFIX_LEN);
+		ret = rename((LPSTR)pathFrom,(LPSTR)pathTo);
+		if (ret == -1) {
+			unlink((LPSTR)pathFrom);
+		}
+
+	 	//check that new sn is not the same as old - force goodSN to 0 if it is the same
+		goodSN &= strncmp(newSN,(char *)TB_SERIAL_NUMBER_ADDR,strlen((char *)TB_SERIAL_NUMBER_ADDR));
+					
+		// check the extension was found
+		if (dot == NULL)
+			goodSN = 0;
+		
+		// If 1) bad SN format or 2) if the erase code isn't used when an SN exists, then return without action.
+	 	if (goodSN && (!flagSNexists || (flagSNexists && flagErase))) { 	
+			//prepare to delete old SN file, but don't do it until after writing new serial number
+			if (flagErase){
+				strcpy(pathTo,(char *)DEFAULT_SYSTEM_PATH);
+				strcat(pathTo,(char *)(TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN));
+				strcat(pathTo,(char *)SERIAL_EXT);				
+			}
+			if(goodSN && (!flagSNexists || (flagSNexists && flagErase)) ) {
+				int vlen = strlen(newSN) - 3; //skip serial number extension
+				if (newSN == dot)
+					vlen = 0;
+				else
+					*dot = 0;
+				write_app_flash((int *)newSN, vlen, (unsigned int)0xffff);
+			}
+			if (flagErase) {
+				unlink((LPSTR)pathTo);
+			}
+	 	}
 	}
+}
+
+int check_new_sd_flash(char * filename) {
+	struct f_info file_info;
+	int ret;
 			
 	ret =_findfirst((LPSTR)UPDATE_FP UPDATE_FN, &file_info, D_FILE);
-	if (ret < 0)
-		file_info.f_name[0] = 0;
-	startUpdate(file_info.f_name);
+	if (ret >= 0) {
+		strcpy(filename, file_info.f_name);
+		ret = 1;
+	} else
+		ret = 0;
+	return ret;
 }
 
 void startUpdate(char *filenameUpdate) {

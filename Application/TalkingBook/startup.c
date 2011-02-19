@@ -26,7 +26,8 @@ static void loadDefaultUserPackage(void);
 static int loadConfigFile (void);
 static void loadSystemNames(void);
 static char *currentSystem(void);
-static void cleanUpOldRevs(void);
+static void flagConfigFile(void);
+static int resetConfigFile(void);
 
 // These capitalized variables are set in the config file.
 APP_IRAM int KEY_PLAY, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_SELECT, KEY_STAR, KEY_HOME, KEY_PLUS, KEY_MINUS;
@@ -120,6 +121,7 @@ void setDefaults(void) {
 void startUp(void) {
 	char buffer[200];
 	char strCounts[20];
+	char filename[FILE_LENGTH];
 	int key;
 	
 	SetSystemClockRate(MAX_CLOCK_SPEED); // to speed up initial startup -- set CLOCK_RATE later
@@ -137,6 +139,7 @@ void startUp(void) {
 	if (key == KEY_STAR || key == KEY_MINUS) {
 		// allows USB device mode no matter what is on memory card
 		Snd_Stop();
+		cleanUpOldRevs(); // cleanup any old revs before someone sees the file system
 		SystemIntoUDisk(1);	
 		SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
 		loadConfigFile();
@@ -148,14 +151,24 @@ void startUp(void) {
 		copyOutbox();
 		resetSystem();
 	}	
-	
+
+	if (!SNexists()) {
+		// This will update the version when the device has just been programmed with probe,
+		// which wipes out the serial number.
+		writeVersionToDisk();	
+	}
 	// check for new firmware first, but don't flash if voltage is low
 	if(V_MIN_SDWRITE_VOLTAGE <= vCur_1) {
-		check_new_sd_flash();
+		updateSN();
+		if (check_new_sd_flash(filename)) {
+			flagConfigFile();  //change config file name to indicate about to be reprogrammed
+			startUpdate(filename);
+		}
 	}
 	
-	if (loadConfigFile() == -1) // config.txt file not found
+	if (loadConfigFile() == -1) { // config.txt file not found
 		testPCB();	
+	}
 	if (!SNexists()) {
 		logException(32,(const char *)"no serial number",LOG_ONLY);
 		testPCB();	
@@ -199,8 +212,6 @@ void startUp(void) {
 		logRTC();  
 	}
 //#endif
-	loadSystemNames(); 
-	loadPackage(PKG_SYS,currentSystem());	
 	SetSystemClockRate(CLOCK_RATE); // either set in config file or the default 48 MHz set at beginning of startUp()
 
 	unlink ((LPSTR) (STAT_DIR SNCSV));
@@ -219,6 +230,9 @@ void startUp(void) {
 			close(ret);
 		}
 	}
+	loadSystemNames(); 
+	SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
+	loadPackage(PKG_SYS,currentSystem());	
 	
 	mainLoop();
 }
@@ -246,6 +260,20 @@ static char * addTextToSystemHeap (char *line) {
 	return startingHeap;
 }
 
+static void flagConfigFile(void) {
+	// This fct is used to cause a read error on control file open only when reprogramming has recently happened
+	// This means that there is no time-costly check to disk to see if reprogramming has happened;
+	// instead we know only when the config file isn't there.
+	rename((LPSTR)CONFIG_FILE,(LPSTR)FLAGGED_CONFIG_FILE);
+}
+
+static int resetConfigFile(void) {
+	// see flagConfigFile()
+	int ret;
+	ret = rename((LPSTR)FLAGGED_CONFIG_FILE,(LPSTR)CONFIG_FILE);
+	return ret;	
+}	
+
 int loadConfigFile(void) {
 	int ret, handle;
 	char *name, *value;
@@ -264,11 +292,17 @@ int loadConfigFile(void) {
 		if (handle == -1) {
 			handle = tbOpen((unsigned long)(ALT_CONFIG_FILE),O_RDONLY);
 			if (handle == -1) {
-				ret = -1;
-				goodPass = 0; //NOTE:can't be logged if log file comes from config file
+				// check if config file was renamed to indicate reprogramming was recently started
+				if (resetConfigFile() >= 0) {
+					writeVersionToDisk();
+					handle = tbOpen((unsigned long)(CONFIG_FILE),O_RDONLY);
+				}
 			}
 		}
-		if (goodPass)
+		if (handle == -1) {
+			ret = -1;
+			goodPass = 0; //NOTE:can't be logged if log file comes from config file
+		} else if (goodPass)
 			getLine(-1,0);  // reset in case at end from prior use
 		while (goodPass && nextNameValuePair(handle, buffer, ':', &name, &value)) {
 			if (!value)
@@ -470,8 +504,8 @@ char *prevSystem() {
 	return ret;
 }
 
-static void cleanUpOldRevs() {
-	int handle, ret;
+void cleanUpOldRevs() {
+	int ret;
 	struct f_info file_info;
 			
 	if (dirExists((LPSTR)"a://Firmware")) {
