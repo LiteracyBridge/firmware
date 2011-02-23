@@ -524,3 +524,183 @@ int fileCopy(char * from, char * to) {
 	close(rHandle);
 	return ret;
 }
+
+//dirCopy slightly modified version of copydir from inbox.c.  Modified so doesn't delete original files.
+int dirCopy(char *fromdir, char *todir) {
+// 	copy directory tree below fromdir (all subdirectories and files at all levels)
+	int ret, r1, len_from, len_to, len, fret;
+	BOOL first_pass = TRUE;	
+	char from[PATH_LENGTH], fromfind[PATH_LENGTH], to[PATH_LENGTH], lastdir[FILE_LENGTH], first_dir[PATH_LENGTH], temp[PATH_LENGTH];
+
+	struct f_info fi;
+	
+	fret = 0;
+	
+	logString((char *)"Enter dirCopy",BUFFER);
+	strcpy(temp,fromdir);
+	logString(temp,ASAP);
+	
+	strcpy(from, fromdir);
+	len_from = strlen(from);
+	
+	if(from[len_from-1] != '/') {
+		strcat(from, "/");
+		len_from++;
+	}
+	strcat(from, "*");
+	
+	strcpy(to, todir);
+	len_to = strlen(to);
+	ret = mkdir((LPSTR)to);	// just to be safe
+	if(to[len_to-1] != '/') {
+		strcat(to, "/");
+		len_to++;
+	}
+	strcpy(fromfind,from);
+	ret =_findfirst((LPSTR)fromfind, &fi, D_DIR);
+	while (ret >= 0) {
+		strcpy(temp,fi.f_name);
+		logString((char *)"Iter:",BUFFER);
+		logString(temp,ASAP);
+		ret = _findnext(&fi);
+	}
+	ret =_findfirst((LPSTR)fromfind, &fi, D_DIR);
+	from[len_from] = 0;
+	lastdir[0] = 0;
+	strcpy(first_dir,fi.f_name);
+	
+	strcpy(temp,fi.f_name);
+	logString((char *)"First:",BUFFER);
+	logString(temp,ASAP);
+	while (ret >= 0) {
+	//while(1) {
+		
+		if((fi.f_attrib & D_DIR) && fi.f_name[0]!='.') {
+
+		
+			from[len_from] = 0;
+			to[len_to]= 0;
+			
+			strcat(from, fi.f_name);
+			strcat(to, fi.f_name);
+			
+			r1 = mkdir((LPSTR)to);
+			
+			strcpy(temp,from);
+			logString((char *)"From:",BUFFER);
+			logString(temp,ASAP);
+			
+			strcpy(temp,to);
+			logString((char *)"To:",BUFFER);
+			logString(temp,ASAP);
+			
+			fret += dirCopy (from, to);
+			ret = rmdir((LPSTR)from);
+					
+			fret++;
+			//ret =_findfirst((LPSTR)fromfind, &fi, D_DIR);  //necessary to reset after rmdir? 
+			
+		}
+		//ret = _findnext(&fi);
+		ret =_findfirst((LPSTR)fromfind, &fi, D_DIR);  //necessary to reset after rmdir? 
+		
+		strcpy(temp,fi.f_name);
+		logString((char *)"Next:",BUFFER);
+		logString(temp,ASAP);
+		//if(strcmp(first_dir,fi.f_name)==0)
+		//	break;
+		first_pass = FALSE;
+	} 
+	
+	from[len_from] = 0;
+	to[len_to]= 0;
+	fret += copyAllFiles(from, to);
+	cpyTopicPath(from);
+	strcpy(lastdir,from+2);
+	if ((len = strlen(lastdir)))
+		lastdir[len-1] = 0; // remove last '\'
+	if (strstr(fromdir,lastdir))
+		fret = 0; // prevents system reset if only copying list files
+	logString((char *)"Leave dirCopy",BUFFER);
+	strcpy(temp,fromdir);
+	logString(temp,ASAP);
+	
+	return(fret);
+
+
+}
+//copyAllFiles slightly modified version of copyfiles from inbox.c.  Modified so doesn't check for path "a:"
+int copyAllFiles(char *fromdir, char *todir)
+{
+	int ret, r1, len_from, len_to, fret;
+	char from[80], to[80], temp[80];
+	struct f_info fi;
+	
+	fret = 0;
+	
+	strcpy(temp,fromdir);
+	logString((char *)"Frrom:",BUFFER);
+	logString(temp,ASAP);
+	
+	strcpy(temp,todir);
+	logString((char *)"Too:",BUFFER);
+	logString(temp,ASAP);
+	
+	strcpy(from, fromdir);
+	
+	len_from = strlen(from);
+	
+	if(from[len_from-1] != '/') {
+		strcat(from, "/");
+		len_from++;
+	}
+	strcat(from, "*.*");
+	
+	strcpy(to, todir);
+	len_to = strlen(to);
+//	mkdir(to);	// just to be safe
+	if(to[len_to-1] != '/') {
+		strcat(to, "/");
+		len_to++;
+	}
+			
+	ret =_findfirst((LPSTR)from, &fi, D_FILE);
+	while(ret >= 0) {
+		if(fi.f_name[0] != '.') {
+			from[len_from] = 0;
+			to[len_to]= 0;
+			strcat(from, fi.f_name);
+			strcat(to, fi.f_name);
+			
+			strcpy(temp,from);
+			logString((char *)"Copyf",BUFFER);
+			logString(temp,ASAP);
+
+			strcpy(temp,to);
+			logString((char *)"Copyt",BUFFER);
+			logString(temp,ASAP);
+
+
+			if((lower(from[0]) == 'a') && (lower(to[0]) == 'a')) {
+				unlink((LPSTR)to);
+				r1 = rename((LPSTR)from, (LPSTR)to);
+			} else {
+				setLED(LED_GREEN,FALSE);
+				setLED(LED_RED,TRUE);
+				r1 = _copy((LPSTR)from, (LPSTR)to);
+				wait (500);
+				setLED(LED_RED,FALSE);
+				if (r1 != -1) {
+					setLED(LED_GREEN,TRUE);
+					wait(500);
+				}
+			}
+//			logString((char *)"FROM/TO:",BUFFER);
+//			logString(from,BUFFER);
+//			logString(to,ASAP);
+		}
+		ret = _findnext(&fi);
+		fret++;
+	}
+	return(fret);
+}

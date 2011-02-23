@@ -4,7 +4,7 @@
 #ifndef	__TALKINGBOOK_h__
 #define	__TALKINGBOOK_h__
 
-#define VERSION			"v1.50r588"
+#define VERSION			"v1.50r582"
 #define TB_CAN_WAKE  // hardware that allows wake from sleep/halt
 //IMPORTANT: changes to TB_CAN_WAKE must also be made to system_head.inc!!!
 
@@ -62,6 +62,7 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 #define DEFAULT_SYSTEM_PATH	"a:/system/"
 #define PKG_CONTROL_FILENAME_BIN	"control.bin"
 #define PKG_CONTROL_FILENAME_TXT	"control.txt"
+#define TRANSLATE_FILENAME_BIN      "translate.bin"
 #define APP_DATA_FILENAME		"data.bin"
 #define SYS_PKG_CHAR		'%'
 #define APP_PKG_CHAR		'^'

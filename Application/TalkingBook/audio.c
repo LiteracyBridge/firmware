@@ -177,7 +177,11 @@ static int getFileHandle (CtnrFile *newFile) {
 	switch (pkg->pkg_type) {
 		case PKG_SYS:
 			strcpy(sTemp,LANGUAGES_PATH);
-			strcat(sTemp,pkg->strHeapStack + pkg->idxName);
+			if (context.transList.mode == '1')
+				strcat(sTemp,TRANSLATE_TEMP_DIR);
+			else
+				strcat(sTemp,pkg->strHeapStack + pkg->idxName);
+				
 			strcat(sTemp,"/");
 			if (newFile->idxFirstBlockInFile == -1) 	// check for list
 				strcat(sTemp,TOPICS_SUBDIR);
@@ -367,12 +371,23 @@ static int recordAudio(char *pkgName, char *cursor) {
 	long metadata_start;
 	long metadata_numfields;
 
-	strcpy(filepath,USER_PATH);
-	strcat(filepath,pkgName);
-	strcat(filepath,AUDIO_FILE_EXT);
+	if (strcmp(cursor,TRANSLATE_TEMP_DIR) == 0) {
+		strcpy(filepath,LANGUAGES_PATH);
+		strcat(filepath,TRANSLATE_TEMP_DIR);
+		strcat(filepath,"/");
+		strcat(filepath,UI_SUBDIR);
+		strcat(filepath,pkgName);
+		strcat(filepath,AUDIO_FILE_EXT);
+	} 
+	else {
+		strcpy(filepath,USER_PATH);
+		strcat(filepath,pkgName);
+		strcat(filepath,AUDIO_FILE_EXT);
+	}
 		
 	file = getListFile(cursor);
-	insertSound(file,NULL,TRUE);
+	if (strcmp(cursor,TRANSLATE_TEMP_DIR) != 0)
+		insertSound(file,NULL,TRUE);
 	start = getRTCinSeconds();
 	strcpy(temp,"\x0d\x0a");
 	longToDecimalString(start,temp+2,8);
@@ -444,7 +459,7 @@ static int recordAudio(char *pkgName, char *cursor) {
         writeLE32(handle, wrk1, CURRENT_POS);  //meta data version = 1
         writeLE32(handle, metadata_numfields, CURRENT_POS); // 4 byte for num fields
         
-        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
+        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + 4); // skip tsn.
         strcat(unique_id, "_");       
 		longToDecimalString(systemCounts.packageNumber,digits,5);
         strcat(unique_id, digits);
@@ -454,7 +469,7 @@ static int recordAudio(char *pkgName, char *cursor) {
 
 //      add audio item id metadata initial code
 //      need to add org here 
-        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
+        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + 4); // skip tsn.
         strcat(unique_id, "_");       
 		longToDecimalString(systemCounts.recordingNumber,digits,8);
 		strcat(unique_id, digits);
@@ -506,13 +521,16 @@ static int recordAudio(char *pkgName, char *cursor) {
 		setLED(LED_RED,FALSE);
 		turnAmpOn();
 		playDing();
-		insertSound(&pkgSystem.files[POST_REC_FILE_IDX],NULL,TRUE); 					
-		insertSound(file,NULL,TRUE);  // replay subject
+		insertSound(&pkgSystem.files[POST_REC_FILE_IDX],NULL,TRUE);
+		
+		if (strcmp(cursor,TRANSLATE_TEMP_DIR) != 0) 					
+			insertSound(file,NULL,TRUE);  // replay subject
 
 		strcpy(temp,"TIME RECORDED (secs): ");
 		longToDecimalString((long)end-start,temp+strlen(temp),4);
 		strcat(temp,"\x0d\x0a");
 		logString(temp,BUFFER);
+		//logString(temp,ASAP);
 
 		ret = 0;  // used to set this based on fileExists() check, but too slow
 	} else {
@@ -548,7 +566,9 @@ int createRecording(char *pkgName, int fromHeadphone, char *listName) {
 	recordAudio(pkgName,listName);
 	if (SPINS)
 		*P_HPAMP_Ctrl &= 0xFFF3; // zero bits 2 and 3, returning SPINS to 0
-	packageRecording(pkgName,listName); // packageRecording turns it into single byte characters
+	
+	if(strcmp(listName, TRANSLATE_TEMP_DIR) != 0)
+		packageRecording(pkgName,listName); // packageRecording turns it into single byte characters
 
 	return 0;
 }

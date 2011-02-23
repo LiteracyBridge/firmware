@@ -5,10 +5,22 @@
 #define	__LISTS_h__
 
 #define LIST_ITEM_LENGTH	40
+#define MAX_TRANSLATE_FILE  60
+#define TRANSLATE_TEMP_DIR  "translate_temp"
 typedef struct ListItem ListItem;
+typedef struct TranslationList TranslationList;
 typedef enum EnumListType EnumListType;
 
 enum EnumListType {LIST_OF_LISTS, LIST_OF_PACKAGES};
+
+struct TranslationList {
+	unsigned int actionStartEnd;
+	unsigned int idxFirstAction;
+	char translatedFileMarker[MAX_TRANSLATE_FILE];
+	//char translatedFileMarker[MAX_FILES];
+	int currFileIdx;
+	char mode;
+};
 
 struct ListItem {
 	unsigned int actionStartEnd; // see bit map for ctnrBlock below
@@ -30,5 +42,5 @@ extern void setListRotation(int *, int);
 extern int getListRotation(unsigned int);
 extern int getListFilename(char *, int, BOOL);
 extern int insertIntoList(ListItem *, long, char *);
-
+//extern void getNextTransList(TranslationList *, BOOL, CtnrPackage *);
 #endif

@@ -157,7 +157,6 @@ void setUSBDevice (BOOL set) {
 	if (set) {
 		Snd_Stop();
 		flushLog();
-		cleanUpOldRevs(); // cleanup any old revs
 		SystemIntoUDisk(USB_CLIENT_SVC_LOOP_CONTINUOUS);	
 		SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
 		processInbox();
