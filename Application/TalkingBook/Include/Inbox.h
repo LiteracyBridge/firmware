@@ -6,5 +6,4 @@
 
 extern void processInbox(void);
 extern void copyOutbox(void);
-
 #endif

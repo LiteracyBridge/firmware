@@ -473,15 +473,7 @@ Action* getBlockActions(CtnrBlock *block) {
 		ret = &context.package->actions[idx];
 	return ret;
 }	
-Action* getTransListActions(TranslationList *list) {
-	Action *ret;
-	int idx = list->idxFirstAction;
-	if (idx == -1)
-		ret = 0;
-	else
-		ret = &context.package->actions[idx];
-	return ret;
-}
+
 Action* getListActions(ListItem *list) {
 	Action *ret;
 	int idx = list->idxFirstAction;

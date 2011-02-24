@@ -94,50 +94,6 @@ char *getCurrentList(ListItem *list) {
 	return ret;
 }
 
-BOOL getNextTransList(TranslationList *transList, BOOL advance, CtnrPackage *pkg) {
-	unsigned int tempInt, startIndex;
-	BOOL foundNext, checkedAll, translated;
-
-	foundNext = FALSE;
-	checkedAll = FALSE;
-	translated = FALSE;
-	startIndex = transList->currFileIdx;
-	do {
-		//Increment first, then if out of bounds, set to 0
-		if (advance) {
-			if (transList->currFileIdx == -1) 
-				transList->currFileIdx = 0;
-			else {
-				tempInt = ++transList->currFileIdx + 1;
-				if (tempInt >= pkg->countFiles)
-					transList->currFileIdx = 0;
-			}
-		}
-		else {
-			if(transList->currFileIdx > 0) 
-				--transList->currFileIdx;
-			else
-				transList->currFileIdx = pkg->countFiles - 2;
-		}
-		
-		if (transList->currFileIdx == startIndex)
-			checkedAll = TRUE;
-		else {
-			//If in not-completed list, play all files
-			if (transList->mode == '0') {
-				foundNext = TRUE;
-				if (transList->translatedFileMarker[transList->currFileIdx] == '1')
-					translated = TRUE;
-			}
-			else if (transList->translatedFileMarker[transList->currFileIdx] == '1')
-				foundNext = TRUE;
-		}
-		
-	} while (foundNext == FALSE && checkedAll == FALSE);
-
-	return translated;
-}
-
 char *getNextList(ListItem *list, BOOL shouldAdvance) {
 	char *ret;
 	char buffer[READ_LENGTH+1];

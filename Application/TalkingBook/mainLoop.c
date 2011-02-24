@@ -37,8 +37,6 @@ static void endOfTimeframe(int, BOOL);
 static void keyResponse(void);
 int checkInactivity(BOOL);
 static void takeAction (Action *, EnumAction);
-static void finishTranslation(void);
-static void createTranslateDir (void);
 
 extern APP_IRAM unsigned int vCur_1;
 extern void refuse_lowvoltage(int);
@@ -301,11 +299,7 @@ static void processButtonEvent(int eventType) {
 	EnumAction actionCode;
 	
 	if (context.idxActiveList != -1) {
-		if (context.idxActiveList == MAX_LISTS) 
-			action = getTransListActions(&context.transList);
-		else
-			action = getListActions(&pkgSystem.lists[context.idxActiveList]);
-			
+		action = getListActions(&pkgSystem.lists[context.idxActiveList]);
 		while (action && !isEventInAction(action,eventType,context.isPaused))
 			action = getNextAction(action);
 	}
@@ -474,8 +468,6 @@ extern int checkInactivity(BOOL resetTimer) {
 //		insertSound(&pkgSystem.files[INACTIVITY_SOUND_FILE_IDX],NULL,FALSE);
 //		restoreVolume(FALSE);
 		lastActivity = currentTime;
-		writeVersionToDisk(); // seems like as good a time as any to check if this info logged (delay was too long on startup)
-		//	cleanUpOldRevs();	
 //#ifdef TB_CAN_WAKE
 		if(MEM_TYPE == MX_MID) {
 			setOperationalMode((int)P_SLEEP);  // keep RTC running
@@ -525,7 +517,6 @@ void mainLoop (void) {
 	unsigned int getCurVoltageSample();
 	CtnrBlock *insertBlock;
 	ListItem *list;
-	TranslationList *transList;
 	int inactivityCheckCounter = 0;
 	
 	while(1) {
@@ -570,14 +561,8 @@ void mainLoop (void) {
 			else {
 				//process any end of play sound-insert
 				//TODO: work this into other code; it's a bit of a one-off right now
-				if (context.idxActiveList == MAX_LISTS) {
-					transList = &context.transList;
-					insertBlock = getEndInsert(transList->actionStartEnd, transList->idxFirstAction);
-				}
-				else {
-					list = &context.package->lists[context.idxActiveList];
-					insertBlock = getEndInsert(list->actionStartEnd, list->idxFirstAction);
-				}
+				list = &context.package->lists[context.idxActiveList];
+				insertBlock = getEndInsert(list->actionStartEnd, list->idxFirstAction);
 				if (insertBlock)
 					insertSound(getFileFromBlock(insertBlock),insertBlock,FALSE);
 			}
@@ -597,134 +582,11 @@ void mainLoop (void) {
 	} // end of while(1) loop
 }
 
-static void createTranslateDir () {
-	//If temp dir doesn't exist, create it.
-	char filepath[PATH_LENGTH],tempPath[PATH_LENGTH];
-	unsigned int len;
-	
-	strcpy(filepath,LANGUAGES_PATH);
-	strcat(filepath,TRANSLATE_TEMP_DIR);
-	
-	if(dirExists((LPSTR)filepath) == 0) {
-		mkdir((LPSTR)filepath);
-		strcat(filepath,"/");
-		len = strlen(filepath);
-		//Temporary code until figure out how to copy directories recursively
-		
-		//Create topics subfolder
-		strcat(filepath,TOPICS_SUBDIR);
-		mkdir((LPSTR)filepath);
-		
-		//Create instructions subfolder
-		filepath[len]=0;
-		strcat(filepath,UI_SUBDIR);
-		mkdir((LPSTR)filepath);
-				
-		//Copying control.txt
-		strcpy(tempPath,LANGUAGES_PATH);
-		strcat(tempPath,pkgSystem.strHeapStack + pkgSystem.idxName);
-		strcat(tempPath,"/");
-		strcat(tempPath,UI_SUBDIR);
-		strcat(tempPath,PKG_CONTROL_FILENAME_TXT);
-		strcat(filepath,PKG_CONTROL_FILENAME_TXT);
-		fileCopy(tempPath,filepath);
-		
-		//Todo: copy topics.txt
-		//Todo: copy contents of messages/lists/copy-for-new-language/
-		
-		//Original code:
-		//strcpy(tempPath,LANGUAGES_PATH);
-		//strcat(tempPath,"copy-for-new-language/");
-		//dirCopy(tempPath,filepath);
-	}
-	
-}
-
-//static void finishTranslation(BOOL forceDone){
-static void finishTranslation(){
-	
-	char filepath[PATH_LENGTH],tempPath[PATH_LENGTH];
-	unsigned int len,len1;
-	long maxFileIdx, i;
-	int handle, ret;
-	
-	//Number of files to translate is pkgSystem.countFiles - 1;
-	maxFileIdx = pkgSystem.countFiles - 2;
-	
-	/*for(i = 0; i <= maxFileIdx; i++){
-		//Check if all files have been translated
-		if(context.transList.translatedFileMarker[i] == '0')
-			break;
-	}*/
-	
-	//For testing only, finish if translated 37 and 38.
-	if(context.transList.translatedFileMarker[38] == '1' && context.transList.translatedFileMarker[39] == '1')
-		i = maxFileIdx+1;
-	
-	//If Done translation
-	if(i > maxFileIdx){
-		
-		//Move to new name
-		strcpy(tempPath,LANGUAGES_PATH);
-		i=0;
-		strcat(tempPath,"translation_");
-		strcat(tempPath,getDeviceSN(0));
-		strcat(tempPath,"_");
-		len = strlen(tempPath);
-		do {
-			tempPath[len]=0;
-			longToDecimalString(i,tempPath+len,2);
-			i++;
-		} while( dirExists((LPSTR)tempPath) );
-		
-		//Rename directory from temp name to serial-number based
-		strcpy(filepath,LANGUAGES_PATH);
-		strcat(filepath,TRANSLATE_TEMP_DIR);
-		ret = rename((LPSTR)filepath, (LPSTR)tempPath);
-		
-		//Append string to system names file
-		strcpy( tempPath,tempPath+strlen((char *)LANGUAGES_PATH) );
-		strcpy(filepath,LANGUAGES_PATH);
-		strcat(filepath,SYSTEM_ORDER_FILE);
-		strcat(filepath,".txt");
-		appendStringToFile(filepath, tempPath);
-		
-		//Remove binary for storing translation list
-		strcpy(filepath,LANGUAGES_PATH);
-		strcat(filepath,TRANSLATE_FILENAME_BIN);
-		unlink((LPSTR)filepath);
-			
-		//Reset translation list	
-		for(i = 0; i <= maxFileIdx; i++){
-			context.transList.translatedFileMarker[i] = '0';
-		}
-		context.transList.currFileIdx = -1;
-		context.transList.mode = '0';
-		
-		loadSystemNames();
-	
-	}
-	else {
-		//Persist transList into memory
-		strcpy(filepath,LANGUAGES_PATH);
-		strcat(filepath,TRANSLATE_FILENAME_BIN);
-		
-		handle = tbOpen((LPSTR)(filepath),O_CREAT|O_RDWR);
-		if (handle != -1) {
-			ret = write(handle, (unsigned long)&context.transList<<1, sizeof(TranslationList)<<1);
-			close(handle);
-		}
-		else {
-			logException(99,"Can't persist translate list",USB_MODE);
-		}
-	}
-}
-
 static void takeAction (Action *action, EnumAction actionCode) {
-	unsigned int newTime, oldTime, tempInt; 
+	unsigned int newTime, oldTime; 
 	unsigned long longNewTime, longOldTime;
 	int newIdxTimeframe, tempTime;
-	CtnrFile *newFile, *tempFile;
+	CtnrFile *newFile;
 	CtnrBlock *newBlock, *soundInsertBlock;
 	int newIdxAction;
 	EnumAction newActionCode;
@@ -734,17 +596,13 @@ static void takeAction (Action *action, EnumAction actionCode) {
 	int status;
 	BOOL reposition = FALSE;
 	BOOL isTooFar = FALSE;
-	BOOL playBipSound = FALSE;
 	ListItem *list, *tempList;
-	TranslationList *transList;
-	char filename[PATH_LENGTH],filepath[PATH_LENGTH],tempPath[PATH_LENGTH];
+	char filename[PATH_LENGTH],filepath[PATH_LENGTH];
 	char *cursor, *cursor2;
 	CtnrFile *replayFile;
-	char tempBuffer[20];
 		
 	replayFile = NULL;
 	list = NULL;
-	transList = NULL;
 	oldTime = compressTime(Snd_A1800_GetCurrentTime(),context.package->timePrecision);
 	newFile = 0;
 	newTime = -1;
@@ -758,141 +616,54 @@ static void takeAction (Action *action, EnumAction actionCode) {
 	}
 		
 	switch (actionCode) {
-		case TRANSLATED_LIST:
-			stop();
-			transList = &context.transList;
-			tempInt = pkgSystem.countFiles - 2;
-			i = 0;
-			//Can go to translated only if something has been translated.
-			while (i < tempInt && transList->translatedFileMarker[i]=='0')
-				i++;
-			if (transList->translatedFileMarker[i]=='1')
-				transList->mode = '1';
-			else
-				transList->mode = '0';
-			
-			break;
-		case NOT_TRANSLATED_LIST:
-			stop();
-			transList = &context.transList;
-			transList->mode = '0';
-			break;
-		case RECORD_TRANSLATION:
-			stop();
-			if(vCur_1 < V_MIN_RECORD_VOLTAGE) {
-				refuse_lowvoltage(0);
-				break;
-			}
-			//cursor is list name - don't need this for translation recording
-			transList = &context.transList;
-			tempFile = &pkgSystem.files[transList->currFileIdx + 1];
-			strcpy(filename,pkgSystem.strHeapStack + tempFile->idxFilename);
-
-			createTranslateDir();
-			
-			//Store mode
-			tempBuffer[0] = transList->mode;
-			
-			//filename is name of new file
-			//cursor is name of current list
-			//Switch mode to '0' so insert sounds can get the correct path
-			transList->mode = '0';
-			ret = createRecording(filename,aux,TRANSLATE_TEMP_DIR);
-			if (ret == -1)
-				logException(28,"recording failed",RESET); //todo: add voice error msg?
-				
-			transList->translatedFileMarker[transList->currFileIdx] = '1';
-			
-			//Set mode to re-play file just recorded in translated tracks
-			transList->mode = '1';
-			insertSound(&pkgSystem.files[transList->currFileIdx+1],NULL,TRUE);
-			transList->mode = tempBuffer[0];
-		
-			finishTranslation();
-			//finishTranslation(FALSE);
-			
-			break;
 		case JUMP_LIST:
 			stop();
-			//strcpy(tempBuffer,"Diag-destination");
-			//longToDecimalString((long)destination,tempBuffer+strlen(tempBuffer),2);
-			//logException(99,tempBuffer,(context.package == &pkgSystem)?USB_MODE:RESET); 
-			if (destination == MAX_LISTS)
-				transList = &context.transList;
-			else {
-				//Reset translation list if jumping to a non-translation list
-				context.transList.currFileIdx = -1;
-				list = &context.package->lists[destination];
-			}
+			list = &context.package->lists[destination];
 			context.idxActiveList = destination;
-			
-			if (transList) {
-				if (transList->currFileIdx == -1)
-					playBipSound = getNextTransList(transList,TRUE,&pkgSystem);
-				else {
-					switch (getListRotation(aux)) {
-						case 1:
-							playBipSound = getNextTransList(transList,TRUE,&pkgSystem);
-							break;
-						case -1:
-							playBipSound = getNextTransList(transList,FALSE,&pkgSystem);
-							break;
-						case 0:
-							break;
-					}
-				}
-				newFile = &pkgSystem.files[transList->currFileIdx+1];
-				newTime = 0;
-				reposition = TRUE;
-				if(playBipSound)
-					playBip();
-			}
-			else {
-				switch (getListRotation(aux)) {
-					case 0:
-					    cursor = getCurrentList(list);
-					    strcpy(filename,cursor);
-						break;
-					case 1:
-					    strcpy(filename,getNextList(list,TRUE));
-						break;
-					case -1:
-					    strcpy(filename,getPreviousList(list));
-						break;
-				}
-				if (!filename[0]) { 
-					// empty list
-					insertSound(&pkgSystem.files[EMPTY_LIST_FILE_IDX],NULL,FALSE);
-					// empty list of packages; redirect to current point in list of lists
-					list = &context.package->lists[0];
-					context.idxActiveList = 0;
+			switch (getListRotation(aux)) {
+				case 0:
 				    cursor = getCurrentList(list);
 				    strcpy(filename,cursor);
-				    reposition = FALSE;
-				} else {
-					if (list->listType == LIST_OF_PACKAGES) {
-						// load package
-						switch (filename[0]) {
-							case SYS_PKG_CHAR:
-								context.queuedPackageType = PKG_SYS;
-								destination = replaceStack(filename+1,&pkgSystem);
-								break;
-							case APP_PKG_CHAR:
-								context.queuedPackageType = PKG_APP;
-								destination = replaceStack(filename+1,&pkgSystem);
-								break;
-							default:
-								context.queuedPackageType = PKG_MSG;
-								destination = replaceStack(filename,&pkgSystem);
-								break;
-						}
-						context.queuedPackageNameIndex = destination;
-					} else { // list->listType != LIST_OF_PACKAGES
-						// play sound of subject
-						newFile = getListFileLong(filename);
-						newTime = 0;
-						reposition = TRUE;
+					break;
+				case 1:
+				    strcpy(filename,getNextList(list,TRUE));
+					break;
+				case -1:
+				    strcpy(filename,getPreviousList(list));
+					break;
+			}
+			if (!filename[0]) { 
+				// empty list
+				insertSound(&pkgSystem.files[EMPTY_LIST_FILE_IDX],NULL,FALSE);
+				// empty list of packages; redirect to current point in list of lists
+				list = &context.package->lists[0];
+				context.idxActiveList = 0;
+			    cursor = getCurrentList(list);
+			    strcpy(filename,cursor);
+			    reposition = FALSE;
+			} else {
+				if (list->listType == LIST_OF_PACKAGES) {
+					// load package
+					switch (filename[0]) {
+						case SYS_PKG_CHAR:
+							context.queuedPackageType = PKG_SYS;
+							destination = replaceStack(filename+1,&pkgSystem);
+							break;
+						case APP_PKG_CHAR:
+							context.queuedPackageType = PKG_APP;
+							destination = replaceStack(filename+1,&pkgSystem);
+							break;
+						default:
+							context.queuedPackageType = PKG_MSG;
+							destination = replaceStack(filename,&pkgSystem);
+							break;
 					}
+					context.queuedPackageNameIndex = destination;
+				} else { // list->listType != LIST_OF_PACKAGES
+					// play sound of subject
+					newFile = getListFileLong(filename);
+					newTime = 0;
+					reposition = TRUE;
 				}
 			}
 			break;
@@ -917,8 +688,6 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			}
 			context.queuedPackageType = aux;
 			context.queuedPackageNameIndex = destination;
-			//Exiting translation app.  Mode is looked at by getFileHandle.  Default is '0'
-			context.transList.mode = '0';
 			break;  // sets up main loop to handle this, rather than building up a stack overflow
 
 		case COPY:
@@ -1106,8 +875,6 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			*cursor2 = 0; // remove extension
 			strcpy(filename,filename+strlen(USER_PATH)); //remove path
 			
-			//filename is name of new file
-			//cursor is name of current list
 			ret = createRecording(filename,aux,cursor);
 			if (ret != -1) {
 				destination = replaceStack(filename,context.package);
@@ -1258,12 +1025,12 @@ static void takeAction (Action *action, EnumAction actionCode) {
 		if (newFile && newFile != context.file) {
 			enterOrExitAllBlocks(context.idxTimeframe,EXITING);
 			context.file = newFile;
-			if (!list && !transList)
+			if (!list)
 				buildBlockTimelines(newFile);
 			context.idxTimeframe = -1; // to signal it hasn't been set yet
 			context.timeNextTimeframe = -1; // resets this -- necessary for lists that dont go to processTimelineJump
 		}
-		if (!list && !transList) {
+		if (!list) {
 			context.idxActiveList = -1;
 			newIdxTimeframe = getIdxTimeline(newTime);
 			if (newIdxTimeframe != context.idxTimeframe) 
@@ -1291,11 +1058,6 @@ static void takeAction (Action *action, EnumAction actionCode) {
 		processStartBlock(newBlock - context.package->blocks);
 	if (list) {
 		soundInsertBlock = getStartInsert(list->actionStartEnd, list->idxFirstAction);
-		if (soundInsertBlock)
-			insertSound(getFileFromBlock(soundInsertBlock),soundInsertBlock,FALSE);
-	}
-	if (transList) {
-		soundInsertBlock = getStartInsert(transList->actionStartEnd, transList->idxFirstAction);
 		if (soundInsertBlock)
 			insertSound(getFileFromBlock(soundInsertBlock),soundInsertBlock,FALSE);
 	}		
@@ -1371,8 +1133,6 @@ void loadPackage(int pkgType, const char * pkgName) {
 		temp = filePath + strlen(filePath);
 		strcpy(temp,PKG_CONTROL_FILENAME_BIN);
 		handle = open((LPSTR)(filePath),O_RDONLY);
-		//Force to re-load control
-		handle = -1;
 		if (handle == -1) {
 			strcpy(temp,PKG_CONTROL_FILENAME_TXT);
 			flagParse = fileExists((LPSTR)filePath);

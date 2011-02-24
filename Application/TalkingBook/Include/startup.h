@@ -8,6 +8,7 @@
 #define SYSTEM_HEAP_SIZE 512	//config file values
 #define CONFIG_FILE		"a://system/config.txt"
 #define ALT_CONFIG_FILE		"a://config.txt"
+#define FLAGGED_CONFIG_FILE	"a://system/config-VERSION-CHANGED.txt"
 
 // set BAD_MEMBRANE_SW for the old membrane switch that A-Tech has
 //#define OLD_MEMBRANE_SW 
@@ -17,7 +18,7 @@ extern void setDefaults(void);
 extern char *nextSystem(void);
 extern char *prevSystem(void); 
 extern unsigned int GetMemManufacturer(void);
-extern void loadSystemNames(void);
+extern void cleanUpOldRevs(void);
 
 #ifndef OLD_MEMBRANE_SW 
 
