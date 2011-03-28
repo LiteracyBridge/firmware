@@ -1,5 +1,4 @@
-// Copyright 2009 Literacy Bridge
-// CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
+// Copyright 2009-2011 Literacy Bridge
 // Contact: info@literacybridge.org
 #include "./system/include/system_head.h"
 #include "Include/talkingbook.h"
@@ -452,12 +451,8 @@ extern int checkInactivity(BOOL resetTimer) {
 	APP_IRAM static int justLogged;
 	APP_IRAM static BOOL green;
 	char stringLog[20];
-	int v;
 		
 	currentTime = getRTCinSeconds();	
-
-	while((v = getCurVoltageSample()) == 0xffff);
-	set_voltmaxvolume();
 
 	if (resetTimer) {
 		lastUSBCheck = lastActivity = currentTime;
@@ -571,12 +566,10 @@ void mainLoop (void) {
 			}	
 		}
 		if (++inactivityCheckCounter > 10) {
+			while(getCurVoltageSample() == 0xffff);
+			set_voltmaxvolume();
 			checkInactivity(!context.isStopped && !context.isPaused);
 			inactivityCheckCounter = 0;
-			if(vCur_1 < V_MIN_RUN_VOLTAGE) {
-				refuse_lowvoltage(1);
-				// not reached
-			}
 		}
 		keyResponse();
 	} // end of while(1) loop

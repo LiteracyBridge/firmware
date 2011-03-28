@@ -1,5 +1,4 @@
-// Copyright 2009 Literacy Bridge
-// CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
+// Copyright 2009-2011 Literacy Bridge
 // Contact: info@literacybridge.org
 #ifndef	__DEVICE_h__
 #define	__DEVICE_h__
@@ -13,13 +12,13 @@
 #define V_MIN_RECORD_VOLTAGE 200
 
 //refuse to write to sd if voltage below this value (hundredths of volts)
-#define V_MIN_SDWRITE_VOLTAGE 200
+#define V_MIN_SDWRITE_VOLTAGE 190
 
 //refuse to run if voltage below this value (hundredths of volts)
 #define V_MIN_RUN_VOLTAGE 175
 
 //voltage at or below this value enforce maximum volume settings
-#define V_MIN_VOL_VOLTAGE 220
+#define V_MIN_VOL_VOLTAGE 310
 
 // must be powered externally if less than this (hundredths of volts)
 #define V_MIN_POSSIBLE_VOLTAGE 80

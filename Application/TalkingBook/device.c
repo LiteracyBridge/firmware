@@ -1,5 +1,4 @@
-// Copyright 2009 Literacy Bridge
-// CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
+// Copyright 2009-2011 Literacy Bridge
 // Contact: info@literacybridge.org
 #include "./system/include/system_head.h"
 #include "Include/talkingbook.h"
@@ -15,9 +14,10 @@ extern void _SystemOnOff(void);
 extern int SystemIntoUDisk(unsigned int);
 extern void KeyScan_ServiceLoop(void);
 extern int SP_GetCh(void);
+extern INT16 SD_Initial(void);
 
 static void logKeystroke(int);
-static void Log_ClockCtrl(void);
+//static void Log_ClockCtrl(void);
 static void turnSDoff(void);
 static void turnNORoff(void);
 
@@ -123,8 +123,10 @@ int adjustVolume (int amount, BOOL relative, BOOL rememberOldVolume) {
 	
 	set_voltmaxvolume();
 
-	if (volume > MAX_VOLUME)  
+	if (volume > MAX_VOLUME) { 
 		volume = MAX_VOLUME;
+		playBip();	
+	}
 	if (volume < 1)  
 		volume = 1;
 	SACM_Volume(volume);	
@@ -201,7 +203,8 @@ unsigned int
 getCurVoltageSample() {	
 	unsigned ret = 0xffff;
 	APP_IRAM static BOOL wasSampleStarted = FALSE;
-
+	char log[80];
+	
 	if (!wasSampleStarted) {
 		*P_ADC_Setup |= 0x4000;
 		*P_MADC_Ctrl |= 0x40; // set STRCNV, starting the voltage sample
@@ -226,6 +229,18 @@ getCurVoltageSample() {
 		if(vThresh_1 == 0xffff) {
 			--vCur_1;	// drop current nominal voltage
 			vThresh_1 = 0;	// reset threshold bits
+			if (DEBUG_MODE) {
+				log[0]='v';
+				longToDecimalString(vCur_1, log+1, 3);
+				logString(log,BUFFER);
+			}
+			if(vCur_1 < V_MIN_RUN_VOLTAGE) {
+				refuse_lowvoltage(1);
+			} else if (vCur_1 == V_MIN_SDWRITE_VOLTAGE) {
+				stop(); // in case running audio causes a problem with logging
+				strcpy(log,(char *)"Low voltage->Logging terminated.");
+				logString(log,ASAP);
+			} 
 		}
 	}
 	return(ret);
@@ -343,6 +358,7 @@ void setOperationalMode(int newmode) {
      }
 }
 
+/*
 void
 Log_ClockCtrl() {
 	char buffer[80];
@@ -356,6 +372,7 @@ Log_ClockCtrl() {
 	longToHexString((long)r1,buffer+strlen(buffer),1);
 	logString(buffer,ASAP);
 }
+*/
 
 int logLongHex(unsigned long data) {
 	char strHex[7];
@@ -372,15 +389,15 @@ int logLongHex(unsigned long data) {
 void
 refuse_lowvoltage(int die)
 {
-	extern void playDing(void);
+	extern void playBip(void);
 	int no_startup_done = ((LED_GREEN == 0) && (LED_RED == 0));
 	if(no_startup_done == 1) { // haven't run startup, no sound possible
 		LED_GREEN = DEFAULT_LED_GREEN;
 		LED_RED = DEFAULT_LED_RED;
 		LED_ALL = LED_GREEN | LED_RED;
 	} else {	
-		playDing();
-		playDing();
+		playBip();
+		playBip();
 	}
 	if(die != 0) {
 		setLED(LED_ALL, FALSE);
@@ -393,26 +410,34 @@ refuse_lowvoltage(int die)
 		wait(500);
 		setLED(LED_RED, FALSE);
 		setOperationalMode((int)P_SLEEP);
-	} else {
-		if(no_startup_done == 0) {
-			playDing();
-			playDing();
-		}
 	}
 }
+
 void
 set_voltmaxvolume()
 {
 	int	wrk = V_MIN_VOL_VOLTAGE - vCur_1;
 	if(wrk > 0) {
-		wrk >>= 1;
-		// for every .02 volt below V_MIN_VOL_VOLTAGE subtract 1 from MAX_VOLUME
+		wrk >>= 3;
+		// for every .08 volt below V_MIN_VOL_VOLTAGE subtract 1 from MAX_VOLUME
 		wrk = 16 - wrk;
-		if(wrk <= 1) wrk = 2;
+		if(wrk < 1) wrk = 1;
 		if(wrk < MAX_VOLUME) {
 			MAX_VOLUME = wrk;
-			if (volume > MAX_VOLUME)  
+			if (volume > MAX_VOLUME) {
 				volume = MAX_VOLUME;
+				SACM_Volume(volume);
+				playBip();	
+			}
+			if (DEBUG_MODE) {
+				char log[15] = "v---,MV--,CV--";
+				longToDecimalString(vCur_1, log+1, 3);
+				log[4] = ',';
+				longToDecimalString((long)MAX_VOLUME,log+7,2);
+				log[9] = ',';
+				longToDecimalString((long)volume,log+11,2);
+				logString(log,BUFFER);
+			}		
 		}
 	}
 }

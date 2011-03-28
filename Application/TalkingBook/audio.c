@@ -1,5 +1,4 @@
-// Copyright 2009,2010 Literacy Bridge
-// CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
+// Copyright 2009-2011 Literacy Bridge
 // Contact: info@literacybridge.org
 #include "./system/include/system_head.h"
 #include "./driver/include/driver_head.h"
@@ -41,8 +40,26 @@ void playDing(void) {
 }
 
 void playBip(void) {
+	unsigned long lastPlayedPoint;
+	int isPlayerStopped = !SACM_Status();
+
+	if (!isPlayerStopped) {
+		lastPlayedPoint = Snd_A1800_GetCurrentTime();
+		if (lastPlayedPoint < INSERT_SOUND_REWIND_MS)
+			lastPlayedPoint = 0;
+		else
+			lastPlayedPoint -= INSERT_SOUND_REWIND_MS;
+	}
 	Snd_SACM_PlayMemory(C_CODEC_AUDIO1800,RES_BIP_A18_SA);	
 	while (SACM_Status());
+	if (!isPlayerStopped) {
+		playLongInt(context.file,lastPlayedPoint);
+		if (context.isPaused) {
+			pause();
+		}
+	} else {
+		turnAmpOff();		
+	}
 }
 
 void playBips(int count) {
