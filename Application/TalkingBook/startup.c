@@ -238,8 +238,9 @@ void startUp(void) {
 }
 
 static char * addTextToSystemHeap (char *line) {
-	APP_IRAM static char systemHeap [SYSTEM_HEAP_SIZE];
-	APP_IRAM static char *cursorSystemHeap = systemHeap;
+	extern char systemHeap [SYSTEM_HEAP_SIZE];
+	extern char *cursorSystemHeap;
+
 	int length;
 	char *startingHeap, *lineCursor;
 	
