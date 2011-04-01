@@ -30,20 +30,24 @@ unsigned int sav_P_Clock_Ctrl;
 APP_IRAM char systemHeap [SYSTEM_HEAP_SIZE];
 APP_IRAM char *cursorSystemHeap = systemHeap;
 extern int statINIT;
+unsigned int sav_Int_status1;
+unsigned int sav_Int_status2;
 
 int main (void) {
-	
-	if(*P_INT_Status1 & 0x8000) {
-		*P_INT_Status1 |= 0x8000;
-		backfromHalt();	
+	int wrk;
+	sav_Int_status2 = *P_INT_Status2;
+	wrk = sav_Int_status1 = *P_INT_Status1;
+	if(wrk || *P_INT_Status2) {
+		wrk &= 0x8003;
+		*P_INT_Status1 |= wrk;
+		backfromHalt();
 	}
 
 	MEM_TYPE = GetMemManufacturer();
 	
 	initVoltage();	// get initial voltage before SACM_Init in BodyInit - may never run BodyInit()
-//	if(SYS_OFF!=SysGetState()) {
-		BodyInit();
-//	}
+	
+	BodyInit();
 	
 	USB_ISR_PTR = (long)USB_ISR;
 	USB_INSERT_PTR = (long)USB_Insert_TimeOut;
@@ -77,6 +81,17 @@ backfromHalt()
 
 	*P_MINT_Ctrl = sav_P_MINT_Ctrl;
 	*P_Clock_Ctrl = sav_P_Clock_Ctrl;
+	
+	*P_CHA_Ctrl = 0x8505;
+	*P_CHB_Ctrl = 0x8505;
+	*P_HPAMP_Ctrl = 0xf;
+	*P_DAC_IIS_Ctrl = 1;
+	*P_DAC_Ctrl = 0xc;
+	*P_NF_INT_Ctrl= 0x1600;
+	*P_LCD_Setup = 0x0400;
+	*P_IrDA_Ctrl = 0x0400;
+	*P_SD_Ctrl = 0x0302;
+	*P_I2C_En = 0x083E;
 	
 	initVoltage();
 			
