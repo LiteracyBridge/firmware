@@ -33,8 +33,11 @@ extern int statINIT;
 unsigned int sav_Int_status1;
 unsigned int sav_Int_status2;
 
+// rtc alarm testing unsigned int rtc_pending;
+
 int main (void) {
 	int wrk;
+// rtc alarm testing	rtc_pending = 0;
 	sav_Int_status2 = *P_INT_Status2;
 	wrk = sav_Int_status1 = *P_INT_Status1;
 	if(wrk || *P_INT_Status2) {
@@ -45,8 +48,15 @@ int main (void) {
 
 	MEM_TYPE = GetMemManufacturer();
 	
+	if (!SNexists()) {
+		if (MEM_TYPE == MX_MID)
+			write_app_flash((int *)"srn.RHMRHM_DevID_MX", 20, 0);
+		else
+			write_app_flash((int *)"srn.RHMRHM_DevID_SST", 21, 0);
+	}
+
 	initVoltage();	// get initial voltage before SACM_Init in BodyInit - may never run BodyInit()
-	
+
 	BodyInit();
 	
 	USB_ISR_PTR = (long)USB_ISR;
@@ -99,8 +109,14 @@ backfromHalt()
 	
 	__asm__("irq on");
 	__asm__("fiq on");
-			
-	strcpy(buf, "back from Halt call startUp\n");
+	
+	if(sav_Int_status2 & 0x2) {  // rtc alarm fired
+		strcpy(buf, "back from Halt - RTC Alarm fired - call startUp\n");
+		*P_RTC_INT_Status |= 0x50f;	//clear all possible RTC interrupts
+	} else {
+		strcpy(buf, "back from Halt - Button press - call startUp\n");
+	}		
+	
 	logString(buf ,ASAP);
 	
 // Do any other initialization here

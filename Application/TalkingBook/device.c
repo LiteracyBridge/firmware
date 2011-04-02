@@ -30,8 +30,12 @@ void set_voltmaxvolume();
 
 
 void resetRTC(void) {
+#define		P_RTC_HMSBusy                 (volatile unsigned int*)(P_RTC_Ctrl_Base+0x17)
+	while (*P_RTC_HMSBusy) ; // wait till RTC is not busy 
 	*P_Second = 0;
+	while (*P_RTC_HMSBusy) ; // wait till RTC is not busy 
 	*P_Minute = 0;
+	while (*P_RTC_HMSBusy) ; // wait till RTC is not busy 
 	*P_Hour = 0;	
 }
 
@@ -348,8 +352,12 @@ void setOperationalMode(int newmode) {
 		turnSDoff();
 		turnNORoff();
 	  	
-	  	if (newmode == (int)P_HALT) 
+	  	if (newmode == (int)P_HALT)  {
+/* RTC test
+	  		setRTCalarmSeconds(61);		// device should come back on in 61 seconds
+*/
 		  	SysIntoHaltMode();
+	  	}
 		else // newmode == (int)P_SLEEP
 			_SystemOnOff();
 	
@@ -509,5 +517,68 @@ void writeVersionToDisk() {
 		handle = tbOpen((LPSTR)fileVersion,O_CREAT|O_RDWR|O_TRUNC);
 		close(handle);	
 	}
+}
+
+void
+setRTCalarmSeconds(unsigned int seconds) {
+	unsigned int h = *P_Hour;
+	unsigned int m = *P_Minute;
+	unsigned int s = *P_Second;
+	unsigned int delta_min, delta_sec, delta_hour;
+	
+	delta_sec = (seconds + s) % 60;
+	delta_min = (seconds + s) / 60;
+
+	delta_min += m;
+	delta_hour = delta_min / 60;
+	delta_min = delta_min % 60;
+	
+	delta_hour += h;
+	
+	setRTCalarm(delta_hour, delta_min, delta_sec);
+}
+void
+setRTCalarmMinutes(unsigned int minutes) {
+	unsigned int h = *P_Hour;
+	unsigned int m = *P_Minute;
+	unsigned int s = *P_Second;
+	unsigned int delta_min, delta_hour;
+
+	delta_min = minutes + m;
+	delta_hour = delta_min / 60;
+	delta_min = delta_min % 60;
+
+	delta_hour += h;
+
+	setRTCalarm(delta_hour, delta_min, *P_Second);
+}
+void
+setRTCalarmHours(unsigned int hours) {
+	setRTCalarm(*P_Hour + hours, *P_Minute, *P_Second);
+}
+
+void
+setRTCalarm(unsigned int hour, unsigned int minute, unsigned int second) {
+#define RTC_ALARM_INTERRUPT_ENABLE 0x0400
+#define RTC_ALARM_FUNCTION_ENABLE  0x0400
+	*P_Alarm_Second = second;
+	*P_Alarm_Minute = minute;
+	*P_Alarm_Hour   = hour;
+	
+	*P_RTC_INT_Ctrl |= RTC_ALARM_INTERRUPT_ENABLE;
+	*P_RTC_Ctrl     |= RTC_ALARM_FUNCTION_ENABLE;
+}
+
+/*  called from isr.asm when RTC alarm has fired
+    running in interrupt service, so should minimize work done and return
+*/
+void
+RTC_Alarm_Fired() {
+	extern int rtc_pending;
+	int wrk = *P_RTC_INT_Status;
+	
+// rtc alarm testing	rtc_pending = 0;
+	*P_RTC_INT_Status |= wrk;	// clear all interrupt flags
+	
 }
 

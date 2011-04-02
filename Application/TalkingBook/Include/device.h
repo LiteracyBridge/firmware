@@ -65,5 +65,10 @@ extern void turnAmpOn(void);
 extern char* getDeviceSN(int);
 extern int SNexists(void);
 extern void writeVersionToDisk(void);
+extern void setRTCalarmSeconds(unsigned int);
+extern void setRTCalarmMinutes(unsigned int);
+extern void setRTCalarmHours(unsigned);
+extern void setRTCalarm(unsigned int, unsigned int, unsigned int);
+
 
 #endif

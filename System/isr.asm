@@ -460,6 +460,8 @@ ExecuteIF_HMS:
 	RETF
 
 ExecuteIF_ALARM:
+.EXTERNAL _RTC_Alarm_Fired
+	CALL _RTC_Alarm_Fired
 	RETF
 
 .EXTERNAL _USB_Insert_TimeOut

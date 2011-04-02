@@ -515,7 +515,17 @@ void mainLoop (void) {
 	int inactivityCheckCounter = 0;
 	
 	while(1) {
-		
+/* rtc alarm testing - delete when rtc alarm code is working a desired		
+		extern unsigned int rtc_pending;
+		if(!rtc_pending) {
+			char buffer[32];
+			strcpy(buffer,"setting rtc alarm");
+			logString(buffer,BUFFER);
+			setRTCalarmSeconds(10);
+			logRTC();
+			rtc_pending = 1;
+		}
+*/		
 		// check if need to load in a new package
 		if (context.queuedPackageType > PKG_NONE) {
 			if (context.queuedPackageNameIndex >= 0)
