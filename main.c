@@ -48,13 +48,6 @@ int main (void) {
 
 	MEM_TYPE = GetMemManufacturer();
 	
-	if (!SNexists()) {
-		if (MEM_TYPE == MX_MID)
-			write_app_flash((int *)"srn.RHMRHM_DevID_MX", 20, 0);
-		else
-			write_app_flash((int *)"srn.RHMRHM_DevID_SST", 21, 0);
-	}
-
 	initVoltage();	// get initial voltage before SACM_Init in BodyInit - may never run BodyInit()
 
 	BodyInit();
