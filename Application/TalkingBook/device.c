@@ -400,7 +400,9 @@ void setOperationalMode(int newmode) {
 		turnNORoff();
 	  	
 	  	if (newmode == (int)P_HALT)  {
+/*
 	  		setRTCalarmSeconds(61);		// device should come back on in 61 seconds
+*/
 		  	SysIntoHaltMode();
 	  	}
 		else // newmode == (int)P_SLEEP

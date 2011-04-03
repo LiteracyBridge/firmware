@@ -238,7 +238,6 @@ void startUp(void) {
 	SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
 	loadPackage(PKG_SYS,currentSystem());
 	
-	LOG_KEYS = 1;	
 	mainLoop();
 }
 
