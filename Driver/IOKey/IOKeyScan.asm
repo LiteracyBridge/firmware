@@ -184,5 +184,25 @@ F_SP_GetCh:
 		[RW_G_KeyStrobe] = r2;			//
 		//pop		BP,BP from [SP];
 		retf;
-		.ENDP  		
+		.ENDP 
+//
+//	get current key without messing up debounce logic
+//
+.PUBLIC _GetCurKey
+_GetCurKey:		.PROC
+F_GetCurKey:
+	r1 = [P_IOA_Data];			// get key data from IOA
+.ifndef TB_CAN_WAKE
+	r1 = r1 and 0x3ff;			// mask out only IOA0-IOA9
+.else
+	r1 = r1 and 0x7f;			// mask out only IOA0-IOA6
+	r2 = [P_IOB_Data];			// get key data from IOB
+	r2 = r2 and 0x07;			// mask out only IOB0-IOB2
+	r2 = r2 lsl 4;
+	r2 = r2 lsl 3;
+	r1 = r1 or r2;
+.endif
+		retf;
+.ENDP  		
+ 		
         		

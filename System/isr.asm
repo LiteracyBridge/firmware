@@ -469,5 +469,7 @@ ExecuteIF_TIMER_BASEA:
 	CALL _USB_Insert_TimeOut
 	RETF
 
+.EXTERNAL  _KEY_TimeBase_B_isr
 ExecuteIF_TIMER_BASEB:
+	CALL _KEY_TimeBase_B_isr
 	RETF

@@ -26,6 +26,7 @@ APP_IRAM static unsigned long voltage; // voltage sample
 APP_IRAM static int oldVolume;
 extern APP_IRAM int vThresh_1;
 extern APP_IRAM unsigned int vCur_1;
+APP_IRAM static unsigned int keydown_counter;
 void set_voltmaxvolume();
 
 
@@ -253,7 +254,28 @@ getCurVoltageSample() {
 int keyCheck(int longCheck) {
 	// get key press or use macro
 	int i, keystroke;
+	static int keydown = 0;
 	
+	if(keydown) {	// we are waiting for key up or long timer to expire
+		extern int GetCurKey();
+		int curkey;
+		curkey = GetCurKey();
+		if(curkey != keydown) {		// the key is up - return it
+			*P_TimeBaseB_Ctrl = 0;    // stop timer
+//			logKeystroke(keydown | 0x8000);
+//			logRTC();
+			curkey = keydown;
+			keydown = 0;
+			return curkey;
+		} else if (keydown_counter > KEY_LONG_DOWN_THRESH) {
+			*P_TimeBaseB_Ctrl = 0;    // stop timer
+			curkey = keydown;
+			keydown = 0;
+//			logKeystroke(curkey | 0xc000);
+//			logRTC();
+			return (curkey | LONG_KEY_STROKE);  // return long key stroke
+		}
+	}
 	// loop allows time for service loop to stabilize on keys
 	// based on C_DebounceCnt = 8 in IOKeyScan.asm (i < 12 was too short)	
 	KeyScan_ServiceLoop();
@@ -265,11 +287,29 @@ int keyCheck(int longCheck) {
 	// BUG: Combo keys are not working. Not sure why yet.
 //	if (keystroke == ADMIN_COMBO_KEYS)
 //		adminOptions();  //might also want to move this to control tracks
-	if (MACRO_FILE)
+	if (MACRO_FILE) {
 		keystroke = nextMacroKey(keystroke);
-	if (keystroke)
+		return(keystroke);
+	}
+	
+// we have debounced key down, start timer and wait for key up or long key press time to expire
+	if (keystroke) {
+		
+		__asm__("irq off");
+		__asm__("fiq off");
+
+		*P_TimeBaseB_Ctrl = TIMEBASE_B_16HZ;  // enable int & divide second into 16 chunks (could be 8,16,32,64)
+		keydown_counter = 0;
+		
+		__asm__("irq on");
+		__asm__("fiq on");
+		
 		logKeystroke(keystroke);
-	return keystroke;
+//		logRTC();
+		keydown = keystroke;
+	}
+	return (0);
+//	return keystroke;
 }
 
 int waitForButton(int targetedButton) {
@@ -308,13 +348,20 @@ static void logKeystroke(int intKey) {
 	APP_IRAM static long secLastKey;
 	long secNow;
 	int diff, i;
-	char str[10];
+	char str[20];
 
 	if (LOG_KEYS) {
-		secNow = getRTCinSeconds();
-		diff = secNow - secLastKey;
-		secLastKey = secNow;
-		longToDecimalString(diff,str,4);
+		longToDecimalString(keydown_counter,str,4);
+		if(intKey & 0x8000) {   // key up
+			if(intKey & 0x4000) {
+				strcat(str," LONG ");
+			} else {
+				strcat(str,"  UP  ");
+			}
+		} else {
+			strcat(str," DOWN ");
+		}
+		intKey &= 0x7fff;
 		strcat(str,", ");
 		i = strlen(str)-1;
 		if (intKey == KEY_LEFT) str[i] = TEXT_EVENT_LEFT;
@@ -327,7 +374,7 @@ static void logKeystroke(int intKey) {
 			else if (intKey == KEY_STAR) str[i] = TEXT_EVENT_STAR;
 			else if (intKey == KEY_PLUS) str[i] = TEXT_EVENT_PLUS;
 			else if (intKey == KEY_MINUS) str[i] = TEXT_EVENT_MINUS;
-		logString(str,BUFFER);	
+		logString(str,ASAP);	
 	}
 }
 
@@ -353,9 +400,7 @@ void setOperationalMode(int newmode) {
 		turnNORoff();
 	  	
 	  	if (newmode == (int)P_HALT)  {
-/* RTC test
 	  		setRTCalarmSeconds(61);		// device should come back on in 61 seconds
-*/
 		  	SysIntoHaltMode();
 	  	}
 		else // newmode == (int)P_SLEEP
@@ -581,4 +626,10 @@ RTC_Alarm_Fired() {
 	*P_RTC_INT_Status |= wrk;	// clear all interrupt flags
 	
 }
-
+void
+KEY_TimeBase_B_isr() {	//TimerBase B fired
+	unsigned int i;
+	i = *P_TimeBaseB_Ctrl;
+	*P_TimeBaseB_Ctrl = i;	// reset interrupt bit
+	keydown_counter += 1;
+}

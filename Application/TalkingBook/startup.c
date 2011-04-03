@@ -59,6 +59,7 @@ APP_IRAM int VOLTAGE_SAMPLE_FREQ_SEC, USB_CLIENT_POLL_INTERVAL;
 APP_IRAM int DEBUG_MODE, LOG_KEYS;
 APP_IRAM unsigned int CLOCK_RATE;
 APP_IRAM int LONG_LIST_NAMES;
+APP_IRAM unsigned int LONG_KEYPRESS_COUNTER;
 //if most recent 16 voltage readings are below vCur_1 (vThresh_1 == 0xffff),
 //   subtract 1 from vCur_1 and zero vThreah_1
 APP_IRAM unsigned int vCur_1;
@@ -116,6 +117,7 @@ void setDefaults(void) {
 	USB_CLIENT_POLL_INTERVAL = DEFAULT_USB_CLIENT_POLL_INTERVAL;
 	
 	ADMIN_COMBO_KEYS = KEY_UP | KEY_DOWN;
+	LONG_KEYPRESS_COUNTER = KEY_LONG_DOWN_THRESH;
 }
 
 void startUp(void) {
@@ -134,6 +136,7 @@ void startUp(void) {
 	playDing();  // it is important to play a sound immediately 
 //	cleanUpOldRevs();	
 	key = keyCheck(1);  // long keycheck 
+	key &= ~LONG_KEY_STROKE;
 	
 	// voltage checks in SystemIntoUSB.c
 	if (key == KEY_STAR || key == KEY_MINUS) {
@@ -207,6 +210,7 @@ void startUp(void) {
 	longToDecimalString(systemCounts.powerUpNumber,(char *)(buffer+strlen(buffer)),4);
 	strcat(buffer,(const char *)" - version " VERSION);
 	logString(buffer,BUFFER);
+	
 //#ifdef TB_CAN_WAKE
 	if(MEM_TYPE == MX_MID) {
 		logRTC();  
@@ -232,8 +236,9 @@ void startUp(void) {
 	}
 	loadSystemNames(); 
 	SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
-	loadPackage(PKG_SYS,currentSystem());	
+	loadPackage(PKG_SYS,currentSystem());
 	
+	LOG_KEYS = 1;	
 	mainLoop();
 }
 
@@ -384,6 +389,7 @@ int loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"LOG_KEYS")) LOG_KEYS=strToInt(value);
 				else if (!strcmp(name,(char *)"CLOCK_RATE")) CLOCK_RATE = strToInt(value);
 				else if (!strcmp(name,(char *)"LONG_LIST_NAMES")) LONG_LIST_NAMES=strToInt(value);
+				else if (!strcmp(name,(char *)"LONG_KEYPRESS_COUNTER")) LONG_KEYPRESS_COUNTER=strToInt(value);
 		}
 	}
 	if (!goodPass) {

@@ -409,6 +409,7 @@ static void endOfTimeframe(int idxTimeframe, BOOL isPlayerStopped) {
 static void keyResponse(void) {
 	// respond to key events
 	int keystroke;
+	char dbgmsg[32];
 	
 	if (context.keystroke) {
 		keystroke = context.keystroke;
@@ -419,27 +420,64 @@ static void keyResponse(void) {
 	if (keystroke)
 		checkInactivity(TRUE);
 	
-	if (keystroke == KEY_PLAY) {	
-		processButtonEvent(PLAY);
-	} else if (keystroke == KEY_LEFT) {
-		// TODO:doesn't yet look at possibility of relative jump action within same context (expects a context change)
-		processButtonEvent(LEFT);
-	} else if(keystroke == KEY_RIGHT) {						
-		processButtonEvent(RIGHT);
-	} else if (keystroke == KEY_UP) {
-		processButtonEvent(UP);
-	} else if (keystroke == KEY_DOWN) {
-		processButtonEvent(DOWN);
-	} else if (keystroke == KEY_SELECT) {
-		processButtonEvent(SELECT);
-	} else if (keystroke == KEY_HOME) {
-		processButtonEvent(HOME);
-	} else if (keystroke == KEY_STAR) {		
-		processButtonEvent(STAR);	
-	} else if (keystroke == KEY_PLUS) {
-		processButtonEvent(PLUS);	
-	} else if (keystroke == KEY_MINUS) {
-		processButtonEvent(MINUS);	
+	if (keystroke & LONG_KEY_STROKE) {  // long keypress
+		
+		keystroke &= ~LONG_KEY_STROKE;
+		
+		if (keystroke == KEY_PLAY) {
+			strcpy(dbgmsg, "Long KEY_PLAY");
+			logString(dbgmsg,ASAP);
+		} else if (keystroke == KEY_LEFT) {
+			strcpy(dbgmsg, "Long KEY_LEFT");
+			logString(dbgmsg,ASAP);
+		} else if (keystroke == KEY_RIGHT) {
+			strcpy(dbgmsg, "Long KEY_RIGHT");
+			logString(dbgmsg,ASAP);
+		} else if (keystroke == KEY_UP) {
+			strcpy(dbgmsg, "Long KEY_UP");
+			logString(dbgmsg,ASAP);
+		} else if (keystroke == KEY_DOWN) {
+			strcpy(dbgmsg, "Long KEY_DOWN");
+			logString(dbgmsg,ASAP);
+		} else if (keystroke == KEY_SELECT) {
+			strcpy(dbgmsg,"Long KEY_SELECT");
+			logString(dbgmsg,ASAP);
+		} else if (keystroke == KEY_HOME) {
+			strcpy(dbgmsg,"Long KEY_HOME");
+			logString(dbgmsg,ASAP);
+		} else if (keystroke == KEY_STAR) {
+			strcpy(dbgmsg, "Long KEY_STAR");
+			logString(dbgmsg,ASAP);
+		} else if (keystroke == KEY_PLUS) {
+			strcpy(dbgmsg, "Long KEY_PLUS");
+			logString(dbgmsg,ASAP);
+		} else if (keystroke == KEY_MINUS) {
+			strcpy(dbgmsg, "Long KEY_MINUS");
+			logString(dbgmsg,ASAP);
+		}
+	} else {  // not a long keystroke
+		if (keystroke == KEY_PLAY) {	
+			processButtonEvent(PLAY);
+		} else if (keystroke == KEY_LEFT) {
+			// TODO:doesn't yet look at possibility of relative jump action within same context (expects a context change)
+			processButtonEvent(LEFT);
+		} else if(keystroke == KEY_RIGHT) {						
+			processButtonEvent(RIGHT);
+		} else if (keystroke == KEY_UP) {
+			processButtonEvent(UP);
+		} else if (keystroke == KEY_DOWN) {
+			processButtonEvent(DOWN);
+		} else if (keystroke == KEY_SELECT) {
+			processButtonEvent(SELECT);
+		} else if (keystroke == KEY_HOME) {
+			processButtonEvent(HOME);
+		} else if (keystroke == KEY_STAR) {		
+			processButtonEvent(STAR);	
+		} else if (keystroke == KEY_PLUS) {
+			processButtonEvent(PLUS);	
+		} else if (keystroke == KEY_MINUS) {
+			processButtonEvent(MINUS);	
+		}
 	}
 }
 

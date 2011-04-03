@@ -34,6 +34,12 @@
 #define P_TB_SERIAL_NUMBER      	(char *)(TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN)
 #define FILE_VERSION_EXT			".ver"
 
+// if change clock in TIMEBASE_B_16HZ need to think about changing KEY_LONG_DOWN_THRESH as well
+#define TIMEBASE_B_16HZ       0xe001
+#define KEY_LONG_DOWN_THRESH  24
+#define LONG_KEY_STROKE       0x4000
+extern unsigned int LONG_KEYPRESS_COUNTER;
+
 extern int KEY_PLAY, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_SELECT, KEY_STAR, KEY_HOME, KEY_PLUS, KEY_MINUS;	
 extern int LED_GREEN, LED_RED, LED_ALL;
 extern int MAX_SPEED, NORMAL_SPEED, SPEED_INCREMENT;
