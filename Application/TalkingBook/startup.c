@@ -190,7 +190,7 @@ void startUp(void) {
 	}
 //#ifndef TB_CAN_WAKE
 //	if(MEM_TYPE == MX_MID) {
-		resetRTC();  //  reset before saving anything to disk and running macros
+//		resetRTC();  //  reset before saving anything to disk and running macros
 		systemCounts.month = 1;
 		systemCounts.monthday = 1;
 //	}
@@ -408,6 +408,7 @@ static void loadDefaultUserPackage(void) {
 	strcpy(sTemp,SYSTEM_PATH);
 	strcat(sTemp,USER_CONTROL_TEMPLATE);
 	strcat(sTemp,".txt"); //todo: move to config file	
+	memset(&pkgDefault,0,sizeof(CtnrPackage));
 	pkgDefault.pkg_type = PKG_MSG;
 	parseControlFile (sTemp, &pkgDefault);
 }
