@@ -1,6 +1,7 @@
 // Copyright 2009 Literacy Bridge
 // CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
 // Contact: info@literacybridge.org
+#include <ctype.h>
 #include "Include/talkingbook.h"
 #include "Include/device.h"
 #include "Include/files.h"
@@ -13,6 +14,7 @@ extern int SP_GetCh(void);
 #define MAX_MACRO_ITEMS     100
 #define MAX_MACRO_LOOPS     10
 #define TOUR_OFFSET			0x100  // to keep tour audio file numbers away from keystroke values
+#define WAKE 				'w'
 
 APP_IRAM static MacroInstr macro[MAX_MACRO_ITEMS];
 APP_IRAM static MacroLoop loop[MAX_MACRO_LOOPS];
@@ -88,6 +90,9 @@ void loadMacro(void) {
 							break;
 						case TEXT_EVENT_MINUS:	//  -
 							key = KEY_MINUS;
+							break;
+						case WAKE: 				// w
+							key = WAKE;
 							break;
 						default:
 							// todo-macro if *action is number, store value in key (+0x100 or someting like that)
@@ -175,6 +180,12 @@ int nextMacroKey (int keystroke) {
 		MACRO_FILE = 0; // end of macros
 		keystroke = 0;
 	} else {
+ 		if (macro[idxMacro].key == WAKE) {
+ 			// Set alarm using wait seconds as # of minutes before waking again 
+ 			// Note that macro doesn't have a way to force halt -- it must use keys or inactivity timer to go to halt.
+ 			setRTCalarmMinutes(macro[idxMacro].wait);
+ 			keystroke = 0; 
+ 		}
 		secNow = getRTCinSeconds();
 		secNextEvent = secLastMacro + macro[idxMacro].wait;
  		if (secNow < secNextEvent)
