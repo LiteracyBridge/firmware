@@ -179,6 +179,7 @@ int nextMacroKey (int keystroke) {
 	if ((idxMacro >= MAX_MACRO_ITEMS) || (macro[idxMacro].wait == -1)) {
 		MACRO_FILE = 0; // end of macros
 		keystroke = 0;
+		idxMacro = idxLoop = countLoop = secLastMacro = 0;
 	} else {
  		if (macro[idxMacro].key == WAKE) {
  			// Set alarm using wait seconds as # of minutes before waking again 
