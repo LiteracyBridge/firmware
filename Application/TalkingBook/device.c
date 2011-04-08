@@ -253,12 +253,13 @@ getCurVoltageSample() {
 
 int keyCheck(int longCheck) {
 	// get key press or use macro
+	extern int GetCurKey();
 	int i, keystroke;
+	unsigned int curkey;
 	static int keydown = 0;
-	
+
 	if(keydown) {	// we are waiting for key up or long timer to expire
-		extern int GetCurKey();
-		int curkey;
+		
 		curkey = GetCurKey();
 		if(curkey != keydown) {		// the key is up - return it
 			*P_TimeBaseB_Ctrl = 0;    // stop timer
@@ -279,9 +280,11 @@ int keyCheck(int longCheck) {
 	// loop allows time for service loop to stabilize on keys
 	// based on C_DebounceCnt = 8 in IOKeyScan.asm (i < 12 was too short)	
 	KeyScan_ServiceLoop();
-	if (longCheck)
-		for (i = 0; i < 15; i++)
+	if (longCheck) {
+		for (i = 0; i < 15; i++) {
 			KeyScan_ServiceLoop();
+		}
+	}
 		
 	keystroke = (int)SP_GetCh();
 	// BUG: Combo keys are not working. Not sure why yet.
@@ -308,6 +311,13 @@ int keyCheck(int longCheck) {
 //		logRTC();
 		keydown = keystroke;
 	}
+	if(longCheck) {
+		while((curkey = GetCurKey()) == keydown) 
+			;
+			curkey = keydown;
+			keydown = 0;
+			return(curkey);
+		}
 	return (0);
 //	return keystroke;
 }
