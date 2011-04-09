@@ -311,7 +311,7 @@ int keyCheck(int longCheck) {
 //		logRTC();
 		keydown = keystroke;
 	}
-	if(longCheck) {
+	if(longCheck && keydown) {
 		while((curkey = GetCurKey()) == keydown) 
 			;
 			curkey = keydown;
