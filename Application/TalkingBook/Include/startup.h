@@ -10,10 +10,14 @@
 #define ALT_CONFIG_FILE		"a://config.txt"
 #define FLAGGED_CONFIG_FILE	"a://system/config-VERSION-CHANGED.txt"
 
+#define BOOT_TYPE_COLD_RESET 0
+#define BOOT_TYPE_KEY_PRESS  1
+#define BOOT_TYPE_RTC_ALARM  2
+
 // set BAD_MEMBRANE_SW for the old membrane switch that A-Tech has
 //#define OLD_MEMBRANE_SW 
 
-extern void startUp(void);
+extern void startUp(unsigned int);
 extern void setDefaults(void);
 extern char *nextSystem(void);
 extern char *prevSystem(void); 

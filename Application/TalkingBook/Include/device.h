@@ -71,6 +71,11 @@ extern void turnAmpOn(void);
 extern char* getDeviceSN(int);
 extern int SNexists(void);
 extern void writeVersionToDisk(void);
+
+#define RTC_ALARM_INTERRUPT_ENABLE 0x0400
+#define RTC_ALARM_FUNCTION_ENABLE  0x0400
+
+extern void rtcAlarmFired(void);
 extern void setRTCalarmSeconds(unsigned int);
 extern void setRTCalarmMinutes(unsigned int);
 extern void setRTCalarmHours(unsigned);

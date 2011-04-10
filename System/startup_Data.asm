@@ -1,9 +1,12 @@
 //------------------------------------------------------------------------------
 .include .\system\include\system_head.inc
 
-.public _RESET, __sn_loop, __sn_loop2, _RESETPCB
+.public _RESET, _RESETPCB, _L_Cold_boot
 .external __sn_init_table, _main, __sn_sp_val
 
+.define BOOT_TYPE_COLD_RESET 0
+.define BOOT_TYPE_KEY_PRESS  1
+.define BOOT_TYPE_RTC_ALARM  2
 //------------------------------------------------------------------------------
 unSP_StartUp: .section .text, .addr = 0xF800
 StartUp: .proc
@@ -68,24 +71,52 @@ _RESET:
 	r1 = 0x0000					
 	[P_LVR_Ctrl] = r1			// LVR enable vol:2.47 -- 2.55V
 
-	cmp	r15,0					//Check if warm reset
-	jne	L_Wakeup
+//	cmp	r15,0					//Check if warm reset
+//	jne	L_Wakeup
 	r1=[P_INT_Status1]
-	jnz	L_Wakeup
+	jz	L_Not_Key_Press
+	[P_INT_Status1] = r1		// clear any interrupts
+	r1 = BOOT_TYPE_KEY_PRESS
+	push r1 ,r1 to [sp]
+	jmp L_init_ram
+	
+L_Not_Key_Press:
 	r1=[P_INT_Status2]
-	jnz	L_Wakeup
-			
+	jz	L_Cold_boot
+	r1 = BOOT_TYPE_RTC_ALARM
+	push r1 ,r1 to [sp]
+	jmp L_Wakeup 
+	
+_L_Cold_boot:		// called from main on rtc not at 0:0:?
+	sp = __sn_sp_val
+	r1 = BOOT_TYPE_KEY_PRESS
+	push r1 ,r1 to [sp]
+	jmp L_init_ram
+	
+L_Cold_boot:
+
+	r1 = BOOT_TYPE_COLD_RESET
+	push r1 ,r1 to [sp]
+
+L_init_ram:			
 	r1 = 0						// clear internal ram
 	r2 = 0
 ?clr_inram_loop:
 	[r2++] = r1
+	cmp r2, sp	// stop at current sp, leave boottype on stack
+	jz  L_skip_boot_type
 	[r2++] = r1
+	cmp r2, sp	// stop at current sp, leave boottype on stack
+	jz  L_skip_boot_type
 	[r2++] = r1
+	cmp r2, sp	// stop at current sp, leave boottype on stack
+	jz  L_skip_boot_type
 	[r2++] = r1
-	cmp r2, __sn_sp_val
+//	cmp r2, __sn_sp_val 
+	cmp r2, sp	// stop at current sp, leave boottype on stack
 	jb	?clr_inram_loop
 
-
+L_skip_boot_type:
 	ds = seg __sn_init_table
 	r1 = offset __sn_init_table
 	r2 = ds:[r1++]		// item count
@@ -116,32 +147,17 @@ __judge_itcount:
 	cmp r2,0
 	jg __next_item
 
-__no_item:
-	call _main
-	
-__sn_loop2:
-	jmp __sn_loop2
-
-__sn_loop:
-	reti
-	.endp
-
 L_Wakeup:
+//	pop r1,r1 from [sp]   // pop boot type
+//  we pushed boottype above, leave it on the stack as the arg to main
 	call _main
+.endp
 //------------------------------------------------------------------------------
 .DEBUG
     .DW '.stabs "startup_code.",0x3c,0,0,0',0x0d,0x0a
 .DEBUG
     .DW '.stabs "__sn_main:F15",36,0,0,', 0, 0
     .DW offset _main,seg _main
-    .DW 0x0d,0x0a
-.DEBUG
-    .DW '.stabs "__sn_end:F15",36,0,0,', 0, 0
-    .DW offset __sn_loop2,seg __sn_loop2
-    .DW 0x0d,0x0a
-.DEBUG
-    .DW '.stabs "__sn_exception:F15",36,0,0,', 0, 0
-    .DW offset __sn_loop,seg __sn_loop
     .DW 0x0d,0x0a
 .END
 

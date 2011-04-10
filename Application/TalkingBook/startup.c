@@ -120,9 +120,9 @@ void setDefaults(void) {
 	LONG_KEYPRESS_COUNTER = KEY_LONG_DOWN_THRESH;
 }
 
-void startUp(void) {
+void startUp(unsigned int bootType) {
 	char buffer[200];
-	char strCounts[20];
+	char strCounts[32];
 	char filename[FILE_LENGTH];
 	int key;
 	
@@ -190,9 +190,12 @@ void startUp(void) {
 	}
 //#ifndef TB_CAN_WAKE
 //	if(MEM_TYPE == MX_MID) {
-//		resetRTC();  //  reset before saving anything to disk and running macros
+	if(bootType == BOOT_TYPE_COLD_RESET) {
+		resetRTC();  //  reset before saving anything to disk and running macros
 		systemCounts.month = 1;
 		systemCounts.monthday = 1;
+		systemCounts.poweredDays = 1;
+	}
 //	}
 //#endif	
 	saveSystemCounts();
@@ -205,6 +208,8 @@ void startUp(void) {
 	longToDecimalString(systemCounts.packageNumber, strCounts+14, 4); 
 	strcat(strCounts,(char *)"R");
 	longToDecimalString(systemCounts.revdPkgNumber, strCounts+19, 4);
+	strcat(strCounts,(char *)"PD");
+	longToDecimalString(systemCounts.poweredDays, strCounts+25, 4);
 	strcat(buffer,strCounts); 
 	strcat(buffer,"\x0d\x0a" "CYCLE "); //cycle number
 	longToDecimalString(systemCounts.powerUpNumber,(char *)(buffer+strlen(buffer)),4);
@@ -237,6 +242,9 @@ void startUp(void) {
 	loadSystemNames(); 
 	SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
 	loadPackage(PKG_SYS,currentSystem());
+	
+//	resetRTC23();  // test 
+	setRTCalarm(0, 0, 0);
 	
 	mainLoop();
 }

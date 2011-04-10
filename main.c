@@ -21,35 +21,35 @@ extern long USB_INSERT_PTR;
 extern void USB_ISR(), USB_Insert_TimeOut();
 extern void initVoltage();
 
-void BodyInit(void);
+void BodyInit();
 extern unsigned int CLOCK_RATE;
 extern unsigned int MEM_TYPE;
 
-unsigned int sav_P_MINT_Ctrl;
-unsigned int sav_P_Clock_Ctrl;
+//unsigned int sav_P_MINT_Ctrl;
+//unsigned int sav_P_Clock_Ctrl;
 APP_IRAM char systemHeap [SYSTEM_HEAP_SIZE];
 APP_IRAM char *cursorSystemHeap = systemHeap;
 extern int statINIT;
-unsigned int sav_Int_status1;
-unsigned int sav_Int_status2;
+//unsigned int sav_Int_status1;
+//unsigned int sav_Int_status2;
 
 // rtc alarm testing unsigned int rtc_pending;
 
-int main (void) {
-	int wrk;
+int main (unsigned int bootType) {
+//	int wrk;
+//	wrk = bootType;
 // rtc alarm testing	rtc_pending = 0;
-	sav_Int_status2 = *P_INT_Status2;
-	wrk = sav_Int_status1 = *P_INT_Status1;
-	if(wrk || *P_INT_Status2) {
-		wrk &= 0x8003;
-		*P_INT_Status1 |= wrk;
-		backfromHalt();
-	}
+/*	wrk = sav_Int_status1 = *P_INT_Status1;*/
+//	sav_Int_status2 = *P_INT_Status2;
 
 	MEM_TYPE = GetMemManufacturer();
 	
+	if(bootType == BOOT_TYPE_RTC_ALARM) {
+		backfromRTC();
+	}
+	
 	initVoltage();	// get initial voltage before SACM_Init in BodyInit - may never run BodyInit()
-
+	
 	BodyInit();
 	
 	USB_ISR_PTR = (long)USB_ISR;
@@ -58,32 +58,63 @@ int main (void) {
 	__asm__("irq on");
 	__asm__("fiq on");
 		
-	fs_init(); 	// should include call to IOKey_Initial() within BodyInit.c 
-	 			// to flip on a transistor early enough to power the microSD card
+	fs_init();
+	_devicemount(0); // should include call to IOKey_Initial() within BodyInit.c 
+	 				// to flip on a transistor early enough to power the microSD card
 
-	_devicemount(0);
 	ChangeCodePage(UNI_ENGLISH);
 	
-	startUp();
+	if(bootType != BOOT_TYPE_COLD_RESET) {
+		fixRegs();
+	}
+	
+	startUp(bootType);
 	return 0;
 }
 
 void
-backfromHalt()
+backfromRTC()
 {
 	char buf[64];
+	unsigned int hr, min;
 	
-// If we are here we are back from HALT, was maintained while halted and
-//  not initialized in startup_Data.asm coming through reset - the RTC continued to run
+// If we are here we are back from RTC int, and we have not initialized ram
+//  - the RTC continued to run
 //  Anything done in SysIntoHaltMode to cut power consumption needs to be reversed here
 	
 #define ASAP 0
 
-	IOKey_Initial();
+	fixRegs();
+	hr = *P_Hour;
+	min = *P_Minute;	
+	
+	IOKey_Initial();	
 	SD_Initial();
+			
+	logRTC();
+	
+	__asm__("irq on");
+	__asm__("fiq on");
+	
+//	if(sav_Int_status2 & 0x2) {  // rtc alarm fired
+//		*P_RTC_INT_Status |= 0x50f;	//clear all possible RTC interrupts
+	strcpy(buf, "back from Halt - RTC Alarm fired\n");
+	logString(buf ,ASAP);
+	RTC_Alarm_Fired();					// bump day counter
+	
+//	setLED(LED_GREEN,TRUE);
+//	wait(1000);
+//	setLED(LED_GREEN,FALSE);
 
-	*P_MINT_Ctrl = sav_P_MINT_Ctrl;
-	*P_Clock_Ctrl = sav_P_Clock_Ctrl;
+	if(hr == 0 && min == 0) {
+		setOperationalMode((int)P_HALT);    //go back to HALT, does not return
+	} else {
+		L_Cold_boot();
+	}
+}
+void fixRegs() {
+	*P_MINT_Ctrl = 0x8;
+	*P_Clock_Ctrl = 0x8618;		
 	
 	*P_CHA_Ctrl = 0x8505;
 	*P_CHB_Ctrl = 0x8505;
@@ -95,28 +126,4 @@ backfromHalt()
 	*P_IrDA_Ctrl = 0x0400;
 	*P_SD_Ctrl = 0x0302;
 	*P_I2C_En = 0x083E;
-	
-	initVoltage();
-			
-	logRTC();
-	
-	__asm__("irq on");
-	__asm__("fiq on");
-	
-	if(sav_Int_status2 & 0x2) {  // rtc alarm fired
-		strcpy(buf, "back from Halt - RTC Alarm fired - call startUp\n");
-		*P_RTC_INT_Status |= 0x50f;	//clear all possible RTC interrupts
-	} else {
-		strcpy(buf, "back from Halt - Button press - call startUp\n");
-	}		
-	
-	logString(buf ,ASAP);
-	
-// Do any other initialization here
-		
-	cursorSystemHeap = systemHeap;	// re-initialize heap so startUp can rebuild it
-	statINIT = 0;
-		
-	startUp();			
-
 }

@@ -9,6 +9,7 @@
 #include "Include/audio.h"
 #include "Include/device.h"
 #include "Include/startup.h"
+#include "Include/sys_counters.h"
 
 extern void _SystemOnOff(void);
 extern int SystemIntoUDisk(unsigned int);
@@ -29,11 +30,12 @@ extern APP_IRAM unsigned int vCur_1;
 APP_IRAM static unsigned int keydown_counter;
 void set_voltmaxvolume();
 
+unsigned int rtc_pending = 0;
 
 void resetRTC(void) {
 #define		P_RTC_HMSBusy                 (volatile unsigned int*)(P_RTC_Ctrl_Base+0x17)
 	while (*P_RTC_HMSBusy) ; // wait till RTC is not busy 
-	*P_Second = 0;
+	*P_Second = 1;
 	while (*P_RTC_HMSBusy) ; // wait till RTC is not busy 
 	*P_Minute = 0;
 	while (*P_RTC_HMSBusy) ; // wait till RTC is not busy 
@@ -616,14 +618,14 @@ setRTCalarmHours(unsigned int hours) {
 
 void
 setRTCalarm(unsigned int hour, unsigned int minute, unsigned int second) {
-#define RTC_ALARM_INTERRUPT_ENABLE 0x0400
-#define RTC_ALARM_FUNCTION_ENABLE  0x0400
+	
 	*P_Alarm_Second = second;
 	*P_Alarm_Minute = minute;
 	*P_Alarm_Hour   = hour;
 	
 	*P_RTC_INT_Ctrl |= RTC_ALARM_INTERRUPT_ENABLE;
 	*P_RTC_Ctrl     |= RTC_ALARM_FUNCTION_ENABLE;
+	rtc_pending = 1;
 }
 
 /*  called from isr.asm when RTC alarm has fired
@@ -631,13 +633,45 @@ setRTCalarm(unsigned int hour, unsigned int minute, unsigned int second) {
 */
 void
 RTC_Alarm_Fired() {
-	extern int rtc_pending;
+	
 	int wrk = *P_RTC_INT_Status;
 	
-// rtc alarm testing	rtc_pending = 0;
+	rtc_pending = 0;
 	*P_RTC_INT_Status |= wrk;	// clear all interrupt flags
+	rtcAlarmFired();
 	
 }
+void rtcAlarmFired() {
+	char buffer[32];
+//	strcpy(buffer,"rtcAlarmFired rtc =");
+//	logString(buffer,BUFFER);
+//	logRTC();
+	
+//  any rtc alarm not on hour 0 minute 0 will not reset an alarm 
+		
+	if(*P_Hour == 0 && *P_Minute == 0) { // bump systemcounters 
+		loadSystemCounts();
+		systemCounts.poweredDays += 1;
+		saveSystemCounts();
+		strcpy(buffer,"poweredDays=");
+		longToDecimalString(systemCounts.poweredDays, buffer+12, 4);
+		logString(buffer,ASAP);
+		resetRTC();
+//		resetRTC23();  // test, really set rtc to 0,0,1sec
+		setRTCalarm(0, 0, 0);
+	}
+}
+/*
+void resetRTC23(void) {
+#define		P_RTC_HMSBusy                 (volatile unsigned int*)(P_RTC_Ctrl_Base+0x17)
+	while (*P_RTC_HMSBusy) ; // wait till RTC is not busy 
+	*P_Second = 30;
+	while (*P_RTC_HMSBusy) ; // wait till RTC is not busy 
+	*P_Minute = 59;
+	while (*P_RTC_HMSBusy) ; // wait till RTC is not busy 
+	*P_Hour = 23;	
+}
+*/
 void
 KEY_TimeBase_B_isr() {	//TimerBase B fired
 	unsigned int i;
