@@ -545,25 +545,43 @@ extern int checkInactivity(BOOL resetTimer) {
 		}
 	}
 }
+// process an alarm that has fired fired here
+void
+processAlarm(unsigned long alarm) {   
+	// the arg alarm is the return value from addAlarm
+	char buffer[48], alm[12];
+	
+	strcpy(buffer,"mainloop: RTC alarm has fired ");
+	longToHexString((long)alarm, (char *)alm, 1);
+ 	strcat(buffer, alm);
+	logString(buffer,BUFFER);
+	
+/*   test
+
+	alarm = setRTCalarmSeconds(60);
+	
+	strcpy(buffer,"mainloop: RTC new alarm set ");
+	longToHexString((long)alarm, (char *)alm, 1);
+ 	strcat(buffer, alm);
+	logString(buffer,BUFFER);
+*/
+}
 
 void mainLoop (void) {
+	void processAlarm();
+	extern unsigned long rtc_fired;
 	unsigned int getCurVoltageSample();
 	CtnrBlock *insertBlock;
 	ListItem *list;
 	int inactivityCheckCounter = 0;
 	
 	while(1) {
-/* rtc alarm testing - delete when rtc alarm code is working a desired		
-		extern unsigned int rtc_pending;
-		if(!rtc_pending) {
-			char buffer[32];
-			strcpy(buffer,"setting rtc alarm");
-			logString(buffer,BUFFER);
-			setRTCalarmSeconds(10);
-			logRTC();
-			rtc_pending = 1;
+		
+		if(rtc_fired) {		
+			processAlarm(rtc_fired);
+			rtc_fired = 0;
 		}
-*/		
+		
 		// check if need to load in a new package
 		if (context.queuedPackageType > PKG_NONE) {
 			if (context.queuedPackageNameIndex >= 0)
@@ -1042,6 +1060,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 		case SLEEP:
 			// call sleep function
+			
 			setOperationalMode((int)P_SLEEP); 
 			break;
 		case HALT:

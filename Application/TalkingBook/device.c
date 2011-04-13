@@ -30,7 +30,15 @@ extern APP_IRAM unsigned int vCur_1;
 APP_IRAM static unsigned int keydown_counter;
 void set_voltmaxvolume();
 
-unsigned int rtc_pending = 0;
+
+
+// data stored between 0 and &rtc_fired+2 is not initialized by startup_Data.asm
+//    data stored here survives going into and returning from HALT mode
+//    it is initialized in startup.c for a cold reset bootType
+asm("APP_RTCALARM: .SECTION .RAM, .ADDR = 0x0");
+__attribute__((section(".APP_RTCALARM"))) unsigned long rtcAlarm[N_RTC_INIT];
+__attribute__((section(".APP_RTCALARM"))) unsigned long curAlarmSet;
+__attribute__((section(".APP_RTCALARM"))) unsigned long rtc_fired;
 
 void resetRTC(void) {
 #define		P_RTC_HMSBusy                 (volatile unsigned int*)(P_RTC_Ctrl_Base+0x17)
@@ -357,9 +365,7 @@ void resetSystem(void) {
 }
 
 static void logKeystroke(int intKey) {
-	APP_IRAM static long secLastKey;
-	long secNow;
-	int diff, i;
+	int i;
 	char str[20];
 
 	if (LOG_KEYS) {
@@ -578,8 +584,8 @@ void writeVersionToDisk() {
 	}
 }
 
-void
-setRTCalarmSeconds(unsigned int seconds) {
+unsigned long
+setRTCalarmSeconds(unsigned long seconds) {
 	unsigned int h = *P_Hour;
 	unsigned int m = *P_Minute;
 	unsigned int s = *P_Second;
@@ -594,13 +600,12 @@ setRTCalarmSeconds(unsigned int seconds) {
 	
 	delta_hour += h;
 	
-	setRTCalarm(delta_hour, delta_min, delta_sec);
+	return(addAlarm(delta_hour, delta_min, delta_sec));
 }
-void
+unsigned long
 setRTCalarmMinutes(unsigned int minutes) {
 	unsigned int h = *P_Hour;
 	unsigned int m = *P_Minute;
-	unsigned int s = *P_Second;
 	unsigned int delta_min, delta_hour;
 
 	delta_min = minutes + m;
@@ -609,11 +614,11 @@ setRTCalarmMinutes(unsigned int minutes) {
 
 	delta_hour += h;
 
-	setRTCalarm(delta_hour, delta_min, *P_Second);
+	return(addAlarm(delta_hour, delta_min, *P_Second));
 }
-void
+unsigned long
 setRTCalarmHours(unsigned int hours) {
-	setRTCalarm(*P_Hour + hours, *P_Minute, *P_Second);
+	return(addAlarm(*P_Hour + hours, *P_Minute, *P_Second));
 }
 
 void
@@ -625,7 +630,6 @@ setRTCalarm(unsigned int hour, unsigned int minute, unsigned int second) {
 	
 	*P_RTC_INT_Ctrl |= RTC_ALARM_INTERRUPT_ENABLE;
 	*P_RTC_Ctrl     |= RTC_ALARM_FUNCTION_ENABLE;
-	rtc_pending = 1;
 }
 
 /*  called from isr.asm when RTC alarm has fired
@@ -636,19 +640,26 @@ RTC_Alarm_Fired() {
 	
 	int wrk = *P_RTC_INT_Status;
 	
-	rtc_pending = 0;
+	if(rtc_fired == 0) {
+		rtc_fired = curAlarmSet;
+	}
 	*P_RTC_INT_Status |= wrk;	// clear all interrupt flags
 	rtcAlarmFired();
 	
 }
 void rtcAlarmFired() {
 	char buffer[32];
+	void setNextAlarm();
+	void removeAlarm(unsigned long);
 //	strcpy(buffer,"rtcAlarmFired rtc =");
 //	logString(buffer,BUFFER);
 //	logRTC();
 	
 //  any rtc alarm not on hour 0 minute 0 will not reset an alarm 
-		
+	if(curAlarmSet) {
+		removeAlarm(curAlarmSet);
+		curAlarmSet = 0;
+	}
 	if(*P_Hour == 0 && *P_Minute == 0) { // bump systemcounters 
 		loadSystemCounts();
 		systemCounts.poweredDays += 1;
@@ -658,7 +669,86 @@ void rtcAlarmFired() {
 		logString(buffer,ASAP);
 		resetRTC();
 //		resetRTC23();  // test, really set rtc to 0,0,1sec
-		setRTCalarm(0, 0, 0);
+//		setRTCalarm(0, 0, 0);
+	}
+	setNextAlarm();
+}
+void removeAlarm(unsigned long al)
+{
+	int i, j;
+	for(i=0; i<N_RTC_ALARMS; i++) {  // find alarm
+		if(rtcAlarm[i] == al) {
+			break;
+		}
+	}
+	for(j=i+1; j<N_RTC_ALARMS; i++,j++) { // pack the table
+		rtcAlarm[i] = rtcAlarm[j];
+	}
+}
+long getTimeinSeconds(unsigned int hour, unsigned int minute, unsigned int second) {
+	unsigned long ret, secH;
+	unsigned int secM;
+	
+	secM = (unsigned int)minute * 60;
+	secH = (unsigned long)hour * 3600;
+	ret = second + secM + secH;
+	return (long)ret;
+}
+unsigned long
+addAlarm(unsigned int hour, unsigned int minute, unsigned int second) {
+	void setNextAlarm();
+	char buf[48], strbuf[12];
+	int i, insertpos;
+	unsigned long newAlarm;
+	
+	newAlarm = getTimeinSeconds(hour, minute, second);
+	
+	for(i=0; i<N_RTC_ALARMS; i++) {
+		if((rtcAlarm[i] == 0) || (newAlarm < rtcAlarm[i])) 
+			break;
+		if(newAlarm && (newAlarm == rtcAlarm[i])) {
+			return(newAlarm);
+		}
+	}
+	insertpos = i;
+	if(rtcAlarm[insertpos] != 0) {
+		for(i=N_RTC_ALARMS-1; i>=insertpos; i--) {
+			rtcAlarm[i+1] = rtcAlarm[i];
+		}
+	}
+	rtcAlarm[insertpos] = newAlarm;
+	
+	strcpy(buf,"add alarm position ");
+	longToDecimalString(insertpos, (char *)strbuf, 1); 
+	strcat(buf, strbuf);
+	strcat(buf," alarm time ");
+	longToHexString((long)newAlarm, (char *)strbuf, 1);
+	strcat(buf, strbuf);
+	logString(buf,BUFFER); 
+	
+	setNextAlarm();
+	
+	return(newAlarm);
+}
+void setNextAlarm() {
+	unsigned int i, hour, minute, second;
+	unsigned long newAlarm;
+	unsigned long curRTC   = getRTCinSeconds();
+	
+	curAlarmSet = 0;
+	for(i=0; i<N_RTC_ALARMS; i++) {
+		if(rtcAlarm[i] > curRTC) {
+			newAlarm = rtcAlarm[i];
+			hour   = newAlarm / 3600;
+			minute = (newAlarm % 3600) / 60;
+			second = (newAlarm % 3600) % 60;
+			setRTCalarm(hour, minute, second);
+			curAlarmSet = newAlarm;
+			break;	
+		}
+	}
+	if(curAlarmSet == 0 ) {
+		setRTCalarm(0, 0, 0);	
 	}
 }
 /*

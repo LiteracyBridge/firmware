@@ -43,7 +43,7 @@ int main (unsigned int bootType) {
 //	sav_Int_status2 = *P_INT_Status2;
 
 	MEM_TYPE = GetMemManufacturer();
-	
+
 	if(bootType == BOOT_TYPE_RTC_ALARM) {
 		backfromRTC();
 	}
@@ -102,9 +102,9 @@ backfromRTC()
 	logString(buf ,ASAP);
 	RTC_Alarm_Fired();					// bump day counter
 	
-//	setLED(LED_GREEN,TRUE);
-//	wait(1000);
-//	setLED(LED_GREEN,FALSE);
+	setLED(LED_GREEN,TRUE);
+	wait(1000);
+	setLED(LED_GREEN,FALSE);
 
 	if(hr == 0 && min == 0) {
 		setOperationalMode((int)P_HALT);    //go back to HALT, does not return

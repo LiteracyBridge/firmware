@@ -1,8 +1,8 @@
 //------------------------------------------------------------------------------
 .include .\system\include\system_head.inc
 
-.public _RESET, _RESETPCB, _L_Cold_boot
-.external __sn_init_table, _main, __sn_sp_val
+.public _RESET, _RESETPCB, _Fake_Keypress
+.external __sn_init_table, _main, __sn_sp_val, _rtc_fired
 
 .define BOOT_TYPE_COLD_RESET 0
 .define BOOT_TYPE_KEY_PRESS  1
@@ -87,7 +87,7 @@ L_Not_Key_Press:
 	push r1 ,r1 to [sp]
 	jmp L_Wakeup 
 	
-_L_Cold_boot:		// called from main on rtc not at 0:0:?
+_Fake_Keypress:		// called from main on rtc not at 0:0:?
 	sp = __sn_sp_val
 	r1 = BOOT_TYPE_KEY_PRESS
 	push r1 ,r1 to [sp]
@@ -100,7 +100,9 @@ L_Cold_boot:
 
 L_init_ram:			
 	r1 = 0						// clear internal ram
-	r2 = 0
+//	r2 = 0
+// instead of starting at 0 we leave the alarm data alone and start just above it
+	r2 = _rtc_fired+2   //rhm test
 ?clr_inram_loop:
 	[r2++] = r1
 	cmp r2, sp	// stop at current sp, leave boottype on stack
@@ -129,7 +131,7 @@ __next_item:
 	r2 = d:[r1++]        // src
 	r5 = D:[r1++]        // block size
 	push sr, sr to [sp]
-	ds = r4
+	ds = r4	
 	jmp __judge_bksize
 
 __move_data:
@@ -139,7 +141,7 @@ __move_data:
 __judge_bksize:
 	cmp r5, 0
 	jg __move_data
-
+	
 	pop sr, sr from [sp]
 	pop r2,r2 from [sp]
 	r2 = r2 - 1

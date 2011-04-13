@@ -76,10 +76,14 @@ extern void writeVersionToDisk(void);
 #define RTC_ALARM_FUNCTION_ENABLE  0x0400
 
 extern void rtcAlarmFired(void);
-extern void setRTCalarmSeconds(unsigned int);
-extern void setRTCalarmMinutes(unsigned int);
-extern void setRTCalarmHours(unsigned);
+extern unsigned long setRTCalarmSeconds(unsigned long);
+extern unsigned long setRTCalarmMinutes(unsigned int);
+extern unsigned long setRTCalarmHours(unsigned);
 extern void setRTCalarm(unsigned int, unsigned int, unsigned int);
+unsigned long addAlarm(unsigned int hour, unsigned int minute, unsigned int second);
+
+#define N_RTC_ALARMS 6
+#define N_RTC_INIT   N_RTC_ALARMS+1
 
 
 #endif

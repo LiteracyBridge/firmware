@@ -191,6 +191,14 @@ void startUp(unsigned int bootType) {
 //#ifndef TB_CAN_WAKE
 //	if(MEM_TYPE == MX_MID) {
 	if(bootType == BOOT_TYPE_COLD_RESET) {
+		extern unsigned long rtcAlarm[];
+		extern unsigned long curAlarmSet;    
+		extern unsigned long rtc_fired;
+		for(key=0; key<N_RTC_INIT; key++) {
+			rtcAlarm[key] = 0;
+		}
+		curAlarmSet = 0;
+		rtc_fired = 0;
 		resetRTC();  //  reset before saving anything to disk and running macros
 		systemCounts.month = 1;
 		systemCounts.monthday = 1;
@@ -242,9 +250,8 @@ void startUp(unsigned int bootType) {
 	loadSystemNames(); 
 	SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
 	loadPackage(PKG_SYS,currentSystem());
-	
-//	resetRTC23();  // test 
-	setRTCalarm(0, 0, 0);
+
+	setNextAlarm();	// be sure at least midnight alarm is set
 	
 	mainLoop();
 }
