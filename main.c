@@ -43,7 +43,7 @@ int main (unsigned int bootType) {
 //	sav_Int_status2 = *P_INT_Status2;
 
 	MEM_TYPE = GetMemManufacturer();
-
+	
 	if(bootType == BOOT_TYPE_RTC_ALARM) {
 		backfromRTC();
 	}
@@ -76,7 +76,7 @@ void
 backfromRTC()
 {
 	char buf[64];
-	unsigned int hr, min;
+	unsigned int hr, min, sec;
 	
 // If we are here we are back from RTC int, and we have not initialized ram
 //  - the RTC continued to run
@@ -86,7 +86,8 @@ backfromRTC()
 
 	fixRegs();
 	hr = *P_Hour;
-	min = *P_Minute;	
+	min = *P_Minute;
+	sec = *P_Second;	
 	
 	IOKey_Initial();	
 	SD_Initial();
@@ -100,16 +101,16 @@ backfromRTC()
 //		*P_RTC_INT_Status |= 0x50f;	//clear all possible RTC interrupts
 	strcpy(buf, "back from Halt - RTC Alarm fired\n");
 	logString(buf ,ASAP);
-	RTC_Alarm_Fired();					// bump day counter
+	RTC_Alarm_Fired();			// do isr work, will ste next alarm
 	
-	setLED(LED_GREEN,TRUE);
-	wait(1000);
-	setLED(LED_GREEN,FALSE);
+//	setLED(LED_GREEN,TRUE);
+//	wait(1000);
+//	setLED(LED_GREEN,FALSE);
 
 	if(hr == 0 && min == 0) {
 		setOperationalMode((int)P_HALT);    //go back to HALT, does not return
 	} else {
-		L_Cold_boot();
+		Fake_Keypress();	// initialize memory, fake a key press wakeup
 	}
 }
 void fixRegs() {
