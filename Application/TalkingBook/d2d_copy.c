@@ -438,4 +438,196 @@ char *longToDecimalStringZ(long l, char * string, int numberOfDigits) {
 	return(string);
 }
 
+// while in usb host mode clone the host to the client
+//   format client sd card (B:)
+//   copy most files from a: to b: (no stats, LOG_FILE, or SYSTEM_VARIABLE_FILE)
+//   special cases
+//       (a:/system/*.img to B:\*.img to force client to reprogram)
+int
+cloneDevice() {
+	int ret, len_path;
+	char path[PATH_LENGTH], to[PATH_LENGTH], from[PATH_LENGTH];
+	struct f_info fi;
+	
+// format b:        [ _format(0, FAT16_Type);  works on a:]
+
+	ret = _format(1, FAT16_Type);   // 0 == a, 1 == b?
+
+// recursively copy files
+
+	ret = cloneDir("a:/", "b:/");
+//	mkdir((LPSTR)"a:/clonetest");   // Test - remove	
+//	ret = cloneDir("a:/", "a:/clonetest"); // Test - remove	
+	
+// special cases
+	
+	strcpy(path, LOG_FILE);
+	path[0] = 'b';
+	ret = unlink((LPSTR)path);
+	
+	strcpy(path, SYSTEM_VARIABLE_FILE);
+	path[0] = 'b';
+	ret = unlink((LPSTR)path);
+
+	strcpy(path, SYSTEM_PATH);
+	path[0] = 'b';	
+//	strcpy(path, "a:/clonetest/System/");   // test remove
+	
+	len_path = strlen(path);
+	if(path[len_path-1] != '/') {
+		strcat(path, "/");
+		len_path++;
+	}
+	strcat(path, "*.img");
+
+	// move any b:/system/*.img to b:/system.img
+	for(ret =_findfirst((LPSTR)path, &fi, D_FILE); ret >= 0; ret = _findnext(&fi)) {
+		strcpy(to, "b:/");
+		strcat(to, fi.f_name);
+		strcpy(from, path);
+		from[len_path] = 0;
+		strcat(from, fi.f_name);
+		rename(from, to);
+	}
+}
+
+static int 
+cloneDir(char *fromdir, char *todir) {
+// 	copy directory tree below fromdir (all subdirectories and files at all levels)
+	int ret, r1, len_from, len_to, len, fret;
+	char from[PATH_LENGTH], fromfind[PATH_LENGTH], to[PATH_LENGTH]; //, lastdir[FILE_LENGTH];
+	char dirname[80];
+
+	struct f_info fi;
+	
+	fret = 0;
+	
+	strcpy(from, fromdir);
+	len_from = strlen(from);
+	
+	if(from[len_from-1] != '/') {
+		strcat(from, "/");
+		len_from++;
+	}
+	strcat(from, "*");
+	
+	strcpy(to, todir);
+	len_to = strlen(to);
+	ret = mkdir((LPSTR)to);	// just to be safe
+	if(to[len_to-1] != '/') {
+		strcat(to, "/");
+		len_to++;
+	}
+	strcpy(fromfind,from);
+	
+	for(ret =_findfirst((LPSTR)fromfind, &fi, D_DIR); ret >= 0; ret = _findnext(&fi)) {
+		logString((char *)fi.f_name,BUFFER);
+	}
+
+	ret =_findfirst((LPSTR)fromfind, &fi, D_DIR);
+	from[len_from] = 0;
+//	lastdir[0] = 0;
+	
+	for (; ret >= 0; ret = _findnext(&fi)) {
+		if(! (fi.f_attrib & D_DIR)) {
+//			ret = _findnext(&fi);
+			continue;
+		}
+	
+		if(fi.f_name[0]=='.') {
+//			ret = _findnext(&fi);
+			continue;
+		}
+		if(!strcmp("clonetest", fi.f_name)) {
+			ret = _findnext(&fi);
+			continue;
+		}
+		from[len_from] = 0;
+		to[len_to]= 0;
+				
+		strcat(from, fi.f_name);	
+		strcat(to, fi.f_name);
+		
+		r1 = mkdir((LPSTR)to);
+		
+		if(!strncmp(from, STAT_DIR, strlen(from))) {
+			continue;
+		}
+		if(!strncmp(from, OSTAT_DIR, strlen(from))) {
+			continue;
+		}
+		
+		strcpy(dirname, fi.f_name);
+		fret += cloneDir (from, to);
+				
+		fret++;
+		
+		ret =_findfirst((LPSTR)fromfind, &fi, D_DIR);  //necessary to reset after rmdir?
+		while(ret >= 0 && strcmp(dirname, fi.f_name)) {
+			ret = _findnext(&fi);
+		}
+	}
+	
+	from[len_from] = 0;
+	to[len_to]= 0;
+	fret += copyfiles(from, to);
+	
+	return(fret);
+}
+//
+// copy all files in fromdir to todir
+//
+static int copyfiles(char *fromdir, char *todir)
+{
+	int ret, r1, len_from, len_to, fret;
+	char from[80], to[80];
+	struct f_info fi;
+	
+	fret = 0;
+	
+	strcpy(from, fromdir);
+	len_from = strlen(from);
+	
+	if(from[len_from-1] != '/') {
+		strcat(from, "/");
+		len_from++;
+	}
+	strcat(from, "*.*");
+	
+	strcpy(to, todir);
+	len_to = strlen(to);
+//	mkdir(to);	// just to be safe
+	if(to[len_to-1] != '/') {
+		strcat(to, "/");
+		len_to++;
+	}
+			
+	ret =_findfirst((LPSTR)from, &fi, D_FILE);
+	for(; ret >= 0; ret = _findnext(&fi)) {
+		if(fi.f_name[0] != '.') {
+			from[len_from] = 0;
+			to[len_to]= 0;
+			strcat(from, fi.f_name);
+			strcat(to, fi.f_name);
+			
+			if(!strcmp(from, LOG_FILE)) {
+				continue;
+			}
+			if(!strcmp(from, SYSTEM_VARIABLE_FILE)) {
+				continue;
+			}		
+			
+				setLED(LED_GREEN,FALSE);
+				setLED(LED_RED,TRUE);
+				r1 = _copy((LPSTR)from, (LPSTR)to);
+				setLED(LED_RED,FALSE);
+				if (r1 != -1) {
+					setLED(LED_GREEN,TRUE);
+				}
+		}
+		fret++;
+	}
+	return(fret);
+}
+
 

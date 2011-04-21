@@ -531,11 +531,11 @@ static int copyfiles(char *fromdir, char *todir)
 				setLED(LED_GREEN,FALSE);
 				setLED(LED_RED,TRUE);
 				r1 = _copy((LPSTR)from, (LPSTR)to);
-				wait (500);
+// speed up 				wait (500);
 				setLED(LED_RED,FALSE);
 				if (r1 != -1) {
 					setLED(LED_GREEN,TRUE);
-					wait(500);
+// speed up					wait(500);
 				}
 			}
 //			logString((char *)"FROM/TO:",BUFFER);
