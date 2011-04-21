@@ -520,10 +520,6 @@ cloneDir(char *fromdir, char *todir) {
 	}
 	strcpy(fromfind,from);
 	
-	for(ret =_findfirst((LPSTR)fromfind, &fi, D_DIR); ret >= 0; ret = _findnext(&fi)) {
-		logString((char *)fi.f_name,BUFFER);
-	}
-
 	ret =_findfirst((LPSTR)fromfind, &fi, D_DIR);
 	from[len_from] = 0;
 //	lastdir[0] = 0;
