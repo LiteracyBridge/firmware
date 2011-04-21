@@ -371,7 +371,7 @@ updateCategory(char *category, char *fnbase, char prefix) {
 	int ret;
 	
 // be sure category is in master-list.txt
-	cpyTopicPath(path);
+	cpyListPath(path);
 	strcpy(buffer,path);
 	strcat(buffer,(char *)LIST_MASTER);
 	strcat(buffer,(char *)".txt");

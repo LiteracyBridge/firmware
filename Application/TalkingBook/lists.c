@@ -28,7 +28,6 @@ void cpyListPath(char * strOut) {
 void cpyTopicPath(char * strOut) {
 	strcpy(strOut,LANGUAGES_PATH);
 	catLangDir(strOut);	
-	strcat(strOut,TOPICS_SUBDIR);	
 }
 
 static int openList(ListItem *list, char *outFilename) {
@@ -37,10 +36,7 @@ static int openList(ListItem *list, char *outFilename) {
 	char filepath[PATH_LENGTH];
 	
 	stop();
-	if (list->listType == LIST_OF_LISTS)
-		cpyTopicPath(filepath);
-	else //LIST_OF_PACKAGES
-		cpyListPath(filepath);
+	cpyListPath(filepath);
 	ret = tbChdir((LPSTR)filepath);
 	if (ret == -1) {
 		logException(5,filepath,RESET); //todo: package name or path does not exist

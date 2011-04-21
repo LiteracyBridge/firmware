@@ -16,10 +16,10 @@
 #define APP_QUIZ_PLAY   1
 #define APP_QUIZ_REC 	2
 
-#define MAX_FILES		60
-#define MAX_BLOCKS		90
-#define MAX_STATES		180   // should always be 2 x MAX_BLOCKS
-#define MAX_ACTIONS		180   // 2 actions per block (in addition to start/end actions)
+#define MAX_FILES		70
+#define MAX_BLOCKS		80
+#define MAX_STATES		(2 * MAX_BLOCKS)   // should always be 2 x MAX_BLOCKS
+#define MAX_ACTIONS		(2 * MAX_BLOCKS)   // 2 actions per block (in addition to start/end actions)
 #define MAX_LISTS		2
 #define MAX_BLOCK_OVERLAP	4   // allows for a file-wide block, a page, a line, and a hyperlink
 #define PKG_HEAP_SIZE	512  // enough for 10 chars per struct file/filename and per ListItem filename
