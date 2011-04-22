@@ -29,4 +29,6 @@ extern int dirExists(LPSTR);
 extern int convertDoubleToSingleChar(char *, const char *, BOOL);
 extern void trimFile(char *, unsigned long, unsigned long);
 extern int fileCopy(char *, char *);
+extern void dirCopy(char *, char *);
+extern void copyAllFiles(char *, char *);
 #endif

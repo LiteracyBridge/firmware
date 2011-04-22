@@ -24,7 +24,7 @@ extern INT16 SD_Initial(void);
 static char * addTextToSystemHeap (char *);
 static void loadDefaultUserPackage(void);
 static int loadConfigFile (void);
-static void loadSystemNames(void);
+//static void loadSystemNames(void);
 static char *currentSystem(void);
 static void flagConfigFile(void);
 static int resetConfigFile(void);
@@ -46,7 +46,8 @@ APP_IRAM int DEFAULT_TIME_PRECISION;
 APP_IRAM int DEFAULT_REWIND;
 APP_IRAM int INSERT_SOUND_REWIND_MS;
 APP_IRAM int HYPERLINK_SOUND_FILE_IDX, DELETED_FILE_IDX, PRE_COPY_FILE_IDX, POST_COPY_FILE_IDX, SPEAK_SOUND_FILE_IDX, 
-    INACTIVITY_SOUND_FILE_IDX, ERROR_SOUND_FILE_IDX, EMPTY_LIST_FILE_IDX, REC_PAUSED_FILE_IDX, POST_REC_FILE_IDX,
+    INACTIVITY_SOUND_FILE_IDX, ERROR_SOUND_FILE_IDX, EMPTY_LIST_FILE_IDX, REC_PAUSED_FILE_IDX, POST_REC_FILE_IDX, POST_TRANSLATE_FILE_IDX,NO_TRANSLATION_FILE_IDX,
+    NOT_YET_TRANSLATED_FILE_IDX,PLS_RECORD_TRANSLATION_FILE_IDX,NEW_RECORDING_FILE_IDX,ORIG_RECORDING_FILE_IDX,
     POST_PLAY_FILE_IDX;
 APP_IRAM int BLOCK_START_LEADER, BLOCK_END_LEADER;
 APP_IRAM long BIT_RATE;
@@ -124,7 +125,8 @@ void startUp(unsigned int bootType) {
 	char buffer[200];
 	char strCounts[32];
 	char filename[FILE_LENGTH];
-	int key;
+	char filepath [PATH_LENGTH];
+	int key, handle, temp;
 	
 	SetSystemClockRate(MAX_CLOCK_SPEED); // to speed up initial startup -- set CLOCK_RATE later
 
@@ -229,6 +231,20 @@ void startUp(unsigned int bootType) {
 		logRTC();  
 	}
 //#endif
+	//Load translation list from bin
+	strcpy(filepath,LANGUAGES_PATH);
+	temp=strlen(filepath);
+	strcat(filepath,TRANSLATE_FILENAME_BIN);
+	handle = tbOpen((LPSTR)(filepath),O_CREAT|O_RDWR);
+	//Also check that translate temp directory exists before re-loading
+	filepath[temp]=0;
+	strcat(filepath,TRANSLATE_TEMP_DIR);
+	if (handle != -1 && dirExists( (LPSTR) filepath) ) {
+		temp = read(handle, (unsigned long)&context.transList<<1, sizeof(TranslationList)<<1);
+		close(handle);
+	}
+	//Always start with not translated list
+	context.transList.mode = '0';
 	SetSystemClockRate(CLOCK_RATE); // either set in config file or the default 48 MHz set at beginning of startUp()
 
 	unlink ((LPSTR) (STAT_DIR SNCSV));
@@ -380,6 +396,12 @@ int loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"SPEAK_SOUND_FILE_IDX")) SPEAK_SOUND_FILE_IDX=strToInt(value);
 				else if (!strcmp(name,(char *)"REC_PAUSED_FILE_IDX")) REC_PAUSED_FILE_IDX=strToInt(value);
 				else if (!strcmp(name,(char *)"POST_REC_FILE_IDX")) POST_REC_FILE_IDX=strToInt(value);
+				else if (!strcmp(name,(char *)"NO_TRANSLATION_FILE_IDX")) NO_TRANSLATION_FILE_IDX=strToInt(value);
+				else if (!strcmp(name,(char *)"POST_TRANSLATE_FILE_IDX")) POST_TRANSLATE_FILE_IDX=strToInt(value);
+				else if (!strcmp(name,(char *)"NOT_YET_TRANSLATED_FILE_IDX")) NOT_YET_TRANSLATED_FILE_IDX=strToInt(value);
+				else if (!strcmp(name,(char *)"PLS_RECORD_TRANSLATION_FILE_IDX")) PLS_RECORD_TRANSLATION_FILE_IDX=strToInt(value);
+				else if (!strcmp(name,(char *)"NEW_RECORDING_FILE_IDX")) NEW_RECORDING_FILE_IDX=strToInt(value);
+				else if (!strcmp(name,(char *)"ORIG_RECORDING_FILE_IDX")) ORIG_RECORDING_FILE_IDX=strToInt(value);
 				else if (!strcmp(name,(char *)"INACTIVITY_SOUND_FILE_IDX")) INACTIVITY_SOUND_FILE_IDX=strToInt(value);
 				else if (!strcmp(name,(char *)"ERROR_SOUND_FILE_IDX")) ERROR_SOUND_FILE_IDX=strToInt(value);
 				else if (!strcmp(name,(char *)"EMPTY_LIST_FILE_IDX")) EMPTY_LIST_FILE_IDX=strToInt(value);
@@ -481,7 +503,7 @@ unsigned int GetMemManufacturer()
 }
 
 
-static void loadSystemNames() {
+extern void loadSystemNames() {
 	int handle;
 	char *cursorRead;
 	char systemOrderFile[PATH_LENGTH];

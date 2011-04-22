@@ -19,7 +19,7 @@
 #define MAX_FILES		70
 #define MAX_BLOCKS		80
 #define MAX_STATES		(2 * MAX_BLOCKS)   // should always be 2 x MAX_BLOCKS
-#define MAX_ACTIONS		(2 * MAX_BLOCKS)   // 2 actions per block (in addition to start/end actions)
+#define MAX_ACTIONS		200   // a little more than 2 actions per block (in addition to start/end actions)
 #define MAX_LISTS		2
 #define MAX_BLOCK_OVERLAP	4   // allows for a file-wide block, a page, a line, and a hyperlink
 #define PKG_HEAP_SIZE	512  // enough for 10 chars per struct file/filename and per ListItem filename
@@ -41,8 +41,8 @@ enum EnumEvent {
 	LEFT, RIGHT, UP, DOWN, SELECT, HOME, PLAY, STAR, PLUS, MINUS, BUTTON_MARKER, START, END
 };
 enum EnumAction {NOP = 0, STOP, PAUSE, JUMP_BLOCK, RETURN, INSERT_SOUND, START_END_MARKER,			
-				PLAY_PAUSE, COPY, RECORD_TITLE, RECORD_MSG, PACKAGE_RECORDING, TRIM,
-				FWD, BACK, JUMP_TIME, CALL_BLOCK, JUMP_PACKAGE, JUMP_LIST, DELETE, 
+				PLAY_PAUSE, COPY, RECORD_TITLE, RECORD_MSG, PACKAGE_RECORDING, RECORD_TRANSLATION, TRIM,
+				FWD, BACK, JUMP_TIME, CALL_BLOCK, JUMP_PACKAGE, JUMP_LIST, TRANSLATED_LIST, NOT_TRANSLATED_LIST, TRANSLATE_DELETE_FINISH, DELETE, DELETE_TRANSLATION, WRAP_TRANSLATION,
                 ENTER_EXIT_MARKER, VOLUME_UP, VOLUME_DOWN, VOLUME_NORMAL, SPEED_UP, SPEED_DOWN, SPEED_NORMAL,  
 				USB_MARKER, USB_DEVICE_ON, USB_HOST_ON, USB_DEVICE_OFF, USB_HOST_OFF,  
                 LED_MARKER, LED_RED_ON, LED_GREEN_ON, LED_ALL_ON, LED_RED_OFF, LED_GREEN_OFF, LED_ALL_OFF,
@@ -189,6 +189,7 @@ struct Context {
 	CtnrPackage *returnPackage;
     CtnrFile *lastFile;
     long packageStartTime;
+    TranslationList transList;
 };
 
 extern Context context;
@@ -228,6 +229,7 @@ extern void setEventCodes(Action *, EnumEvent, BOOL);
 extern void setEndOfActions(Action *, BOOL);
 extern Action *getBlockActions(CtnrBlock *);
 extern Action *getListActions(ListItem *);
+extern Action *getTransListActions(TranslationList *);
 extern int replaceStack (char *, CtnrPackage *);
 extern CtnrFile *getListFile(char *); 
 extern CtnrFile *getListFileLong(char *);

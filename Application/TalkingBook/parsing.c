@@ -21,7 +21,7 @@ static int getActionEnumFromChar (char *);
 static int buildEnterExitCode (int, EnumAction);
 static void setEnterCode(CtnrBlock *, EnumAction);
 static void setExitCode(CtnrBlock *, EnumAction);
-static BOOL parseCreateAction (char *, Action *, int *, char *, CtnrBlock *, ListItem *);
+static BOOL parseCreateAction (char *, Action *, int *, char *, CtnrBlock *, ListItem *, TranslationList *);
 static BOOL parseCreateBlock (char *, CtnrBlock *, char **, int);
 static int getBlockIndexFromSymbol (char *, const char *);
 static unsigned int getLinkedTime(OrderBlock *, EnumStartOrEnd);
@@ -58,16 +58,6 @@ static int getIndexFromLine(char *line, char *symbolMapStart) {
 	return index;
 }
 
-// copied from above for reference
-// EnumEvent {LEFT, RIGHT, UP, DOWN, SELECT, HOME, PLAY, STAR, PLUS, MINUS, BUTTON_MARKER, START, END};
-// EnumAction {NOP = 0, STOP, PAUSE, JUMP_BLOCK, RETURN, INSERT_SOUND, START_END_MARKER,			
-//				PLAY_PAUSE, COPY, RECORD_TITLE, RECORD_MSG, PACKAGE_RECORDING, TRIM,
-//              FWD, BACK, JUMP_TIME, CALL_BLOCK, JUMP_PACKAGE, JUMP_LIST, DELETE, 
-//              ENTER_EXIT_MARKER, VOLUME_UP, VOLUME_DOWN, VOLUME_NORMAL, SPEED_UP, SPEED_DOWN, SPEED_NORMAL,  
-//				USB_MARKER, USB_DEVICE_ON, USB_HOST_ON, USB_DEVICE_OFF, USB_HOST_OFF,  
-//              LED_MARKER, LED_RED_ON, LED_GREEN_ON, LED_ALL_ON, LED_RED_OFF, LED_GREEN_OFF, LED_ALL_OFF, 
-//				HALT, SLEEP, TEST_PCB};
-
 static int getEventEnumFromChar (char *c) {
 	int ret = -1;
 	const char *EVENT_CODES = "<>^vohp*+-_!$";   // '_' is placeholder for BUTTON_MARKER
@@ -78,7 +68,7 @@ static int getEventEnumFromChar (char *c) {
 
 static int getActionEnumFromChar (char *c) {
 	int ret = -1;
-	const char *ACTION_CODES = "~.,[)I_PCEEEMFBT(<LD_VVVSSS_UUUU_RGARGAHZX";  // '_' is placeholder for marker codes
+	const char *ACTION_CODES = "~.,[)I_PCEEEEMFBT(<LLLLDDW_VVVSSS_UUUU_RGARGAHZX";  // '_' is placeholder for marker codes
 	// note that E is for rEcord since R should represent Red
 	// only first instance of action code is found, others are placeholders as dealt with below
 	
@@ -106,6 +96,21 @@ static int getActionEnumFromChar (char *c) {
 			ret += 1;
 		else if (*(c+1) == 'p')
 			ret += 2;
+		else if (*(c+1) == 'l')
+			ret += 3;
+	}
+	else if (ret == JUMP_LIST) {
+		if (*(c+1) == 'n')
+			ret += 1;
+		else if (*(c+1) == 'o')
+			ret += 2;
+		else if (*(c+1) == '?')
+			ret += 3;
+	
+	}
+	else if (ret == DELETE) {
+		if (*(c+1) == 't')
+			ret += 1;
 	}
 	return ret;	
 }
@@ -218,7 +223,7 @@ static void setExitCode(CtnrBlock *block, EnumAction actionCode) {
 	block->actionEnterExit = enterExitCode;
 }
 
-static BOOL parseCreateAction (char *line, Action *action, int *actionCount, char *symbolMapStart, CtnrBlock *block, ListItem *list) {	
+static BOOL parseCreateAction (char *line, Action *action, int *actionCount, char *symbolMapStart, CtnrBlock *block, ListItem *list, TranslationList *transList) {	
 	//TODO:
 	//    Add code to parse speed changes in actions (already incorporated into Action, but nowhere else yet)
 	//
@@ -262,6 +267,8 @@ static BOOL parseCreateAction (char *line, Action *action, int *actionCount, cha
 		setSoundInsert(&action[*actionCount], TRUE);
 		if (list)
 			pStartEndCode = &list->actionStartEnd;
+		else if (transList)
+			pStartEndCode = &transList->actionStartEnd;
 		else
 			pStartEndCode = &block->actionStartEnd;
 		if (eventCode == START)
@@ -361,6 +368,10 @@ static BOOL parseCreateAction (char *line, Action *action, int *actionCount, cha
 			index = getIndexFromLine(strAction,symbolMapStart);
 			if (index != -1)
 				action[*actionCount].destination = index; 
+			//else {
+			//	ret = FALSE;
+			//	logException(6,strAction,0);  // todo:invalid internal reference in control track file
+			//}
 // TODO:If (index==-1), there was no destination ("[]"), which is ok for now -- and ret=FALSE was ignored anyway   
 //			else
 //				ret = FALSE;
@@ -425,11 +436,82 @@ static BOOL parseCreateAction (char *line, Action *action, int *actionCount, cha
 				logException(6,strAction,0);  // todo:invalid internal reference in control track file 
 			}
 		}
+		if (actionCode == DELETE_TRANSLATION || actionCode == WRAP_TRANSLATION) {
+			//strAction = strAction+3;
+			index = getIndexFromLine(strAction,symbolMapStart);
+			if (index != -1)	
+				action[*actionCount].destination = index; 
+			else {
+				ret = FALSE;
+				logException(6,strAction,0);  // todo:invalid internal reference in control track file 
+			}
+		}
+		if (actionCode == TRANSLATE_DELETE_FINISH) {
+			//Get first block and store in destination
+			//Move past ?
+			strAction=strAction+2;
+			while (*strAction && isspace(*strAction))
+				strAction++;
+			
+			if (*strAction == '[') { 
+				cursor = strchr(strAction,']');
+				//if (cursor)
+				//	*cursor = 0;			
+				//else {
+				//	logException(8,strAction,0);  // syntax error in control track
+				//	ret = FALSE;
+				//}
+				//strAction++;
+				index = getIndexFromLine(strAction,symbolMapStart);
+				if (index != -1) {
+					action[*actionCount].destination = index; 
+					strAction = cursor+1;
+				}
+				else {
+					ret = FALSE;
+					logException(6,(char *)"here1",0);  // todo:invalid internal reference in control track file
+				}
+			}
+			else {
+				ret = FALSE;
+				logException(8,strAction,0);  // syntax error in control track
+			}
+			// Store second block name in aux
+			while (*strAction && isspace(*strAction))
+				strAction++;
+			
+			if (*strAction == '[') { 
+				//cursor = strchr(strAction,']');
+				//if (cursor)
+				//	*cursor = 0;			
+				//else {
+				//	logException(8,strAction,0);  // syntax error in control track
+				//	ret = FALSE;
+				//}
+				//strAction++;
+				index = getIndexFromLine(strAction,symbolMapStart);
+				if (index != -1) {
+					action[*actionCount].aux = index; 
+				}
+				else {
+					ret = FALSE;
+					logException(6,(char *)"here1",0);  // todo:invalid internal reference in control track file
+				}
+			}
+			else {
+				ret = FALSE;
+				logException(8,strAction,0);  // syntax error in control track
+			}	
+		
+			/////////
+		}
 	}		
-	if ((block || list) && actionCode != -1) {
+	if ((block || list || transList) && actionCode != -1) {
 		int *pStartEndCode;
 		if (list)
 			pStartEndCode = &list->actionStartEnd;
+		else if (transList)
+			pStartEndCode = &transList->actionStartEnd;
 		else
 			pStartEndCode = &block->actionStartEnd;	
 		if (eventCode == START)
@@ -698,14 +780,16 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 	char *charCursor;
 	char *charCursor2;
 	OrderBlock *latestStart, *latestEnd;
-	char currentContainerType; // P = package; F = file; B = block
+	char currentContainerType; // P = package; F = file; B = block; L = List (of lists or packages); T = Translation List
 	int lineCount;
 	ListItem *list;
+	TranslationList *transList;
 	OrderBlock orderBlocks[MAX_BLOCKS*2];
 	char buffer[READ_LENGTH+1];
 	char tempBuffer[50];
 	char symbolMap[MAX_BLOCKS * AVG_SYMBOL_LENGTH]; 
 	int attempt, goodPass;
+	//int tempListNum;
 	const int MAX_ATTEMPTS = 3;
 	
 	buffer[READ_LENGTH] = '\0'; //prevents readLine from searching for \n past buffer
@@ -785,29 +869,41 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 						}
 */						break;
 					case 'L':
-						currentContainerType = 'L';
-						pkg->countLists++;
-						if (pkg->countLists > MAX_LISTS) {
-							close(fileHandle);
-							strcpy(tempBuffer,"ListItem#");
-							longToDecimalString((long)pkg->countLists,tempBuffer+strlen(tempBuffer),2);
-							logException(2,tempBuffer,(context.package == &pkgSystem)?USB_MODE:RESET); // todo: too many files, blocks, or lists
+						charCursor = strchr(line,DELIMITER) + 1;
+						if (*charCursor == 'T') {
+							currentContainerType = 'T';
+							transList = &context.transList;
+							transList->idxFirstAction = -1;
+							transList->currFileIdx = -1;
+							transList->mode = '0';
+							
+						}
+						else {
+							currentContainerType = 'L';
+							pkg->countLists++;
+							if (pkg->countLists > MAX_LISTS) {
+								close(fileHandle);
+								strcpy(tempBuffer,"ListItem#");
+								longToDecimalString((long)pkg->countLists,tempBuffer+strlen(tempBuffer),2);
+								logException(2,tempBuffer,(context.package == &pkgSystem)?USB_MODE:RESET); // todo: too many files, blocks, or lists
+							}
+
+							// now prep new ListItem container
+							list = &pkg->lists[pkg->countLists-1];
+							list->idxFirstAction = -1;
+							list->currentFilePosition =  -1;
 						}
 						// first wrap up last File container, if any
 						if (pkg->countFiles && latestStart) 
 							setBlockOrder(pkg,latestStart,latestEnd);
-						// now prep new ListItem container
-						list = &pkg->lists[pkg->countLists-1];
-						list->idxFirstAction = -1;
-						list->currentFilePosition =  -1;
-						charCursor = strchr(line,DELIMITER) + 1;
+						//charCursor = strchr(line,DELIMITER) + 1;
 						if (*charCursor == 'L') {
 							list->listType = LIST_OF_LISTS;
 							context.package->idxMasterList = pkg->countLists-1;	
 						}
 						else if (*charCursor == 'P')
 							list->listType = LIST_OF_PACKAGES;
-						else {
+						else if (*charCursor != 'T') {
 							close(fileHandle);
 							logException(8,line,(context.package == &pkgSystem)?USB_MODE:RESET);//syntax error
 						}
@@ -817,7 +913,7 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 						while (*charCursor && isspace(*charCursor))
 							charCursor++;
 						if (*charCursor != 0) {
-							if (*charCursor == '{') {
+							if (currentContainerType == 'L' && *charCursor == '{') {
 								charCursor++;
 								ret = getIndexFromLine(charCursor,symbolMap);
 	 							if (ret != -1) {	
@@ -839,8 +935,12 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 								    logException(8,tempBuffer,(context.package == &pkgSystem)?USB_MODE:RESET); //todo: syntax error in control track
 								} else if (charCursor == charCursor2){
 									// '[' immediate follows list type -- no list filename
-									if (list->listType == LIST_OF_LISTS) { // no list filename needed for Lists of Lists (they use config master list)
+									//if (list->listType == LIST_OF_LISTS) { // no list filename needed for Lists of Lists (they use config master list)
+									if (currentContainerType == 'L' && list->listType == LIST_OF_LISTS) { // no list filename needed for Lists of Lists (they use config master list)
 										strcpy(list->filename,LIST_MASTER);
+										charCursor++; //advance cursor from '[' to first character of list label
+									}
+									else if(currentContainerType == 'T') {
 										charCursor++; //advance cursor from '[' to first character of list label
 									}
 									else {
@@ -849,7 +949,7 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 										longToDecimalString((long)pkg->countLists,tempBuffer+strlen(tempBuffer),2);
 									    logException(8,tempBuffer,(context.package == &pkgSystem)?USB_MODE:RESET); //todo: syntax error in control track
 									}
-								} else {
+								} else if (currentContainerType == 'L') {
 									while (isspace(*(charCursor2-1)) && charCursor2 >= charCursor)
 										charCursor2--;							
 									*charCursor2++ = 0; // set null mark and move back to space or [
@@ -869,7 +969,16 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 							//todo: separate list and block namespaces?
 							charCursor = strcpy(pSymbolMap,charCursor);
 							charCursor = strchr(charCursor,'\0');
-							*(charCursor + 1) = pkg->countLists-1;
+							if(currentContainerType == 'T') {
+								*(charCursor + 1) = MAX_LISTS;
+								//*(charCursor + 1) = 2;
+								//tempListNum = *(charCursor + 1);
+								//strcpy(tempBuffer,"TranslationList#");
+								//longToDecimalString((long)tempListNum,tempBuffer+strlen(tempBuffer),2);
+								//logException(99,tempBuffer,(context.package == &pkgSystem)?USB_MODE:RESET); // todo: too many files, blocks, or lists
+							}
+							else 
+								*(charCursor + 1) = pkg->countLists-1;
 							pSymbolMap = charCursor + 2;
 							if ((pSymbolMap - symbolMap) > (MAX_BLOCKS * AVG_SYMBOL_LENGTH)) {
 								close(fileHandle);
@@ -881,7 +990,8 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 						currentContainerType = 'F';
 						// first wrap up last File container, if any
 						if (pkg->countFiles && latestStart) 
-							setBlockOrder(pkg,latestStart,latestEnd);					
+							setBlockOrder(pkg,latestStart,latestEnd);
+									
 						// now prep new File container
 						charCursor = strchr(line,DELIMITER) + 1;
 						if (*charCursor != 0) {
@@ -900,6 +1010,13 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 										strcpy(tempBuffer,"File#");
 										longToDecimalString((long)pkg->countFiles,tempBuffer+strlen(tempBuffer),3);
 										logException(2,tempBuffer,(context.package == &pkgSystem)?USB_MODE:RESET); // todo: too many files, blocks, or lists
+									}
+									//Register file as not translated (modify later to see if binary file from previous exists)
+									//Assume first file is always bell???
+									if(context.package == &pkgSystem && pkg->countFiles <= MAX_TRANSLATE_FILE && pkg->countFiles > 1) {
+									//if(context.package == &pkgSystem && pkg->countFiles > 1) {
+										//Since skipping 1st file (assume bell), 0th index in file marker array maps to 2nd file
+										context.transList.translatedFileMarker[pkg->countFiles-2]='0';
 									}
 								}
 								else
@@ -943,6 +1060,10 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 								//temporarily store file line number to find first action during second pass (below)
 								list->idxFirstAction = lineCount; 
 							} 
+							else if (currentContainerType == 'T' && transList->idxFirstAction == -1) {
+								//temporarily store file line number to find first action during second pass (below)
+								transList->idxFirstAction = lineCount; 
+							} 
 							break;
 				} // switch
 			} // while (line);
@@ -967,7 +1088,7 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 				if (!goodPass)
 					continue;
 				while (line && *line == 'A') {
-					ret = parseCreateAction(line, (Action *) &pkg->actions, &actionCount, (char *)&symbolMap, NULL, NULL);
+					ret = parseCreateAction(line, (Action *) &pkg->actions, &actionCount, (char *)&symbolMap, NULL, NULL, NULL);
 					if (!ret) {
 						goodPass = 0;
 						logException(8,0,0); 
@@ -1001,7 +1122,7 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 					//actionCount is updated within parseCreateAction
 					pkg->blocks[currentBlock].idxFirstAction = actionCount + 1;
 					do {
-						ret = parseCreateAction(line, (Action *)&pkg->actions, &actionCount, (char *)&symbolMap, &pkg->blocks[currentBlock], NULL);
+						ret = parseCreateAction(line, (Action *)&pkg->actions, &actionCount, (char *)&symbolMap, &pkg->blocks[currentBlock], NULL, NULL);
 						if (ret == -1) {
 							goodPass = 0;
 							break;
@@ -1017,7 +1138,7 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 				}	
 				currentBlock++;
 			} while (line && currentBlock <= pkg->countBlocks);
-	
+			//Begin parsing for lists
 			currentList = 0;		
 			getLine(fileHandle,0); // resets fct to beginning of file
 			line = getLine(fileHandle,buffer); // read first line
@@ -1042,7 +1163,7 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 					//actionCount is updated within parseCreateAction
 					pkg->lists[currentList].idxFirstAction = actionCount + 1;
 					do {
-						ret = parseCreateAction(line, (Action *)&pkg->actions, &actionCount, (char *)&symbolMap, NULL, &pkg->lists[currentList]);
+						ret = parseCreateAction(line, (Action *)&pkg->actions, &actionCount, (char *)&symbolMap, NULL, &pkg->lists[currentList], NULL);
 						//todo: handle ret = -1 or FALSE or 0 or whatever
 						if ((line = getLine(fileHandle,buffer)))
 							lineCount++;
@@ -1053,6 +1174,38 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 				}	
 				currentList++;
 			} while (line && currentList <= pkg->countLists);
+			
+			//Begin parsing for Translation Lists
+			getLine(fileHandle,0); // resets fct to beginning of file
+			line = getLine(fileHandle,buffer); // read first line
+			if (!goodString(line,0)) {
+				goodPass = 0;
+				continue;
+			}
+			lineCount = 0;
+			while (line && lineCount < context.transList.idxFirstAction) {
+				if ((line = getLine(fileHandle,buffer)))
+					lineCount++;
+				if (!goodString(line,0)) {
+					goodPass = 0;
+					continue;
+				}
+			}
+			// parse line if ended with \n or if last line of last buffer	
+			if (line && *line == 'A') {
+				//actionCount is updated within parseCreateAction
+				context.transList.idxFirstAction = actionCount + 1;
+				do {
+					ret = parseCreateAction(line, (Action *)&pkg->actions, &actionCount, (char *)&symbolMap, NULL, NULL, &context.transList);
+					//todo: handle ret = -1 or FALSE or 0 or whatever
+					if ((line = getLine(fileHandle,buffer)))
+						lineCount++;
+					if (!goodString(line,0))
+						goodPass = 0;
+				} while (line && *line == 'A');	
+				setEndOfActions(&pkg->actions[actionCount],TRUE);
+			}	
+			
 			close(fileHandle);
 		} // if fileHandle >= 0 
 		if (pkg->countFiles == 0)

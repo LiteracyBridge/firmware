@@ -196,7 +196,8 @@ void updateSN() {
 		}
 
 	 	//check that new sn is not the same as old - force goodSN to 0 if it is the same
-		goodSN &= strncmp(newSN,(char *)TB_SERIAL_NUMBER_ADDR,strlen((char *)TB_SERIAL_NUMBER_ADDR));
+		if ((char *)TB_SERIAL_NUMBER_ADDR) // otherwise 0-length string will look equal
+			goodSN &= strncmp(newSN,(char *)TB_SERIAL_NUMBER_ADDR,strlen((char *)TB_SERIAL_NUMBER_ADDR));
 					
 		// check the extension was found
 		if (dot == NULL)
