@@ -597,11 +597,6 @@ void loadDefaultUserPackage(const char *strPkgName) {
 	memset(&pkgUser,0,sizeof(CtnrPackage));
 	pkgUser.pkg_type = PKG_MSG;
 	
-	strcpy(pkgUser.strHeapStack,strPkgName);
-	pkgUser.idxStrHeap = strlen(strPkgName);  // probably not necessary since only used in parse
-	pkgUser.idxName = 0; // package name found at top of heap
-	pkgUser.files[0].idxFilename = 0;  // filename also found at top of heap
-
 	if (USER_CONTROL_TEMPLATE) {
 		// load in configurable control template
 		strcpy(sTemp,SYSTEM_PATH);
@@ -610,12 +605,16 @@ void loadDefaultUserPackage(const char *strPkgName) {
 		strcat(sTemp,".txt"); //todo: move to config file	
 		parseControlFile (sTemp, &pkgUser);	
 		//TODO: save binary version
+		strcpy(pkgUser.strHeapStack+pkgUser.files[0].idxFilename,strPkgName);
 	} else {
 		// create the basic default user package dynamically
 		pkgUser.timePrecision = getBitShift(DEFAULT_TIME_PRECISION);
 		pkgUser.idxLanguageCode = -1;
+		strcpy(pkgUser.strHeapStack,strPkgName);
+		pkgUser.idxStrHeap = strlen(strPkgName);  // probably not necessary since only used in parse
 
 		pkgUser.countFiles = 1;
+		pkgUser.files[0].idxFilename = 0;  // filename found at top of heap
 		pkgUser.files[0].idxFirstBlockStart = 0;
 		pkgUser.files[0].idxFirstBlockEnd = -1;
 		pkgUser.files[0].idxFirstBlockInFile = 0;
@@ -635,4 +634,5 @@ void loadDefaultUserPackage(const char *strPkgName) {
 		pkgUser.actions[0].destination = 0;
 		setEndOfActions(&pkgUser.actions[1],TRUE);
 	}
+	pkgUser.idxName = pkgUser.files[0].idxFilename;
 }
