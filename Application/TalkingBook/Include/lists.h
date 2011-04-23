@@ -20,6 +20,7 @@ struct TranslationList {
 	//char translatedFileMarker[MAX_FILES];
 	int currFileIdx;
 	char mode;
+	char updateOnly;
 };
 
 struct ListItem {

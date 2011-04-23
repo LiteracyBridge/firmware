@@ -708,3 +708,100 @@ void copyAllFiles(char *fromdir, char *todir)
 	}
 	//return(fret);
 }
+
+void deleteAllFiles(char *fromdir)
+{
+	int ret, r1, len_from;
+	//int fret;
+	char from[80];
+	//char temp[80];
+	struct f_info fi;
+	
+	strcpy(from, fromdir);
+	len_from = strlen(from);
+	
+	if(from[len_from-1] != '/') {
+		strcat(from, "/");
+		len_from++;
+	}
+	strcat(from, "*.*");
+	
+	ret =_findfirst((LPSTR)from, &fi, D_FILE);
+	while(ret >= 0) {
+		if(fi.f_name[0] != '.') {
+			from[len_from] = 0;
+			strcat(from, fi.f_name);
+			
+			setLED(LED_GREEN,FALSE);
+			setLED(LED_RED,TRUE);
+			unlink((LPSTR)from);
+			wait (500);
+			setLED(LED_RED,FALSE);
+			if (r1 != -1) {
+				setLED(LED_GREEN,TRUE);
+				wait(500);
+			}
+		}
+		ret = _findnext(&fi);
+	}
+}
+
+void moveAudioFiles(char *fromdir, char *todir)
+{
+	int ret, r1, len_from, len_to;
+	char* cursor;
+	char from[80], to[80];
+	struct f_info fi;
+	
+	strcpy(from, fromdir);
+	
+	len_from = strlen(from);
+	
+	if(from[len_from-1] != '/') {
+		strcat(from, "/");
+		len_from++;
+	}
+	strcat(from, "*.*");
+	
+	strcpy(to, todir);
+	len_to = strlen(to);
+//	mkdir(to);	// just to be safe
+	if(to[len_to-1] != '/') {
+		strcat(to, "/");
+		len_to++;
+	}
+			
+	ret =_findfirst((LPSTR)from, &fi, D_FILE);
+	while(ret >= 0) {
+		cursor = strchr((char *)fi.f_name,'.');
+		//logString((char *)fi.f_name,BUFFER);
+		//logString(cursor,ASAP);
+		//logString((char*)AUDIO_FILE_EXT,ASAP);
+		//cursor = strchr((char *)fi.f_name,'.');
+//			logString(to,ASAP);
+
+		if(fi.f_name[0] != '.' && !strcmp(cursor,(char *)AUDIO_FILE_EXT)) {
+			from[len_from] = 0;
+			to[len_to]= 0;
+
+			strcat(from, fi.f_name);
+			strcat(to, fi.f_name);
+
+			setLED(LED_GREEN,FALSE);
+			setLED(LED_RED,TRUE);
+			unlink((LPSTR)to);
+			r1 = rename((LPSTR)from, (LPSTR)to);
+
+			logString((char *)"MOVING",ASAP);
+			wait (500);
+			setLED(LED_RED,FALSE);
+			if (r1 != -1) {
+				setLED(LED_GREEN,TRUE);
+				wait(500);
+			}
+		}
+		ret = _findnext(&fi);
+		//fret++;
+	}
+	//return(fret);
+}

@@ -31,4 +31,5 @@ extern void trimFile(char *, unsigned long, unsigned long);
 extern int fileCopy(char *, char *);
 extern void dirCopy(char *, char *);
 extern void copyAllFiles(char *, char *);
+extern void moveAllFiles(char *, char *);
 #endif

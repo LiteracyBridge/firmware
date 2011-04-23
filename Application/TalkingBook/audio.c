@@ -392,7 +392,6 @@ static int recordAudio(char *pkgName, char *cursor) {
 		strcpy(filepath,LANGUAGES_PATH);
 		strcat(filepath,TRANSLATE_TEMP_DIR);
 		strcat(filepath,"/");
-		strcat(filepath,UI_SUBDIR);
 		strcat(filepath,pkgName);
 		strcat(filepath,AUDIO_FILE_EXT);
 	} 

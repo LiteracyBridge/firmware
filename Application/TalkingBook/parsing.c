@@ -68,7 +68,7 @@ static int getEventEnumFromChar (char *c) {
 
 static int getActionEnumFromChar (char *c) {
 	int ret = -1;
-	const char *ACTION_CODES = "~.,[)I_PCEEEEMFBT(<LLLLDDW_VVVSSS_UUUU_RGARGAHZX";  // '_' is placeholder for marker codes
+	const char *ACTION_CODES = "~.,[)I_PCEEEEMFBT(<LLLLLLDDWO_VVVSSS_UUUU_RGARGAHZX";  // '_' is placeholder for marker codes
 	// note that E is for rEcord since R should represent Red
 	// only first instance of action code is found, others are placeholders as dealt with below
 	
@@ -106,7 +106,10 @@ static int getActionEnumFromChar (char *c) {
 			ret += 2;
 		else if (*(c+1) == '?')
 			ret += 3;
-	
+		else if (*(c+1) == 'c')
+			ret += 4;
+		else if (*(c+1) == '!')
+			ret += 5;	
 	}
 	else if (ret == DELETE) {
 		if (*(c+1) == 't')
@@ -444,6 +447,54 @@ static BOOL parseCreateAction (char *line, Action *action, int *actionCount, cha
 			else {
 				ret = FALSE;
 				logException(6,strAction,0);  // todo:invalid internal reference in control track file 
+			}
+		}
+		if (actionCode == TRANSLATE_NEW){
+			//Get first block and store in destination
+			//Move past 'c' (c for create)
+			strAction=strAction+2;
+			while (*strAction && isspace(*strAction))
+				strAction++;
+			
+			if (*strAction == '[') { 
+				cursor = strchr(strAction,']');
+				index = getIndexFromLine(strAction,symbolMapStart);
+				if (index != -1) {
+					action[*actionCount].destination = index; 
+					strAction = cursor+1;
+				}
+				else {
+					ret = FALSE;
+					logException(6,strAction,0);  // todo:invalid internal reference in control track file
+				}
+			}
+			else {
+				ret = FALSE;
+				logException(8,strAction,0);  // syntax error in control track
+			}
+		}
+		if (actionCode == TRANSLATE_OVERWRITE) {
+			//Get first block and store in destination
+			//Move past '!'
+			strAction=strAction+2;
+			while (*strAction && isspace(*strAction))
+				strAction++;
+			
+			if (*strAction == '[') { 
+				cursor = strchr(strAction,']');
+				index = getIndexFromLine(strAction,symbolMapStart);
+				if (index != -1) {
+					action[*actionCount].destination = index; 
+					strAction = cursor+1;
+				}
+				else {
+					ret = FALSE;
+					logException(6,strAction,0);  // todo:invalid internal reference in control track file
+				}
+			}
+			else {
+				ret = FALSE;
+				logException(8,strAction,0);  // syntax error in control track
 			}
 		}
 		if (actionCode == TRANSLATE_DELETE_FINISH) {
