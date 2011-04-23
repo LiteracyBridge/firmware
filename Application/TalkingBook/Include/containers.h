@@ -16,12 +16,12 @@
 #define APP_QUIZ_PLAY   1
 #define APP_QUIZ_REC 	2
 
-#define MAX_FILES		70
-#define MAX_BLOCKS		80
+#define MAX_FILES		100
+#define MAX_BLOCKS		100
 #define MAX_STATES		(2 * MAX_BLOCKS)   // should always be 2 x MAX_BLOCKS
-#define MAX_ACTIONS		200   // a little more than 2 actions per block (in addition to start/end actions)
+#define MAX_ACTIONS		300   // a little more than 2 actions per block (in addition to start/end actions)
 #define MAX_LISTS		2
-#define MAX_BLOCK_OVERLAP	4   // allows for a file-wide block, a page, a line, and a hyperlink
+#define MAX_BLOCK_OVERLAP	3   // allows for a file-wide block, a page, and a hyperlink
 #define PKG_HEAP_SIZE	512  // enough for 10 chars per struct file/filename and per ListItem filename
 #define PKG_STACK_SIZE	100   // only stores one item and is erased by next item stored (used for list item filenames)
 // PKG_STACK_SIZE is used so that list filenames can be relative to the heap without being accumulated and hogging memory
@@ -193,7 +193,7 @@ struct Context {
 };
 
 extern Context context;
-extern CtnrPackage pkgSystem, pkgUser, pkgDefault; 
+extern CtnrPackage pkgSystem, pkgUser; 
 
 #define MASK_IDX_NEXT_START	0x03FF   // masks bits 0-9; see ctnrBlock.idxNextStart and action.destination
 
@@ -234,4 +234,6 @@ extern int replaceStack (char *, CtnrPackage *);
 extern CtnrFile *getListFile(char *); 
 extern CtnrFile *getListFileLong(char *);
 extern void resetPackage(CtnrPackage *);
+extern void loadDefaultUserPackage(const char *);
+
 #endif

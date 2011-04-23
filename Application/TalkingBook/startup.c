@@ -22,7 +22,6 @@ extern int SystemIntoUDisk(unsigned int);
 extern INT16 SD_Initial(void);
 
 static char * addTextToSystemHeap (char *);
-static void loadDefaultUserPackage(void);
 static int loadConfigFile (void);
 //static void loadSystemNames(void);
 static char *currentSystem(void);
@@ -181,7 +180,7 @@ void startUp(unsigned int bootType) {
 	SysDisableWaitMode(WAITMODE_CHANNEL_A);
 	adjustVolume(NORMAL_VOLUME,FALSE,FALSE);
 	adjustSpeed(NORMAL_SPEED,FALSE);
-	loadDefaultUserPackage();
+	//loadDefaultUserPackage(); --moved this to load dynamically into pkgUser so that we could save the memory of pkgDefault
 	if (MACRO_FILE)	
 		loadMacro();
 	loadSystemCounts();
@@ -439,16 +438,6 @@ int loadConfigFile(void) {
 	return ret;
 }
 
-static void loadDefaultUserPackage(void) {
-	char sTemp[PATH_LENGTH];
-	
-	strcpy(sTemp,SYSTEM_PATH);
-	strcat(sTemp,USER_CONTROL_TEMPLATE);
-	strcat(sTemp,".txt"); //todo: move to config file	
-	memset(&pkgDefault,0,sizeof(CtnrPackage));
-	pkgDefault.pkg_type = PKG_MSG;
-	parseControlFile (sTemp, &pkgDefault);
-}
 void initVoltage()
 {
 	extern void set_voltmaxvolume();

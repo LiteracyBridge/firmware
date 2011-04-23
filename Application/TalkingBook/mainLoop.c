@@ -1588,11 +1588,8 @@ void loadPackage(int pkgType, const char * pkgName) {
 		context.package = &pkgSystem;
 		pkg = context.package;
 	} else if (pkgType == PKG_MSG) { 
-		context.package = &pkgDefault;
-		pkg = context.package;
-		//overwrite last filename with new one -- strlen(template's filename) > strlen(standard getPkgNumber())
-		strcpy(pkg->strHeapStack+pkg->files[0].idxFilename,pkgName);
-		pkg->idxName = pkg->files[0].idxFilename;
+		pkg = context.package = &pkgUser;
+		loadDefaultUserPackage(pkgName);
 	}
 	else {
 		//SET PKG, DIR, AND OPEN FILE

@@ -2,12 +2,13 @@
 // CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
 // Contact: info@literacybridge.org
 #include "Include/talkingbook.h"
+#include "Include/parsing.h"
 #include "Include/containers.h"
 #include <ctype.h>
 
 static const int REWIND[] = {0,500,1000,1500,2000,3000,5000,10000};
 APP_IRAM Context context;
-APP_IRAM CtnrPackage pkgSystem, pkgUser, pkgDefault;
+APP_IRAM CtnrPackage pkgSystem, pkgUser;
 
 typedef struct StackFrame StackFrame;
 struct StackFrame {
@@ -253,8 +254,8 @@ CtnrPackage* getPackageFromFile (CtnrFile *file) {
 	
 	if (file >= pkgSystem.files && file < (pkgSystem.files + pkgSystem.countFiles))
 		ret = &pkgSystem;
-	else if (file >= pkgDefault.files && file < (pkgDefault.files + pkgDefault.countFiles))
-		ret = &pkgDefault;
+//	else if (file >= pkgDefault.files && file < (pkgDefault.files + pkgDefault.countFiles))
+//		ret = &pkgDefault;
 	else if (file >= pkgUser.files && file < (pkgUser.files + pkgUser.countFiles))
 		ret = &pkgUser;
 	else if (file == &context.package->tempFile)
@@ -587,4 +588,51 @@ void resetPackage(CtnrPackage *pkg) {
 //	ListItem lists[MAX_LISTS];
 //	char strHeapStack[PKG_HEAP_SIZE+PKG_STACK_SIZE];
 	
+}
+
+
+void loadDefaultUserPackage(const char *strPkgName) {
+	char sTemp[PATH_LENGTH];
+	
+	memset(&pkgUser,0,sizeof(CtnrPackage));
+	pkgUser.pkg_type = PKG_MSG;
+	
+	strcpy(pkgUser.strHeapStack,strPkgName);
+	pkgUser.idxStrHeap = strlen(strPkgName);  // probably not necessary since only used in parse
+	pkgUser.idxName = 0; // package name found at top of heap
+	pkgUser.files[0].idxFilename = 0;  // filename also found at top of heap
+
+	if (USER_CONTROL_TEMPLATE) {
+		// load in configurable control template
+		strcpy(sTemp,SYSTEM_PATH);
+		strcat(sTemp,USER_CONTROL_TEMPLATE);
+		// TODO: load in binary version if exists
+		strcat(sTemp,".txt"); //todo: move to config file	
+		parseControlFile (sTemp, &pkgUser);	
+		//TODO: save binary version
+	} else {
+		// create the basic default user package dynamically
+		pkgUser.timePrecision = getBitShift(DEFAULT_TIME_PRECISION);
+		pkgUser.idxLanguageCode = -1;
+
+		pkgUser.countFiles = 1;
+		pkgUser.files[0].idxFirstBlockStart = 0;
+		pkgUser.files[0].idxFirstBlockEnd = -1;
+		pkgUser.files[0].idxFirstBlockInFile = 0;
+		pkgUser.files[1].idxFilename = -1;			
+
+		pkgUser.countBlocks = 1;
+		pkgUser.blocks[0].startTime = 0;
+		pkgUser.blocks[0].endTime = -1;
+		pkgUser.blocks[0].idxNextStart = MASK_IDX_NEXT_START;
+		pkgUser.blocks[0].idxNextEnd = -1;
+		pkgUser.blocks[0].idxFirstAction = -1; 
+		setNextStartBlock(0,-1);
+
+		pkgUser.countPackageActions = 1;
+		setActionCode(&pkgUser.actions[0], JUMP_BLOCK);
+		setEventCodes(&pkgUser.actions[0], START, FALSE);
+		pkgUser.actions[0].destination = 0;
+		setEndOfActions(&pkgUser.actions[1],TRUE);
+	}
 }
