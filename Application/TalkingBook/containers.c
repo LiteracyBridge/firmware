@@ -632,7 +632,7 @@ void loadDefaultUserPackage(const char *strPkgName) {
 		setActionCode(&pkgUser.actions[0], JUMP_BLOCK);
 		setEventCodes(&pkgUser.actions[0], START, FALSE);
 		pkgUser.actions[0].destination = 0;
-		setEndOfActions(&pkgUser.actions[1],TRUE);
+		setEndOfActions(&pkgUser.actions[0],TRUE);
 	}
 	pkgUser.idxName = pkgUser.files[0].idxFilename;
 }
