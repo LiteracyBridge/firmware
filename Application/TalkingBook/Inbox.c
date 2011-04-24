@@ -371,7 +371,7 @@ updateCategory(char *category, char *fnbase, char prefix) {
 	int ret;
 	
 // be sure category is in master-list.txt
-	cpyListPath(path);
+	cpyListPath(path,LIST_MASTER);
 	strcpy(buffer,path);
 	strcat(buffer,(char *)LIST_MASTER);
 	strcat(buffer,(char *)".txt");
@@ -385,7 +385,7 @@ updateCategory(char *category, char *fnbase, char prefix) {
 // delete new file name or dir name from {category}.txt, 
 // then add it (only want it to appear once)	
 //   int findDeleteStringFromFile(char *path, char *filename, char* string, BOOL shouldDelete)
-	cpyListPath(path);
+	cpyListPath(path,category);
 	strcpy(buffer, path);
 	strcat(buffer, category);
 	strcat(buffer,".txt");

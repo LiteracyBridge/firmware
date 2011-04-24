@@ -64,6 +64,7 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 #define TRANSLATE_FILENAME_BIN      "translate.bin"
 #define APP_DATA_FILENAME		"data.bin"
 #define SYS_PKG_CHAR		'%'
+#define SYS_MSG_CHAR		'$'
 #define APP_PKG_CHAR		'^'
 #define CATEGORY_DELIM		'#'
 #define CATEGORY_DELIM_STR	"#"

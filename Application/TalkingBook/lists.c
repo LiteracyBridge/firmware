@@ -20,8 +20,11 @@ static void catLangDir(char * strOut) {
 	strcat(strOut,"/");	
 }
 
-void cpyListPath(char * strOut) {
-	strcpy(strOut,LISTS_PATH);
+void cpyListPath(char *strOut, char *strListName) {
+	if (*strListName == SYS_MSG_CHAR)
+		strcpy(strOut,LANGUAGES_PATH);
+	else
+		strcpy(strOut,LISTS_PATH);
 	catLangDir(strOut);	
 }
 
@@ -36,11 +39,6 @@ static int openList(ListItem *list, char *outFilename) {
 	char filepath[PATH_LENGTH];
 	
 	stop();
-	cpyListPath(filepath);
-	ret = tbChdir((LPSTR)filepath);
-	if (ret == -1) {
-		logException(5,filepath,RESET); //todo: package name or path does not exist
-	}
 	if (list->filename[0])
 		strcpy(filename,list->filename);
 	else {
@@ -48,6 +46,11 @@ static int openList(ListItem *list, char *outFilename) {
 		list->posListWithFilename = context.package->lists[list->idxListWithFilename].currentFilePosition; 
 	}
 	strcat(filename,".txt"); //todo: move to config file
+	cpyListPath(filepath,filename);
+	ret = tbChdir((LPSTR)filepath);
+	if (ret == -1) {
+		logException(5,filepath,RESET); //todo: package name or path does not exist
+	}
 	if (outFilename)
 		strcpy(outFilename,filename);
 	ret = tbOpen((LPSTR)(filename),O_RDONLY);
@@ -314,7 +317,7 @@ int insertIntoList(ListItem *list, long posInsert, char * string) {
 		refuse_lowvoltage(0);
 		return -1;
 	}
-	cpyListPath(rFilepath);
+	cpyListPath(rFilepath,list->filename);
 	strcpy(wFilepath,rFilepath);
 	strcat(wFilepath,"temp.txt");  
 	rHandle = openList(list,rFilepath+strlen(rFilepath));

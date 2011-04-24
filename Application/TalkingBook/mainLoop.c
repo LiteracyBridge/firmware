@@ -1244,19 +1244,24 @@ static void takeAction (Action *action, EnumAction actionCode) {
 				} else {
 					if (list->listType == LIST_OF_PACKAGES) {
 						// load package
-						switch (filename[0]) {
-							case SYS_PKG_CHAR:
-								context.queuedPackageType = PKG_SYS;
-								destination = replaceStack(filename+1,&pkgSystem);
-								break;
-							case APP_PKG_CHAR:
-								context.queuedPackageType = PKG_APP;
-								destination = replaceStack(filename+1,&pkgSystem);
-								break;
-							default:
-								context.queuedPackageType = PKG_MSG;
-								destination = replaceStack(filename,&pkgSystem);
-								break;
+						if (context.package->lists[list->idxListWithFilename].currentString[0] == SYS_MSG_CHAR) {
+							context.queuedPackageType = SYS_MSG;
+							destination = replaceStack(filename,&pkgSystem);
+						} else {
+							switch (filename[0]) {
+								case SYS_PKG_CHAR:
+									context.queuedPackageType = PKG_SYS;
+									destination = replaceStack(filename+1,&pkgSystem);
+									break;
+								case APP_PKG_CHAR:
+									context.queuedPackageType = PKG_APP;
+									destination = replaceStack(filename+1,&pkgSystem);
+									break;
+								default:
+									context.queuedPackageType = PKG_MSG;
+									destination = replaceStack(filename,&pkgSystem);
+									break;
+							}
 						}
 						context.queuedPackageNameIndex = destination;
 					} else { // list->listType != LIST_OF_PACKAGES
@@ -1321,7 +1326,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			tempList = &context.package->lists[destination];
 			getListFilename(filename,destination,TRUE);
 			cursor = getCurrentList(tempList);		
-			cpyListPath(filepath);	
+			cpyListPath(filepath,filename);	
 			ret = findDeleteStringFromFile(filepath,filename,cursor,TRUE);
 			tempList->currentFilePosition = -1; // forces next list action to reload
 			if (ret != -1)
@@ -1719,8 +1724,16 @@ void loadPackage(int pkgType, const char * pkgName) {
 	} else if (pkgType == PKG_MSG) { 
 		pkg = context.package = &pkgUser;
 		loadDefaultUserPackage(pkgName);
-	}
-	else {
+	} else if (pkgType == SYS_MSG) {		
+		pkg = context.package = &pkgUser;
+		loadDefaultUserPackage(pkgName);
+		//loadDefault assumes filename and package name should be the same, but here we want pkg name to be system/language name 
+		pkgUser.pkg_type = pkgType;
+		temp = pkgSystem.strHeapStack+pkgSystem.idxName;
+		pkgUser.idxName = pkgUser.idxStrHeap;
+		strcpy(pkgUser.strHeapStack+pkgUser.idxName,temp);
+		pkgUser.idxStrHeap += strlen(temp);  
+	} else {
 		//SET PKG, DIR, AND OPEN FILE
 		switch (pkgType) {
 			case PKG_SYS:

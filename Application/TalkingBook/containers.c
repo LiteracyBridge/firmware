@@ -611,7 +611,7 @@ void loadDefaultUserPackage(const char *strPkgName) {
 		pkgUser.timePrecision = getBitShift(DEFAULT_TIME_PRECISION);
 		pkgUser.idxLanguageCode = -1;
 		strcpy(pkgUser.strHeapStack,strPkgName);
-		pkgUser.idxStrHeap = strlen(strPkgName);  // probably not necessary since only used in parse
+		pkgUser.idxStrHeap = strlen(strPkgName) + 1;  // necessary since loadPackage() adds more to this heap for SYS_MSG packages
 
 		pkgUser.countFiles = 1;
 		pkgUser.files[0].idxFilename = 0;  // filename found at top of heap

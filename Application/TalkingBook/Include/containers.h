@@ -11,6 +11,7 @@
 #define PKG_APP			2
 #define PKG_MSG			3
 #define PKG_VARIABLE	4
+#define SYS_MSG			5
 
 #define APP_CUSTOM		0
 #define APP_QUIZ_PLAY   1

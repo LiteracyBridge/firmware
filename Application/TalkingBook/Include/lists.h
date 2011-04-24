@@ -34,7 +34,7 @@ struct ListItem {
     EnumListType listType;
 };
 
-extern void cpyListPath(char *);
+extern void cpyListPath(char *, char *);
 extern void cpyTopicPath(char *);
 extern char *getCurrentList(ListItem *);
 extern char *getNextList(ListItem *, BOOL);
