@@ -1263,6 +1263,10 @@ static void takeAction (Action *action, EnumAction actionCode) {
 						// play sound of subject
 						newFile = getListFileLong(filename);
 						newTime = 0;
+						// reset any lists that depend on the position of this List_of lists, which has just moved
+						for (i=0; i < MAX_LISTS; i++) 
+							if (i != destination && context.package->lists[i].idxListWithFilename == destination)
+								context.package->lists[i].currentFilePosition = -1;
 						reposition = TRUE;
 					}
 				}
