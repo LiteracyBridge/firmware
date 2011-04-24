@@ -412,7 +412,9 @@ static int recordAudio(char *pkgName, char *cursor) {
 	LBstrncat(temp," -> ",60);
 	LBstrncat(temp,cursor,60);	
 	logString(temp,BUFFER);
-	insertSound(&pkgSystem.files[SPEAK_SOUND_FILE_IDX],NULL,TRUE);
+	if (strcmp(cursor,TRANSLATE_TEMP_DIR) != 0) {
+		insertSound(&pkgSystem.files[SPEAK_SOUND_FILE_IDX],NULL,TRUE);
+	}
 	stop();
 	start = getRTCinSeconds();
 	prev = end = start;
