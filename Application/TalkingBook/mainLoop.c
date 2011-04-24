@@ -641,7 +641,7 @@ void mainLoop (void) {
 				if (insertBlock)
 					insertSound(getFileFromBlock(insertBlock),insertBlock,FALSE);
 			}
-			if (context.package->pkg_type == PKG_MSG) {
+			if (context.package->pkg_type == PKG_MSG || context.package->pkg_type == SYS_MSG ) {
 				insertSound(&pkgSystem.files[POST_PLAY_FILE_IDX],NULL,FALSE); 					
 			}	
 		}
@@ -1493,7 +1493,10 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			if (ret != -1) {
 				destination = replaceStack(filename,context.package);
 				context.queuedPackageNameIndex = destination;
-				context.queuedPackageType = PKG_MSG;
+				if (*cursor == SYS_MSG_CHAR) 
+					context.queuedPackageType = SYS_MSG;
+				else
+					context.queuedPackageType = PKG_MSG;
 			} else
 				logException(28,"recording failed",RESET); //todo: add voice error msg?
 			break;	

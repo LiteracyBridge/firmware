@@ -12,10 +12,9 @@
 extern APP_IRAM unsigned int vCur_1;
 extern void refuse_lowvoltage(int);
 
-static void catLangDir(char *); 
 static int openList(ListItem *, char *);
 
-static void catLangDir(char * strOut) {
+void catLangDir(char * strOut) {
 	strcat(strOut,pkgSystem.strHeapStack + pkgSystem.idxName);
 	strcat(strOut,"/");	
 }
@@ -317,7 +316,7 @@ int insertIntoList(ListItem *list, long posInsert, char * string) {
 		refuse_lowvoltage(0);
 		return -1;
 	}
-	cpyListPath(rFilepath,list->filename);
+	cpyListPath(rFilepath,context.package->lists[list->idxListWithFilename].currentString);
 	strcpy(wFilepath,rFilepath);
 	strcat(wFilepath,"temp.txt");  
 	rHandle = openList(list,rFilepath+strlen(rFilepath));

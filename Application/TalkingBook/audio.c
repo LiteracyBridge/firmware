@@ -8,6 +8,7 @@
 #include "Include/pkg_ops.h"
 #include "Include/device.h"
 #include "Include/containers.h"
+#include "Include/files.h"
 #include "Include/audio.h"
 #include "Include/metadata.h"
 #include "Include/filestats.h"
@@ -395,8 +396,12 @@ static int recordAudio(char *pkgName, char *cursor) {
 		strcat(filepath,"/");
 		strcat(filepath,pkgName);
 		strcat(filepath,AUDIO_FILE_EXT);
-	} 
-	else {
+	} else if (*cursor == SYS_MSG_CHAR) {
+		strcpy(filepath,LANGUAGES_PATH);
+		catLangDir(filepath);	
+		strcat(filepath,pkgName);
+		strcat(filepath,AUDIO_FILE_EXT);		
+	} else {
 		strcpy(filepath,USER_PATH);
 		strcat(filepath,pkgName);
 		strcat(filepath,AUDIO_FILE_EXT);
