@@ -46,7 +46,7 @@ APP_IRAM int DEFAULT_REWIND;
 APP_IRAM int INSERT_SOUND_REWIND_MS;
 APP_IRAM int HYPERLINK_SOUND_FILE_IDX, DELETED_FILE_IDX, PRE_COPY_FILE_IDX, POST_COPY_FILE_IDX, SPEAK_SOUND_FILE_IDX, 
     INACTIVITY_SOUND_FILE_IDX, ERROR_SOUND_FILE_IDX, EMPTY_LIST_FILE_IDX, REC_PAUSED_FILE_IDX, POST_REC_FILE_IDX, POST_TRANSLATE_FILE_IDX,NO_TRANSLATION_FILE_IDX,
-    NOT_YET_TRANSLATED_FILE_IDX,PLS_RECORD_TRANSLATION_FILE_IDX,NEW_RECORDING_FILE_IDX,ORIG_RECORDING_FILE_IDX,
+    NOT_YET_TRANSLATED_FILE_IDX,PLS_RECORD_TRANSLATION_FILE_IDX,NEW_RECORDING_FILE_IDX,ORIG_RECORDING_FILE_IDX,PLS_WAIT_FILE_IDX,OVERWRITE_WARNING_FILE_IDX,
     POST_PLAY_FILE_IDX;
 APP_IRAM int BLOCK_START_LEADER, BLOCK_END_LEADER;
 APP_IRAM long BIT_RATE;
@@ -125,7 +125,7 @@ void startUp(unsigned int bootType) {
 	char strCounts[32];
 	char filename[FILE_LENGTH];
 	char filepath[PATH_LENGTH];
-	int key, handle, temp;
+	int key, handle, temp, i;
 	
 	SetSystemClockRate(MAX_CLOCK_SPEED); // to speed up initial startup -- set CLOCK_RATE later
 
@@ -241,6 +241,13 @@ void startUp(unsigned int bootType) {
 	if (handle != -1 && dirExists( (LPSTR) filepath) ) {
 		temp = read(handle, (unsigned long)&context.transList<<1, sizeof(TranslationList)<<1);
 		close(handle);
+	}
+	else {
+		for(i=0;i<=MAX_TRANSLATE_FILE;i++)
+			context.transList.translatedFileMarker[i]='0';
+		context.transList.currFileIdx = -1;
+		context.transList.mode = '0';
+		context.transList.updateOnly = '0';
 	}
 	//Always start with not translated list
 	context.transList.mode = '0';
@@ -397,8 +404,10 @@ int loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"POST_REC_FILE_IDX")) POST_REC_FILE_IDX=strToInt(value);
 				else if (!strcmp(name,(char *)"NO_TRANSLATION_FILE_IDX")) NO_TRANSLATION_FILE_IDX=strToInt(value);
 				else if (!strcmp(name,(char *)"POST_TRANSLATE_FILE_IDX")) POST_TRANSLATE_FILE_IDX=strToInt(value);
+				else if (!strcmp(name,(char *)"OVERWRITE_WARNING_FILE_IDX")) OVERWRITE_WARNING_FILE_IDX=strToInt(value);				
 				else if (!strcmp(name,(char *)"NOT_YET_TRANSLATED_FILE_IDX")) NOT_YET_TRANSLATED_FILE_IDX=strToInt(value);
 				else if (!strcmp(name,(char *)"PLS_RECORD_TRANSLATION_FILE_IDX")) PLS_RECORD_TRANSLATION_FILE_IDX=strToInt(value);
+				else if (!strcmp(name,(char *)"PLS_WAIT_FILE_IDX")) PLS_WAIT_FILE_IDX=strToInt(value);
 				else if (!strcmp(name,(char *)"NEW_RECORDING_FILE_IDX")) NEW_RECORDING_FILE_IDX=strToInt(value);
 				else if (!strcmp(name,(char *)"ORIG_RECORDING_FILE_IDX")) ORIG_RECORDING_FILE_IDX=strToInt(value);
 				else if (!strcmp(name,(char *)"INACTIVITY_SOUND_FILE_IDX")) INACTIVITY_SOUND_FILE_IDX=strToInt(value);

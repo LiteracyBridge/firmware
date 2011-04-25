@@ -675,6 +675,7 @@ static void wrapTranslation() {
 	unsigned int len2;
 	int ret;
 
+	insertSound(&pkgSystem.files[PLS_WAIT_FILE_IDX],NULL,TRUE);
 	//Wrapping up a complete translation
 	//Number of files to translate is pkgSystem.countFiles - 1;
 	maxFileIdx = pkgSystem.countFiles - 2;
@@ -694,6 +695,7 @@ static void wrapTranslation() {
 			longToDecimalString(i,tempPath+len,2);
 			i++;
 		} while( dirExists((LPSTR)tempPath) );
+		i--;
 		
 		//Rename directory from temp name to serial-number based
 		strcpy(filepath,LANGUAGES_PATH);
@@ -705,6 +707,20 @@ static void wrapTranslation() {
 		strcpy(filepath,LANGUAGES_PATH);
 		strcat(filepath,pkgSystem.strHeapStack + pkgSystem.idxName);
 		strcat(filepath,"/");
+		dirCopy(filepath,tempPath,0);
+		
+		//Copy over messages/lists
+		strcpy(filepath,LISTS_PATH);
+		strcat(filepath,pkgSystem.strHeapStack + pkgSystem.idxName);
+		strcat(filepath,"/");
+		
+		strcpy(tempPath,LISTS_PATH);
+		strcat(tempPath,"translation_");
+		strcat(tempPath,getDeviceSN(0));
+		strcat(tempPath,"_");
+		len = strlen(tempPath);
+		longToDecimalString(i,tempPath+len,2);	
+		
 		dirCopy(filepath,tempPath,0);
 		
 		//Append string to system names file
@@ -911,7 +927,9 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			else {
 				//A user can finish a translation without completing all files
 				//All translated: jump to block delete or finish
-				//Jump to destination block after deleting 
+				//Jump to destination block after deleting
+				if(transList->updateOnly == '1')
+					insertSound(&pkgSystem.files[OVERWRITE_WARNING_FILE_IDX],NULL,TRUE);
 				newBlock = &context.package->blocks[aux];
 				newTime = newBlock->startTime;
 				reposition = TRUE;
