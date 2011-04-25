@@ -124,7 +124,7 @@ void startUp(unsigned int bootType) {
 	char buffer[200];
 	char strCounts[32];
 	char filename[FILE_LENGTH];
-	char filepath [PATH_LENGTH];
+	char filepath[PATH_LENGTH];
 	int key, handle, temp;
 	
 	SetSystemClockRate(MAX_CLOCK_SPEED); // to speed up initial startup -- set CLOCK_RATE later
@@ -234,7 +234,7 @@ void startUp(unsigned int bootType) {
 	strcpy(filepath,LANGUAGES_PATH);
 	temp=strlen(filepath);
 	strcat(filepath,TRANSLATE_FILENAME_BIN);
-	handle = tbOpen((LPSTR)(filepath),O_CREAT|O_RDWR);
+	handle = tbOpen((LPSTR)(filepath),O_RDONLY);
 	//Also check that translate temp directory exists before re-loading
 	filepath[temp]=0;
 	strcat(filepath,TRANSLATE_TEMP_DIR);

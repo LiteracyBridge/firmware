@@ -5,7 +5,7 @@
 #define	__LISTS_h__
 
 #define LIST_ITEM_LENGTH	40
-#define MAX_TRANSLATE_FILE  60
+#define MAX_TRANSLATE_FILE  100
 #define TRANSLATE_TEMP_DIR  "translate_temp"
 typedef struct ListItem ListItem;
 typedef struct TranslationList TranslationList;

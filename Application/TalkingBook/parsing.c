@@ -1062,13 +1062,6 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 										longToDecimalString((long)pkg->countFiles,tempBuffer+strlen(tempBuffer),3);
 										logException(2,tempBuffer,(context.package == &pkgSystem)?USB_MODE:RESET); // todo: too many files, blocks, or lists
 									}
-									//Register file as not translated (modify later to see if binary file from previous exists)
-									//Assume first file is always bell???
-									if(context.package == &pkgSystem && pkg->countFiles <= MAX_TRANSLATE_FILE && pkg->countFiles > 1) {
-									//if(context.package == &pkgSystem && pkg->countFiles > 1) {
-										//Since skipping 1st file (assume bell), 0th index in file marker array maps to 2nd file
-										context.transList.translatedFileMarker[pkg->countFiles-2]='0';
-									}
 								}
 								else
 									logException(4,0,(context.package == &pkgSystem)?USB_MODE:RESET); //todo: text heap is full
