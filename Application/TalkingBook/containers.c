@@ -424,9 +424,9 @@ BOOL isEventInAction(Action *action, EnumEvent checkEvent, BOOL whenPaused) {
 	
 	eventAction = action->eventAction;
 	eventCode = eventAction & 0x00FF; 
-	ret = ((eventCode & 0x0F) == checkEvent);
+	ret = ((eventCode & 0x1F) == checkEvent);
 	if (ret && !whenPaused) // device is playing or stopped (not paused)
-		ret = !(eventCode & 0x10); // event does not apply if set only for paused state
+		ret = !(eventCode & 0x20); // event does not apply if set only for paused state
 	return ret;
 }
 
@@ -447,10 +447,10 @@ void setActionCode(Action *action, EnumAction actionCode) {
 	action->eventAction = eventActionCode;	
 }
 
-void setEventCodes(Action *action, EnumEvent eventCode, BOOL whenPaused) {
+void setEventCodes(Action *action, EnumEvent eventCode, BOOL whenPaused, BOOL whenHeld) {
 	int eventActionCode = action->eventAction;
 	eventActionCode = eventActionCode & 0xFF00;
-	eventActionCode = eventActionCode | eventCode | (whenPaused << 4);
+	eventActionCode = eventActionCode | eventCode | (whenHeld << 4) | (whenPaused << 5);
 	action->eventAction = eventActionCode;	
 }
 
@@ -630,7 +630,7 @@ void loadDefaultUserPackage(const char *strPkgName) {
 
 		pkgUser.countPackageActions = 1;
 		setActionCode(&pkgUser.actions[0], JUMP_BLOCK);
-		setEventCodes(&pkgUser.actions[0], START, FALSE);
+		setEventCodes(&pkgUser.actions[0], START, FALSE, FALSE);
 		pkgUser.actions[0].destination = 0;
 		setEndOfActions(&pkgUser.actions[0],TRUE);
 	}

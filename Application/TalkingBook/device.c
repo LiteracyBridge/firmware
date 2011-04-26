@@ -280,11 +280,12 @@ int keyCheck(int longCheck) {
 			return curkey;
 		} else if (keydown_counter > KEY_LONG_DOWN_THRESH) {
 			*P_TimeBaseB_Ctrl = 0;    // stop timer
-			curkey = keydown;
+			curkey = keydown | LONG_KEY_STROKE;
 			keydown = 0;
 //			logKeystroke(curkey | 0xc000);
 //			logRTC();
-			return (curkey | LONG_KEY_STROKE);  // return long key stroke
+			logKeystroke(curkey);
+			return (curkey);  // return long key stroke
 		}
 	}
 	// loop allows time for service loop to stabilize on keys
@@ -302,6 +303,7 @@ int keyCheck(int longCheck) {
 //		adminOptions();  //might also want to move this to control tracks
 	if (MACRO_FILE) {
 		keystroke = nextMacroKey(keystroke);
+		logKeystroke(keystroke);
 		return(keystroke);
 	}
 	
@@ -317,17 +319,19 @@ int keyCheck(int longCheck) {
 		__asm__("irq on");
 		__asm__("fiq on");
 		
-		logKeystroke(keystroke);
 //		logRTC();
 		keydown = keystroke;
 	}
 	if(longCheck && keydown) {
-		while((curkey = GetCurKey()) == keydown) 
+		while(((curkey = GetCurKey()) == keydown) && (keydown_counter <= KEY_LONG_DOWN_THRESH)) 
 			;
-			curkey = keydown;
-			keydown = 0;
-			return(curkey);
-		}
+		curkey = keydown;
+		if (keydown_counter > KEY_LONG_DOWN_THRESH)
+			curkey |= LONG_KEY_STROKE;
+		keydown = 0;
+		logKeystroke(curkey);
+		return(curkey);
+	}
 	return (0);
 //	return keystroke;
 }

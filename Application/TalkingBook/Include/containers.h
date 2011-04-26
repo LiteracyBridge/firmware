@@ -38,8 +38,11 @@ typedef struct Context Context;
 
 
 //WARNING: if the order of these enumerations change, there must also be a change to getEventEnumFromChar and getActionEnumFromChar (char *c)
+#define HELD_KEY		0x10
 enum EnumEvent {
-	LEFT, RIGHT, UP, DOWN, SELECT, HOME, PLAY, STAR, PLUS, MINUS, BUTTON_MARKER, START, END
+	START, END, BUTTON_MARKER, 
+	LEFT, RIGHT, UP, DOWN, SELECT, HOME, PLAY, STAR, PLUS, MINUS, 
+	LEFT_HOLD = HELD_KEY, RIGHT_HOLD, UP_HOLD, DOWN_HOLD, SELECT_HOLD, HOME_HOLD, PLAY_HOLD, STAR_HOLD, PLUS_HOLD, MINUS_HOLD
 };
 /*enum EnumAction {NOP = 0, STOP, PAUSE, JUMP_BLOCK, RETURN, INSERT_SOUND, START_END_MARKER,			
 				PLAY_PAUSE, COPY, RECORD_TITLE, RECORD_MSG, PACKAGE_RECORDING, RECORD_TRANSLATION, TRIM,
@@ -51,7 +54,7 @@ enum EnumEvent {
 enum EnumAction {NOP = 0, STOP, PAUSE, JUMP_BLOCK, RETURN, INSERT_SOUND, START_END_MARKER,			
 				PLAY_PAUSE, COPY, RECORD_TITLE, RECORD_MSG, PACKAGE_RECORDING, RECORD_TRANSLATION, TRIM,
 				FWD, BACK, JUMP_TIME, CALL_BLOCK, JUMP_PACKAGE, JUMP_LIST, TRANSLATED_LIST, NOT_TRANSLATED_LIST, TRANSLATE_DELETE_FINISH, TRANSLATE_NEW, TRANSLATE_OVERWRITE,DELETE, DELETE_TRANSLATION, WRAP_TRANSLATION,
-                ENTER_EXIT_MARKER, VOLUME_UP, VOLUME_DOWN, VOLUME_NORMAL, SPEED_UP, SPEED_DOWN, SPEED_NORMAL,  
+                ENTER_EXIT_MARKER, VOLUME_UP, VOLUME_DOWN, VOLUME_NORMAL, SPEED_UP, SPEED_DOWN, SPEED_NORMAL, SPEED_MAX,  
 				USB_MARKER, USB_DEVICE_ON, USB_HOST_ON, USB_DEVICE_OFF, USB_HOST_OFF,  
                 LED_MARKER, LED_RED_ON, LED_GREEN_ON, LED_ALL_ON, LED_RED_OFF, LED_GREEN_OFF, LED_ALL_OFF,
                 HALT, SLEEP, TEST_PCB, EOL_MARKER}; //end-of-list marker
@@ -140,8 +143,9 @@ struct Action {
 
 // BIT MAP of eventAction
 // bits 0-3: event id #1
-// bit 4: pause state (1== applies only when paused; 0 == any time, unless superceded by event specifed for when paused)
-// bits 5-7: unused
+// bit 4: long-hold keypresses
+// bit 5: pause state (1== applies only when paused; 0 == any time, unless superceded by event specifed for when paused)
+// bits 6-7: unused
 // bits 8-13: action code
 // bit 14: indicates need to insert sound by playing block number in bits 0-10 of aux before executing action code
 // bit 15: indicates last event/action for container (e.g. block/pkg)
@@ -189,6 +193,7 @@ struct Context {
 	int keystroke; // to store keystroke during insertSound and later process in mainLoop
 	BOOL isPaused;
 	BOOL isStopped;
+	BOOL isScanning;
 	BOOL isHyperlinked; //1=hyperlink is currently active
 	BOOL USB;
 	int queuedPackageType;
@@ -233,7 +238,7 @@ extern BOOL hasSoundInsert(Action *);
 extern BOOL isEventInAction(Action *, EnumEvent, BOOL);
 extern EnumAction getActionCode(Action *);
 extern void setActionCode(Action *, EnumAction);
-extern void setEventCodes(Action *, EnumEvent, BOOL);
+extern void setEventCodes(Action *, EnumEvent, BOOL, BOOL);
 extern void setEndOfActions(Action *, BOOL);
 extern Action *getBlockActions(CtnrBlock *);
 extern Action *getListActions(ListItem *);

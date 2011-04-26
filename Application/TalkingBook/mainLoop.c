@@ -252,7 +252,7 @@ static Action *getMatchingAction (EnumEvent eventType) {
 	iAction = NULL;
 	
     // FIND ACTION FOR EVENT
-	if (eventType < BUTTON_MARKER) {  // marker separates button events from following start/event event codes
+	if (eventType > BUTTON_MARKER) {  // marker separates button events from following start/event event codes
 		arrayIndex = context.idxTimeframe;  // relies on main loop and TakeAction() keeping this updated
 		//search through all currently active block containers to get actions
 		if (arrayIndex != -1) { // check that at least one block is active  
@@ -317,9 +317,12 @@ static void processButtonEvent(int eventType) {
 	if (context.returnPackage) {
 		if (action) {
 			actionCode = getActionCode(action);
+			//TODO: There has got to be a better way to handle the code below--very prone to errors
+			//      I've forgotten why context.returnPackage isn't always restored when it exists, instead of only for
+			// 		certain actions.
 			if (actionCode == VOLUME_UP || actionCode == VOLUME_DOWN || actionCode == VOLUME_NORMAL
 				|| actionCode == SPEED_UP || actionCode == SPEED_DOWN || actionCode == SPEED_NORMAL
-				|| actionCode == JUMP_TIME || actionCode == PLAY_PAUSE || actionCode == PAUSE)
+				|| actionCode == SPEED_MAX || actionCode == JUMP_TIME || actionCode == PLAY_PAUSE || actionCode == PAUSE)
 					context.package = context.returnPackage; // reset what might have been set in getMatchingAction
 		}
 		context.returnPackage = NULL;
@@ -416,75 +419,39 @@ static void endOfTimeframe(int idxTimeframe, BOOL isPlayerStopped) {
 static void keyResponse(void) {
 	// respond to key events
 	int keystroke;
-	char dbgmsg[32];
+	int longKeystroke;
+	char str[40];
 	
 	if (context.keystroke) {
 		keystroke = context.keystroke;
 		context.keystroke = 0;
 	} else
 		keystroke = keyCheck(0);
-	
+	longKeystroke = (keystroke & LONG_KEY_STROKE)?HELD_KEY:0;
+	keystroke &= ~LONG_KEY_STROKE;
 	if (keystroke)
 		checkInactivity(TRUE);
-	
-	if (keystroke & LONG_KEY_STROKE) {  // long keypress
-		
-		keystroke &= ~LONG_KEY_STROKE;
-		
-		if (keystroke == KEY_PLAY) {
-			strcpy(dbgmsg, "Long KEY_PLAY");
-			logString(dbgmsg,ASAP);
-		} else if (keystroke == KEY_LEFT) {
-			strcpy(dbgmsg, "Long KEY_LEFT");
-			logString(dbgmsg,ASAP);
-		} else if (keystroke == KEY_RIGHT) {
-			strcpy(dbgmsg, "Long KEY_RIGHT");
-			logString(dbgmsg,ASAP);
-		} else if (keystroke == KEY_UP) {
-			strcpy(dbgmsg, "Long KEY_UP");
-			logString(dbgmsg,ASAP);
-		} else if (keystroke == KEY_DOWN) {
-			strcpy(dbgmsg, "Long KEY_DOWN");
-			logString(dbgmsg,ASAP);
-		} else if (keystroke == KEY_SELECT) {
-			strcpy(dbgmsg,"Long KEY_SELECT");
-			logString(dbgmsg,ASAP);
-		} else if (keystroke == KEY_HOME) {
-			strcpy(dbgmsg,"Long KEY_HOME");
-			logString(dbgmsg,ASAP);
-		} else if (keystroke == KEY_STAR) {
-			strcpy(dbgmsg, "Long KEY_STAR");
-			logString(dbgmsg,ASAP);
-		} else if (keystroke == KEY_PLUS) {
-			strcpy(dbgmsg, "Long KEY_PLUS");
-			logString(dbgmsg,ASAP);
-		} else if (keystroke == KEY_MINUS) {
-			strcpy(dbgmsg, "Long KEY_MINUS");
-			logString(dbgmsg,ASAP);
-		}
-	} else {  // not a long keystroke
-		if (keystroke == KEY_PLAY) {	
-			processButtonEvent(PLAY);
-		} else if (keystroke == KEY_LEFT) {
-			// TODO:doesn't yet look at possibility of relative jump action within same context (expects a context change)
-			processButtonEvent(LEFT);
-		} else if(keystroke == KEY_RIGHT) {						
-			processButtonEvent(RIGHT);
-		} else if (keystroke == KEY_UP) {
-			processButtonEvent(UP);
-		} else if (keystroke == KEY_DOWN) {
-			processButtonEvent(DOWN);
-		} else if (keystroke == KEY_SELECT) {
-			processButtonEvent(SELECT);
-		} else if (keystroke == KEY_HOME) {
-			processButtonEvent(HOME);
-		} else if (keystroke == KEY_STAR) {		
-			processButtonEvent(STAR);	
-		} else if (keystroke == KEY_PLUS) {
-			processButtonEvent(PLUS);	
-		} else if (keystroke == KEY_MINUS) {
-			processButtonEvent(MINUS);	
-		}
+	if (keystroke == KEY_PLAY) {	
+		processButtonEvent(PLAY | longKeystroke);
+	} else if (keystroke == KEY_LEFT) {
+		// TODO:doesn't yet look at possibility of relative jump action within same context (expects a context change)
+		processButtonEvent(LEFT  | longKeystroke);
+	} else if(keystroke == KEY_RIGHT) {						
+		processButtonEvent(RIGHT | longKeystroke);
+	} else if (keystroke == KEY_UP) {
+		processButtonEvent(UP | longKeystroke);
+	} else if (keystroke == KEY_DOWN) {
+		processButtonEvent(DOWN | longKeystroke);
+	} else if (keystroke == KEY_SELECT) {
+		processButtonEvent(SELECT | longKeystroke);
+	} else if (keystroke == KEY_HOME) {
+		processButtonEvent(HOME | longKeystroke);
+	} else if (keystroke == KEY_STAR) {		
+		processButtonEvent(STAR | longKeystroke);	
+	} else if (keystroke == KEY_PLUS) {
+		processButtonEvent(PLUS | longKeystroke);	
+	} else if (keystroke == KEY_MINUS) {
+		processButtonEvent(MINUS | longKeystroke);	
 	}
 }
 
@@ -624,6 +591,10 @@ void mainLoop (void) {
 			if (GREEN_LED_WHEN_PLAYING) {
 				setLED(LED_GREEN,FALSE);
 				setLED(LED_RED,FALSE);				
+			}
+			if (context.isScanning) {
+				context.isScanning = FALSE;
+				adjustSpeed(SPEED_NORMAL,FALSE);	
 			}
 			if (context.idxActiveList == -1)		
 				endOfTimeframe(context.idxTimeframe, TRUE);
@@ -1247,6 +1218,21 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			adjustSpeed(NORMAL_SPEED,FALSE);
 			break;
 
+		case SPEED_MAX:
+			if (!context.isScanning) {
+				context.isScanning = TRUE;
+				adjustSpeed(MAX_SPEED,FALSE);
+			} else { // was already scanning, so must jump ahead
+				// TODO: For now I've, copied the first part of JUMP_TIME here
+				// 		 This is a simplified version that doesn't expect multiple files or block boundary events.
+				longOldTime = Snd_A1800_GetCurrentTime();
+				longNewTime = longOldTime + 60000;  // TODO: move to config
+				newTime = compressTime(longNewTime,context.package->timePrecision);
+				reposition = TRUE;
+			}
+			playActionSound(JUMP_TIME);
+			break;
+
 		case VOLUME_UP:
 			adjustVolume(VOLUME_INCREMENT,TRUE,FALSE);
 			break;
@@ -1322,6 +1308,10 @@ static void takeAction (Action *action, EnumAction actionCode) {
 					if (context.isPaused) {
 						context.isPaused = FALSE;
 						resume();	
+					} else if (context.isScanning) {
+						context.isScanning = FALSE;
+						playBip();
+						adjustSpeed(NORMAL_SPEED,FALSE);
 					} else {
 						context.isPaused = TRUE;
 						pause();
@@ -1514,6 +1504,12 @@ static void takeAction (Action *action, EnumAction actionCode) {
 	}
 		
 	if (reposition) {
+		// if was scanning at high speed, 
+		if (context.isScanning) {
+			context.isScanning = FALSE;
+			playBip();
+			adjustSpeed(NORMAL_SPEED,FALSE);
+		}	
 		//todo: am i catching every possible change in file?		
 		if (newBlock && !newFile) 
 			newFile = getFileFromBlock(newBlock);

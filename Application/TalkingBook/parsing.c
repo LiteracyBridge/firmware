@@ -60,7 +60,7 @@ static int getIndexFromLine(char *line, char *symbolMapStart) {
 
 static int getEventEnumFromChar (char *c) {
 	int ret = -1;
-	const char *EVENT_CODES = "<>^vohp*+-_!$";   // '_' is placeholder for BUTTON_MARKER
+	const char *EVENT_CODES = "!$`<>^vohp*+-";   // '`' is placeholder for BUTTON_MARKER
 	
 	ret = strIndex(EVENT_CODES,*c);
 	return ret;		
@@ -68,7 +68,7 @@ static int getEventEnumFromChar (char *c) {
 
 static int getActionEnumFromChar (char *c) {
 	int ret = -1;
-	const char *ACTION_CODES = "~.,[)I_PCEEEEMFBT(<LLLLLLDDWO_VVVSSS_UUUU_RGARGAHZX";  // '_' is placeholder for marker codes
+	const char *ACTION_CODES = "~.,[)I`PCEEEEMFBT(<LLLLLLDDW`VVVSSSS`UUUU`RGARGAHZX";  // '`' is placeholder for marker codes
 	// note that E is for rEcord since R should represent Red
 	// only first instance of action code is found, others are placeholders as dealt with below
 	
@@ -89,6 +89,8 @@ static int getActionEnumFromChar (char *c) {
 			ret += 1;
 		else if (*(c+1) == 'N') // N=normal (volume or speed)
 			ret += 2;
+		else if (*(c+1) == 'M') // M=max speed
+			ret += 3;
 	}
 	else if (ret == RECORD_TITLE) {
 		// == 't' keeps current ret
@@ -235,7 +237,7 @@ static BOOL parseCreateAction (char *line, Action *action, int *actionCount, cha
 	char *strEvents, *delimeter, *strAction, *cursor;
 	long l;
 	int eventCode, actionCode, index;
-	BOOL inLabel, whenPaused;
+	BOOL inLabel, whenPaused, whenHeld;
 		
 	(*actionCount)++;
 	strEvents = line + 1; // move past the 'A'
@@ -250,11 +252,12 @@ static BOOL parseCreateAction (char *line, Action *action, int *actionCount, cha
 	for (strEvents++;*strEvents && isspace(*strEvents);strEvents++);
 
 	// check for onlyWhenPaused marker
-	if (strEvents < delimeter)
-		whenPaused = (*strEvents == '|');
-	else
-		whenPaused = FALSE;
-	setEventCodes(action + *actionCount, eventCode, whenPaused);
+	if (strEvents < delimeter) {
+		whenPaused = (*strEvents == '|') ||  (*(strEvents+1) == '|') ;
+		whenHeld = (*strEvents == '_') ||  (*(strEvents+1) == '_');
+	} else 
+		whenPaused = whenHeld = FALSE;
+	setEventCodes(action + *actionCount, eventCode, whenPaused, whenHeld);
 
 	// skip whitespace
 	for (strEvents++;*strEvents && isspace(*strEvents);strEvents++);
