@@ -547,8 +547,9 @@ static int recordAudio(char *pkgName, char *cursor) {
 		playDing();
 	
 		if (strcmp(cursor,TRANSLATE_TEMP_DIR) != 0) {
-			insertSound(&pkgSystem.files[POST_REC_FILE_IDX],NULL,TRUE);
-			insertSound(file,NULL,TRUE);  // replay subject
+			insertSound(&pkgSystem.files[POST_REC_FILE_IDX],NULL,FALSE);
+			if (!context.keystroke)
+				insertSound(file,NULL,FALSE);  // replay subject
 		}
 
 		strcpy(temp,"TIME RECORDED (secs): ");
