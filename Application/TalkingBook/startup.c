@@ -230,27 +230,6 @@ void startUp(unsigned int bootType) {
 		logRTC();  
 	}
 //#endif
-	//Load translation list from bin
-	strcpy(filepath,LANGUAGES_PATH);
-	temp=strlen(filepath);
-	strcat(filepath,TRANSLATE_FILENAME_BIN);
-	handle = tbOpen((LPSTR)(filepath),O_RDONLY);
-	//Also check that translate temp directory exists before re-loading
-	filepath[temp]=0;
-	strcat(filepath,TRANSLATE_TEMP_DIR);
-	if (handle != -1 && dirExists( (LPSTR) filepath) ) {
-		temp = read(handle, (unsigned long)&context.transList<<1, sizeof(TranslationList)<<1);
-		close(handle);
-	}
-	else {
-		for(i=0;i<=MAX_TRANSLATE_FILE;i++)
-			context.transList.translatedFileMarker[i]='0';
-		context.transList.currFileIdx = -1;
-		context.transList.mode = '0';
-		context.transList.updateOnly = '0';
-	}
-	//Always start with not translated list
-	context.transList.mode = '0';
 	SetSystemClockRate(CLOCK_RATE); // either set in config file or the default 48 MHz set at beginning of startUp()
 
 	unlink ((LPSTR) (STAT_DIR SNCSV));

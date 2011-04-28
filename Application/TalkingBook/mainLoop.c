@@ -36,6 +36,7 @@ static EnumAction processEndBlock(int);
 static void endOfTimeframe(int, BOOL);
 static void keyResponse(void);
 int checkInactivity(BOOL);
+static void loadDraftTranslation(void);
 static void takeAction (Action *, EnumAction);
 static void finishTranslation(void);
 static void wrapTranslation(void);
@@ -799,6 +800,36 @@ static void jumpTransList (int listRotation, CtnrFile** p_newFile, unsigned int*
 		playBip();
 }
 
+static void loadDraftTranslation(void) {
+	int handle, i, temp, draftExists;
+	char filepath[PATH_LENGTH];
+	
+	//Load translation list from bin
+	strcpy(filepath,LANGUAGES_PATH);
+	temp=strlen(filepath);
+	strcat(filepath,TRANSLATE_FILENAME_BIN);
+	handle = open((LPSTR)(filepath),O_RDONLY);
+	//Also check that translate temp directory exists before re-loading
+	if (handle != -1) {
+		filepath[temp]=0;
+		strcat(filepath,TRANSLATE_TEMP_DIR);
+		if (dirExists( (LPSTR) filepath) ) {
+			temp = read(handle, (unsigned long)&context.transList<<1, sizeof(TranslationList)<<1);
+			close(handle);
+			draftExists = 1;
+		}
+	}
+	if (!draftExists) {
+		for(i=0;i<=MAX_TRANSLATE_FILE;i++)
+			context.transList.translatedFileMarker[i]='0';
+		context.transList.currFileIdx = -1;
+		context.transList.mode = '0';
+		context.transList.updateOnly = '0';
+	}
+	//Always start with not translated list
+	context.transList.mode = '0';	
+}
+
 static void takeAction (Action *action, EnumAction actionCode) {
 	unsigned int newTime, oldTime, tempInt; 
 	unsigned long longNewTime, longOldTime;
@@ -852,6 +883,8 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			strcat(tempPath,TRANSLATE_FILENAME_BIN);
 			unlink((LPSTR)tempPath);
 
+			//TODO: also delete TRANSLATE_TEMP_DIR and files inside
+
 			//Jump to destination block after deleting 
 			newBlock = &context.package->blocks[destination];
 			newTime = newBlock->startTime;
@@ -860,6 +893,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 		case TRANSLATE_NEW:
 			stop();
+			loadDraftTranslation();
 			context.transList.updateOnly = '0';
 			newBlock = &context.package->blocks[destination];
 			newTime = newBlock->startTime;
@@ -867,6 +901,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 		case TRANSLATE_OVERWRITE:
 			stop();
+			loadDraftTranslation();
 			context.transList.updateOnly = '1';
 			newBlock = &context.package->blocks[destination];
 			newTime = newBlock->startTime;
@@ -1696,6 +1731,7 @@ void loadPackage(int pkgType, const char * pkgName) {
 	for (i=0; i < MAX_LISTS; i++) 
 		pkg->lists[i].currentFilePosition = -1;
 //	pkg->recInProgress = FALSE;
+	action = 0;
 	if (pkg->countPackageActions) 
 		action = pkg->actions;
 	while (action && !isEventInAction(action,START,context.isPaused))
