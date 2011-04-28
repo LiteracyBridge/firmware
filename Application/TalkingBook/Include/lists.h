@@ -37,6 +37,8 @@ struct ListItem {
 extern void cpyListPath(char *, char *);
 extern void cpyTopicPath(char *);
 extern char *getCurrentList(ListItem *);
+//for some reason the definition below causes a parsing error, but it doesn't when included at the top of mainLoop.c
+//extern BOOL getNextTransList(TranslationList *, int, CtnrPackage *);
 extern char *getNextList(ListItem *, BOOL);
 extern char *getPreviousList(ListItem *);
 extern void setListRotation(int *, int);
@@ -44,5 +46,4 @@ extern int getListRotation(unsigned int);
 extern int getListFilename(char *, int, BOOL);
 extern int insertIntoList(ListItem *, long, char *);
 extern void catLangDir(char *);
-//extern void getNextTransList(TranslationList *, BOOL, CtnrPackage *);
 #endif

@@ -23,6 +23,7 @@ enum EnumEnterOrExit {ENTERING, EXITING};
 extern int SystemIntoUDisk(unsigned int);
 extern int testPCB(void);
 extern INT16 SD_Initial(void);
+extern BOOL getNextTransList(TranslationList *, int, CtnrPackage *);
 
 static void processBlockEnterExit (CtnrBlock *, EnumEnterOrExit);
 static void processTimelineJump (int, int);
@@ -420,7 +421,6 @@ static void keyResponse(void) {
 	// respond to key events
 	int keystroke;
 	int longKeystroke;
-	char str[40];
 	
 	if (context.keystroke) {
 		keystroke = context.keystroke;
@@ -629,8 +629,7 @@ void mainLoop (void) {
 static void createTranslateDir () {
 	
 	//If temp dir doesn't exist, create it.
-	char filepath[PATH_LENGTH],tempPath[PATH_LENGTH];
-	unsigned int len;
+	char filepath[PATH_LENGTH];
 	
 	strcpy(filepath,LANGUAGES_PATH);
 	strcat(filepath,TRANSLATE_TEMP_DIR);
@@ -643,7 +642,6 @@ static void wrapTranslation() {
 	char filepath[PATH_LENGTH],tempPath[PATH_LENGTH];
 	long maxFileIdx,i;
 	unsigned int len;
-	unsigned int len2;
 	int ret;
 
 	insertSound(&pkgSystem.files[PLS_WAIT_FILE_IDX],NULL,TRUE);
@@ -695,11 +693,10 @@ static void wrapTranslation() {
 		dirCopy(filepath,tempPath,0);
 		
 		//Append string to system names file
-		strcpy( tempPath,tempPath+strlen((char *)LANGUAGES_PATH) );
 		strcpy(filepath,LANGUAGES_PATH);
 		strcat(filepath,SYSTEM_ORDER_FILE);
 		strcat(filepath,".txt");
-		appendStringToFile(filepath, tempPath);
+		appendStringToFile(filepath, tempPath + strlen(LISTS_PATH));
 	
 		loadSystemNames();
 	}
@@ -812,7 +809,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 	EnumAction newActionCode;
 	EnumBorderCrossing direction;
 	signed long l;	
-	int destination, aux, i, ret;
+	int destination, aux, i, count, ret;
 	int status;
 	BOOL reposition = FALSE;
 	BOOL isTooFar = FALSE;
@@ -880,18 +877,18 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			stop();
 		
 			tempInt = pkgSystem.countFiles - 1;
-			i = 0;
+			i = count = 0;
 			//l = 0;
 			transList = &context.transList;
 			transList->mode = '0';
 			while (i < tempInt) {
 				if(transList->translatedFileMarker[i]=='1'){
-					i++;
+					count++;
 					break;
 				}
 				i++;
 			}
-			if(i == 0){
+			if(count == 0){
 				//None translated: insert sound 
 				insertSound(&pkgSystem.files[NO_TRANSLATION_FILE_IDX],NULL,TRUE);
 			}

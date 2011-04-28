@@ -32,4 +32,6 @@ extern int fileCopy(char *, char *);
 extern void dirCopy(char *, char *, BOOL);
 extern void copyAllFiles(char *, char *, BOOL);
 extern void moveAllFiles(char *, char *);
+extern void deleteAllFiles(char *);
+extern void moveAudioFiles(char *, char *);
 #endif
