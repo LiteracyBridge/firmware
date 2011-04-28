@@ -407,7 +407,7 @@ static int recordAudio(char *pkgName, char *cursor) {
 		strcat(filepath,AUDIO_FILE_EXT);
 	}
 		
-	file = getListFile(cursor);
+	file = getTempFileFromName(cursor,0);
 	if (strcmp(cursor,TRANSLATE_TEMP_DIR) != 0)
 		insertSound(file,NULL,TRUE);
 	start = getRTCinSeconds();

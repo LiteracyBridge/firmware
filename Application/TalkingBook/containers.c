@@ -516,35 +516,14 @@ int replaceStack (char *line, CtnrPackage *pkg) {
 	return PKG_HEAP_SIZE; //marks the beginning of the stack	
 }
 
-CtnrFile *getListFile(char *name) {
+CtnrFile *getTempFileFromName(char *name, int getLongName) {
 	CtnrFile *file;
 	char temp[FILE_LENGTH];
 	
 	strcpy(temp,name);
-//	if (pkgSystem.idxLanguageCode != -1) {
-//		strcat(temp,"-");
-//		strcat(temp,&pkgSystem.strHeapStack[pkgSystem.idxLanguageCode]);
-//	}
-	file = &pkgSystem.tempFile;
-	file->idxFilename = replaceStack(temp,&pkgSystem);	
-	file->idxFirstBlockStart = 0;
-	file->idxFirstBlockEnd = 0;
-	file->idxFirstBlockInFile = -1;
-	return file;
-}
-
-CtnrFile *getListFileLong(char *name) {
-	CtnrFile *file;
-	char temp[FILE_LENGTH];
-
-	strcpy(temp,name);
-	if (LONG_LIST_NAMES) { //Temporary Patch  
+	if (getLongName) { //Temporary Patch  
 		strcat(temp,"-LONG");
 	}
-//	if (pkgSystem.idxLanguageCode != -1) {
-//		strcat(temp,"-");
-//		strcat(temp,&pkgSystem.strHeapStack[pkgSystem.idxLanguageCode]);
-//	}
 	file = &pkgSystem.tempFile;
 	file->idxFilename = replaceStack(temp,&pkgSystem);	
 	file->idxFirstBlockStart = 0;

@@ -244,8 +244,7 @@ extern Action *getBlockActions(CtnrBlock *);
 extern Action *getListActions(ListItem *);
 extern Action *getTransListActions(TranslationList *);
 extern int replaceStack (char *, CtnrPackage *);
-extern CtnrFile *getListFile(char *); 
-extern CtnrFile *getListFileLong(char *);
+extern CtnrFile *getTempFileFromName(char *, int); 
 extern void resetPackage(CtnrPackage *);
 extern void loadDefaultUserPackage(const char *);
 

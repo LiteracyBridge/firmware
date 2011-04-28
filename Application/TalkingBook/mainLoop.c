@@ -1114,7 +1114,11 @@ static void takeAction (Action *action, EnumAction actionCode) {
 						context.queuedPackageNameIndex = destination;
 					} else { // list->listType != LIST_OF_PACKAGES
 						// play sound of subject
-						newFile = getListFileLong(filename);
+						newFile = getTempFileFromName(filename,0);
+						if (LONG_LIST_NAMES) {
+							insertSound(newFile,NULL,FALSE);
+							newFile = getTempFileFromName(filename,1);
+						}
 						newTime = 0;
 						// reset any lists that depend on the position of this List_of lists, which has just moved
 						for (i=0; i < MAX_LISTS; i++) 
@@ -1184,7 +1188,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 
 			list = &context.package->lists[aux];
 			context.idxActiveList = aux;
-			newFile = getListFile(getCurrentList(list));
+			newFile = getTempFileFromName(getCurrentList(list),0);
 			newTime = 0;
 			reposition = TRUE;
 
@@ -1507,7 +1511,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 		// if was scanning at high speed, 
 		if (context.isScanning) {
 			context.isScanning = FALSE;
-			playBip();
+			playActionSound(JUMP_TIME);
 			adjustSpeed(NORMAL_SPEED,FALSE);
 		}	
 		//todo: am i catching every possible change in file?		
@@ -1530,7 +1534,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 	}
 	
 	// now that context.idxTimeframe has been set for repositions, we can insert sounds
-	if (action && hasSoundInsert(action)) {
+	if (action && hasSoundInsert(action) && !context.keystroke) {
 		if (reposition) 
 			stop();  // stop currently playing audio first or insertSound() will return to it
 		if (actionCode == JUMP_TIME) {
@@ -1547,12 +1551,12 @@ static void takeAction (Action *action, EnumAction actionCode) {
 	// process start block action if landing on the start of a new block
 	if (reposition && newBlock && newTime == newBlock->startTime)
 		processStartBlock(newBlock - context.package->blocks);
-	if (list) {
+	if (list && !context.keystroke) {
 		soundInsertBlock = getStartInsert(list->actionStartEnd, list->idxFirstAction);
 		if (soundInsertBlock)
 			insertSound(getFileFromBlock(soundInsertBlock),soundInsertBlock,FALSE);
 	}
-	if (transList) {
+	if (transList && !context.keystroke) {
 		soundInsertBlock = getStartInsert(transList->actionStartEnd, transList->idxFirstAction);
 		if (soundInsertBlock)
 			insertSound(getFileFromBlock(soundInsertBlock),soundInsertBlock,FALSE);
@@ -1565,7 +1569,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 		context.isPaused = FALSE;
 		resume();	
 	}
-	if (reposition)
+	if (reposition && !context.keystroke)
 		play(context.file,newTime); //todo: chg to seek if same file
 	//todo: maybe for JUMP_BLOCK (not CALL_BLOCK) , allow offsets within a block (stored in first 13 bits of aux)
 }

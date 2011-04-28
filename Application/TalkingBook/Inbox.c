@@ -93,7 +93,7 @@ queueNewPackage(struct newContent nc) {
 			context.queuedPackageType = PKG_APP;  
 		} else
 			context.queuedPackageType = PKG_MSG;
-		insertSound(getListFile(fbuf),NULL,TRUE);	
+		insertSound(getTempFileFromName(fbuf,0),NULL,TRUE);	
 		context.queuedPackageNameIndex = replaceStack(strList,&pkgSystem);
 	} 
 }
