@@ -53,6 +53,7 @@ processInbox(void) {
 	
 	struct newContent nc;	
 	
+	stop();
 	playBip();
 	setLED(LED_RED,TRUE);
 	writeVersionToDisk();  // make sure the version file wasn't deleted during USB device time
