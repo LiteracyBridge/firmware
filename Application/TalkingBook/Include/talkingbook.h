@@ -3,7 +3,7 @@
 #ifndef	__TALKINGBOOK_h__
 #define	__TALKINGBOOK_h__
 
-#define VERSION			"v1.50r666"
+#define VERSION			"v1.50r668"
 #define TB_CAN_WAKE  // hardware that allows wake from sleep/halt
 //IMPORTANT: changes to TB_CAN_WAKE must also be made to system_head.inc!!!
 
@@ -90,7 +90,6 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 #define TEXT_EVENT_MINUS	'-'
 #define TEXT_EVENT_START	'!'
 #define TEXT_EVENT_END		'$'
-#define TEXT_EVENT_ORDER	"<>^vohp*+-_!$"
 
 #define TEXT_ACTION_NOP				'~'
 #define TEXT_ACTION_STOP			'.'

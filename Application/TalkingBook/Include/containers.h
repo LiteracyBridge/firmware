@@ -17,14 +17,14 @@
 #define APP_QUIZ_PLAY   1
 #define APP_QUIZ_REC 	2
 
-#define MAX_FILES		100
-#define MAX_BLOCKS		100
+#define MAX_FILES		120
+#define MAX_BLOCKS		120
 #define MAX_STATES		(2 * MAX_BLOCKS)   // should always be 2 x MAX_BLOCKS
-#define MAX_ACTIONS		300   // a little more than 2 actions per block (in addition to start/end actions)
-#define MAX_LISTS		2
+#define MAX_ACTIONS		250   // a little more than 2 actions per block (in addition to start/end actions)
+#define MAX_LISTS		3  		// includes 2 regular lists (list of lists and list of packages) and translation list
 #define MAX_BLOCK_OVERLAP	3   // allows for a file-wide block, a page, and a hyperlink
 #define PKG_HEAP_SIZE	600  // enough for 10 chars per struct file/filename and per ListItem filename
-#define PKG_STACK_SIZE	100   // only stores one item and is erased by next item stored (used for list item filenames)
+#define PKG_STACK_SIZE	80   // only stores one item and is erased by next item stored (used for list item filenames)
 // PKG_STACK_SIZE is used so that list filenames can be relative to the heap without being accumulated and hogging memory
 
 typedef enum EnumEvent EnumEvent;
@@ -45,7 +45,7 @@ enum EnumEvent {
 	LEFT_HOLD = HELD_KEY, RIGHT_HOLD, UP_HOLD, DOWN_HOLD, SELECT_HOLD, HOME_HOLD, PLAY_HOLD, STAR_HOLD, PLUS_HOLD, MINUS_HOLD
 };
 enum EnumAction {NOP = 0, STOP, PAUSE, JUMP_BLOCK, RETURN, INSERT_SOUND, START_END_MARKER,			
-				PLAY_PAUSE, COPY, RECORD_TITLE, RECORD_MSG, PACKAGE_RECORDING, RECORD_TRANSLATION, TRIM,
+				PLAY_PAUSE, COPY, CLONE, RECORD_TITLE, RECORD_MSG, PACKAGE_RECORDING, RECORD_TRANSLATION, TRIM,
 				FWD, BACK, JUMP_TIME, CALL_BLOCK, JUMP_PACKAGE, 
 				JUMP_LIST, TRANSLATED_LIST, NOT_TRANSLATED_LIST, TRANSLATE_DELETE_FINISH, 
 				TRANSLATE_NEW, TRANSLATE_OVERWRITE,DELETE, DELETE_TRANSLATION, WRAP_TRANSLATION,

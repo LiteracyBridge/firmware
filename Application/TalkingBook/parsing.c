@@ -68,7 +68,7 @@ static int getEventEnumFromChar (char *c) {
 
 static int getActionEnumFromChar (char *c) {
 	int ret = -1;
-	const char *ACTION_CODES = "~.,[)I`PCEEEEMFBT(<LLLLLLDDW`VVVSSSS`UUUU`RGARGAHZX";  // '`' is placeholder for marker codes
+	const char *ACTION_CODES = "~.,[)I`PCCEEEEMFBT(<LLLLLLDDW`VVVSSSS`UUUU`RGARGAHZX";  // '`' is placeholder for marker codes
 	// note that E is for rEcord since R should represent Red
 	// only first instance of action code is found, others are placeholders as dealt with below
 	
@@ -115,6 +115,10 @@ static int getActionEnumFromChar (char *c) {
 	}
 	else if (ret == DELETE) {
 		if (*(c+1) == 't')
+			ret += 1;
+	}
+	else if (ret == COPY) {
+		if (*(c+1) == 'l')  //clone
 			ret += 1;
 	}
 	return ret;	
@@ -360,7 +364,7 @@ static BOOL parseCreateAction (char *line, Action *action, int *actionCount, cha
 					action[*actionCount].aux = index; 		
 			}	
 		}
-		if (actionCode == JUMP_BLOCK || actionCode == CALL_BLOCK ||
+		if (actionCode == JUMP_BLOCK || actionCode == CALL_BLOCK || actionCode == CLONE ||
 			actionCode == RECORD_TITLE || actionCode == RECORD_MSG || actionCode == PACKAGE_RECORDING || 
 			actionCode == USB_DEVICE_ON || actionCode == USB_HOST_ON) {
 			if (actionCode == RECORD_TITLE || actionCode == RECORD_MSG) {

@@ -646,6 +646,8 @@ static void wrapTranslation() {
 	int ret;
 
 	insertSound(&pkgSystem.files[PLS_WAIT_FILE_IDX],NULL,TRUE);
+	fs_safexit();  	// This is necessary to close the file handle of the previously played sound, 
+					// in case it was translated and needs to be overwritten.
 	//Wrapping up a complete translation
 	//Number of files to translate is pkgSystem.countFiles - 1;
 	maxFileIdx = pkgSystem.countFiles - 2;
@@ -711,8 +713,6 @@ static void wrapTranslation() {
 		strcpy(filepath,LANGUAGES_PATH);
 		strcat(filepath,TRANSLATE_TEMP_DIR);
 		strcat(filepath,"/");
-		len = strlen(filepath);
-		//strcat(filepath,UI_SUBDIR);
 	
 		moveAudioFiles(filepath,tempPath);
 		
@@ -810,6 +810,7 @@ static void loadDraftTranslation(void) {
 	strcat(filepath,TRANSLATE_FILENAME_BIN);
 	handle = open((LPSTR)(filepath),O_RDONLY);
 	//Also check that translate temp directory exists before re-loading
+	draftExists = 0;
 	if (handle != -1) {
 		filepath[temp]=0;
 		strcat(filepath,TRANSLATE_TEMP_DIR);
@@ -883,7 +884,12 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			strcat(tempPath,TRANSLATE_FILENAME_BIN);
 			unlink((LPSTR)tempPath);
 
-			//TODO: also delete TRANSLATE_TEMP_DIR and files inside
+			//delete TRANSLATE_TEMP_DIR and files inside
+			strcpy(tempPath,LANGUAGES_PATH);
+			strcat(tempPath,TRANSLATE_TEMP_DIR);
+			strcat(tempPath,"/");
+			deleteAllFiles(tempPath);
+			rmdir((LPSTR)tempPath);
 
 			//Jump to destination block after deleting 
 			newBlock = &context.package->blocks[destination];
@@ -1001,6 +1007,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 					transList->mode = '0';
 					insertSound(&pkgSystem.files[NOT_YET_TRANSLATED_FILE_IDX],NULL,TRUE);
 				}
+				playBip();
 				//switch back after done with inserting sound
 				transList->mode = '1';
 			}
@@ -1017,8 +1024,9 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			//Pass zero to not rotate list
 			jumpTransList(0, &newFile, &newTime, &reposition);
 			insertSound(&pkgSystem.files[ORIG_RECORDING_FILE_IDX],NULL,TRUE);
-			
+			playBip();
 			break;
+			
 		case RECORD_TRANSLATION:
 			stop();
 			if(vCur_1 < V_MIN_RECORD_VOLTAGE) {
@@ -1186,6 +1194,17 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			context.transList.mode = '0';
 			break;  // sets up main loop to handle this, rather than building up a stack overflow
 
+		case CLONE:
+			stop();
+			if (PRE_COPY_FILE_IDX)
+				insertSound(&pkgSystem.files[PRE_COPY_FILE_IDX],NULL,TRUE);  
+			setUSBHost(TRUE);
+			ret = cloneDevice();
+			setUSBHost(FALSE);
+			if (ret == 0 && POST_COPY_FILE_IDX) 
+				insertSound(&pkgSystem.files[POST_COPY_FILE_IDX],NULL,TRUE); 
+			break;
+					
 		case COPY:
 			stop();
 			tempList = &context.package->lists[destination];
@@ -1330,7 +1349,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			switch (status) {
 				case 0:
 //					if (context.package->pkg_type != PKG_SYS)
-						markStartPlay(Snd_A1800_GetCurrentTime(),context.package->strHeapStack+context.package->idxName);
+						markStartPlay(getRTCinSeconds(),context.package->strHeapStack+context.package->idxName);
 					if (context.idxActiveList == -1) {
 						enterOrExitAllBlocks(context.idxTimeframe,ENTERING);
 						i = getStartingBlockIdxFromTimeline(context.idxTimeframe);
