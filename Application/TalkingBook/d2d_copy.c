@@ -25,7 +25,9 @@ int d2dCopy(const char * packageName,const char * filenameList) {
 	char newPkgPath[PATH_LENGTH], strLog[PATH_LENGTH];
 //	int maxTrials = 5;
 	long timeNow;
-
+	ListItem *list;
+	char *localPackageName;
+		
 	setLED(LED_GREEN,FALSE);
 	timeNow = getRTCinSeconds();
 	markEndPlay(timeNow);
@@ -41,7 +43,19 @@ int d2dCopy(const char * packageName,const char * filenameList) {
 	strcpy(newPkgPath,INBOX_PATH);
 	newPkgPath[0] = 'b'; //change a:/ drive to b:/ drive
 	strcat(newPkgPath,NEW_PKG_SUBDIR);
-	retCopy = copyApplicationOrMessage((char *)packageName,newPkgPath);
+	if (packageName) 
+		retCopy = copyApplicationOrMessage((char *)packageName,newPkgPath);
+	else { // copy entire category
+		list = &pkgSystem.lists[1];
+		list->currentFilePosition = -1;
+		localPackageName = getCurrentList(list);
+		do {
+			logString((char *)"catcopy",BUFFER);
+			logString(localPackageName,BUFFER);
+			retCopy = copyApplicationOrMessage(localPackageName,newPkgPath);				
+			localPackageName = getPreviousList(list);
+		} while (list->currentFilePosition);
+	}
 	copyListAudio(filenameList);
 	setUSBHost(FALSE);
 	return retCopy;
@@ -51,6 +65,7 @@ static int copyApplicationOrMessage(char * packageName, char *newPkgPath) {
 	int retCopy;
 	char *prefixCursor = NULL;
 
+	setLED(LED_GREEN,TRUE);
 	if (0 == strncmp(packageName,CUSTOM_PKG_PREFIX,strlen(CUSTOM_PKG_PREFIX)))
 		prefixCursor = CUSTOM_PKG_PREFIX;
 	if (prefixCursor) {
@@ -58,6 +73,7 @@ static int copyApplicationOrMessage(char * packageName, char *newPkgPath) {
 	} else {
 		retCopy = copyMessage((char *)packageName,newPkgPath);		
 	}		
+	setLED(LED_GREEN,FALSE);
 }
 
 static int copyApplication(char * packageName, char *newPkgPath) {
