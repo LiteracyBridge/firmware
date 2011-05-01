@@ -345,14 +345,20 @@ processDir(char *dirname, struct newContent *pNC) {
 		strcat(tempbuf,dirname);
 		strcpy(fnbase, dirname);
 		ret = rename((LPSTR)buffer,(LPSTR)tempbuf);
+		if (ret == -1) {
+			// assume the directory already exists
+			deleteAllFiles(buffer);
+			rmdir((LPSTR)buffer);			
+		}
 	}
 		
 	if(catidx == 0)
 		strcpy(category, "OTHER");  // "O"
 	
 // TODO: - currently doing nothing with subcategory
-	
-	ret = updateCategory(category, fnbase, APP_PKG_CHAR);
+
+	if (ret != -1) // dont bother if move didnt happen, which means it probably already exists	
+		ret = updateCategory(category, fnbase, APP_PKG_CHAR);
 	
 	if(pNC->newAudioDirCat[0] == 0) {
 		strcpy(pNC->newAudioDirCat, category);
