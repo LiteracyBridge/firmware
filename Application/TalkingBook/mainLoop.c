@@ -1540,10 +1540,19 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 		case SLEEP:
 			// call sleep function
-			
+			stop();
+		  	// give visual and aural feedback to 
+		  	playBip();
+			setLED(LED_RED,TRUE);
+			wait(1000);			
 			setOperationalMode((int)P_SLEEP); 
 			break;
 		case HALT:
+			stop();
+		  	// give visual and aural feedback to 
+		  	playBip();
+			setLED(LED_RED,TRUE);
+			wait(1000);
 			// call sleep function
 			setOperationalMode((int)P_HALT); 
 			break;
