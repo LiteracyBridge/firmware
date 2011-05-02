@@ -68,7 +68,7 @@ static int getEventEnumFromChar (char *c) {
 
 static int getActionEnumFromChar (char *c) {
 	int ret = -1;
-	const char *ACTION_CODES = "~.,[)I`PCCEEEEMFBT(<LLLLLLDDW`VVVSSSS`UUUU`RGARGAHZX";  // '`' is placeholder for marker codes
+	const char *ACTION_CODES = "~.,[)I`PCCEEEEMYYYFBT(<LLLLLLDDW`VVVSSSS`UUUU`RGARGAHZX";  // '`' is placeholder for marker codes
 	// note that E is for rEcord since R should represent Red
 	// only first instance of action code is found, others are placeholders as dealt with below
 	
@@ -120,6 +120,12 @@ static int getActionEnumFromChar (char *c) {
 	else if (ret == COPY) {
 		if (*(c+1) == 'l')  //clone
 			ret += 1;
+	}
+	else if (ret == SURVEY_TAKEN) {
+		if (*(c+1) == 'a')
+			ret += 1;
+		else if (*(c+1) == 'u')
+			ret += 2;
 	}
 	return ret;	
 }
@@ -332,8 +338,12 @@ static BOOL parseCreateAction (char *line, Action *action, int *actionCount, cha
 				// no specified rewind time, so use default
 				setRewind(&action[*actionCount].aux,-DEFAULT_REWIND);
 		}					
-		if (actionCode == DELETE || actionCode == COPY || actionCode == TRIM) {
+		if (actionCode == DELETE || actionCode == COPY || actionCode == TRIM || actionCode == SURVEY_TAKEN
+				|| actionCode == SURVEY_APPLY || actionCode == SURVEY_USELESS) {
 			strAction++;
+			if (actionCode == SURVEY_TAKEN || actionCode == SURVEY_APPLY || actionCode == SURVEY_USELESS)
+				strAction++; // skip the 't', 'a', or 'u'
+			while (isspace(*strAction)) strAction++;
 			if (*strAction == '{') { // variable-based package
 				cursor = strchr(strAction,'}');
 				if (cursor)
@@ -356,7 +366,7 @@ static BOOL parseCreateAction (char *line, Action *action, int *actionCount, cha
 					ret = FALSE;
 					logException(8,strAction,0);  // syntax error in control track
 			}
-			if (actionCode == DELETE || actionCode == COPY ) {
+			if (actionCode != TRIM) {
 				// TRIM doesn't use aux
 				cursor++;
 				index = getIndexFromLine(cursor,symbolMapStart);

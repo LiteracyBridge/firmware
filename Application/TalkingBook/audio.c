@@ -15,7 +15,6 @@
 
 APP_IRAM unsigned long stat_audio_length;
 APP_IRAM unsigned int  stat_pkg_type;
-APP_IRAM struct ondisk_filestats gFileStats;
 APP_IRAM int statINIT = 0;
 
 static char STAT_FN[FILE_LENGTH];
@@ -683,6 +682,7 @@ int addField(int handle, unsigned int field_id, char *field_value, int numfieldv
     
     return(ret);
 }
+
 void recordStats(char *filename, unsigned long handle, unsigned int why, unsigned long misc)
 {
 //	char msg[128];
@@ -698,12 +698,6 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 			read(handle, (unsigned long)&stat_audio_length << 1, 4);
 			lseek(handle, 0L, SEEK_SET);
 			stat_pkg_type = misc;
-/*		
-			sprintf(msg, "StatLog  OPEN: handle=%ld: pkg_type=0x%lx audio length=%ld ", handle, misc, stat_audio_length);
-			strcat(msg, filename);
-			strcat(msg,"\x0d\x0a");
-			logString(msg, ASAP);
-*/
 			strcpy(STAT_FN, strrchr(filename, '/') + 1);
 			STAT_FN[strlen(STAT_FN) - 4] = 0; //chop off ".a18"
 		} else {
@@ -713,12 +707,6 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 	case STAT_CLOSE:
 		if(statINIT > 0) {
 			wrk = lseek(SACMFileHandle, 0L, SEEK_CUR);
-/*
-			sprintf(msg, "StatLog CLOSE: handle=%ld: position=%d; ", misc, wrk);
-			strcat(msg, STAT_FN);
-			strcat(msg,"\x0d\x0a");
-			logString(msg, ASAP);
-*/
 			if(stat_pkg_type > PKG_SYS) {	
 				
 				strcpy(statpath, STAT_DIR);
@@ -743,8 +731,8 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 		break;
 		
 	case STAT_COPIED:
-// how to eliminate PKG_SYS * PKG_NONE files ??
-
+	// how to eliminate PKG_SYS * PKG_NONE files ??
+	
 		strcpy(STAT_FN, strrchr(filename, '/') + 1);
 		cp = strrchr(STAT_FN, '.');
 		if(cp == NULL)
@@ -755,8 +743,8 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 		STAT_FN[strlen(STAT_FN) - 4] = 0; //chop off ".a18"
 		
 		strcpy(statpath, STAT_DIR);
-//		strcat(statpath, getDeviceSN(0));
-//		strcat(statpath, "~");
+	//		strcat(statpath, getDeviceSN(0));
+	//		strcat(statpath, "~");
 		strcat(statpath, STAT_FN); 
 		
 		stathandle = tbOpen((LPSTR)statpath, O_CREAT|O_RDWR);
@@ -779,6 +767,53 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 
 		}
 */
+		break;
+
+	case STAT_SURVEY1:
+		strcpy(statpath, STAT_DIR);
+	//		strcat(statpath, getDeviceSN(0));
+	//		strcat(statpath, "~");
+		strcat(statpath, STAT_FN); 
+		stathandle = tbOpen((LPSTR)statpath, O_CREAT|O_RDWR);
+		if(stathandle >= 0) {
+			ret = read(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
+			lseek(stathandle, 0L, SEEK_SET);
+			tmp_file_stats.stat_num_survey1 += 1; 
+			ret = write(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
+			close(stathandle);
+		}
+		break;
+	
+	case STAT_APPLY:
+		strcpy(statpath, STAT_DIR);
+	//		strcat(statpath, getDeviceSN(0));
+	//		strcat(statpath, "~");
+		strcat(statpath, STAT_FN); 
+		
+		stathandle = tbOpen((LPSTR)statpath, O_CREAT|O_RDWR);
+		if(stathandle >= 0) {
+			ret = read(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
+			lseek(stathandle, 0L, SEEK_SET);
+			tmp_file_stats.stat_num_apply += 1; 
+			ret = write(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
+			close(stathandle);
+		}
+		break;
+		
+	case STAT_USELESS:
+		strcpy(statpath, STAT_DIR);
+	//		strcat(statpath, getDeviceSN(0));
+	//		strcat(statpath, "~");
+		strcat(statpath, STAT_FN); 
+		
+		stathandle = tbOpen((LPSTR)statpath, O_CREAT|O_RDWR);
+		if(stathandle >= 0) {
+			ret = read(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
+			lseek(stathandle, 0L, SEEK_SET);
+			tmp_file_stats.stat_num_useless += 1; 
+			ret = write(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
+			close(stathandle);
+		}
 		break;
 	}
 }

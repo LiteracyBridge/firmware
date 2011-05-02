@@ -15,6 +15,7 @@
 #include "Include/d2d_copy.h"
 #include "Include/Inbox.h"
 #include "Include/edit.h"
+#include "Include/filestats.h"
 #include "Include/mainLoop.h"
 #include "./Reprog/USB_Flash_reprog.h"
 
@@ -1260,7 +1261,33 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			destination = replaceStack(cursor,context.package);
 			context.queuedPackageNameIndex = destination;
 			break;
+		
+		case SURVEY_TAKEN:
+			tempList = &context.package->lists[destination];
+			cursor = getCurrentList(tempList);		
+			recordStats(cursor, 0L, STAT_SURVEY1, PKG_SYS+1);
+			newBlock = &context.package->blocks[aux];
+			newTime = newBlock->startTime;
+			reposition = TRUE;
+			break;
 			
+		case SURVEY_APPLY:
+			tempList = &context.package->lists[destination];
+			cursor = getCurrentList(tempList);		
+			recordStats(cursor, 0L, STAT_APPLY, PKG_SYS+1);
+			newBlock = &context.package->blocks[aux];
+			newTime = newBlock->startTime;
+			reposition = TRUE;
+			break;
+		case SURVEY_USELESS:
+			tempList = &context.package->lists[destination];
+			cursor = getCurrentList(tempList);		
+			recordStats(cursor, 0L, STAT_USELESS, PKG_SYS+1);		
+			newBlock = &context.package->blocks[aux];
+			newTime = newBlock->startTime;
+			reposition = TRUE;
+			break;
+
 		case SPEED_UP:
 			adjustSpeed(SPEED_INCREMENT,TRUE);
 			break;

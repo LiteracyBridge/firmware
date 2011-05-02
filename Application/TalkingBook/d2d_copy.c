@@ -298,7 +298,7 @@ void exchangeStatsCSV() {
 				
 		rHandle = open((LPSTR)filename,O_RDONLY);	
 		if(rHandle >= 0) {
-			retCopy = read(rHandle, (UINT32)&tmpstats << 1, sizeof(tmpstats));
+			retCopy = read(rHandle, (UINT32)&tmpstats << 1, sizeof(tmpstats) << 1);
 			close(rHandle);
 //			sprintf(to,"%s,%lu,%lu,%lu",
 //					file_info.f_name,
@@ -317,6 +317,18 @@ void exchangeStatsCSV() {
 			strcat(to, ",");
 			strout = &num[0];
 			zstrout = longToDecimalStringZ((long) tmpstats.stat_num_copies, strout, 6);
+			strcat(to, zstrout);
+			strcat(to, ",");
+			strout = &num[0];
+			zstrout = longToDecimalStringZ((long) tmpstats.stat_num_survey1, strout, 6);
+			strcat(to, zstrout);
+			strcat(to, ",");
+			strout = &num[0];
+			zstrout = longToDecimalStringZ((long) tmpstats.stat_num_apply, strout, 6);
+			strcat(to, zstrout);
+			strcat(to, ",");
+			strout = &num[0];
+			zstrout = longToDecimalStringZ((long) tmpstats.stat_num_useless, strout, 6);
 			strcat(to, zstrout);
 					
 			bytesToWrite = convertDoubleToSingleChar(filename,to,TRUE);
@@ -402,7 +414,7 @@ void exchangeStatsCSV() {
 		
 		rHandle = open((LPSTR)filename,O_RDONLY);	
 		if(rHandle >= 0) {
-			retCopy = read(rHandle, (UINT32)&tmpstats << 1, sizeof(tmpstats));
+			retCopy = read(rHandle, (UINT32)&tmpstats << 1, sizeof(tmpstats) << 1);
 			close(rHandle);
 //			sprintf(to,"%s,%lu,%lu,%lu",
 //					file_info.f_name,
@@ -421,6 +433,18 @@ void exchangeStatsCSV() {
 			strcat(to, ",");
 			strout = &num[0];
 			zstrout = longToDecimalStringZ((long) tmpstats.stat_num_copies, strout, 6);
+			strcat(to, zstrout);
+			strcat(to, ",");
+			strout = &num[0];
+			zstrout = longToDecimalStringZ((long) tmpstats.stat_num_survey1, strout, 6);
+			strcat(to, zstrout);
+			strcat(to, ",");
+			strout = &num[0];
+			zstrout = longToDecimalStringZ((long) tmpstats.stat_num_apply, strout, 6);
+			strcat(to, zstrout);
+			strcat(to, ",");
+			strout = &num[0];
+			zstrout = longToDecimalStringZ((long) tmpstats.stat_num_useless, strout, 6);
 			strcat(to, zstrout);
 					
 			bytesToWrite = convertDoubleToSingleChar(filename,to,TRUE);
