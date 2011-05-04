@@ -485,7 +485,7 @@ char *longToDecimalStringZ(long l, char * string, int numberOfDigits) {
 //       (a:/system/*.img to B:\*.img to force client to reprogram)
 int
 cloneDevice() {
-	int ret, len_path;
+	int ret, len_path, newlog;
 	char path[PATH_LENGTH], to[PATH_LENGTH], from[PATH_LENGTH];
 	struct f_info fi;
 	
@@ -503,11 +503,22 @@ cloneDevice() {
 	
 	strcpy(path, LOG_FILE);
 	path[0] = 'b';
-	ret = unlink((LPSTR)path);
+//	ret = unlink((LPSTR)path);
+	newlog = tbOpen((LPSTR)path, O_CREAT|O_RDWR);
+	if(newlog >= 0) {
+		close(newlog);
+		strcpy(to, "CLONED by ");
+		strcat(to, (LPSTR) (TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN));
+		appendStringToFile(path, to);
+	}
 	
 	strcpy(path, SYSTEM_VARIABLE_FILE);
 	path[0] = 'b';
 	ret = unlink((LPSTR)path);
+	ret = tbOpen((LPSTR)path, O_CREAT|O_RDWR);
+	if(ret >= 0) {
+		close(ret);
+	}
 
 	strcpy(path, SYSTEM_PATH);
 	path[0] = 'b';	
@@ -520,14 +531,17 @@ cloneDevice() {
 	}
 	strcat(path, "*.img");
 
-	// move any b:/system/*.img to b:/system.img
-	for(ret =_findfirst((LPSTR)path, &fi, D_FILE); ret >= 0; ret = _findnext(&fi)) {
-		strcpy(to, "b:/");
+	// move any b:/system/*.img to b:/Inbox/sys-updates so it will be processed by processSystemFiles
+	for(ret =_findfirst((LPSTR)path, &fi, D_FILE); ret >= 0; ret = _findnext(&fi)) {	
+		strcpy(to,INBOX_PATH);
+		to[0] = 'b';
+		strcat(to,SYS_UPDATE_SUBDIR);
 		strcat(to, fi.f_name);
 		strcpy(from, path);
 		from[len_path] = 0;
 		strcat(from, fi.f_name);
-		rename(from, to);
+		ret = rename(from, to);
+//		ret = _copy((LPSTR)from, (LPSTR)to);
 	}
 }
 
@@ -537,6 +551,7 @@ cloneDir(char *fromdir, char *todir) {
 	int ret, r1, len_from, len_to, len, fret;
 	char from[PATH_LENGTH], fromfind[PATH_LENGTH], to[PATH_LENGTH]; //, lastdir[FILE_LENGTH];
 	char dirname[80];
+//	char dbgbuf[96], dbghex[16];
 
 	struct f_info fi;
 	
@@ -574,10 +589,10 @@ cloneDir(char *fromdir, char *todir) {
 //			ret = _findnext(&fi);
 			continue;
 		}
-		if(!strcmp("clonetest", fi.f_name)) {
-			ret = _findnext(&fi);
-			continue;
-		}
+//		if(!strcmp("clonetest", fi.f_name)) {
+//			ret = _findnext(&fi);
+//			continue;
+//		}
 		from[len_from] = 0;
 		to[len_to]= 0;
 				
@@ -586,6 +601,12 @@ cloneDir(char *fromdir, char *todir) {
 		
 		r1 = mkdir((LPSTR)to);
 		
+//		longToHexString((long)r1, (char *)dbghex, 1);
+//		strcpy(dbgbuf, dbghex);
+//		strcat(dbgbuf, " mkdir ");
+//		strcat(dbgbuf, to);
+ //		logString(dbgbuf,ASAP);
+	
 		if(!strncmp(from, STAT_DIR, strlen(from))) {
 			continue;
 		}
@@ -618,6 +639,7 @@ static int copyfiles(char *fromdir, char *todir)
 	int ret, r1, len_from, len_to, fret;
 	char from[80], to[80];
 	struct f_info fi;
+//	char dbgbuf[96], dbghex[16];
 	
 	fret = 0;
 	
@@ -656,6 +678,13 @@ static int copyfiles(char *fromdir, char *todir)
 				setLED(LED_GREEN,FALSE);
 				setLED(LED_RED,TRUE);
 				r1 = _copy((LPSTR)from, (LPSTR)to);
+				
+//				longToHexString((long)r1, (char *)dbghex, 1);
+//				strcpy(dbgbuf, dbghex);
+//				strcat(dbgbuf, " copy ");
+//				strcat(dbgbuf, to);
+//		 		logString(dbgbuf,ASAP);
+
 				setLED(LED_RED,FALSE);
 				if (r1 != -1) {
 					setLED(LED_GREEN,TRUE);
