@@ -171,12 +171,14 @@ static void
 processSystemFiles(void) {
 	// copy any system updates from SYS_UPDATE_SUBDIR to a:\ 
 	long l;
+	int ret;
 	char strSysUpdatePath[PATH_LENGTH];
 	
 	strcpy(strSysUpdatePath,INBOX_PATH);
 	strcat(strSysUpdatePath,SYS_UPDATE_SUBDIR);
 	l = (long)copydir((char *)strSysUpdatePath, (char *)"a:/");  // returns # of items copied
-	if (l > 1)  // 1 is for the SYS_UPDATE_SUBDIR
+	ret = check_new_sd_flash(strSysUpdatePath);  //strSysUpdatePath may be changed
+	if ((l > 1) || (ret != 0))  // 1 is for the SYS_UPDATE_SUBDIR
 		resetSystem(); // reset to begin new firmware reprogramming or to reload new config/system control
 }
 
