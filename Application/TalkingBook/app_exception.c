@@ -10,6 +10,7 @@
 #include "./Application/TalkingBook/Include/app_exception.h"
 extern APP_IRAM unsigned int vCur_1;
 extern void refuse_lowvoltage(int);
+extern int SystemIntoUDisk(unsigned int);
 
 void logException(unsigned int errorCode, const char * pStrError, int takeAction) {
 	// errorcode == 1 means memory error from BodyInit() and ucBSInit()
@@ -61,8 +62,10 @@ void logException(unsigned int errorCode, const char * pStrError, int takeAction
 				setLED(LED_GREEN,TRUE);
 				wait(500);
 			}
-		if (takeAction == USB_MODE) // can't load config
-			setUSBDevice (TRUE);
+		if (takeAction == USB_MODE) { // can't load config
+			SystemIntoUDisk(1);	
+			resetSystem();
+		}
 		else if (takeAction == RESET)
 			resetSystem();
 		else if (takeAction ==  SHUT_DOWN)
