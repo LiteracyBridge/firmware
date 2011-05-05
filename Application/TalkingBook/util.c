@@ -5,6 +5,7 @@
 #include "typedef.h"
 #include <string.h>
 #include <ctype.h>
+#include ".\System\Include\System\GPL162002.h"
 
 int strIndex (const char *str, char c) {
 	char * cursor;
@@ -207,3 +208,19 @@ int LBstrncat (char *to, const char *from, int max) {
 		addedLen = 0;
 	return initLen + addedLen;
 } 
+
+void 
+initRandomNG()
+{
+	*P_TimerF_Ctrl = 0x2002; // enable, 32768HZ
+	*P_TimerE_Ctrl = 0x2006; // enable, timerF overflow, at 32768HZ timerE bumps every 2 sec
+}
+unsigned long rand() {
+	unsigned long ret;
+	
+	ret = (unsigned long) *P_TimerE_UpCount;
+	ret <<= 16;
+	ret |= *P_TimerF_UpCount;
+	
+	return(ret);
+}

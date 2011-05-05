@@ -68,6 +68,8 @@ int main (unsigned int bootType) {
 		fixRegs();
 	}
 	
+	initRandomNG();  // enable 32 bit counter 
+
 	startUp(bootType);
 	return 0;
 }
