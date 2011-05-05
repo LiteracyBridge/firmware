@@ -63,31 +63,26 @@ void clearStaleLog() {
 void logString(char *string, int whenToWrite) {
 	int len, available;
 	
-	// WARNING: if !waitToWrite, this could destory *string
-	// todo: add whenToWrite parameter to allow write "ASAP but preserve" 	
 	if (LOG_FILE) {
-		if (whenToWrite==ASAP && !SACM_Status()) {
-			flushLog();
-			appendStringToFile(LOG_FILE,string);  // destroys *string	
-		} else {
-			if (idxLogBuffer && (idxLogBuffer <= (LOG_BUFFER_SIZE - 3))) {
-				// already one entry, separate with CRLF
-				logBuffer[idxLogBuffer++] = 0x0d;
-				logBuffer[idxLogBuffer++] = 0x0a;
-				logBuffer[idxLogBuffer] = '\0';			 
-			}
-			available = LOG_BUFFER_SIZE - idxLogBuffer - 1;	
-			len = strlen(string);		
-			if ((available > 0) && (len > available)) {
-				memcpy(&logBuffer[idxLogBuffer],string,available);
-				idxLogBuffer = LOG_BUFFER_SIZE;
-				logBuffer[LOG_BUFFER_SIZE - 1] = '\0';
-			} else if (available >= len) {
-				strcpy(&logBuffer[idxLogBuffer],string);
-				idxLogBuffer += len;
-				logBuffer[idxLogBuffer] = '\0';			 
-			}
+		if (idxLogBuffer && (idxLogBuffer <= (LOG_BUFFER_SIZE - 3))) {
+			// already one entry, separate with CRLF
+			logBuffer[idxLogBuffer++] = 0x0d;
+			logBuffer[idxLogBuffer++] = 0x0a;
+			logBuffer[idxLogBuffer] = '\0';			 
 		}
+		available = LOG_BUFFER_SIZE - idxLogBuffer - 1;	
+		len = strlen(string);		
+		if ((available > 0) && (len > available)) {
+			memcpy(&logBuffer[idxLogBuffer],string,available);
+			idxLogBuffer = LOG_BUFFER_SIZE;
+			logBuffer[LOG_BUFFER_SIZE - 1] = '\0';
+		} else if (available >= len) {
+			strcpy(&logBuffer[idxLogBuffer],string);
+			idxLogBuffer += len;
+			logBuffer[idxLogBuffer] = '\0';			 
+		}
+		if (whenToWrite==ASAP && !SACM_Status())
+			flushLog();
 	}
 }
 
