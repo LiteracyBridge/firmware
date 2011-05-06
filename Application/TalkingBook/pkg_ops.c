@@ -11,17 +11,28 @@
 
 void packageRecording(char * pkgName, char *listName) {
 	// adds name to current subject list
-	ListItem *tempList;	
+	ListItem *tempList;
+	char *cursor;	
+	char filePath[PATH_LENGTH];
 //	long pos;
-
-	tempList = &context.package->lists[1]; // todo: this is a hack -- I shouldn't know it is list[1] 
-//	if (tempList->currentFilePosition == -1 || strlen(tempList->currentString) == 0)
-//		pos = 0;
-//	else 
-//		pos = tempList->currentFilePosition + strlen(tempList->currentString) + 2;
-	insertIntoList(tempList,0,pkgName); //insert new recording at top of list
-	tempList->currentFilePosition = 0;
-	strcpy(tempList->currentString,pkgName); 
+	cursor = getCurrentList(&pkgSystem.lists[context.package->idxMasterList]);
+	if (strcmp(cursor,listName)) {
+		// list assigned to the recording is not the current list (e.g. user feedback forced into that category)
+		cpyListPath(filePath,listName);
+		strcat(filePath,listName);
+		strcat(filePath,".txt");
+		insertStringInFile(filePath,pkgName,0);
+	} else {
+		tempList = &context.package->lists[1]; // todo: this is a hack -- I shouldn't know it is list[1] 
+		
+	//	if (tempList->currentFilePosition == -1 || strlen(tempList->currentString) == 0)
+	//		pos = 0;
+	//	else 
+	//		pos = tempList->currentFilePosition + strlen(tempList->currentString) + 2;
+		insertIntoList(tempList,0,pkgName); //insert new recording at top of list
+		tempList->currentFilePosition = 0;
+		strcpy(tempList->currentString,pkgName); 
+	}
 }
 
 int deletePackage(char * packageName) {

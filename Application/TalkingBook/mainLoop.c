@@ -1552,6 +1552,48 @@ static void takeAction (Action *action, EnumAction actionCode) {
 				logException(28,"recording failed",RESET); //todo: add voice error msg?
 			break;	
 
+		case RECORD_FEEDBACK:
+			//this code is mostly a copy of case RECORD.  todo: move reusable part into a fct
+			stop();
+/*			// Not currently allowing sound inserts before record commands since aux is used for recording from another headphone jack
+			// Although the SPINS part of the headphone jack thing isn't currently working.
+			if (action && hasSoundInsert(action)) {
+				soundInsertBlock = &pkgSystem.blocks[getSoundInsertIdxFromAux(aux)];
+				insertSound(getFileFromBlock(soundInsertBlock),soundInsertBlock,TRUE);
+				wait(500);
+			}
+*/
+			if(vCur_1 < V_MIN_RECORD_VOLTAGE) {
+				refuse_lowvoltage(0);
+				break;
+			}
+			strcpy(tempPath,FEEDBACK_CATEGORY);
+			do {
+				strcpy(filepath,USER_PATH);
+				getPkgNumber(filepath+strlen(USER_PATH),TRUE);
+				strcat(filepath,(const char *)CATEGORY_DELIM_STR);
+				strcat(filepath,tempPath); // adds current listname to new recording name
+				cursor2 = filepath + strlen(filepath);
+				strcat(filepath,AUDIO_FILE_EXT);
+				ret = fileExists((LPSTR)filepath); // this causes approx 1 sec delay!
+			} while (ret);
+			*cursor2 = 0; // remove extension
+			strcpy(filename,filepath+strlen(USER_PATH)); //remove path
+			
+			//filename is name of new file
+			//cursor is name of current list
+			ret = createRecording(filename,aux,tempPath);
+			if (ret != -1) {
+				destination = replaceStack(filename,context.package);
+				context.queuedPackageNameIndex = destination;
+				if (*cursor == SYS_MSG_CHAR) 
+					context.queuedPackageType = SYS_MSG;
+				else
+					context.queuedPackageType = PKG_MSG;
+			} else
+				logException(28,"recording failed",RESET); //todo: add voice error msg?
+			break;	
+
 		case CALL_BLOCK:
 			// TODO: handle error (return of -1) if stack is full
 			stackPush(context.package,context.file,oldTime - getRewind(aux)); // times are compressed
