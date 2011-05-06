@@ -68,7 +68,7 @@ static int getEventEnumFromChar (char *c) {
 
 static int getActionEnumFromChar (char *c) {
 	int ret = -1;
-	const char *ACTION_CODES = "~.,[)I`PCCEEEEMYYYFBT(<LLLLLLDDW`VVVSSSS`UUUU`RGARGAHZX";  // '`' is placeholder for marker codes
+	const char *ACTION_CODES = "~.,[)I`PCCEEEEMOYYYFBT(<LLLLLLDDW`VVVSSSS`UUUU`RGARGAHZX";  // '`' is placeholder for marker codes
 	// note that E is for rEcord since R should represent Red
 	// only first instance of action code is found, others are placeholders as dealt with below
 	
@@ -339,7 +339,7 @@ static BOOL parseCreateAction (char *line, Action *action, int *actionCount, cha
 				setRewind(&action[*actionCount].aux,-DEFAULT_REWIND);
 		}					
 		if (actionCode == DELETE || actionCode == COPY || actionCode == TRIM || actionCode == SURVEY_TAKEN
-				|| actionCode == SURVEY_APPLY || actionCode == SURVEY_USELESS) {
+				|| actionCode == SURVEY_APPLY || actionCode == SURVEY_USELESS || actionCode == POSITION_TO_TOP) {
 			strAction++;
 			if (actionCode == SURVEY_TAKEN || actionCode == SURVEY_APPLY || actionCode == SURVEY_USELESS)
 				strAction++; // skip the 't', 'a', or 'u'
@@ -362,9 +362,11 @@ static BOOL parseCreateAction (char *line, Action *action, int *actionCount, cha
 					logException(6,strAction,0);  // todo:invalid internal reference in control track file
 				}
 			}
-			else {
-					ret = FALSE;
-					logException(8,strAction,0);  // syntax error in control track
+			else if (actionCode == POSITION_TO_TOP) // otherwise no parameter is legit for pushing language to top
+				action[*actionCount].destination = -1;
+			else  { 
+				ret = FALSE;
+				logException(8,strAction,0);  // syntax error in control track
 			}
 			if (actionCode != TRIM) {
 				// TRIM doesn't use aux

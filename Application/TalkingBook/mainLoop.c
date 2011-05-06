@@ -1288,6 +1288,34 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			reposition = TRUE;
 			break;
 
+		case POSITION_TO_TOP:
+			stop();
+			longToDecimalString(destination,filename,3);
+			logString(filename,ASAP);
+			if (destination == -1) {
+				// move LANGUAGE to top position
+				//Append string to system names file
+				cursor = pkgSystem.strHeapStack + pkgSystem.idxName;
+				strcpy(filename,SYSTEM_ORDER_FILE);
+				strcat(filename,".txt");
+				findDeleteStringFromFile(LANGUAGES_PATH,filename,cursor,TRUE);
+				strcpy(filepath,LANGUAGES_PATH);
+				strcat(filepath,SYSTEM_ORDER_FILE);
+				strcat(filepath,".txt");
+				insertStringInFile(filepath,cursor,0);
+				resetSystem();					
+			} else { 
+				tempList = &context.package->lists[destination];
+				getListFilename(filename,destination,FALSE);
+				if (tempList->currentFilePosition == -1) // haven't picked a msg in category yet --> reposition the whole category
+					cursor = NULL;
+				else // reposition the message
+					cursor = getCurrentList(tempList);
+				cursor = getCurrentList(&pkgSystem.lists[context.package->idxMasterList]);
+				
+			}
+			break;
+
 		case SPEED_UP:
 			adjustSpeed(SPEED_INCREMENT,TRUE);
 			break;
