@@ -376,18 +376,23 @@ void insertSoundFile(int idxFile) {
 }
 	
 static int recordAudio(char *pkgName, char *cursor) {
+	unsigned long getAvailRand();
 	int handle, ret = -1;
 	char temp[PATH_LENGTH];
 	char filepath[PATH_LENGTH];
-    char unique_id[PATH_LENGTH], digits[8];
+    char unique_id[PATH_LENGTH], digits[16];
 	long start, end, prev;
 	CtnrFile *file;
 	int key;
 	int low_voltage, v;
 	unsigned long wrk1;
-	char *cp, category[9];
+	char *cp, *cp1, category[9];
 	long metadata_start;
 	long metadata_numfields;
+	unsigned long rand1;
+	
+	rand1 = getAvailRand();		// pick random value to identify this recording
+    unsignedlongToHexString((long)rand1,digits);
 
 	if (strcmp(cursor,TRANSLATE_TEMP_DIR) == 0) {
 		strcpy(filepath,LANGUAGES_PATH);
@@ -398,11 +403,21 @@ static int recordAudio(char *pkgName, char *cursor) {
 	} else if (*cursor == SYS_MSG_CHAR) {
 		strcpy(filepath,LANGUAGES_PATH);
 		catLangDir(filepath);	
-		strcat(filepath,pkgName);
-		strcat(filepath,AUDIO_FILE_EXT);		
+//		strcat(filepath,pkgName);
+		cp1 = filepath + strlen(filepath);	// save this position
+		strcat(filepath, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN);
+		strcat(filepath, "_");
+		strcat(filepath, digits);
+		strcpy(pkgName, cp1);      // change pkgName to show file name we used
+		strcat(filepath,AUDIO_FILE_EXT);
 	} else {
 		strcpy(filepath,USER_PATH);
-		strcat(filepath,pkgName);
+//		strcat(filepath,pkgName);
+		cp1 = filepath + strlen(filepath);	// save this position
+		strcat(filepath, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN);
+		strcat(filepath, "_");
+		strcat(filepath, digits);
+		strcpy(pkgName, cp1);      // change pkgName to show file name we used
 		strcat(filepath,AUDIO_FILE_EXT);
 	}
 		
@@ -483,19 +498,26 @@ static int recordAudio(char *pkgName, char *cursor) {
         writeLE32(handle, metadata_numfields, CURRENT_POS); // 4 byte for num fields
         
         strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
-        strcat(unique_id, "_");       
-		longToDecimalString(systemCounts.packageNumber,digits,5);
-        strcat(unique_id, digits);
+        strcat(unique_id, "_");    
         
+//		longToDecimalString(systemCounts.packageNumber,digits,5);
+       	strcat(unique_id, digits);
+            
         addField(handle, DC_IDENTIFIER, unique_id, 1);       
         metadata_numfields += 1;
 
 //      add audio item id metadata initial code
 //      need to add org here 
         strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
-        strcat(unique_id, "_");       
-		longToDecimalString(systemCounts.recordingNumber,digits,8);
+        strcat(unique_id, "_"); 
+        
+//		longToDecimalString(systemCounts.recordingNumber,digits,8);
 		strcat(unique_id, digits);
+				
+//		strcpy(temp, "recordingAudio hex rand1=");
+//		strcat(temp, digits);
+//		strcat(temp,"\x0d\x0a");
+//		logString(temp,BUFFER);
 		
         addField(handle, DC_AUDIO_ITEM_ID, unique_id, 1);       
         metadata_numfields += 1;
@@ -816,4 +838,32 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 		}
 		break;
 	}
+}
+
+// for now a uid is available if no stat file is present for that id
+unsigned long getAvailRand() {
+	char statpath[PATH_LENGTH], *cp, digits[16];
+	unsigned long uid;
+	struct ondisk_filestats tmp_file_stats = {0};
+	int stathandle = -1, ret;
+	
+	strcpy(statpath, STAT_DIR);	
+    strcat(statpath, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
+    strcat(statpath, "_"); 
+	cp = statpath + strlen(statpath);
+
+	do {
+		uid = rand();
+		unsignedlongToHexString((unsigned long)uid, digits);
+		strcpy(cp, digits);
+		stathandle = open((LPSTR)statpath, O_RDWR);
+		if(stathandle >= 0)
+			close(stathandle);
+	} while (stathandle >= 0);
+	
+	stathandle = open(statpath, O_CREAT|O_RDWR);
+	ret = write(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
+	close(stathandle);
+	
+	return(uid);
 }

@@ -110,6 +110,24 @@ void longToDecimalString(long l, char * string, int numberOfDigits) {
 	*cursor++ = (num % 10) + 0x30;
 	*cursor = 0;	
 }
+void unsignedlongToDecimalString(unsigned long l, char * string, int numberOfDigits) {
+	int digit; 
+	long divisor;
+	unsigned long num;
+	char * cursor = string;
+	
+	num = l;
+	for (divisor=1;numberOfDigits>1;numberOfDigits--)
+		divisor *= 10;
+	for (;divisor >= 10;divisor /= 10) {
+		digit = num/divisor;
+		num -= (digit * divisor);
+		*cursor++ = digit + 0x30;
+	}
+	*cursor++ = (num % 10) + 0x30;
+	*cursor = 0;	
+}
+
 
 void longToHexString(long l, char * string, int words) {
 	int digit; 
@@ -141,6 +159,33 @@ void longToHexString(long l, char * string, int words) {
 		*cursor++ = (num % 16) - 10 + 0x41;
 	*cursor = 0;	
 }
+void unsignedlongToHexString(unsigned long l, char * string) {
+	int digit; 
+	long divisor;
+	unsigned long num;
+	char * cursor = string;
+	int numberOfDigits;
+		
+	//todo: deal with signed issue
+	num = l;
+	numberOfDigits = 8;
+	for (divisor=1;numberOfDigits>1;numberOfDigits--)
+		divisor *= 16;
+	for (;divisor >= 16;divisor /= 16) {
+		digit = num/divisor;
+		num -= (digit * divisor);
+		if (digit < 10)
+			*cursor++ = digit + 0x30;
+		else
+			*cursor++ = digit - 10 + 0x41;
+	}
+	if (num < 10)
+		*cursor++ = (num % 16) + 0x30;
+	else
+		*cursor++ = (num % 16) - 10 + 0x41;
+	*cursor = 0;	
+}
+
 
 long strToLong (char *str) {
 	//todo: flag when NaN

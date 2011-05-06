@@ -1526,6 +1526,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			}
 			
 			cursor = getCurrentList(&pkgSystem.lists[context.package->idxMasterList]);
+/* now in createRecording
 			do {
 				strcpy(filename,USER_PATH);
 				getPkgNumber(filename+strlen(USER_PATH),TRUE);
@@ -1538,7 +1539,10 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			*cursor2 = 0; // remove extension
 			strcpy(filename,filename+strlen(USER_PATH)); //remove path
 			
-			//filename is name of new file
+			strcpy(filename,(const char *)CATEGORY_DELIM_STR);
+			strcat(filename,cursor); // adds current listname to new recording name
+*/
+			//filename is now output from createRecording - name of new file without the .a18 suffix
 			//cursor is name of current list
 			ret = createRecording(filename,aux,cursor);
 			if (ret != -1) {
