@@ -1378,6 +1378,18 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			}
 			break;
 
+		case MAKE_FAVORITE:
+			tempList = &context.package->lists[destination];
+		    cursor = getCurrentList(tempList);
+			cpyListPath(filepath,FAVORITES_CATEGORY);
+			strcat(filepath,FAVORITES_CATEGORY);
+			strcat(filepath,".txt");
+			insertStringInFile(filepath,cursor,0);
+			context.queuedPackageNameIndex = SAME_SYSTEM;
+			context.queuedPackageType = PKG_SYS;
+			reposition = TRUE;
+			break;					
+
 		case SPEED_UP:
 			adjustSpeed(SPEED_INCREMENT,TRUE);
 			break;
