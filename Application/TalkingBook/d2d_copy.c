@@ -675,9 +675,7 @@ static int copyfiles(char *fromdir, char *todir)
 				continue;
 			}		
 			
-				setLED(LED_GREEN,FALSE);
-				setLED(LED_RED,TRUE);
-				r1 = _copy((LPSTR)from, (LPSTR)to);
+				setLED(LED_GREEN,TRUE);
 				
 //				longToHexString((long)r1, (char *)dbghex, 1);
 //				strcpy(dbgbuf, dbghex);
@@ -686,13 +684,16 @@ static int copyfiles(char *fromdir, char *todir)
 //		 		logString(dbgbuf,ASAP);
 
 				setLED(LED_RED,FALSE);
-				if (r1 != -1) {
-					setLED(LED_GREEN,TRUE);
-				}
+				if (DEBUG_MODE)
+					logString(from,ASAP);
+				r1 = _copy((LPSTR)from, (LPSTR)to);
+				playBip();
+				setLED(LED_RED,TRUE);
+				setLED(LED_GREEN,FALSE);
 		}
 		fret++;
 	}
 	return(fret);
 }
 
-
+	
