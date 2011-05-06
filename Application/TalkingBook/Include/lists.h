@@ -7,6 +7,7 @@
 #define LIST_ITEM_LENGTH	40
 #define MAX_TRANSLATE_FILE  100
 #define TRANSLATE_TEMP_DIR  "translate_temp"
+#define FAVORITES_CATEGORY	"FAVORITES"
 typedef struct ListItem ListItem;
 typedef struct TranslationList TranslationList;
 typedef enum EnumListType EnumListType;

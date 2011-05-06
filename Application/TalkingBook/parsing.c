@@ -114,8 +114,10 @@ static int getActionEnumFromChar (char *c) {
 			ret += 5;	
 	}
 	else if (ret == DELETE) {
-		if (*(c+1) == 't')
+		if (*(c+1) == 'm')
 			ret += 1;
+		if (*(c+1) == 't')
+			ret += 2;
 	}
 	else if (ret == COPY) {
 		if (*(c+1) == 'l')  //clone
@@ -338,11 +340,13 @@ static BOOL parseCreateAction (char *line, Action *action, int *actionCount, cha
 				// no specified rewind time, so use default
 				setRewind(&action[*actionCount].aux,-DEFAULT_REWIND);
 		}					
-		if (actionCode == DELETE || actionCode == COPY || actionCode == TRIM || actionCode == SURVEY_TAKEN
-				|| actionCode == SURVEY_APPLY || actionCode == SURVEY_USELESS || actionCode == POSITION_TO_TOP) {
+		if (actionCode == DELETE || actionCode == DELETE_MESSAGES || actionCode == COPY || actionCode == TRIM || 
+				actionCode == SURVEY_TAKEN || actionCode == SURVEY_APPLY || actionCode == SURVEY_USELESS || 
+				actionCode == POSITION_TO_TOP) {
 			strAction++;
-			if (actionCode == SURVEY_TAKEN || actionCode == SURVEY_APPLY || actionCode == SURVEY_USELESS)
-				strAction++; // skip the 't', 'a', or 'u'
+			if (actionCode == SURVEY_TAKEN || actionCode == SURVEY_APPLY || 
+				actionCode == SURVEY_USELESS || actionCode == DELETE_MESSAGES)
+				strAction++; // skip the 't', 'a', or 'u' or 'm'
 			while (isspace(*strAction)) strAction++;
 			if (*strAction == '{') { // variable-based package
 				cursor = strchr(strAction,'}');

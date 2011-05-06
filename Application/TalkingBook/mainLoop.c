@@ -1228,27 +1228,66 @@ static void takeAction (Action *action, EnumAction actionCode) {
 		case DELETE:
 			stop();
 			tempList = &context.package->lists[destination];
-			getListFilename(filename,destination,TRUE);
-			cursor = getCurrentList(tempList);		
-			cpyListPath(filepath,filename);	
-			ret = findDeleteStringFromFile(filepath,filename,cursor,TRUE);
-			tempList->currentFilePosition = -1; // forces next list action to reload
-			if (ret != -1)
-				ret = deletePackage(cursor);
-			else
-				logException(29,cursor,0);
-
-			list = &context.package->lists[aux];
-			context.idxActiveList = aux;
-			newFile = getTempFileFromName(getCurrentList(list),0);
-			newTime = 0;
-			reposition = TRUE;
-
+			if (destination == 0) {
+				// delete subject/category from master list	
+			    cursor = getCurrentList(tempList);
+				getListFilename(filename,destination,FALSE); 
+				cpyListPath(filepath,filename);  // e.g. a:/messages/lists/EN/
+				strcpy(tempPath,LIST_MASTER);
+				strcat(tempPath,".txt");
+				findDeleteStringFromFile(filepath,tempPath,cursor,TRUE);
+				// todo: actually delete audio file if it's not in any other list (including other languages)				
+				insertSound(&pkgSystem.files[DELETED_FILE_IDX],NULL,TRUE);
+				context.queuedPackageNameIndex = SAME_SYSTEM;
+				context.queuedPackageType = PKG_SYS;
+				reposition = TRUE;
+			} else {
+				// delete a message
+				getListFilename(filename,destination,TRUE);
+				cursor = getCurrentList(tempList);		
+				cpyListPath(filepath,filename);	
+				ret = findDeleteStringFromFile(filepath,filename,cursor,TRUE);
+				tempList->currentFilePosition = -1; // forces next list action to reload
+				if (ret != -1)
+					ret = deletePackage(cursor);
+				else
+					logException(29,cursor,0);
+	
+				context.queuedPackageNameIndex = SAME_SYSTEM;
+				context.queuedPackageType = PKG_SYS;
+				list = &context.package->lists[aux];
+				context.idxActiveList = aux;
+				insertSound(&pkgSystem.files[DELETED_FILE_IDX],NULL,TRUE);
+				newFile = getTempFileFromName(getCurrentList(list),0);
+				newTime = 0;
+				reposition = TRUE;
+			}
+	
 //			newBlock = &context.package->blocks[aux];
 //			newTime = newBlock->startTime;
 //			reposition = TRUE;
 			break;
-			
+
+		case DELETE_MESSAGES:
+			// delete all messages in a subject/category
+			if (destination == 0) {
+				stop();
+				tempList = &context.package->lists[destination];
+					// delete subject/category from master list	
+				cursor = getCurrentList(tempList);
+				cpyListPath(filepath,cursor);
+				strcat(filepath,cursor);
+				strcat(filepath,".txt");
+				unlink((LPSTR)filepath);
+				i = tbOpen((LPSTR)filepath,O_CREAT|O_RDWR|O_TRUNC);
+				close(i);
+				insertSound(&pkgSystem.files[DELETED_FILE_IDX],NULL,TRUE);
+				context.queuedPackageNameIndex = SAME_SYSTEM;
+				context.queuedPackageType = PKG_SYS;
+				reposition = TRUE;
+			}		
+			break;
+
 		case TRIM:
 			stop();
 			tempList = &context.package->lists[destination];
@@ -1296,23 +1335,46 @@ static void takeAction (Action *action, EnumAction actionCode) {
 				// move LANGUAGE to top position
 				//Append string to system names file
 				cursor = pkgSystem.strHeapStack + pkgSystem.idxName;
-				strcpy(filename,SYSTEM_ORDER_FILE);
-				strcat(filename,".txt");
-				findDeleteStringFromFile(LANGUAGES_PATH,filename,cursor,TRUE);
 				strcpy(filepath,LANGUAGES_PATH);
+				cursor2 = filepath + strlen(filepath);
 				strcat(filepath,SYSTEM_ORDER_FILE);
 				strcat(filepath,".txt");
+				findDeleteStringFromFile(LANGUAGES_PATH,cursor2,cursor,TRUE);
 				insertStringInFile(filepath,cursor,0);
 				resetSystem();					
 			} else { 
 				tempList = &context.package->lists[destination];
-				getListFilename(filename,destination,FALSE);
-				if (tempList->currentFilePosition == -1) // haven't picked a msg in category yet --> reposition the whole category
-					cursor = NULL;
-				else // reposition the message
-					cursor = getCurrentList(tempList);
-				cursor = getCurrentList(&pkgSystem.lists[context.package->idxMasterList]);
-				
+				longToDecimalString(tempList->currentFilePosition,filename,3);
+				logString(filename,ASAP);
+				if (destination == 0) {
+					 // reposition the whole category
+				    cursor = getCurrentList(tempList);
+					getListFilename(filename,destination,FALSE);  // e.g. HEALTH
+					cpyListPath(filepath,filename);  // e.g. a:/messages/lists/EN/
+					strcpy(tempPath,LIST_MASTER);
+					strcat(tempPath,".txt");
+					findDeleteStringFromFile(filepath,tempPath,cursor,TRUE);
+					strcat(filepath,tempPath);
+					insertStringInFile(filepath,cursor,0);
+					context.queuedPackageNameIndex = SAME_SYSTEM;
+					context.queuedPackageType = PKG_SYS;
+					reposition = TRUE;
+				}
+				else {
+					// reposition the message
+				    cursor = getCurrentList(tempList);
+					cursor2 = getCurrentList(&pkgSystem.lists[context.package->idxMasterList]);
+					cpyListPath(filepath,filename);
+					strcpy(tempPath,cursor2);
+					strcat(tempPath,".txt");
+					findDeleteStringFromFile(filepath,tempPath,cursor,TRUE);
+					strcat(filepath,cursor2);
+					strcat(filepath,".txt");
+					insertStringInFile(filepath,cursor,0);
+					context.queuedPackageNameIndex = SAME_SYSTEM;
+					context.queuedPackageType = PKG_SYS;
+					reposition = TRUE;
+				}
 			}
 			break;
 
