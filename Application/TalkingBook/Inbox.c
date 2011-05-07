@@ -178,8 +178,11 @@ processSystemFiles(void) {
 	strcat(strSysUpdatePath,SYS_UPDATE_SUBDIR);
 	l = (long)copydir((char *)strSysUpdatePath, (char *)"a:/");  // returns # of items copied
 	ret = check_new_sd_flash(strSysUpdatePath);  //strSysUpdatePath may be changed
-	if ((l > 1) || (ret != 0))  // 1 is for the SYS_UPDATE_SUBDIR
+	if ((l > 1) || (ret != 0)) { // 1 is for the SYS_UPDATE_SUBDIR
+		if (PLEASE_WAIT_IDX) 
+			insertSound(&pkgSystem.files[PLEASE_WAIT_IDX],NULL,TRUE); 
 		resetSystem(); // reset to begin new firmware reprogramming or to reload new config/system control
+	}
 }
 
 
