@@ -1572,6 +1572,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 				break;
 			}
 			strcpy(tempPath,FEEDBACK_CATEGORY);
+			/*
 			do {
 				strcpy(filepath,USER_PATH);
 				getPkgNumber(filepath+strlen(USER_PATH),TRUE);
@@ -1583,7 +1584,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			} while (ret);
 			*cursor2 = 0; // remove extension
 			strcpy(filename,filepath+strlen(USER_PATH)); //remove path
-			
+			*/
 			//filename is name of new file
 			//cursor is name of current list
 			ret = createRecording(filename,aux,tempPath);
