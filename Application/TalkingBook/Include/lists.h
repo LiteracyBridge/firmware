@@ -9,6 +9,7 @@
 #define TRANSLATE_TEMP_DIR  "translate_temp"
 #define FAVORITES_CATEGORY	"FAVORITES"
 #define FEEDBACK_CATEGORY	"USERS"
+#define TEMPLATE_LISTS_DIR	"copy-for-new-language"
 typedef struct ListItem ListItem;
 typedef struct TranslationList TranslationList;
 typedef enum EnumListType EnumListType;

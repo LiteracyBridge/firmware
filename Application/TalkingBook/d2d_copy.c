@@ -19,6 +19,8 @@ static int copyApplication(char * packageName, char *newPkgPath);
 static int copyMessage(char * packageName, char *newPkgPath);
 static void copyListAudio(const char * listName);
 static void exchangeStatsCSV(void);
+static int cloneDir(char *fromdir, char *todir);
+static int copyfiles(char *fromdir, char *todir);
 
 int d2dCopy(const char * packageName,const char * filenameList) {
 	int retCopy;
@@ -478,6 +480,38 @@ char *longToDecimalStringZ(long l, char * string, int numberOfDigits) {
 	return(string);
 }
 
+int
+copyLanguage(char *language) {
+	char from[PATH_LENGTH], to[PATH_LENGTH];
+	int ret;
+	
+	cpyTopicPath(from);
+	strcpy(to,from);
+	to[0] = 'b';
+	ret = cloneDir(from,to);
+	
+	//don't add language to languages.txt if there was an error in cloneDir (or if it's already listed)	
+	if (ret >= 0) { 
+		strcpy(to,LANGUAGES_PATH);
+		to[0] = 'b';
+		strcat(to,SYSTEM_ORDER_FILE);
+		strcat(to,".txt");	
+		strcpy(from,language);
+		ret = appendStringToFile(to,from);
+	
+		//TODO: move this to openList() if the directory isn't there the first time
+		strcpy(from,LISTS_PATH);
+		from[0] = 'b';
+		strcat(from,TEMPLATE_LISTS_DIR);
+		strcpy(to,LISTS_PATH);
+		to[0] = 'b';
+		strcat(to,language);
+		ret += cloneDir(from,to);
+	}
+	return ret;
+}
+
+
 // while in usb host mode clone the host to the client
 //   format client sd card (B:)
 //   copy most files from a: to b: (no stats, LOG_FILE, or SYSTEM_VARIABLE_FILE)
@@ -508,7 +542,7 @@ cloneDevice() {
 	if(newlog >= 0) {
 		close(newlog);
 		strcpy(to, "CLONED by ");
-		strcat(to, (LPSTR) (TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN));
+		strcat(to, (char *) (TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN));
 		appendStringToFile(path, to);
 	}
 	
@@ -540,7 +574,7 @@ cloneDevice() {
 		strcpy(from, path);
 		from[len_path] = 0;
 		strcat(from, fi.f_name);
-		ret = rename(from, to);
+		ret = rename((LPSTR)from, (LPSTR)to);
 //		ret = _copy((LPSTR)from, (LPSTR)to);
 	}
 }
@@ -548,7 +582,7 @@ cloneDevice() {
 static int 
 cloneDir(char *fromdir, char *todir) {
 // 	copy directory tree below fromdir (all subdirectories and files at all levels)
-	int ret, r1, len_from, len_to, len, fret;
+	int ret, r1, len_from, len_to, fret;
 	char from[PATH_LENGTH], fromfind[PATH_LENGTH], to[PATH_LENGTH]; //, lastdir[FILE_LENGTH];
 	char dirname[80];
 //	char dbgbuf[96], dbghex[16];
@@ -691,7 +725,10 @@ static int copyfiles(char *fromdir, char *todir)
 				setLED(LED_RED,TRUE);
 				setLED(LED_GREEN,FALSE);
 		}
-		fret++;
+		if (r1 == -1) 
+			fret = -(1<<14); // fret = very negative number so that we know at least one copy didn't work 
+		else
+			fret++;
 	}
 	return(fret);
 }

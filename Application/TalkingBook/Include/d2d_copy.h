@@ -6,6 +6,7 @@
 
 extern int d2dCopy(const char *, const char *);
 extern int cloneDevice(void);
+extern int copyLanguage(char *);
 extern int setUSBHost(BOOL);
 
 #endif

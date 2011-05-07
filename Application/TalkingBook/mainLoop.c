@@ -1202,10 +1202,23 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			setUSBHost(TRUE);
 			ret = cloneDevice();
 			setUSBHost(FALSE);
-			if (ret == 0 && POST_COPY_FILE_IDX) 
+			if (POST_COPY_FILE_IDX) 
 				insertSound(&pkgSystem.files[POST_COPY_FILE_IDX],NULL,TRUE); 
+			checkInactivity(TRUE); // stop from sleeping after long time out of the mainLoop
 			break;
-					
+
+		case COPY_LANGUAGE:
+			stop();
+			if (PRE_COPY_FILE_IDX)
+				insertSound(&pkgSystem.files[PRE_COPY_FILE_IDX],NULL,TRUE);  
+			setUSBHost(TRUE);
+			ret = copyLanguage(pkgSystem.strHeapStack + pkgSystem.idxName);
+			setUSBHost(FALSE);
+			if (POST_COPY_FILE_IDX) 
+				insertSound(&pkgSystem.files[POST_COPY_FILE_IDX],NULL,TRUE); 
+			checkInactivity(TRUE); // stop from sleeping after long time out of the mainLoop
+			break;
+								
 		case COPY:
 			stop();
 			tempList = &context.package->lists[destination];
@@ -1223,6 +1236,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 //			newBlock = &context.package->blocks[aux];
 //			newTime = newBlock->startTime;
 //			reposition = TRUE;
+			checkInactivity(TRUE); // stop from sleeping after long time out of the mainLoop
 			break;		
 
 		case DELETE:
