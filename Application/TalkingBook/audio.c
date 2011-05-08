@@ -393,7 +393,6 @@ static int recordAudio(char *pkgName, char *cursor) {
 	
 	rand1 = getAvailRand();		// pick random value to identify this recording
     unsignedlongToHexString((long)rand1,digits);
-
 	if (strcmp(cursor,TRANSLATE_TEMP_DIR) == 0) {
 		strcpy(filepath,LANGUAGES_PATH);
 		strcat(filepath,TRANSLATE_TEMP_DIR);
@@ -499,28 +498,16 @@ static int recordAudio(char *pkgName, char *cursor) {
         
         strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
         strcat(unique_id, "_");    
-        
-//		longToDecimalString(systemCounts.packageNumber,digits,5);
        	strcat(unique_id, digits);
             
         addField(handle, DC_IDENTIFIER, unique_id, 1);       
         metadata_numfields += 1;
 
-//      add audio item id metadata initial code
-//      need to add org here 
-        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
-        strcat(unique_id, "_"); 
-        
-//		longToDecimalString(systemCounts.recordingNumber,digits,8);
-		strcat(unique_id, digits);
-				
-//		strcpy(temp, "recordingAudio hex rand1=");
-//		strcat(temp, digits);
-//		strcat(temp,"\x0d\x0a");
-//		logString(temp,BUFFER);
-		
-        addField(handle, DC_AUDIO_ITEM_ID, unique_id, 1);       
-        metadata_numfields += 1;
+//        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
+//        strcat(unique_id, "_");       
+//		strcat(unique_id, digits);		
+//        addField(handle, DC_AUDIO_ITEM_ID, unique_id, 1);       
+//        metadata_numfields += 1;
 
         if (pkgSystem.idxLanguageCode != -1) {
 			strcpy(unique_id,&pkgSystem.strHeapStack[pkgSystem.idxLanguageCode]);
@@ -707,11 +694,14 @@ int addField(int handle, unsigned int field_id, char *field_value, int numfieldv
 
 void recordStats(char *filename, unsigned long handle, unsigned int why, unsigned long misc)
 {
+	int metaRead(int fd, unsigned int field_id, unsigned int *buf);
 //	char msg[128];
 	char statpath[PATH_LENGTH], *cp;
-	int stathandle, ret;
+	int stathandle, ret, ret1;
 	unsigned long wrk;
 	struct ondisk_filestats tmp_file_stats = {0};
+	
+	ret = ret1 = 0;
 	
 	switch(why) {
 	case STAT_OPEN:
@@ -720,8 +710,26 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 			read(handle, (unsigned long)&stat_audio_length << 1, 4);
 			lseek(handle, 0L, SEEK_SET);
 			stat_pkg_type = misc;
-			strcpy(STAT_FN, strrchr(filename, '/') + 1);
-			STAT_FN[strlen(STAT_FN) - 4] = 0; //chop off ".a18"
+			
+			statpath[0] = 0;
+			
+//			strcpy(msg, "STAT_OPEN call metaRead  ");
+//			strcat(msg, filename);
+//			logString(msg, ASAP);
+			
+        	ret1 = metaRead(handle, DC_IDENTIFIER, (unsigned int*)&statpath);
+        	
+        	if(ret1 > 0) {
+ 				strcpy(STAT_FN, statpath);
+        	} else {
+				strcpy(STAT_FN, strrchr(filename, '/') + 1);
+				STAT_FN[strlen(STAT_FN) - 4] = 0; //chop off ".a18"			
+        	}
+        	
+//   			strcpy(msg, "STAT_OPEN set STAT_FN  ");
+//			strcat(msg, STAT_FN);
+//			logString(msg, ASAP);
+
 		} else {
 			statINIT = 0;
 		}
@@ -732,9 +740,11 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 			if(stat_pkg_type > PKG_SYS) {	
 				
 				strcpy(statpath, STAT_DIR);
-//				strcat(statpath, getDeviceSN(0));
-//				strcat(statpath, "~");
 				strcat(statpath, STAT_FN); 
+				
+//				strcpy(msg, "STAT_CLOSE ");
+//				strcat(msg, statpath);
+//				logString(msg, ASAP);
 						
 				stathandle = tbOpen((LPSTR)statpath, O_CREAT|O_RDWR);
 				if(stathandle >= 0) {
@@ -765,8 +775,6 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 		STAT_FN[strlen(STAT_FN) - 4] = 0; //chop off ".a18"
 		
 		strcpy(statpath, STAT_DIR);
-	//		strcat(statpath, getDeviceSN(0));
-	//		strcat(statpath, "~");
 		strcat(statpath, STAT_FN); 
 		
 		stathandle = tbOpen((LPSTR)statpath, O_CREAT|O_RDWR);
@@ -861,9 +869,137 @@ unsigned long getAvailRand() {
 			close(stathandle);
 	} while (stathandle >= 0);
 	
-	stathandle = open(statpath, O_CREAT|O_RDWR);
+	stathandle = open((LPSTR)statpath, O_CREAT|O_RDWR);
 	ret = write(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
 	close(stathandle);
 	
 	return(uid);
 }
+int readLE32(int handle, long value, long offset) {
+	int ret = 0;
+	unsigned long wrkl;
+    long curpos = lseek(handle, 0, SEEK_CUR);
+    if(offset != CURRENT_POS) {
+        wrkl = lseek(handle, offset, SEEK_SET);
+    }
+    
+    ret += read(handle, (unsigned long) value << 1, 4);
+   
+ 	if(offset != CURRENT_POS) {
+    	lseek(handle, curpos, SEEK_SET);
+ 	}
+    
+    return(ret);
+}
+int readLE16(int handle, long value, long offset) {
+	int ret = 0;
+	unsigned long wrkl;
+	long curpos = lseek(handle, 0, SEEK_CUR);
+	if(offset != CURRENT_POS) {
+		wrkl = lseek(handle, offset, SEEK_SET);
+	}
+    ret += read(handle, (unsigned long) value << 1, 2);
+    
+ 	if(offset != CURRENT_POS) {
+    	lseek(handle, curpos, SEEK_SET);
+ 	}
+    
+	return(ret);
+}
+int metaRead(int fd, unsigned int field_id, unsigned int *buf) {
+	int convertTwoByteToSingleChar(unsigned int *, const unsigned int *, int);
+	unsigned long audio_bytes, mdversion, numfields, fieldlen, wrk, savpos;
+	unsigned int fid, nfv=0, i, j, ret, ret1 = 0;
+	unsigned char tmpbuf[128];
+//	char msg[128], digits[16];;
+
+	savpos = lseek(fd, 0, SEEK_CUR);  // save current position
+	
+	wrk = lseek(fd, 0, SEEK_SET);
+	ret = readLE32(fd, (long)&audio_bytes, CURRENT_POS);
+//	printf("%s has %ld audio bytes\n",argv[n], wrk);
+	wrk = lseek(fd, audio_bytes + 4, SEEK_SET);
+	ret = readLE32(fd, (long)&mdversion, CURRENT_POS);
+	if((mdversion == 0) || (mdversion > META_CURRENT_VERSION)) {
+		goto failed;
+	}
+	ret = readLE32(fd, (long)&numfields, CURRENT_POS);
+//	printf("num fields=%ld\n", numfields);
+
+//	strcpy(msg,"metaRead numfields ");
+//	unsignedlongToHexString((long)numfields,digits);
+//	strcat(msg, digits);
+//	logString(msg, ASAP);
+	
+	for(i=0; i<(int)numfields; i++) {
+		ret = readLE16(fd, (long)&fid, CURRENT_POS);
+//		printf("\n  field id=%d\n",fid);
+		ret = readLE32(fd, (long)&fieldlen, CURRENT_POS);
+//		printf("    filed length=%d\n", fieldlen);
+		ret = read(fd, (unsigned long)&nfv << 1, 1);
+		nfv &= 1;
+//		printf("    num field values=%d\n", nfv);
+		for(j=0; j<nfv; j++) {
+			unsigned int fl;
+			ret = readLE16(fd, (long)&fl, CURRENT_POS);
+//			printf("    field value length[%d]=%d\n",j,fl);
+			ret = read(fd, (unsigned long) tmpbuf << 1, fl);
+			if(field_id == fid) {
+				ret1 = fl;
+				goto foundit;
+			}
+//			printf("    field value[%d]=",j);
+/*			for(k=0; k<fl; k++) {
+				printf("0x%.2x ", buf[k]);
+			}
+			printf("\n");
+*/
+//			printf("'%s'",buf);
+/*			if(fid == 0) { // categories
+				unsigned int m = buf[0] - '0';
+				if((m >= 0 && m < 9)) {
+					printf(" (%s) ", categories[m]);
+				}
+			}
+			printf("\n");
+			*/
+		}
+	}
+failed:
+//	strcpy(msg, "metaRead failed");
+//	logString(msg, ASAP);
+	
+	wrk = lseek(fd, savpos, SEEK_SET);
+	return(-1);
+foundit:
+//	strcpy(msg,"metaRead found item ");
+//	unsignedlongToHexString((long)ret1,digits);
+//	strcat(msg, digits);
+//	logString(msg, ASAP);
+	
+	ret = convertTwoByteToSingleChar(buf,(const unsigned int *)tmpbuf,ret1);
+	wrk = lseek(fd, savpos, SEEK_SET);
+	return(ret1);
+}
+int convertTwoByteToSingleChar(unsigned int *buf, const unsigned int *tmpbuf, int count) {
+	unsigned int j, wrk, *cp;
+	
+	cp = (unsigned int*)tmpbuf;
+	for(j=0; j<count; ) {
+		wrk = *cp++;
+		buf[j++] = wrk & 0xff;
+		if(j == count)
+			break;
+		buf[j++] = (wrk & 0xff00) >> 8;
+	}
+	buf[j] = 0;
+//	{
+//		char msg[128];
+//		strcpy(msg, "convertTwoByteToSingleChar ");
+//		strcat (msg, (char *)buf);
+//		logString(msg, BUFFER);
+//	}
+	return(j);
+}
+
+
