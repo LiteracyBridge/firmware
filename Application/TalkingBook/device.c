@@ -401,12 +401,15 @@ static void logKeystroke(int intKey) {
 }
 
 void setOperationalMode(int newmode) {
+	extern void buildMyStatsCSV();
+	
   if(newmode == (int)P_WAIT) {
   	// stop();  --- should we see if we can WAIT while paused in an audio file?
   	SysIntoWaitMode();
     // when leaving wait mode, next instruction is executed, so we return here
     return;
   } else {
+  		buildMyStatsCSV(); 
      	// assume calling for sleep or halt
 		*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
 		if (newmode == (int)P_HALT)
