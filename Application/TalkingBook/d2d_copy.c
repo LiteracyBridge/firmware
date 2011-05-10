@@ -10,7 +10,10 @@
 #include "Include/containers.h"
 #include "Include/d2d_copy.h"
 #include "Include/filestats.h"
+#include "Include/files.h"
+#include "Include/sys_counters.h"
 
+extern APP_IRAM SystemCounts systemCounts;
 static char * longToDecimalStringZ(long l, char * string, int numberOfDigits);
 
 extern int setUSBHost(BOOL enter);
@@ -264,6 +267,14 @@ void buildMyStatsCSV() {
 	if(mystats < 0) {
 		return;
 	}
+
+//  first line is serial_number, cycle number
+	strcpy(lineout, (LPSTR)TB_SERIAL_NUMBER_ADDR);
+	strcat(lineout, ",");
+	longToDecimalString(systemCounts.powerUpNumber,(char *)strLog,4);
+	strcat(lineout, strLog);
+	bytesToWrite = convertDoubleToSingleChar(filename,lineout,TRUE);
+	retCopy = write(mystats, (UINT32)filename << 1, bytesToWrite);
 
 	strcpy(filename,STAT_DIR); 
 	strcat(filename,"*.*");
