@@ -33,8 +33,8 @@ static int processDir(char *, struct newContent *);
 //static int copyCWD(char *);
 static int updateCategory(char *, char *, char);
 static void processSystemFiles(void);
-static struct newContent processNewPackages(void);
-static void queueNewPackage(struct newContent);
+static void processNewPackages(struct newContent *);
+static void queueNewPackage(struct newContent *);
 static int copydir(char *, char *);
 static int copyfiles(char *, char *);
 
@@ -58,27 +58,27 @@ processInbox(void) {
 	setLED(LED_RED,TRUE);
 	writeVersionToDisk();  // make sure the version file wasn't deleted during USB device time
 
-	nc = processNewPackages();
+	processNewPackages(&nc);
 	processSystemFiles(); //copy system files, including firmware
-	queueNewPackage(nc);
+	queueNewPackage(&nc);
 	setLED(LED_RED,FALSE);
 	checkInactivity(TRUE);
 }
 
 static void 
-queueNewPackage(struct newContent nc) {
+queueNewPackage(struct newContent *ncp) {
 	char fbuf[PATH_LENGTH];
 	char *strList;
 
 	// Set up current list to position at one of the newly copied messages and queue it up to play
 	// This point is only reached if there was not a successful copy made of new firmware
-	if (nc.newAudioFileCat[0])
-		strcpy(fbuf,nc.newAudioFileCat);
-	else if (nc.newAudioDirCat[0])
-		strcpy(fbuf,nc.newAudioDirCat);
+	if (ncp->newAudioFileCat[0])
+		strcpy(fbuf,ncp->newAudioFileCat);
+	else if (ncp->newAudioDirCat[0])
+		strcpy(fbuf,ncp->newAudioDirCat);
 	else
 		fbuf[0] = 0;
-	//logString(nc.newAudioFileCat,BUFFER);
+	//logString(ncp->newAudioFileCat,BUFFER);
 	//flushLog();
 	if (fbuf[0]) {
 		context.package = &pkgSystem; // in case paused on content
@@ -99,17 +99,17 @@ queueNewPackage(struct newContent nc) {
 	} 
 }
 
-static struct newContent
-processNewPackages(void) {
+static void
+processNewPackages(struct newContent *ncp) {
 	struct f_info file_info;
 	char strLog[PATH_LENGTH], savecwd[PATH_LENGTH];
 	char fbuf[PATH_LENGTH], strNewPkgPath[PATH_LENGTH], fname[FILE_LENGTH];
 	int ret, len, fret;
-	struct newContent nc;	
+//	struct newContent nc;	
 
 	fret = 0;
-	nc.newAudioFileCat[0] = nc.newAudioFileName[0] = 0;
-	nc.newAudioDirCat [0] = nc.newAudioDirName [0] = 0;
+	ncp->newAudioFileCat[0] = ncp->newAudioFileName[0] = 0;
+	ncp->newAudioDirCat [0] = ncp->newAudioDirName [0] = 0;
 		
 //  check for *.a18 files in Inbox
 	strcpy(strNewPkgPath, INBOX_PATH);
@@ -122,7 +122,7 @@ processNewPackages(void) {
 			mkdir((LPSTR)strNewPkgPath);
 			strcpy(strLog, "no new packages");	
 			logString(strLog, ASAP);
-			return nc;
+			return;
 		}	
 		ret = getcwd((LPSTR)savecwd , sizeof(savecwd) - 1 );
 		ret = chdir((LPSTR)strNewPkgPath);
@@ -137,7 +137,7 @@ processNewPackages(void) {
 		while (ret >= 0) {
 			strcpy(strLog, file_info.f_name);
 			//logString(strLog,BUFFER);		
-			fret += processA18(&file_info, &nc);
+			fret += processA18(&file_info, ncp);
 			ret = unlink((LPSTR)file_info.f_name);					
 			ret = _findnext(&file_info);
 		}
@@ -155,7 +155,7 @@ processNewPackages(void) {
 				
 				strcpy(fname, file_info.f_name);	
 				//logString(fname,BUFFER);		
-				fret += processDir(fname, &nc);
+				fret += processDir(fname, ncp);
 				  // RHM: something I do below makes this necessary
 				  //      upon return after _findnext returns -1 even if there are more dirs
 				ret = _findfirst((LPSTR)fbuf, &file_info, D_ALL);
@@ -164,7 +164,7 @@ processNewPackages(void) {
 		
 		ret = chdir((LPSTR)savecwd);
 	}	// end of if: length of strNewPkgPath must be > 1
-	return nc;
+	return;
 }
 
 static void 
@@ -188,6 +188,7 @@ processSystemFiles(void) {
 
 static int 
 processA18(struct f_info *fip, struct newContent *pNC) {
+	int getMetaCat(char *filename, char *category);
 	char buffer[READ_LENGTH+1], *line, tmpbuf[READ_LENGTH+1];
 	char fnbase[80], category[40], subcategory[40];
 	int ret, len_fnbase, i, catidx, subidx, cat_base, fret;
@@ -234,9 +235,9 @@ processA18(struct f_info *fip, struct newContent *pNC) {
 			category[sizeof(category)-1] = 0;
 			unlink((LPSTR)fnbase);		
 		} else { // .a18 file without category info
-			getMetaCat(fip->f_name, category);
-			//or
-			// strcpy(category, "O");
+			if(!getMetaCat(fip->f_name, category))  {
+				strcpy(category, "OTHER");
+			}
 		}
 	}
 
@@ -275,6 +276,7 @@ processA18(struct f_info *fip, struct newContent *pNC) {
 			logString((char *)buffer,BUFFER);
 			logString((char *)"rename failed",ASAP);
 			unlink((LPSTR)tmpbuf);	// rename failed, remove from inbox anyway
+			return(fret);
 		} else {
 			fret++;
 		}
