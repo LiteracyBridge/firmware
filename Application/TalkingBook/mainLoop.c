@@ -1831,7 +1831,6 @@ void loadPackage(int pkgType, const char * pkgName) {
 	Action *action;
 	char filePath[PATH_LENGTH];
 	long timeNow;
-	char str[50];
 	char *temp;
 		
 	flagParse = 0;
@@ -1880,7 +1879,6 @@ void loadPackage(int pkgType, const char * pkgName) {
 				logException(5,0,USB_MODE);
 				break;
 		}
-		strcpy(str,pkgName);
 		strcat(filePath,pkgName);
 		strcat(filePath,"/");
 		if (pkgType == PKG_SYS)
@@ -1916,18 +1914,18 @@ void loadPackage(int pkgType, const char * pkgName) {
 			//resetPackage(pkg);
 			memset(pkg,0,sizeof(CtnrPackage));		
 			pkg->pkg_type = pkgType;
-			ret = addTextToPkgHeap(str,pkg);
+			ret = addTextToPkgHeap(pkgName,pkg);
 			if (ret > -1) {
 				pkg->idxName = ret;
-				if (pkgType == PKG_SYS) {
-					// system packages use their language code as their package name (directory name)
-					pkg->idxLanguageCode = ret;	
-				}
 			}
 			else {
 				logException(11,pkgName,USB_MODE);
 			}		
 			parseControlFile(filePath, pkg);
+			if (pkgType == PKG_SYS) {
+				// system packages use their language code as their package name (directory name)
+				pkg->idxLanguageCode = pkg->idxName;	
+			}
 			// now save parsed structure to disk
 			strcpy(temp,PKG_CONTROL_FILENAME_BIN);
 			handle = tbOpen((LPSTR)(filePath),O_CREAT|O_RDWR);
