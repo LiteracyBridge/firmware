@@ -1887,11 +1887,11 @@ void loadPackage(int pkgType, const char * pkgName) {
 			strcat(filePath,UI_SUBDIR);
 		temp = filePath + strlen(filePath);
 		strcpy(temp,PKG_CONTROL_FILENAME_BIN);
-		handle = open((LPSTR)(filePath),O_RDONLY);
 		if (DEBUG_MODE) {
 			//Force to re-load control
 			handle = -1;
-		}
+		} else
+			handle = open((LPSTR)(filePath),O_RDONLY);
 		if (handle == -1) {
 			strcpy(temp,PKG_CONTROL_FILENAME_TXT);
 			flagParse = fileExists((LPSTR)filePath);
