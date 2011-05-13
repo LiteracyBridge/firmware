@@ -532,8 +532,8 @@ static int recordAudio(char *pkgName, char *cursor) {
         }
         
         
-/*        cp = strchr(filepath, '#');
-        if(cp++ != NULL) {
+        cp = cursor;
+        if(cp != NULL) {
         	if(!strncmp(cp, "AGR", 3))
         		strcpy(category, CAT_AGRICULTURE);
         	else if(!strncmp(cp, "HEA", 3))
@@ -555,16 +555,9 @@ static int recordAudio(char *pkgName, char *cursor) {
         } else {
         	strcpy(category, CAT_OTHER);
         }
-        */
         
-        if(cursor && *cursor) {
-        	addField(handle, DC_CATEGORY, cursor, 1);
-        	metadata_numfields += 1;
-        } else {
-        	strcpy(category, "OTHER");
-           	addField(handle, DC_CATEGORY, category, 1);
-        	metadata_numfields += 1;
-        }
+       	addField(handle, DC_CATEGORY, category, 1);
+    	metadata_numfields += 1;
         	       
         // add other fields here
         

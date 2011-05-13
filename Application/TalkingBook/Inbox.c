@@ -591,13 +591,14 @@ int getMetaCat(char *filename, char *category)
 		nret = read(fd, (unsigned long)&fieldlen << 1, 4);
 		//printf("    filed length=%d\n", fieldlen);
 		nret = read(fd, (unsigned long)&nfv << 1, 1);
+		nfv &= 0xff;
 		//printf("    num field values=%d\n", nfv);
 		for(j=0; j<nfv; j++) {
 			short fl;
 			nret = read(fd, (unsigned long)&fl << 1, 2);
 			//printf("    field value length[%d]=%d\n",j,fl);
 			nret = read(fd, (unsigned long)buf << 1, fl);
-			buf[fl] = 0;
+			buf[0] &= 0xff;
 			//printf("    field value[%d]=",j);
 /*			for(k=0; k<fl; k++) {
 				printf("0x%.2x ", buf[k]);
