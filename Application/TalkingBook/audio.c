@@ -502,6 +502,15 @@ static int recordAudio(char *pkgName, char *cursor) {
             
         addField(handle, DC_IDENTIFIER, unique_id, 1);       
         metadata_numfields += 1;
+        
+        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
+        strcat(unique_id, "_");    
+        longToDecimalString(systemCounts.powerUpNumber,(char *)category,4);
+        strcat(unique_id, category);
+        strcat(unique_id, "_"); 
+        strncat(unique_id, digits, 4);
+        addField(handle, DC_TITLE, unique_id, 1);       
+        metadata_numfields += 1;
 
 //        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
 //        strcat(unique_id, "_");       
@@ -511,10 +520,12 @@ static int recordAudio(char *pkgName, char *cursor) {
 
         if (pkgSystem.idxLanguageCode != -1) {
 			strcpy(unique_id,&pkgSystem.strHeapStack[pkgSystem.idxLanguageCode]);
-			addField(handle, DC_LANGUAGE, unique_id, 1);   
+			addField(handle, DC_LANGUAGE, unique_id, 1);
+			metadata_numfields += 1;   
         }
         
-        cp = strchr(filepath, '#');
+        
+/*        cp = strchr(filepath, '#');
         if(cp++ != NULL) {
         	if(!strncmp(cp, "AGR", 3))
         		strcpy(category, CAT_AGRICULTURE);
@@ -537,10 +548,17 @@ static int recordAudio(char *pkgName, char *cursor) {
         } else {
         	strcpy(category, CAT_OTHER);
         }
+        */
         
-		addField(handle, DC_CATEGORY, category, 1);
-        metadata_numfields += 1;
-       
+        if(cursor && *cursor) {
+        	addField(handle, DC_CATEGORY, cursor, 1);
+        	metadata_numfields += 1;
+        } else {
+        	strcpy(category, "OTHER");
+           	addField(handle, DC_CATEGORY, category, 1);
+        	metadata_numfields += 1;
+        }
+        	       
         // add other fields here
         
         writeLE32(handle, metadata_numfields, metadata_start + 4); // write correct num meta data fields
