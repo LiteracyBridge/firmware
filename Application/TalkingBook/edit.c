@@ -101,9 +101,10 @@ int loopClip(void) {
 					if (clipEndFrame < clipStartFrame)
 						clipEndFrame = clipStartFrame;
 				} else {
-					clipStartFrame -= adjustmentFrames;
-					if (clipStartFrame < 0)
-							clipStartFrame = 0;
+					if (clipStartFrame < adjustmentFrames)
+						clipStartFrame = 0;
+					else
+						clipStartFrame -= adjustmentFrames;
 				}				
 			} 
 		} while (key != KEY_SELECT && key != KEY_HOME);
