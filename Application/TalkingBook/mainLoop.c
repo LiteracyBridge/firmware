@@ -657,7 +657,6 @@ static void wrapTranslation() {
 		
 		//Move to new name
 		strcpy(tempPath,LANGUAGES_PATH);
-		strcat(tempPath,"translation_");
 		strcat(tempPath,getDeviceSN(0));
 		strcat(tempPath,"_");
 		len = strlen(tempPath);
@@ -688,7 +687,6 @@ static void wrapTranslation() {
 		strcat(filepath,"/");
 		
 		strcpy(tempPath,LISTS_PATH);
-		strcat(tempPath,"translation_");
 		strcat(tempPath,getDeviceSN(0));
 		strcat(tempPath,"_");
 		len = strlen(tempPath);
