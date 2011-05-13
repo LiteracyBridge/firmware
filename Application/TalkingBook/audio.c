@@ -481,6 +481,9 @@ static int recordAudio(char *pkgName, char *cursor) {
 //			end = getRTCinSeconds();			
 //		}
 		SACM_Stop();		//Snd_Stop(); // no need to call stop() and flush the log
+		setLED(LED_RED,FALSE);
+		turnAmpOn();
+		playDing();
 		//lseek(handle, 6, SEEK_SET );			//Seek to the start of the file input
 		//write(handle,(LPSTR)header<<1,6);
  
@@ -572,9 +575,6 @@ static int recordAudio(char *pkgName, char *cursor) {
 		//asm("INT FIQ, IRQ"); -- see INT OFF above used once to prevent corrupted recordings (now possibly handled by SD_Initial() after USB Device mode
         
 //		*P_WatchDog_Ctrl &= ~0x8000; // clear bit 15 to disable
-		setLED(LED_RED,FALSE);
-		turnAmpOn();
-		playDing();
 	
 		if (strcmp(cursor,TRANSLATE_TEMP_DIR) != 0) {
 			insertSound(&pkgSystem.files[POST_REC_FILE_IDX],NULL,FALSE);
