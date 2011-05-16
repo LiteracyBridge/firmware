@@ -510,6 +510,9 @@ static int recordAudio(char *pkgName, char *cursor) {
         addField(handle, DC_IDENTIFIER, unique_id, 1);       
         metadata_numfields += 1;
         
+        addField(handle, DTB_REVISION, (char *)"0", 1);       
+        metadata_numfields += 1;
+        
         strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
         strcat(unique_id, "_");    
         longToDecimalString(systemCounts.powerUpNumber,(char *)category,4);
