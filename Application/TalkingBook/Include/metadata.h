@@ -23,9 +23,6 @@
 #define DTB_REVISION		16
 #define DTB_REVISION_DATE	17
 #define DTB_REVISION_DESCRIPTION	18
-#define LB_COPY_COUNT		19
-#define LB_PLAY_COUNT		20
-#define LB_RATING			21
 
 #define DC_AUDIO_ITEM_ID	0x40   // change to match ACM
 
@@ -46,5 +43,6 @@ int metacat(char *filename, char *category);
 #define CAT_GOVERNANCE  "6"
 #define CAT_MUSIC       "7"
 #define CAT_DIARY       "8" 
+#define CAT_FEEDBACK	"9"
 
 #endif    

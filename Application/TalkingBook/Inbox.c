@@ -40,7 +40,7 @@ static int copyfiles(char *, char *);
 
 #define D_NOTDIR (D_FILE | D_RDONLY | D_HIDDEN | D_SYSTEM | D_ARCHIVE)
 
-__attribute__((section(".code"))) char *categories[] = {"OTHER", "AGRIC", "HEALTH", "EDU", "STORIES", "BUSINESS", "GOV", "MUSIC", "DIARY" };
+__attribute__((section(".code"))) char *categories[] = {"OTHER", "AGRIC", "HEALTH", "EDU", "STORY", "BIZ", "GOV", "MUSIC", "DIARY", "USERS" };
 
 //  called when leaving USB mode to check for files copied from other device into a:\Inbox
 //
@@ -608,7 +608,7 @@ int getMetaCat(char *filename, char *category)
 			//printf("'%s'",buf);
 			if(fid == 0) { // categories
 				unsigned int m = buf[0] - '0';
-				if((m >= 0 && m < 9)) {
+				if((m >= 0 && m <= 9)) {
 					strcpy(category, categories[m]);
 					ret = 1;
 					goto done;
