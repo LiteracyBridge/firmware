@@ -262,10 +262,21 @@ initRandomNG()
 }
 unsigned long rand() {
 	unsigned long ret;
-	
+	unsigned long wrk;
+
 	ret = (unsigned long) *P_TimerE_UpCount;
+
+	wrk = ret & 0xff;
+
 	ret <<= 16;
 	ret |= *P_TimerF_UpCount;
+	
+	wrk += *P_TimerF_UpCount & 0xff;
+	wrk += (*P_TimerF_UpCount & 0xff00) >> 8;
+	wrk <<= 24;
+
+	ret &= ~wrk;	// high order byte = sum of other 3 bytes (mod 256)
+	ret |= wrk;
 	
 	return(ret);
 }
