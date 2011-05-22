@@ -873,6 +873,8 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			context.idxActiveList = -1;
 			transList = &context.transList;
 			tempInt = pkgSystem.countFiles - 1;
+			if (tempInt >= (MAX_FILES-1)) 
+				logException(34,"too many files for array size",USB_MODE);
 			for(i=0; i < tempInt; i++)
 				transList->translatedFileMarker[i]='0';
 			transList->currFileIdx = -1;

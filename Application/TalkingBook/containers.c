@@ -517,13 +517,17 @@ int replaceStack (char *line, CtnrPackage *pkg) {
 }
 
 CtnrFile *getTempFileFromName(char *name, int getLongName) {
+	// This function takes a filename and populates a CtnrFile object for it.
+	// The getLongName feature is used when creating a category file and distinguishing the simple category name
+	// from the instruction to choose that cateogory (e.g. "press up to listen to ____ category").
 	CtnrFile *file;
 	char temp[FILE_LENGTH];
 	
-	strcpy(temp,name);
 	if (getLongName) { //Temporary Patch  
-		strcat(temp,"-LONG");
-	}
+		temp[0] = 'i';  // to distinguish the instruction associated with a category from just the category name
+		strcpy(temp+1,name);
+	} else
+		strcpy(temp,name);
 	file = &pkgSystem.tempFile;
 	file->idxFilename = replaceStack(temp,&pkgSystem);	
 	file->idxFirstBlockStart = 0;

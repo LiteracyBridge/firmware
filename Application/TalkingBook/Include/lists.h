@@ -5,10 +5,10 @@
 #define	__LISTS_h__
 
 #define LIST_ITEM_LENGTH	40
-#define MAX_TRANSLATE_FILE  100
+#define MAX_TRANSLATE_FILE  120
 #define TRANSLATE_TEMP_DIR  "translate_temp"
-#define FAVORITES_CATEGORY	"FAVORITES"
-#define FEEDBACK_CATEGORY	"USERS"
+#define FAVORITES_CATEGORY	"0-2"
+#define FEEDBACK_CATEGORY	"9"
 #define TEMPLATE_LISTS_DIR	"copy-for-new-language"
 typedef struct ListItem ListItem;
 typedef struct TranslationList TranslationList;

@@ -153,9 +153,10 @@ static void copyListAudio(const char * listName) {
 	struct f_info file_info;
 
 	cpyTopicPath(path);
-	strcpy(filename,path);
+	filename[0] = '*';  // to copy the short topic name and the instruction that goes with it
+	strcpy(filename+1,path);
 	strcat(filename,listName);
-	strcat(filename,"*"); // to copy "*-LONG.a18" as well as short topic name
+	strcat(filename,"*"); // to copy the short topic name and the instruction that goes with it
 	strcat(filename,AUDIO_FILE_EXT);
 	ret =_findfirst((LPSTR)filename, &file_info, D_FILE);
 	while (ret >= 0 && (retCopy == 0)) {
