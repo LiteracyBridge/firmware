@@ -14,6 +14,9 @@ typedef struct ListItem ListItem;
 typedef struct TranslationList TranslationList;
 typedef enum EnumListType EnumListType;
 
+typedef unsigned long MLENTRY;
+#define MAX_ML_ENTRIES 50
+
 enum EnumListType {LIST_OF_LISTS, LIST_OF_PACKAGES};
 
 struct TranslationList {

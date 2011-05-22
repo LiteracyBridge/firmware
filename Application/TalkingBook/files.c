@@ -717,3 +717,92 @@ void moveAudioFiles(char *fromdir, char *todir)
 		ret = _findnext(&fi);
 	}
 }
+unsigned int
+loadLanglisttoMemory(char *masterlist,  MLENTRY mla[], unsigned int mla_size)
+{
+	int mlfd, i, n;
+	unsigned int ret = 0;
+	char packedbuf[16], *line;
+	char buffer[READ_LENGTH+1];
+	MLENTRY *mlp;
+	
+	mlfd = tbOpen((LPSTR)masterlist, O_RDONLY);
+	if(mlfd < 0) {
+		return(ret);
+	}
+	getLine(-1,0); // reset
+	for(i=0, mlp=mla; i<mla_size; i++, mlp++) {
+		line = getLine(mlfd, buffer);
+		if(line == 0)
+			break;
+		categoryStringtoLong(line, mlp);
+	}
+	close(mlfd);
+	ret = i;
+	return(ret);
+}
+void
+categoryStringtoLong(char *cat, MLENTRY *mlp)
+{
+	unsigned char *cp, *base;
+	unsigned int i;
+	unsigned long l = 0;
+	
+	for(i=24, base=cat; i>=0; i-=8) {
+		cp = strchr(base, '-');
+		if (cp) {
+			*cp++ = 0;			
+		}
+		l |= (unsigned long) (((unsigned long)(strToInt(base))) << i);
+		if(!cp)
+			break;
+		base = cp;
+	}
+	
+	*mlp = l;		
+}
+void
+categoryLongtoString(char *cat, MLENTRY *mlp)
+{
+	unsigned long wrk;
+	char tmp[8], *cp;
+	
+	
+	wrk = (*mlp & 0xff000000) >> 24;
+	unsignedlongToDecimalString(wrk, tmp, 3);
+	cp = tmp;
+	if (*cp == '0') cp++;
+	if (*cp == '0') cp++;
+	strcpy(cat, cp);
+	
+	wrk = (*mlp & 0x00ff0000) >> 16;
+	if(wrk == 0)
+		return;
+	unsignedlongToDecimalString(wrk, tmp, 3);
+	strcat(cat, "-");
+	cp = tmp;
+	if (*cp == '0') cp++;
+	if (*cp == '0') cp++;
+	strcat(cat, cp);
+
+	wrk = (*mlp & 0x0000ff00) >> 8;
+	if(wrk == 0)
+		return;
+	unsignedlongToDecimalString(wrk, tmp, 3);
+	strcat(cat, "-");
+	cp = tmp;
+	if (*cp == '0') cp++;
+	if (*cp == '0') cp++;
+	strcat(cat, cp);
+	
+	wrk = (*mlp & 0x000000ff) >> 8;
+	if(wrk == 0)
+		return;
+	unsignedlongToDecimalString(wrk, tmp, 3);
+	strcat(cat, "-");
+	cp = tmp;
+	if (*cp == '0') cp++;
+	if (*cp == '0') cp++;
+	strcat(cat, cp);
+}
+

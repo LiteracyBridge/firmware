@@ -32,16 +32,21 @@ static int processA18(struct f_info *, struct newContent *);
 static int processDir(char *, struct newContent *);
 //static int copyCWD(char *);
 static int updateCategory(char *, char *, char);
+static int newUpdateCategory(char *, char *, char *, char);
 static void processSystemFiles(void);
 static void processNewPackages(struct newContent *);
 static void queueNewPackage(struct newContent *);
 static int copydir(char *, char *);
 static int copyfiles(char *, char *);
 
+char Lang[8] = {0};
+char *MLp = (unsigned int *) 0;
+int  nMLp = 0;
+
 #define D_NOTDIR (D_FILE | D_RDONLY | D_HIDDEN | D_SYSTEM | D_ARCHIVE)
-
+/*
 __attribute__((section(".code"))) char *categories[] = {"OTHER", "AGRIC", "HEALTH", "EDU", "STORY", "BIZ", "GOV", "MUSIC", "DIARY", "USERS" };
-
+*/
 //  called when leaving USB mode to check for files copied from other device into a:\Inbox
 //
 extern void
@@ -105,6 +110,11 @@ processNewPackages(struct newContent *ncp) {
 	char strLog[PATH_LENGTH], savecwd[PATH_LENGTH];
 	char fbuf[PATH_LENGTH], strNewPkgPath[PATH_LENGTH], fname[FILE_LENGTH];
 	int ret, len, fret;
+	MLENTRY mla[MAX_ML_ENTRIES]= { 0 };
+	Lang[0] = 0;
+	MLp = &mla[0];
+	nMLp = 0;
+
 //	struct newContent nc;	
 
 	fret = 0;
@@ -164,6 +174,11 @@ processNewPackages(struct newContent *ncp) {
 		
 		ret = chdir((LPSTR)savecwd);
 	}	// end of if: length of strNewPkgPath must be > 1
+	
+	Lang[0] = 0;
+	MLp = 0;
+	nMLp = 0;
+	
 	return;
 }
 
@@ -190,10 +205,10 @@ static int
 processA18(struct f_info *fip, struct newContent *pNC) {
 	int getMetaCat(char *filename, char *category);
 	char buffer[READ_LENGTH+1], *line, tmpbuf[READ_LENGTH+1];
-	char fnbase[80], category[40], subcategory[40];
-	int ret, len_fnbase, i, catidx, subidx, cat_base, fret;
+	char fnbase[80], category[40], subcategory[40], lan[8];
+	int ret, len_fnbase, i, catidx, subidx, cat_base, fret, handle;
 
-	category[0] = subcategory[0] = 0;
+	category[0] = subcategory[0] = lan[0] = 0;
 	cat_base = strIndex(fip->f_name, CATEGORY_DELIM);
 	catidx = subidx = fret = 0;
 	if(cat_base >= 1) {	// category info in filename
@@ -235,8 +250,14 @@ processA18(struct f_info *fip, struct newContent *pNC) {
 			category[sizeof(category)-1] = 0;
 			unlink((LPSTR)fnbase);		
 		} else { // .a18 file without category info
-			if(!getMetaCat(fip->f_name, category))  {
-				strcpy(category, "OTHER");
+			if(getMetaCat(fip->f_name, category))  {				
+				handle = open(fip->f_name, O_RDONLY);
+				if(handle >= 0) {
+					ret = metaRead(handle, DC_LANGUAGE, (unsigned int*)&lan);
+					close(handle);
+				}
+			} else {
+				strcpy(category, "0");
 			}
 		}
 	}
@@ -289,7 +310,11 @@ processA18(struct f_info *fip, struct newContent *pNC) {
 			
 // TODO - currently doing nothing with subcategory
 	
-	ret = updateCategory((char *)category, (char *)fnbase, 0);
+	if(lan[0] != 0) {
+		ret = newUpdateCategory((char *)category, (char *)fnbase, (char *)lan, 0);
+	} else {
+		ret = updateCategory((char *)category, (char *)fnbase, 0);
+	}
 	
 	return(fret);
 
@@ -299,14 +324,15 @@ static int
 processDir(char *dirname, struct newContent *pNC) {
 	char savecwd[80];
 	char buffer[READ_LENGTH+1], tempbuf[80];
-	char fnbase[80], category[40], subcategory[40];
-	int ret, fret, catidx, subidx, len_fnbase, i, cat_base;
+	char fnbase[80], category[40], subcategory[40], lang[8];
+	int ret, fret, catidx, subidx, len_fnbase, i, cat_base, fd;
 
 	ret = getcwd((LPSTR)savecwd , sizeof(savecwd) - 1 );
 	ret = chdir((LPSTR)dirname);
 	
 	category[0] = subcategory[0] = 0;
 	catidx = subidx = 0;
+	strcpy(lang,&pkgSystem.strHeapStack[pkgSystem.idxLanguageCode]);
 	
 	fret = 1;
 	
@@ -359,13 +385,25 @@ processDir(char *dirname, struct newContent *pNC) {
 		}
 	}
 		
-	if(catidx == 0)
-		strcpy(category, "OTHER");  // "O"
+	if(catidx == 0) {
+		strcat(tempbuf,"/");
+		strcat(tempbuf, dirname);
+		strcat(tempbuf,".a18");
+		if(!getMetaCat(tempbuf, category))  {
+			strcpy(category, "0");  // "O"
+		} else {
+			fd = tbOpen(tempbuf, O_RDONLY);
+			if(fd >= 0) {
+				i = metaRead(fd, DC_LANGUAGE, lang);
+				close(fd);
+			}
+		}
+	}
 	
 // TODO: - currently doing nothing with subcategory
 
 	if (ret != -1) // dont bother if move didnt happen, which means it probably already exists	
-		ret = updateCategory(category, fnbase, APP_PKG_CHAR);
+		ret = newUpdateCategory(category, fnbase, lang, APP_PKG_CHAR);
 	
 	if(pNC->newAudioDirCat[0] == 0) {
 		strcpy(pNC->newAudioDirCat, category);
@@ -377,6 +415,102 @@ processDir(char *dirname, struct newContent *pNC) {
 	ret = rmdir((LPSTR)dirname);
 	
 	return (fret);
+}
+MLENTRY 
+matchCategory(MLENTRY *mlp, MLENTRY *filecat) {
+	int i, ret = 1;
+	MLENTRY *mp, tmpfilecat = *filecat;
+	for (i=0, mp=mlp; i<nMLp; i++, mp++) {
+		if(*mp == tmpfilecat) {
+			return(tmpfilecat);
+		}
+	}
+	tmpfilecat &= (long) 0xffffff00;
+	for (i=0, mp=mlp; i<nMLp; i++, mp++) {
+		if(*mp == tmpfilecat) {
+			return(tmpfilecat);
+		}
+	}
+	tmpfilecat &= (long) 0xffff0000;
+	for (i=0, mp=mlp; i<nMLp; i++, mp++) {
+		if(*mp == tmpfilecat) {
+			return(tmpfilecat);
+		}
+	}
+	tmpfilecat &= (long) 0xff000000;
+	for (i=0, mp=mlp; i<nMLp; i++, mp++) {
+		if(*mp == tmpfilecat) {
+			return(tmpfilecat);
+		}
+	}
+	
+	return((MLENTRY)0);
+}
+static int 
+newUpdateCategory(char *category, char *fnbase, char *lang, char prefix) {
+	char buffer[80], tmpbuf[80], path[PATH_LENGTH], catwrk[20], *cp;
+	int ret;
+	MLENTRY filecat, mlret;
+
+	
+	strcpy(path,LISTS_PATH);
+	strcat(path,lang);
+	strcat(path, "/");
+	strcat(path,LIST_MASTER);
+	strcat(path,".txt");
+
+	if(strcmp(lang, &Lang)) {
+		ret = loadLanglisttoMemory(path,  MLp, MAX_ML_ENTRIES);
+		nMLp = ret;
+	}
+	
+	categoryStringtoLong(category, &filecat);
+	
+	{
+		MLENTRY tmp = 0x01010101;
+		mlret = matchCategory(MLp, &tmp);
+		tmp = 0x08080801;
+		mlret = matchCategory(MLp, &tmp);
+		tmp = 0x02080801;
+		mlret = matchCategory(MLp, &tmp);
+	}
+	
+	mlret = matchCategory(MLp, &filecat);
+		
+	categoryLongtoString(&catwrk[0], &filecat);
+	
+//	cpyListPath(path,&catwrk[0]);
+	if (catwrk[0] == SYS_MSG_CHAR)
+		strcpy(path,LANGUAGES_PATH);
+	else
+		strcpy(path,LISTS_PATH);
+	strcat(path, lang);
+	strcat(path, "/");
+	
+	strcpy(buffer, path);
+	strcat(buffer, catwrk);
+	strcat(buffer,".txt");
+	
+	if(!fileExists((LPSTR)buffer)) {  // if category does not exist, put file in OTHER - 0.txt
+		strcpy(buffer, path);
+		strcat(buffer,"0.txt");
+	}
+	
+	if(prefix) {
+		tmpbuf[0] = prefix;
+		strcpy(tmpbuf+1, fnbase);
+	} else {
+		strcpy(tmpbuf,fnbase);
+	}
+// This checks if entry already exists and adds a new line only if it does not.
+	ret = findDeleteStringFromFile((char *)NULL, buffer, tmpbuf, 0);
+		
+//  append the basename to the proper .txt file in lists
+	if (ret == -1)
+		ret = insertStringInFile(buffer,tmpbuf,0);
+	
+	return(ret);
+
 }
 
 static int 
@@ -599,6 +733,7 @@ int getMetaCat(char *filename, char *category)
 			//printf("    field value length[%d]=%d\n",j,fl);
 			nret = read(fd, (unsigned long)buf << 1, fl);
 			buf[0] &= 0xff;
+			buf[fl] = 0;
 			//printf("    field value[%d]=",j);
 /*			for(k=0; k<fl; k++) {
 				printf("0x%.2x ", buf[k]);
@@ -609,11 +744,11 @@ int getMetaCat(char *filename, char *category)
 			if(fid == 0) { // categories
 				unsigned int m = buf[0] - '0';
 				if((m >= 0 && m <= 9)) {
-					strcpy(category, categories[m]);
+					strcpy(category, buf);
 					ret = 1;
 					goto done;
 				} else {
-					strcpy(category, categories[0]);
+					strcpy(category, "0");
 					ret = 1;
 					goto done;
 				}

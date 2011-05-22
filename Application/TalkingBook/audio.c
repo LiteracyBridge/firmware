@@ -537,8 +537,10 @@ static int recordAudio(char *pkgName, char *cursor) {
         
         cp = cursor;
         if(cp != NULL) {
-        	if(!strncmp(cp, "AGR", 3))
-        		strcpy(category, CAT_AGRICULTURE);
+			if(*cp >= '0' && *cp <= '9') {
+	        	strcpy(category, cursor);
+			} else if(!strncmp(cp, "AGR", 3))
+	        	strcpy(category, CAT_AGRICULTURE);
         	else if(!strncmp(cp, "HEA", 3))
         		strcpy(category, CAT_HEALTH);
         	else if(!strncmp(cp, "EDU", 3))
@@ -555,9 +557,7 @@ static int recordAudio(char *pkgName, char *cursor) {
         		strcpy(category, CAT_DIARY);
         	else
         		strcpy(category, CAT_OTHER);
-        } else {
-        	strcpy(category, CAT_OTHER);
-        }
+		}
         
        	addField(handle, DC_CATEGORY, category, 1);
     	metadata_numfields += 1;
@@ -721,7 +721,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 	struct ondisk_filestats tmp_file_stats = {0};
 	
 	ret = ret1 = 0;
-	
+		
 	switch(why) {
 	case STAT_OPEN:
 		if(misc > PKG_SYS) {
