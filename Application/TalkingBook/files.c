@@ -427,9 +427,7 @@ INT16 tbOpen(LPSTR path, INT16 open_flag) {
 
 	for (i = 0; i < RETRIES; i++) { 
 		handle = open(path, open_flag);
-		if (handle < 0)
-			logException(22,(const char *)path,0);
-		else
+		if (handle >= 0)
 			break;
 		wait(100);
 	}
