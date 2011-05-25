@@ -32,7 +32,7 @@ static int processA18(struct f_info *, struct newContent *);
 static int processDir(char *, struct newContent *);
 //static int copyCWD(char *);
 static int updateCategory(char *, char *, char);
-static int newUpdateCategory(char *, char *, char *, char);
+static int newUpdateCategory(char *, char *, char *, struct newContent *, char);
 static void processSystemFiles(void);
 static void processNewPackages(struct newContent *);
 static void queueNewPackage(struct newContent *);
@@ -311,7 +311,7 @@ processA18(struct f_info *fip, struct newContent *pNC) {
 // TODO - currently doing nothing with subcategory
 	
 	if(lan[0] != 0) {
-		ret = newUpdateCategory((char *)category, (char *)fnbase, (char *)lan, 0);
+		ret = newUpdateCategory((char *)category, (char *)fnbase, (char *)lan, pNC, 0);
 	} else {
 		ret = updateCategory((char *)category, (char *)fnbase, 0);
 	}
@@ -403,7 +403,7 @@ processDir(char *dirname, struct newContent *pNC) {
 // TODO: - currently doing nothing with subcategory
 
 	if (ret != -1) // dont bother if move didnt happen, which means it probably already exists	
-		ret = newUpdateCategory(category, fnbase, lang, APP_PKG_CHAR);
+		ret = newUpdateCategory(category, fnbase, lang, pNC, APP_PKG_CHAR);
 	
 	if(pNC->newAudioDirCat[0] == 0) {
 		strcpy(pNC->newAudioDirCat, category);
@@ -447,7 +447,7 @@ matchCategory(MLENTRY *mlp, MLENTRY *filecat) {
 	return((MLENTRY)0);
 }
 static int 
-newUpdateCategory(char *category, char *fnbase, char *lang, char prefix) {
+newUpdateCategory(char *category, char *fnbase, char *lang, struct newContent *pNC, char prefix) {
 	char buffer[80], tmpbuf[80], path[PATH_LENGTH], catwrk[20], *cp;
 	int ret;
 	MLENTRY filecat, mlret;
@@ -465,19 +465,9 @@ newUpdateCategory(char *category, char *fnbase, char *lang, char prefix) {
 	}
 	
 	categoryStringtoLong(category, &filecat);
-	
-	{
-		MLENTRY tmp = 0x01010101;
-		mlret = matchCategory(MLp, &tmp);
-		tmp = 0x08080801;
-		mlret = matchCategory(MLp, &tmp);
-		tmp = 0x02080801;
-		mlret = matchCategory(MLp, &tmp);
-	}
-	
-	mlret = matchCategory(MLp, &filecat);
-		
-	categoryLongtoString(&catwrk[0], &filecat);
+	mlret = matchCategory(MLp, &filecat);		
+	categoryLongtoString(&catwrk[0], &mlret);
+	strcpy(pNC->newAudioFileCat, catwrk);
 	
 //	cpyListPath(path,&catwrk[0]);
 	if (catwrk[0] == SYS_MSG_CHAR)
@@ -697,6 +687,7 @@ static int copyfiles(char *fromdir, char *todir)
 }
 int getMetaCat(char *filename, char *category)
 {
+	int convertTwoByteToSingleChar(unsigned int *, const unsigned int *, int);
 	int ret = 0;
 	long wrk, numfields, fieldlen;
 	unsigned int nret, fd;
@@ -732,7 +723,7 @@ int getMetaCat(char *filename, char *category)
 			nret = read(fd, (unsigned long)&fl << 1, 2);
 			//printf("    field value length[%d]=%d\n",j,fl);
 			nret = read(fd, (unsigned long)buf << 1, fl);
-			buf[0] &= 0xff;
+//			buf[0] &= 0xff;
 			buf[fl] = 0;
 			//printf("    field value[%d]=",j);
 /*			for(k=0; k<fl; k++) {
@@ -742,9 +733,9 @@ int getMetaCat(char *filename, char *category)
 */
 			//printf("'%s'",buf);
 			if(fid == 0) { // categories
-				unsigned int m = buf[0] - '0';
+				unsigned int m = (buf[0] & 0xff) - '0';
 				if((m >= 0 && m <= 9)) {
-					strcpy(category, buf);
+					ret = convertTwoByteToSingleChar(category,(const unsigned int *)buf,fl);
 					ret = 1;
 					goto done;
 				} else {
