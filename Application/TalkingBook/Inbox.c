@@ -294,8 +294,8 @@ processA18(struct f_info *fip, struct newContent *pNC) {
 //			logString(buffer,ASAP);
 		if(ret) {   // rename failed, probably already exists
 			int fdinbox, fdcard;
-			fdcard  = tbOpen(tmpbuf, O_RDONLY);
-			fdinbox = tbOpen(buffer, O_RDONLY);
+			fdcard  = tbOpen(buffer, O_RDONLY);
+			fdinbox = tbOpen(tmpbuf, O_RDONLY);
 			ret = checkRevisions(fdcard, fdinbox);
 			if(ret == 0) {  // revision in inbox > revision on card
 				unlink((LPSTR)buffer);
@@ -314,8 +314,6 @@ processA18(struct f_info *fip, struct newContent *pNC) {
 			fret++;
 		}
 	}
-		
-docategory:	
 		
 	if(pNC->newAudioFileCat[0] == 0) {
 		strcpy(pNC->newAudioFileCat, category);
