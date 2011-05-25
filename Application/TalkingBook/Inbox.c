@@ -292,17 +292,31 @@ processA18(struct f_info *fip, struct newContent *pNC) {
 //			logString((char *)"Rename from/to",BUFFER);
 //			logString(tmpbuf,BUFFER);
 //			logString(buffer,ASAP);
-		if(ret) {
-			logString((char *)tmpbuf,BUFFER);
-			logString((char *)buffer,BUFFER);
-			logString((char *)"rename failed",ASAP);
-			unlink((LPSTR)tmpbuf);	// rename failed, remove from inbox anyway
-			return(fret);
+		if(ret) {   // rename failed, probably already exists
+			int fdinbox, fdcard;
+			fdcard  = tbOpen(tmpbuf, O_RDONLY);
+			fdinbox = tbOpen(buffer, O_RDONLY);
+			ret = checkRevisions(fdcard, fdinbox);
+			if(ret == 0) {  // revision in inbox > revision on card
+				unlink((LPSTR)buffer);
+				ret = rename((LPSTR)tmpbuf, (LPSTR)buffer);
+			}
+			if(ret) {
+				logString((char *)tmpbuf,BUFFER);
+				logString((char *)buffer,BUFFER);
+				logString((char *)"rename failed",ASAP);
+				unlink((LPSTR)tmpbuf);	// rename failed, remove from inbox anyway
+				return(fret);
+			} else {
+				fret++;
+			}
 		} else {
 			fret++;
 		}
 	}
-			
+		
+docategory:	
+		
 	if(pNC->newAudioFileCat[0] == 0) {
 		strcpy(pNC->newAudioFileCat, category);
 		strcpy(pNC->newAudioFileName, fnbase);
@@ -749,4 +763,40 @@ int getMetaCat(char *filename, char *category)
 done:
 	close(fd);
 	return(ret);
+}
+
+// return 0 if the metadata DTB_REVISION from the 2nd arg is greater that that on the first card
+// return non zero for all other cases & errors
+int 
+checkRevisions(int fdcard, int fdinbox)
+{
+	int i, j, iInbox, iCard;
+	char revInInbox[8], revOnCard[8];
+	
+	revInInbox[0] = revOnCard[0] = 0;
+	
+	if(fdcard < 0) {
+		if(fdinbox >= 0)
+			close(fdinbox);
+			return(1);
+	}
+	if(fdinbox < 0) {
+		close(fdcard);
+		return(1);
+	}
+
+	i = metaRead(fdcard, DTB_REVISION, revOnCard);
+	j = metaRead(fdinbox, DTB_REVISION, revInInbox);
+	close(fdinbox);
+	close(fdcard);
+	
+	if(i <= 0 || j <= 0) {
+		return(2);
+	}
+	iInbox = strToInt(revInInbox);
+	iCard  = strToInt(revOnCard);
+	if(iInbox > iCard) {
+		return(0); 
+	}
+	return(3);  // no change
 }
