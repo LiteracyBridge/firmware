@@ -188,6 +188,8 @@ int SystemIntoUDisk(unsigned int serviceloop)
 		long j;
 		tmp = R_USB_State_Machine;
 		for(j=0; j<100000; j++) {
+
+
 			USB_ServiceLoop(0);
 			if(R_USB_State_Machine > 0 && R_USB_State_Machine <= SCSI_CSW_Stage) {
 				goto xxx;
@@ -202,11 +204,13 @@ int SystemIntoUDisk(unsigned int serviceloop)
 		}
 		if (tmp == 0 && R_USB_State_Machine == 0) {
 			SetSystemClockRate(CLOCK_RATE);
+			_devicemount(0);
 			return(2);
 		}
 
 		if(R_USB_State_Machine == 0xf5f5) {
 			SetSystemClockRate(CLOCK_RATE);
+			_devicemount(0);
 			return(2);
 		}
 		if(!(R_USB_State_Machine > 0 && R_USB_State_Machine <= SCSI_CSW_Stage)) {
