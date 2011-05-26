@@ -1399,6 +1399,16 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			strcat(filepath,FAVORITES_CATEGORY);
 			strcat(filepath,".txt");
 			insertStringInFile(filepath,cursor,0);
+			// be sure category is in master-list.txt
+			cpyListPath(filepath,LIST_MASTER);
+			strcat(filepath,(char *)LIST_MASTER);
+			strcat(filepath,(char *)".txt");
+			strcpy(tempBuffer,(char *)FAVORITES_CATEGORY);
+			// Only add category entry if doesn't already exist.
+			// Checking for existence without deleting and appending preserves category order.
+			ret = findDeleteStringFromFile((char *)NULL, filepath, tempBuffer, 0);
+			if (ret == -1) // not found in file
+				ret = appendStringToFile(filepath, tempBuffer); 
 			context.queuedPackageNameIndex = SAME_SYSTEM;
 			context.queuedPackageType = PKG_SYS;
 			reposition = TRUE;
@@ -1734,7 +1744,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 		  	// give visual and aural feedback to 
 		  	playBip();
 			setLED(LED_RED,TRUE);
-			wait(1000);			
+			wait(500);			
 			setOperationalMode((int)P_SLEEP); 
 			break;
 		case HALT:
@@ -1742,7 +1752,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 		  	// give visual and aural feedback to 
 		  	playBip();
 			setLED(LED_RED,TRUE);
-			wait(1000);
+			wait(500);
 			// call sleep function
 			setOperationalMode((int)P_HALT); 
 			break;
