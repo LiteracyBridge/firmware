@@ -113,10 +113,7 @@ int deletePackage(char * packageName) {
 					logException(29,filename,0);			
 			}
 		}
-		if (shouldDelete && ret == 0) {
-			ret = 0;
-			insertSound(&pkgSystem.files[DELETED_FILE_IDX],NULL,TRUE);
-		} else
+		if (!(shouldDelete && ret == 0))
 			ret = -1;
 	}
 	return ret;
