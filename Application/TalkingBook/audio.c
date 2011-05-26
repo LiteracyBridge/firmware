@@ -573,6 +573,14 @@ static int recordAudio(char *pkgName, char *cursor) {
 		longToDecimalString(systemCounts.powerUpNumber,(char *)temp,4);
 		addField(handle,DC_DATE,temp,1);
         metadata_numfields += 1;
+        
+        if(!strcmp(category, FEEDBACK_CATEGORY)) {
+        	strcpy(unique_id, STAT_FN); // DC_IDENTIFIER read at open
+        	if(strlen(unique_id)) {
+        		addField(handle,DC_RELATION,unique_id,1);
+        		metadata_numfields += 1;
+        	}
+        }
 
         // add other fields here
         
