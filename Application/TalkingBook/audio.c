@@ -514,11 +514,16 @@ static int recordAudio(char *pkgName, char *cursor) {
         metadata_numfields += 1;
         
         strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
+
+
         strcat(unique_id, "_");    
-        longToDecimalString(systemCounts.powerUpNumber,(char *)category,4);
-        strcat(unique_id, category);
+        longToDecimalString(systemCounts.powerUpNumber,(char *)temp,4);
+        strcat(unique_id, temp);
         strcat(unique_id, "_"); 
-        strncat(unique_id, digits, 4);
+        longToDecimalString(systemCounts.recordingNumber,(char *)temp,4);
+        strcat(unique_id, temp);
+        strcat(unique_id, "_"); 
+        strncat(unique_id, digits, 8);
         addField(handle, DC_TITLE, unique_id, 1);       
         metadata_numfields += 1;
 
@@ -533,8 +538,7 @@ static int recordAudio(char *pkgName, char *cursor) {
 			addField(handle, DC_LANGUAGE, unique_id, 1);
 			metadata_numfields += 1;   
         }
-        
-        
+         
         cp = cursor;
         if(cp != NULL) {
 			if(*cp >= '0' && *cp <= '9') {
@@ -562,6 +566,14 @@ static int recordAudio(char *pkgName, char *cursor) {
        	addField(handle, DC_CATEGORY, category, 1);
     	metadata_numfields += 1;
         	       
+        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
+ 		addField(handle,DC_SOURCE,unique_id,1);       
+        metadata_numfields += 1;
+
+		longToDecimalString(systemCounts.powerUpNumber,(char *)temp,4);
+		addField(handle,DC_DATE,temp,1);
+        metadata_numfields += 1;
+
         // add other fields here
         
         writeLE32(handle, metadata_numfields, metadata_start + 4); // write correct num meta data fields
