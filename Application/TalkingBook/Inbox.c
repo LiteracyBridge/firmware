@@ -21,6 +21,7 @@ struct newContent {
 	char newAudioFileName [FILE_LENGTH];
 	char newAudioDirCat   [FILE_LENGTH];
 	char newAudioDirName  [FILE_LENGTH];
+	char newAudioLanguage [FILE_LENGTH];
 };
 
 extern APP_IRAM char logBuffer[LOG_BUFFER_SIZE];
@@ -38,6 +39,8 @@ static void processNewPackages(struct newContent *);
 static void queueNewPackage(struct newContent *);
 static int copydir(char *, char *);
 static int copyfiles(char *, char *);
+static int checkRevisions(int, int);
+static int getMetaCat(char *, char *);
 
 char Lang[8] = {0};
 char *MLp = (unsigned int *) 0;
@@ -73,8 +76,15 @@ processInbox(void) {
 static void 
 queueNewPackage(struct newContent *ncp) {
 	char fbuf[PATH_LENGTH];
+	char system_language[FILE_LENGTH];
 	char *strList;
 
+	// First, be sure that the queued package is of the same language as the current system.
+	// If not, then don't queue it up.
+	strcpy(system_language,&pkgSystem.strHeapStack[pkgSystem.idxLanguageCode]);
+	if (strcmp(system_language,ncp->newAudioLanguage))
+		return;
+	
 	// Set up current list to position at one of the newly copied messages and queue it up to play
 	// This point is only reached if there was not a successful copy made of new firmware
 	if (ncp->newAudioFileCat[0])
@@ -205,7 +215,7 @@ static int
 processA18(struct f_info *fip, struct newContent *pNC) {
 	int getMetaCat(char *filename, char *category);
 	char buffer[READ_LENGTH+1], *line, tmpbuf[READ_LENGTH+1];
-	char fnbase[80], category[40], subcategory[40], lan[8];
+	char fnbase[80], category[FILE_LENGTH], subcategory[FILE_LENGTH], lan[FILE_LENGTH];
 	int ret, len_fnbase, i, catidx, subidx, cat_base, fret, handle;
 
 	category[0] = subcategory[0] = lan[0] = 0;
@@ -255,6 +265,7 @@ processA18(struct f_info *fip, struct newContent *pNC) {
 				if(handle >= 0) {
 					ret = metaRead(handle, DC_LANGUAGE, (unsigned int*)&lan);
 					close(handle);
+					strcpy(pNC->newAudioLanguage,lan);
 				}
 			} else {
 				strcpy(category, "0");
@@ -430,7 +441,7 @@ processDir(char *dirname, struct newContent *pNC) {
 }
 MLENTRY 
 matchCategory(MLENTRY *mlp, MLENTRY *filecat) {
-	int i, ret = 1;
+	int i;
 	MLENTRY *mp, tmpfilecat = *filecat;
 	for (i=0, mp=mlp; i<nMLp; i++, mp++) {
 		if(*mp == tmpfilecat) {
@@ -511,7 +522,7 @@ newUpdateCategory(char *category, char *fnbase, char *lang, struct newContent *p
 	if (ret == -1)
 		ret = insertStringInFile(buffer,tmpbuf,0);
 	
-	if(cp = strrchr(buffer, '/')) {
+	if((cp = strrchr(buffer, '/'))) {
 		if(!strcmp(cp+1, "0.txt")) {
 			strcpy(path,LISTS_PATH);
 			strcat(path, lang);
@@ -521,7 +532,7 @@ newUpdateCategory(char *category, char *fnbase, char *lang, struct newContent *p
 			strcpy(tmpbuf, "0");
 			ret = findDeleteStringFromFile((char *)NULL, path, tmpbuf, 0);
 			if (ret == -1)
-				ret = insertStringInFile(path,tmpbuf,0);
+				ret = appendStringToFile(path,tmpbuf);
 		}
 	}
 
@@ -711,7 +722,9 @@ static int copyfiles(char *fromdir, char *todir)
 	}
 	return(fret);
 }
-int getMetaCat(char *filename, char *category)
+
+static int 
+getMetaCat(char *filename, char *category)
 {
 	int convertTwoByteToSingleChar(unsigned int *, const unsigned int *, int);
 	int ret = 0;
@@ -779,7 +792,7 @@ done:
 
 // return 0 if the metadata DTB_REVISION from the 2nd arg is greater that that on the first card
 // return non zero for all other cases & errors
-int 
+static int 
 checkRevisions(int fdcard, int fdinbox)
 {
 	int i, j, iInbox, iCard;

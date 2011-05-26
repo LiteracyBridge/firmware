@@ -5,6 +5,7 @@
 #define	__FILES_h__
 
 #include ".\Component\Include\FS\vfs.h"
+#include "./Application/TalkingBook/Include/lists.h"
 
 #define LOG_BUFFER_SIZE		512
 #define COPY_BUFFER_SIZE    1024
@@ -34,4 +35,8 @@ extern void copyAllFiles(char *, char *, BOOL);
 extern void moveAllFiles(char *, char *);
 extern void deleteAllFiles(char *);
 extern void moveAudioFiles(char *, char *);
+extern void categoryStringtoLong(char *, MLENTRY *);
+extern void categoryLongtoString(char *, MLENTRY *);
+extern unsigned int loadLanglisttoMemory(char *,  MLENTRY[], unsigned int);
+
 #endif
