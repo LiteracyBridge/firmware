@@ -511,6 +511,20 @@ newUpdateCategory(char *category, char *fnbase, char *lang, struct newContent *p
 	if (ret == -1)
 		ret = insertStringInFile(buffer,tmpbuf,0);
 	
+	if(cp = strrchr(buffer, '/')) {
+		if(!strcmp(cp+1, "0.txt")) {
+			strcpy(path,LISTS_PATH);
+			strcat(path, lang);
+			strcat(path, "/");
+			strcat(path,(char *)LIST_MASTER);
+			strcat(path,(char *)".txt");
+			strcpy(tmpbuf, "0");
+			ret = findDeleteStringFromFile((char *)NULL, path, tmpbuf, 0);
+			if (ret == -1)
+				ret = insertStringInFile(path,tmpbuf,0);
+		}
+	}
+
 	return(ret);
 
 }
