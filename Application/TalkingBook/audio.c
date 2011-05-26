@@ -766,7 +766,8 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 		}
 		break;
 	case STAT_CLOSE:
-		if(statINIT > 0) {
+		wrk = Snd_A1800_GetCurrentTime();  // in ms
+		if((statINIT > 0) && (wrk > 10000L)) {   // if ending pos > 10 seconds
 			wrk = lseek(SACMFileHandle, 0L, SEEK_CUR);
 			if(stat_pkg_type > PKG_SYS) {	
 				
