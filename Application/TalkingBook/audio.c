@@ -28,7 +28,7 @@ extern void User_SetDecodeLength(unsigned long);
 
 static int getFileHandle (CtnrFile *);
 static void playLongInt(CtnrFile *, unsigned long);
-static int recordAudio(char *, char *);
+static int recordAudio(char *, char *, BOOL);
 extern APP_IRAM unsigned int vCur_1;
 
 #include "Include/sys_counters.h"
@@ -376,7 +376,7 @@ void insertSoundFile(int idxFile) {
 	insertSound(&pkgSystem.files[idxFile],NULL,FALSE);
 }
 	
-static int recordAudio(char *pkgName, char *cursor) {
+static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 	unsigned long getAvailRand();
 	int handle, ret = -1;
 	char temp[PATH_LENGTH];
@@ -566,6 +566,14 @@ static int recordAudio(char *pkgName, char *cursor) {
        	addField(handle, DC_CATEGORY, category, 1);
     	metadata_numfields += 1;
         	       
+        if(relatedToLastPlayed) {
+        	strcpy(unique_id, STAT_FN); // DC_IDENTIFIER read at open
+        	if(strlen(unique_id)) {
+        		addField(handle,DC_RELATION,unique_id,1);
+        		metadata_numfields += 1;
+        	}
+        }
+
         strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
  		addField(handle,DC_SOURCE,unique_id,1);       
         metadata_numfields += 1;
@@ -574,14 +582,6 @@ static int recordAudio(char *pkgName, char *cursor) {
 		addField(handle,DC_DATE,temp,1);
         metadata_numfields += 1;
         
-        if(!strcmp(category, FEEDBACK_CATEGORY)) {
-        	strcpy(unique_id, STAT_FN); // DC_IDENTIFIER read at open
-        	if(strlen(unique_id)) {
-        		addField(handle,DC_RELATION,unique_id,1);
-        		metadata_numfields += 1;
-        	}
-        }
-
         // add other fields here
         
         writeLE32(handle, metadata_numfields, metadata_start + 4); // write correct num meta data fields
@@ -612,7 +612,7 @@ static int recordAudio(char *pkgName, char *cursor) {
 	return ret;
 }	
 
-int createRecording(char *pkgName, int fromHeadphone, char *listName) {
+int createRecording(char *pkgName, int fromHeadphone, char *listName, BOOL relatedToLastPlayed) {
 	int SPINS; //from page 102 of GPL Progammers Manual v1.0/Dec20,2006 
 	           //headphone amp audio driver input source select 
 	
@@ -636,7 +636,7 @@ int createRecording(char *pkgName, int fromHeadphone, char *listName) {
 		*P_HPAMP_Ctrl |= SPINS;	
 	}
 
-	recordAudio(pkgName,listName);
+	recordAudio(pkgName,listName,relatedToLastPlayed);
 	if (SPINS)
 		*P_HPAMP_Ctrl &= 0xFFF3; // zero bits 2 and 3, returning SPINS to 0
 	

@@ -1048,7 +1048,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			//cursor is name of current list
 			//Switch mode to '0' so insert sounds can get the correct path
 			transList->mode = '0';
-			ret = createRecording(filename,aux,TRANSLATE_TEMP_DIR);
+			ret = createRecording(filename,aux,TRANSLATE_TEMP_DIR, FALSE);
 			if (ret == -1)
 				logException(28,"recording failed",RESET); //todo: add voice error msg?
 				
@@ -1568,7 +1568,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 */
 			//filename is now output from createRecording - name of new file without the .a18 suffix
 			//cursor is name of current list
-			ret = createRecording(filename,aux,cursor);
+			ret = createRecording(filename,aux,cursor,FALSE);
 			if (ret != -1) {
 				destination = replaceStack(filename,context.package);
 				context.queuedPackageNameIndex = destination;
@@ -1611,7 +1611,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			*/
 			//filename is name of new file
 			//cursor is name of current list
-			ret = createRecording(filename,aux,tempPath);
+			ret = createRecording(filename,aux,tempPath,TRUE);
 			if (ret != -1) {
 				destination = replaceStack(filename,context.package);
 				context.queuedPackageNameIndex = destination;
