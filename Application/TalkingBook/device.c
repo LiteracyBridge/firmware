@@ -576,13 +576,13 @@ void writeVersionToDisk() {
 	int handle, ret;
 	struct f_info file_info;
 		
-	strcpy(fileVersion,DEFAULT_SYSTEM_PATH  VERSION  FILE_VERSION_EXT);
+	strcpy(fileVersion,DEFAULT_SYSTEM_PATH  SVN_REVISION  FILE_REVISION_EXT);
 	
 	if (!fileExists((LPSTR)fileVersion)) {
 		logString(fileVersion,ASAP);
 		mkdir((LPSTR)DEFAULT_SYSTEM_PATH); 
 		tbChdir((LPSTR)DEFAULT_SYSTEM_PATH);
-		ret =_findfirst((LPSTR)"*" FILE_VERSION_EXT, &file_info, D_FILE);
+		ret =_findfirst((LPSTR)"*" FILE_REVISION_EXT, &file_info, D_FILE);
 		if (ret >= 0) {
 			ret = unlink((LPSTR)file_info.f_name);		
 		}	

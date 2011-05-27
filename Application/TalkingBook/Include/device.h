@@ -32,7 +32,7 @@
 #define CONST_TB_SERIAL_PREFIX		(char *)"srn."
 #define CONST_TB_SERIAL_PREFIX_LEN	(strlen(CONST_TB_SERIAL_PREFIX))   // strlen of TB_SERIAL_PREFIX above
 #define P_TB_SERIAL_NUMBER      	(char *)(TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN)
-#define FILE_VERSION_EXT			".ver"
+#define FILE_REVISION_EXT			".rev"
 
 // if change clock in TIMEBASE_B_16HZ need to think about changing KEY_LONG_DOWN_THRESH as well
 #define TIMEBASE_B_16HZ       0xe001
