@@ -115,7 +115,7 @@ void buildBlockTimelines(CtnrFile *newFile) {
 				//copy from previous active array and just add newest thing
 				index = copyActiveBlocks(blockTimeline[idxBlockTimeline].activeBlocks, blockTimeline[idxBlockTimeline-1].activeBlocks, -1);
 				if (index < MAX_BLOCK_OVERLAP) { //todo:error if beyond overlap
-					blockTimeline[idxBlockTimeline].idxStartingEndingBlock = index;
+					blockTimeline[idxBlockTimeline].idxStartingEndingBlock = 0xFF00 + index; // block starting; nothing ending (FF)
 					blockTimeline[idxBlockTimeline].activeBlocks[index] = getBlockIdx(startingNext);
 					index++;
 				} else
