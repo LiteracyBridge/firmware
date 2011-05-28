@@ -28,9 +28,6 @@ APP_IRAM static int oldVolume;
 extern APP_IRAM int vThresh_1;
 extern APP_IRAM unsigned int vCur_1;
 APP_IRAM static unsigned int keydown_counter;
-void set_voltmaxvolume();
-
-
 
 // data stored between 0 and &rtc_fired+2 is not initialized by startup_Data.asm
 //    data stored here survives going into and returning from HALT mode
@@ -136,7 +133,7 @@ int adjustVolume (int amount, BOOL relative, BOOL rememberOldVolume) {
 	else
 		volume = amount;
 	
-	set_voltmaxvolume();
+	set_voltmaxvolume(FALSE);
 
 	if (volume > MAX_VOLUME) { 
 		volume = MAX_VOLUME;
@@ -218,6 +215,9 @@ unsigned int
 getCurVoltageSample() {	
 	unsigned ret = 0xffff;
 	APP_IRAM static BOOL wasSampleStarted = FALSE;
+	unsigned long currentTimeInSec;
+	unsigned int voltageDropTime;
+	APP_IRAM static unsigned long timeLastVoltageMilestone = 0;
 	char log[80];
 	
 	if (!wasSampleStarted) {
@@ -244,9 +244,30 @@ getCurVoltageSample() {
 		if(vThresh_1 == 0xffff) {
 			--vCur_1;	// drop current nominal voltage
 			vThresh_1 = 0;	// reset threshold bits
-			if (DEBUG_MODE) {
-				log[0]='v';
-				longToDecimalString(vCur_1, log+1, 3);
+			currentTimeInSec = getRTCinSeconds();
+			if (!(vCur_1 % V_VOLTAGE_DROP_CHECK_INTERVAL)) {
+				if (timeLastVoltageMilestone) {
+					voltageDropTime = currentTimeInSec - timeLastVoltageMilestone; 
+					strcpy(log, (char *) "VOLTAGE DROP RATE: 0."); 
+					longToDecimalString((long)V_VOLTAGE_DROP_CHECK_INTERVAL,log+strlen(log),2);
+					strcat(log,(char *) "v in ");
+					longToDecimalString((long)voltageDropTime,log+strlen(log),4);
+					strcat(log, (char *) " sec");
+					logString(log,BUFFER);
+					if (voltageDropTime < V_FAST_VOLTAGE_DROP_TIME_SEC && vCur_1 < V_MIN_VOL_VOLTAGE) {
+						// Maybe try an adjustment like the one below, but that might be too aggressive
+						// vFast_Voltage_Drop_Time_Sec = voltageDropTime;
+						set_voltmaxvolume(TRUE);						
+					} 
+				}  
+				timeLastVoltageMilestone = currentTimeInSec;
+			}
+
+
+			if (1) {  // (DEBUG_MODE) {
+				longToDecimalString(currentTimeInSec,log,5);
+				strcat(log,(char *)": v");
+				longToDecimalString(vCur_1, log+strlen(log), 3);
 				logString(log,BUFFER);
 			}
 			if(vCur_1 < V_MIN_RUN_VOLTAGE) {
@@ -494,13 +515,18 @@ refuse_lowvoltage(int die)
 }
 
 void
-set_voltmaxvolume()
+set_voltmaxvolume(BOOL forceLower)
 {
-	int	wrk = V_MIN_VOL_VOLTAGE - vCur_1;
-	if(wrk > 0) {
-		wrk >>= 3;
-		// for every .08 volt below V_MIN_VOL_VOLTAGE subtract 1 from MAX_VOLUME
-		wrk = 16 - wrk;
+	int wrk = V_MIN_VOL_VOLTAGE - vCur_1;
+	
+	if (wrk <= 0 || forceLower) {
+		if (forceLower)
+			wrk = MAX_VOLUME - 1;			
+		else {
+			wrk >>= 3;
+			// for every .08 volt below V_MIN_VOL_VOLTAGE subtract 1 from MAX_VOLUME
+			wrk = 16 - wrk;
+		}
 		if(wrk < 1) wrk = 1;
 		if(wrk < MAX_VOLUME) {
 			MAX_VOLUME = wrk;
@@ -509,7 +535,7 @@ set_voltmaxvolume()
 				SACM_Volume(volume);
 				playBip();	
 			}
-			if (DEBUG_MODE) {
+			if (TRUE) { // logging voltage for all devices in the field (DEBUG_MODE) {
 				char log[15] = "v---,MV--,CV--";
 				longToDecimalString(vCur_1, log+1, 3);
 				log[4] = ',';

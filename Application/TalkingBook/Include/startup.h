@@ -87,5 +87,8 @@ extern void loadSystemNames(void);
 #define DEFAULT_SPEED_INCREMENT 	3
 #define DEFAULT_INACTIVITY_SECONDS	60
 #define DEFAULT_USB_CLIENT_POLL_INTERVAL	3
+#define DEFAULT_V_FAST_VOLTAGE_DROP_TIME_SEC	60
+#define DEFAULT_V_VOLTAGE_DROP_CHECK_INTERVAL 	3  // check every .03 volts
+
 #endif
 

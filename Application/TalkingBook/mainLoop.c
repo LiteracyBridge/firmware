@@ -45,7 +45,6 @@ static void createTranslateDir (void);
 static void jumpTransList (int, CtnrFile**, unsigned int*, BOOL*);
 extern APP_IRAM unsigned int vCur_1;
 extern void refuse_lowvoltage(int);
-extern void set_voltmaxvolume();
 extern unsigned int MEM_TYPE;
 
 static EnumAction getStartEndCodeFromTimeframe(int idxTimeframe, EnumBorderCrossing approach, int *actionTime, int *idxAction) {
@@ -620,7 +619,7 @@ void mainLoop (void) {
 		}
 		if (++inactivityCheckCounter > 10) {
 			while(getCurVoltageSample() == 0xffff);
-			set_voltmaxvolume();
+			set_voltmaxvolume(FALSE);
 			checkInactivity(!context.isStopped && !context.isPaused);
 			inactivityCheckCounter = 0;
 		}

@@ -60,6 +60,8 @@ APP_IRAM int DEBUG_MODE, LOG_KEYS;
 APP_IRAM unsigned int CLOCK_RATE;
 APP_IRAM int LONG_LIST_NAMES;
 APP_IRAM unsigned int LONG_KEYPRESS_COUNTER;
+APP_IRAM unsigned int V_FAST_VOLTAGE_DROP_TIME_SEC, V_VOLTAGE_DROP_CHECK_INTERVAL;
+
 //if most recent 16 voltage readings are below vCur_1 (vThresh_1 == 0xffff),
 //   subtract 1 from vCur_1 and zero vThreah_1
 APP_IRAM unsigned int vCur_1;
@@ -118,6 +120,9 @@ void setDefaults(void) {
 	
 	ADMIN_COMBO_KEYS = KEY_UP | KEY_DOWN;
 	LONG_KEYPRESS_COUNTER = KEY_LONG_DOWN_THRESH;
+	V_FAST_VOLTAGE_DROP_TIME_SEC = DEFAULT_V_FAST_VOLTAGE_DROP_TIME_SEC;
+	V_VOLTAGE_DROP_CHECK_INTERVAL = DEFAULT_V_VOLTAGE_DROP_CHECK_INTERVAL;
+
 }
 
 void startUp(unsigned int bootType) {
@@ -413,6 +418,8 @@ int loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"LOG_KEYS")) LOG_KEYS=strToInt(value);
 				else if (!strcmp(name,(char *)"CLOCK_RATE")) CLOCK_RATE = strToInt(value);
 				else if (!strcmp(name,(char *)"LONG_LIST_NAMES")) LONG_LIST_NAMES=strToInt(value);
+				else if (!strcmp(name,(char *)"V_FAST_VOLTAGE_DROP_TIME_SEC")) V_FAST_VOLTAGE_DROP_TIME_SEC=strToInt(value);
+				else if (!strcmp(name,(char *)"V_VOLTAGE_DROP_CHECK_INTERVAL")) V_VOLTAGE_DROP_CHECK_INTERVAL=strToInt(value);
 				else if (!strcmp(name,(char *)"LONG_KEYPRESS_COUNTER")) LONG_KEYPRESS_COUNTER=strToInt(value);
 		}
 	}
@@ -429,7 +436,6 @@ int loadConfigFile(void) {
 
 void initVoltage()
 {
-	extern void set_voltmaxvolume();
 	APP_IRAM static unsigned long timeInitialized = -1;
 	int i, j, k, sumv;
 
@@ -464,7 +470,7 @@ void initVoltage()
 		refuse_lowvoltage(1);
 		// not reached
 	}
-	set_voltmaxvolume();
+	set_voltmaxvolume(FALSE);
 }
 unsigned int GetMemManufacturer()
 {
