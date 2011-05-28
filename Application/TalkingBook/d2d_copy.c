@@ -12,6 +12,7 @@
 #include "Include/filestats.h"
 #include "Include/files.h"
 #include "Include/sys_counters.h"
+#include "Include/SD_reprog.h"
 
 extern APP_IRAM SystemCounts systemCounts;
 static char * longToDecimalStringZ(long l, char * string, int numberOfDigits);
@@ -656,6 +657,10 @@ static int copyfiles(char *fromdir, char *todir)
 				continue;
 			}
 			if(!strcmp(from, SYSTEM_VARIABLE_FILE)) {
+				continue;
+			}		
+
+			if(!strcmp(from+strlen(from)-strlen(SERIAL_EXT), SERIAL_EXT)) {
 				continue;
 			}		
 			
