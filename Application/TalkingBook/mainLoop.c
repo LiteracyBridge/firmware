@@ -628,17 +628,34 @@ void mainLoop (void) {
 }
 
 static void createTranslateDir () {
+	char *temp;
+	int ret;
+	struct f_info fi;
+	char pathTranslate[PATH_LENGTH];
+	char pathCurrentLang[PATH_LENGTH];
+	
+	strcpy(pathTranslate,LANGUAGES_PATH);
+	strcat(pathTranslate,TRANSLATE_TEMP_DIR);
 	
 	//If temp dir doesn't exist, create it.
-	char filepath[PATH_LENGTH];
-	
-	strcpy(filepath,LANGUAGES_PATH);
-	strcat(filepath,TRANSLATE_TEMP_DIR);
-	
-	if(dirExists((LPSTR)filepath) == 0) {
-		mkdir((LPSTR)filepath);
+	if(dirExists((LPSTR)pathTranslate) == 0) {
+		mkdir((LPSTR)pathTranslate);
+		// also create any subdirectories within the language directory (just one level deep)
+		strcat(pathTranslate,(char *)"/");
+		temp = pathTranslate + strlen(pathTranslate); // to allow replacement of filename at the end of this path
+		strcpy(pathCurrentLang,LANGUAGES_PATH);
+		catLangDir(pathCurrentLang);
+		strcat(pathCurrentLang,(char *)"*");
+		ret =_findfirst((LPSTR)pathCurrentLang, &fi, D_DIR);
+		for (; ret >= 0; ret = _findnext(&fi)) {
+			if(fi.f_name[0]=='.')
+				continue;
+			strcpy(temp,fi.f_name);
+			mkdir((LPSTR)pathTranslate);
+		}		
 	}
 }
+
 static void wrapTranslation() {
 	char filepath[PATH_LENGTH],tempPath[PATH_LENGTH];
 	long maxFileIdx,i;
