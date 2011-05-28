@@ -10,6 +10,7 @@
 #include "Include/device.h"
 #include "Include/startup.h"
 #include "Include/sys_counters.h"
+#include "Include/SD_reprog.h"
 
 extern void _SystemOnOff(void);
 extern int SystemIntoUDisk(unsigned int);
@@ -21,6 +22,7 @@ static void logKeystroke(int);
 //static void Log_ClockCtrl(void);
 static void turnSDoff(void);
 static void turnNORoff(void);
+static void confirmSNonDisk(void);
 
 APP_IRAM static int volume, speed;
 APP_IRAM static unsigned long voltage; // voltage sample 
@@ -430,7 +432,8 @@ void setOperationalMode(int newmode) {
     // when leaving wait mode, next instruction is executed, so we return here
     return;
   } else {
-  		buildMyStatsCSV(); 
+  		buildMyStatsCSV();
+  		confirmSNonDisk();
      	// assume calling for sleep or halt
 		*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
 		if (newmode == (int)P_HALT)
@@ -803,4 +806,18 @@ KEY_TimeBase_B_isr() {	//TimerBase B fired
 	i = *P_TimeBaseB_Ctrl;
 	*P_TimeBaseB_Ctrl = i;	// reset interrupt bit
 	keydown_counter += 1;
+}
+
+static void confirmSNonDisk(void) {
+	int exists, handle;
+	char fileSN[PATH_LENGTH];
+		
+	strcpy(fileSN,SYSTEM_PATH);
+	strcat(fileSN, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN);
+	strcat(fileSN, (char *)SERIAL_EXT);
+	exists = fileExists((LPSTR) fileSN);
+	if (!exists) {
+		handle = tbOpen((LPSTR)fileSN,O_CREAT|O_RDWR|O_TRUNC);
+		close(handle);
+	}
 }
