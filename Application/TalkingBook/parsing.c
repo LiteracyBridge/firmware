@@ -951,7 +951,7 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 						charCursor = strchr(line,DELIMITER) + 1;
 						if (*charCursor == 'T') {
 							currentContainerType = 'T';
-							transList = &context.transList;
+							transList = &context.package->transList;
 							transList->idxFirstAction = -1;
 							transList->currFileIdx = -1;
 							transList->mode = '0';
@@ -978,7 +978,7 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 						//charCursor = strchr(line,DELIMITER) + 1;
 						if (*charCursor == 'L') {
 							list->listType = LIST_OF_LISTS;
-							context.package->idxMasterList = pkg->countLists-1;	
+							pkg->idxMasterList = pkg->countLists-1;	
 						}
 						else if (*charCursor == 'P')
 							list->listType = LIST_OF_PACKAGES;
@@ -1255,7 +1255,7 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 				continue;
 			}
 			lineCount = 0;
-			while (line && lineCount < context.transList.idxFirstAction) {
+			while (line && lineCount < context.package->transList.idxFirstAction) {
 				if ((line = getLine(fileHandle,buffer)))
 					lineCount++;
 				if (!goodString(line,0)) {
@@ -1266,9 +1266,9 @@ void parseControlFile (char * filePath, CtnrPackage *pkg) {
 			// parse line if ended with \n or if last line of last buffer	
 			if (line && *line == 'A') {
 				//actionCount is updated within parseCreateAction
-				context.transList.idxFirstAction = actionCount + 1;
+				context.package->transList.idxFirstAction = actionCount + 1;
 				do {
-					ret = parseCreateAction(line, (Action *)&pkg->actions, &actionCount, (char *)&symbolMap, NULL, NULL, &context.transList);
+					ret = parseCreateAction(line, (Action *)&pkg->actions, &actionCount, (char *)&symbolMap, NULL, NULL, &context.package->transList);
 					//todo: handle ret = -1 or FALSE or 0 or whatever
 					if ((line = getLine(fileHandle,buffer)))
 						lineCount++;

@@ -196,7 +196,7 @@ static int getFileHandle (CtnrFile *newFile) {
 		case PKG_SYS:
 		case SYS_MSG:
 			strcpy(sTemp,LANGUAGES_PATH);
-			if (context.transList.mode == '1')
+			if (pkg->transList.mode == '1')
 				strcat(sTemp,TRANSLATE_TEMP_DIR);
 			else
 				strcat(sTemp,pkg->strHeapStack + pkg->idxName);

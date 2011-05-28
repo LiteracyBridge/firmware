@@ -173,6 +173,7 @@ struct CtnrPackage {
 	int timePrecision;  
 	//BOOL recInProgress;
 	int idxLanguageCode;
+    TranslationList transList;
 	//TODO:unsigned int length;
 	//TODO:unsigned int playCount;
 	//TODO:boolean allowReplies;
@@ -198,7 +199,6 @@ struct Context {
 	CtnrPackage *returnPackage;
     CtnrFile *lastFile;
     long packageStartTime;
-    TranslationList transList;
 };
 
 extern Context context;

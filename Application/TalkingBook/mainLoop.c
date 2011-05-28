@@ -304,7 +304,7 @@ static void processButtonEvent(int eventType) {
 	
 	if (context.idxActiveList != -1) {
 		if (context.idxActiveList == MAX_LISTS) 
-			action = getTransListActions(&context.transList);
+			action = getTransListActions(&context.package->transList);
 		else
 			action = getListActions(&pkgSystem.lists[context.idxActiveList]);
 			
@@ -411,11 +411,9 @@ static void endOfTimeframe(int idxTimeframe, BOOL isPlayerStopped) {
 			context.timeNextTimeframe = nextTimeframe;
 		}
 	}
-	if (startOrEnd == STARTING || startOrEnd == BOTH)
+	if (startOrEnd == STARTING || startOrEnd == BOTH) {
 		processIntoBlock(idxStart);
-/*	else if (GREEN_LED_WHEN_PLAYING)
-		setLED(LED_GREEN,FALSE);
-*/
+	}
 }
 
 static void keyResponse(void) {
@@ -603,7 +601,7 @@ void mainLoop (void) {
 				//process any end of play sound-insert
 				//TODO: work this into other code; it's a bit of a one-off right now
 				if (context.idxActiveList == MAX_LISTS) {
-					transList = &context.transList;
+					transList = &context.package->transList;
 					insertBlock = getEndInsert(transList->actionStartEnd, transList->idxFirstAction);
 				}
 				else {
@@ -657,10 +655,12 @@ static void createTranslateDir () {
 }
 
 static void wrapTranslation() {
-	char filepath[PATH_LENGTH],tempPath[PATH_LENGTH];
+	char filepath[PATH_LENGTH],tempPath[PATH_LENGTH], langPath[PATH_LENGTH], updatePath[PATH_LENGTH];
+	char *tempLangPath, *tempUpdatePath;
 	long maxFileIdx,i;
 	unsigned int len;
 	int ret;
+	struct f_info fi;
 
 	insertSound(&pkgSystem.files[PLS_WAIT_FILE_IDX],NULL,TRUE);
 	fs_safexit();  	// This is necessary to close the file handle of the previously played sound, 
@@ -669,7 +669,7 @@ static void wrapTranslation() {
 	//Number of files to translate is pkgSystem.countFiles - 1;
 	maxFileIdx = pkgSystem.countFiles - 2;
 	//Not overwriting files
-	if(context.transList.updateOnly == '0') {
+	if(context.package->transList.updateOnly == '0') {
 		
 		//Move to new name
 		strcpy(tempPath,LANGUAGES_PATH);
@@ -696,6 +696,8 @@ static void wrapTranslation() {
 		strcat(filepath,pkgSystem.strHeapStack + pkgSystem.idxName);
 		strcat(filepath,"/");
 		dirCopy(filepath,tempPath,0);
+		strcat(tempPath,(char *)"/" PKG_CONTROL_FILENAME_BIN);
+		unlink((LPSTR)tempPath);
 		
 		//Copy over messages/lists
 		strcpy(filepath,LISTS_PATH);
@@ -718,23 +720,37 @@ static void wrapTranslation() {
 	
 		loadSystemNames();
 	}
-	else {
-		//Get destination folder then temp folder paths
-		strcpy(tempPath,LANGUAGES_PATH);
-		strcat(tempPath,pkgSystem.strHeapStack + pkgSystem.idxName);
-		strcat(tempPath,"/");
+	else {   // update only
+ 		//Get destination folder then temp folder paths
+		strcpy(langPath,LANGUAGES_PATH);
+		strcat(langPath,pkgSystem.strHeapStack + pkgSystem.idxName);
+		strcat(langPath,"/");
 		//strcat(tempPath,UI_SUBDIR);
+		tempLangPath = langPath + strlen(langPath); // to allow replacement of filename at the end of this path
 		
-		strcpy(filepath,LANGUAGES_PATH);
-		strcat(filepath,TRANSLATE_TEMP_DIR);
-		strcat(filepath,"/");
-	
-		moveAudioFiles(filepath,tempPath);
+		strcpy(updatePath,LANGUAGES_PATH);
+		strcat(updatePath,TRANSLATE_TEMP_DIR);
+		strcat(updatePath,"/");
+		tempUpdatePath = updatePath + strlen(updatePath); // to allow replacement of filename at the end of this path
 		
-		//No subfolders under translate_temp
+		moveAudioFiles(updatePath,langPath);
+
+		// also move any subdirectories within the language directory (just one level deep)
+		strcat(tempUpdatePath,(char *)"*");
+		ret =_findfirst((LPSTR)updatePath, &fi, D_DIR);
+		for (; ret >= 0; ret = _findnext(&fi)) {
+			if(fi.f_name[0]=='.')
+				continue;
+			strcpy(tempUpdatePath,fi.f_name);
+			strcpy(tempLangPath,fi.f_name);
+			moveAudioFiles(updatePath,langPath);
+			deleteAllFiles(updatePath);
+			rmdir((LPSTR)updatePath);
+		}		
 		//Delete all files in translate_temp
-		deleteAllFiles(filepath);
-		rmdir((LPSTR)filepath);
+		*tempUpdatePath = 0;
+		deleteAllFiles(updatePath);
+		rmdir((LPSTR)updatePath);
 		
 	}
 	
@@ -746,11 +762,11 @@ static void wrapTranslation() {
 	
 	//Reset translation list	
 	for(i = 0; i <= maxFileIdx; i++){
-		context.transList.translatedFileMarker[i] = '0';
+		context.package->transList.translatedFileMarker[i] = '0';
 	}
-	context.transList.currFileIdx = -1;
-	context.transList.mode = '0';
-	context.transList.updateOnly = '0';
+	context.package->transList.currFileIdx = -1;
+	context.package->transList.mode = '0';
+	context.package->transList.updateOnly = '0';
 }	
 
 
@@ -766,7 +782,7 @@ static void finishTranslation(){
 	
 	handle = tbOpen((LPSTR)(filepath),O_CREAT|O_RDWR);
 	if (handle != -1) {
-		ret = write(handle, (unsigned long)&context.transList<<1, sizeof(TranslationList)<<1);
+		ret = write(handle, (unsigned long)&context.package->transList<<1, sizeof(TranslationList)<<1);
 		close(handle);
 	}
 	else {
@@ -778,7 +794,7 @@ static void finishTranslation(){
 	
 	for(i = 0; i <= maxFileIdx; i++){
 		//Check if all files have been translated
-		if(context.transList.translatedFileMarker[i] == '0')
+		if(context.package->transList.translatedFileMarker[i] == '0')
 			break;
 	}
 	
@@ -792,7 +808,7 @@ static void jumpTransList (int listRotation, CtnrFile** p_newFile, unsigned int*
 	TranslationList *transList;
 	BOOL playBipSound = FALSE;
 	
-	transList = &context.transList;
+	transList = &context.package->transList;
 	
 	if (transList->currFileIdx == -1)
 		playBipSound = getNextTransList(transList,TRUE,&pkgSystem);
@@ -830,20 +846,20 @@ static void loadDraftTranslation(void) {
 		filepath[temp]=0;
 		strcat(filepath,TRANSLATE_TEMP_DIR);
 		if (dirExists( (LPSTR) filepath) ) {
-			temp = read(handle, (unsigned long)&context.transList<<1, sizeof(TranslationList)<<1);
+			temp = read(handle, (unsigned long)&context.package->transList<<1, sizeof(TranslationList)<<1);
 			close(handle);
 			draftExists = 1;
 		}
 	}
 	if (!draftExists) {
 		for(i=0;i<=MAX_TRANSLATE_FILE;i++)
-			context.transList.translatedFileMarker[i]='0';
-		context.transList.currFileIdx = -1;
-		context.transList.mode = '0';
-		context.transList.updateOnly = '0';
+			context.package->transList.translatedFileMarker[i]='0';
+		context.package->transList.currFileIdx = -1;
+		context.package->transList.mode = '0';
+		context.package->transList.updateOnly = '0';
 	}
 	//Always start with not translated list
-	context.transList.mode = '0';	
+	context.package->transList.mode = '0';	
 }
 
 static void takeAction (Action *action, EnumAction actionCode) {
@@ -887,7 +903,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 		case DELETE_TRANSLATION:
 			stop();
 			context.idxActiveList = -1;
-			transList = &context.transList;
+			transList = &context.package->transList;
 			tempInt = pkgSystem.countFiles - 1;
 			if (tempInt >= (MAX_FILES-1)) 
 				logException(34,"too many files for array size",USB_MODE);
@@ -917,7 +933,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 		case TRANSLATE_NEW:
 			stop();
 			loadDraftTranslation();
-			context.transList.updateOnly = '0';
+			context.package->transList.updateOnly = '0';
 			newBlock = &context.package->blocks[destination];
 			newTime = newBlock->startTime;
 			reposition = TRUE;
@@ -925,7 +941,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 		case TRANSLATE_OVERWRITE:
 			stop();
 			loadDraftTranslation();
-			context.transList.updateOnly = '1';
+			context.package->transList.updateOnly = '1';
 			newBlock = &context.package->blocks[destination];
 			newTime = newBlock->startTime;
 			reposition = TRUE;
@@ -937,7 +953,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			tempInt = pkgSystem.countFiles - 1;
 			i = count = 0;
 			//l = 0;
-			transList = &context.transList;
+			transList = &context.package->transList;
 			transList->mode = '0';
 			while (i < tempInt) {
 				if(transList->translatedFileMarker[i]=='1'){
@@ -966,7 +982,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 		case WRAP_TRANSLATION:
 			stop();
 			context.idxActiveList = -1;
-			//if(i > l || context.transList.updateOnly == '1'){
+			//if(i > l || context.package->transList.updateOnly == '1'){
 				stop();
 				wrapTranslation();
 			//}
@@ -978,7 +994,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 		case TRANSLATED_LIST:
 			stop();
-			transList = &context.transList;
+			transList = &context.package->transList;
 			tempInt = pkgSystem.countFiles - 2;
 			i = 0;
 			//Can go to translated only if something has been translated.
@@ -1032,7 +1048,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 		case NOT_TRANSLATED_LIST:
 			stop();
-			transList = &context.transList;
+			transList = &context.package->transList;
 			transList->mode = '0';
 			
 			//New:
@@ -1051,7 +1067,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 				break;
 			}
 			//cursor is list name - don't need this for translation recording
-			transList = &context.transList;
+			transList = &context.package->transList;
 			tempFile = &pkgSystem.files[transList->currFileIdx + 1];
 			strcpy(filename,pkgSystem.strHeapStack + tempFile->idxFilename);
 
@@ -1085,10 +1101,10 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			//longToDecimalString((long)destination,tempBuffer+strlen(tempBuffer),2);
 			//logException(99,tempBuffer,(context.package == &pkgSystem)?USB_MODE:RESET); 
 			if (destination == MAX_LISTS)
-				transList = &context.transList;
+				transList = &context.package->transList;
 			else {
 				//Reset translation list if jumping to a non-translation list
-				context.transList.currFileIdx = -1;
+				context.package->transList.currFileIdx = -1;
 				list = &context.package->lists[destination];
 			}
 			context.idxActiveList = destination;
@@ -1208,7 +1224,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			context.queuedPackageType = aux;
 			context.queuedPackageNameIndex = destination;
 			//Exiting translation app.  Mode is looked at by getFileHandle.  Default is '0'
-			context.transList.mode = '0';
+			context.package->transList.mode = '0';
 			break;  // sets up main loop to handle this, rather than building up a stack overflow
 
 		case CLONE:
@@ -1360,7 +1376,6 @@ static void takeAction (Action *action, EnumAction actionCode) {
 		case POSITION_TO_TOP:
 			stop();
 			longToDecimalString(destination,filename,3);
-			logString(filename,ASAP);
 			if (destination == -1) {
 				// move LANGUAGE to top position
 				//Append string to system names file
@@ -1375,7 +1390,6 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			} else { 
 				tempList = &context.package->lists[destination];
 				longToDecimalString(tempList->currentFilePosition,filename,3);
-				logString(filename,ASAP);
 				if (destination == 0) {
 					 // reposition the whole category
 				    cursor = getCurrentList(tempList);
