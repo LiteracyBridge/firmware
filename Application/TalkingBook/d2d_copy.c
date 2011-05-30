@@ -592,10 +592,10 @@ cloneDir(char *fromdir, char *todir) {
 //		strcat(dbgbuf, to);
  //		logString(dbgbuf,ASAP);
 	
-		if(!strncmp(from, STAT_DIR, strlen(from))) {
+		if(!strcmp(from, STAT_DIR)) {
 			continue;
 		}
-		if(!strncmp(from, OSTAT_DIR, strlen(from))) {
+		if(!strcmp(from, OSTAT_DIR)) {
 			continue;
 		}
 		
