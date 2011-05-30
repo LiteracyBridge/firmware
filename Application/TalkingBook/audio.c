@@ -29,6 +29,8 @@ extern void User_SetDecodeLength(unsigned long);
 static int getFileHandle (CtnrFile *);
 static void playLongInt(CtnrFile *, unsigned long);
 static int recordAudio(char *, char *, BOOL);
+static void createStatsFile(unsigned long);
+
 extern APP_IRAM unsigned int vCur_1;
 
 #include "Include/sys_counters.h"
@@ -597,6 +599,12 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 			if (!context.keystroke)
 				insertSound(file,NULL,FALSE);  // replay subject
 		}
+		// Leaving this out now, because I believe it gets created when it is first played if non-existent.  
+		// The delay of having it in recordAudio is too long.
+		// createStatsFile(rand1); 
+								// Assumes no name collision from using a 32-bit semi-random number
+								// Checking all past names was causing a long delay, but maybe (TODO:) we can
+								// add in a check if the open() fails and then generate a new number in that unlikely case
 
 		strcpy(temp,"TIME RECORDED (secs): ");
 		longToDecimalString((long)end-start,temp+strlen(temp),4);
@@ -737,7 +745,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 //	char msg[128];
 	char statpath[PATH_LENGTH], *cp;
 	int stathandle, ret, ret1;
-	unsigned long wrk;
+	unsigned long wrk, msgTime;
 	struct ondisk_filestats tmp_file_stats = {0};
 	
 	ret = ret1 = 0;
@@ -774,8 +782,8 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 		}
 		break;
 	case STAT_CLOSE:
-		wrk = Snd_A1800_GetCurrentTime();  // in ms
-		if((statINIT > 0) && (wrk > 10000L)) {   // if ending pos > 10 seconds
+		msgTime = Snd_A1800_GetCurrentTime();  // in ms
+		if(statINIT > 0) {   
 			wrk = lseek(SACMFileHandle, 0L, SEEK_CUR);
 			if(stat_pkg_type > PKG_SYS) {	
 				
@@ -790,10 +798,11 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 				if(stathandle >= 0) {
 					ret = read(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
 					lseek(stathandle, 0L, SEEK_SET);
-					tmp_file_stats.stat_num_opens += 1; 
 					if(wrk >= stat_audio_length) {
+						tmp_file_stats.stat_num_opens += 1; 
 						tmp_file_stats.stat_num_completions += 1;
-					}
+					} else if (msgTime > 10000)
+						tmp_file_stats.stat_num_opens += 1; 						
 					ret = write(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
 					close(stathandle);
 				}
@@ -890,31 +899,28 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 
 // for now a uid is available if no stat file is present for that id
 unsigned long getAvailRand() {
-	char statpath[PATH_LENGTH], *cp, digits[16];
 	unsigned long uid;
+
+	uid = rand();
+
+	return(uid);
+}
+
+void createStatsFile(unsigned long uid) {
+	char statpath[PATH_LENGTH], digits[16];
 	struct ondisk_filestats tmp_file_stats = {0};
 	int stathandle = -1, ret;
 	
 	strcpy(statpath, STAT_DIR);	
     strcat(statpath, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
     strcat(statpath, "_"); 
-	cp = statpath + strlen(statpath);
-
-	do {
-		uid = rand();
-		unsignedlongToHexString((unsigned long)uid, digits);
-		strcpy(cp, digits);
-		stathandle = open((LPSTR)statpath, O_RDWR);
-		if(stathandle >= 0)
-			close(stathandle);
-	} while (stathandle >= 0);
-	
+	unsignedlongToHexString((unsigned long)uid, digits);
+	strcat(statpath, digits);
 	stathandle = open((LPSTR)statpath, O_CREAT|O_RDWR);
 	ret = write(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
 	close(stathandle);
-	
-	return(uid);
 }
+
 int readLE32(int handle, long value, long offset) {
 	int ret = 0;
 	unsigned long wrkl;

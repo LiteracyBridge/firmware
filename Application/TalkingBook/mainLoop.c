@@ -1204,6 +1204,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 		
 		case JUMP_PACKAGE:
+			stop();
 			if (aux == PKG_VARIABLE) {
 				strcpy(filename,getCurrentList(&pkgSystem.lists[destination]));
 				switch (filename[0]) {
@@ -1298,13 +1299,15 @@ static void takeAction (Action *action, EnumAction actionCode) {
 					ret = deletePackage(cursor);
 				else
 					logException(29,cursor,0);
-	
-				context.queuedPackageNameIndex = SAME_SYSTEM;
-				context.queuedPackageType = PKG_SYS;
-				list = &context.package->lists[aux];
+				tempList = &context.package->lists[aux];
+				cursor = getCurrentList(tempList);		
 				context.idxActiveList = aux;
 				insertSound(&pkgSystem.files[DELETED_FILE_IDX],NULL,TRUE);
-				newFile = getTempFileFromName(getCurrentList(list),0);
+				newFile = getTempFileFromName(cursor,0);
+				if (LONG_LIST_NAMES) {
+					insertSound(newFile,NULL,FALSE);
+					newFile = getTempFileFromName(cursor,1);
+				}
 				newTime = 0;
 				reposition = TRUE;
 			}
@@ -1423,6 +1426,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 
 		case MAKE_FAVORITE:
+			stop();
 			tempList = &context.package->lists[destination];
 		    cursor = getCurrentList(tempList);
 			cpyListPath(filepath,FAVORITES_CATEGORY);
@@ -1774,7 +1778,6 @@ static void takeAction (Action *action, EnumAction actionCode) {
 		  	// give visual and aural feedback to 
 		  	playBip();
 			setLED(LED_RED,TRUE);
-			wait(500);			
 			setOperationalMode((int)P_SLEEP); 
 			break;
 		case HALT:
@@ -1782,7 +1785,6 @@ static void takeAction (Action *action, EnumAction actionCode) {
 		  	// give visual and aural feedback to 
 		  	playBip();
 			setLED(LED_RED,TRUE);
-			wait(500);
 			// call sleep function
 			setOperationalMode((int)P_HALT); 
 			break;

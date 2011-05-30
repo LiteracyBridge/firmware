@@ -4,6 +4,7 @@
 #include "Include/talkingbook.h"
 #include "Include/parsing.h"
 #include "Include/containers.h"
+#include ".\Component\Include\FS\vfs.h"
 #include <ctype.h>
 
 static const int REWIND[] = {0,500,1000,1500,2000,3000,5000,10000};
@@ -251,6 +252,7 @@ CtnrBlock* getEndBlockFromFile(CtnrFile *file) {
 
 CtnrPackage* getPackageFromFile (CtnrFile *file) {
 	CtnrPackage *ret;
+	char path[PATH_LENGTH];
 	
 	if (file >= pkgSystem.files && file < (pkgSystem.files + pkgSystem.countFiles))
 		ret = &pkgSystem;
@@ -260,8 +262,18 @@ CtnrPackage* getPackageFromFile (CtnrFile *file) {
 		ret = &pkgUser;
 	else if (file == &context.package->tempFile)
 		ret = context.package;
-	else
-		logException(18,0,RESET); //file address doen't match pkgSystem or pkgUser
+	else {
+		// delete the binary control track to force a re-parse.
+		strcpy(path,LANGUAGES_PATH);
+		catLangDir(path);
+		strcat(path,PKG_CONTROL_FILENAME_BIN);
+		ret = unlink((LPSTR)path);	
+		if (ret)
+			strcat(path,(char *)": tried to delete this binary control");
+		else
+			strcpy(path,(char *)"deleted binary control to force re-parse");
+		logException(18,path,RESET); //file address doen't match pkgSystem or pkgUser	
+	}
 	return ret;
 }
 
