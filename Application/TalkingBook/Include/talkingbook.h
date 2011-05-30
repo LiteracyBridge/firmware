@@ -4,7 +4,7 @@
 #define	__TALKINGBOOK_h__
 
 #define MAJOR_VERSION	"v1.50"
-#define SVN_REVISION	"r773"
+#define SVN_REVISION	"r775+2"
 #define VERSION			MAJOR_VERSION SVN_REVISION
 #define TB_CAN_WAKE  // hardware that allows wake from sleep/halt
 //IMPORTANT: changes to TB_CAN_WAKE must also be made to system_head.inc!!!
@@ -74,7 +74,7 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 #define BACKWARD_SKIP	0x0001
 #define DELIMITER		':'
 #define MAX_HYPERLINK_STACK	5
-#define AVG_SYMBOL_LENGTH	12
+#define AVG_SYMBOL_LENGTH	20
 // TODO: malloc this -- it's huge waste of space to do it with an 2-dimensional array
 #define READ_LENGTH			1024
 #define FILE_LENGTH			40

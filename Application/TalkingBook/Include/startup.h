@@ -5,7 +5,7 @@
 #define	__STARTUP_h__
 
 #define MAX_SYSTEMS			20
-#define SYSTEM_HEAP_SIZE 512	//config file values
+#define SYSTEM_HEAP_SIZE 300	//config file values
 #define CONFIG_FILE		"a://system/config.txt"
 #define ALT_CONFIG_FILE		"a://config.txt"
 #define FLAGGED_CONFIG_FILE	"a://system/config-VERSION-CHANGED.txt"
