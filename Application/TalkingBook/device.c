@@ -177,7 +177,6 @@ void setUSBDevice (BOOL set) {
 		SystemIntoUDisk(USB_CLIENT_SVC_LOOP_CONTINUOUS);	
 		SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
 		processInbox();
-		setLED(LED_ALL,FALSE);
 	}
 }
 
@@ -433,7 +432,8 @@ void setOperationalMode(int newmode) {
     return;
   } else {
   		buildMyStatsCSV();
-  		confirmSNonDisk();
+		writeVersionToDisk();  // make sure the version file is correct
+  		confirmSNonDisk(); // make sure the serial number file is correct 
      	// assume calling for sleep or halt
 		*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
 		if (newmode == (int)P_HALT)

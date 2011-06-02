@@ -117,6 +117,9 @@ void setDefaults(void) {
 	BIT_RATE = DEFAULT_BIT_RATE;
 	INACTIVITY_SECONDS = DEFAULT_INACTIVITY_SECONDS;
 	USB_CLIENT_POLL_INTERVAL = DEFAULT_USB_CLIENT_POLL_INTERVAL;
+
+	PLEASE_WAIT_IDX = 0; // prevents trying to insert this sound before config & control files are loaded.
+	context.package = 0; // prevents trying to insert this sound before config & control files are loaded.
 	
 	ADMIN_COMBO_KEYS = KEY_UP | KEY_DOWN;
 	LONG_KEYPRESS_COUNTER = KEY_LONG_DOWN_THRESH;
@@ -129,8 +132,8 @@ void startUp(unsigned int bootType) {
 	char buffer[200];
 	char strCounts[32];
 	char filename[FILE_LENGTH];
-	char filepath[PATH_LENGTH];
-	int key, handle, temp, i;
+	int key;
+	int configExists;
 	
 	SetSystemClockRate(MAX_CLOCK_SPEED); // to speed up initial startup -- set CLOCK_RATE later
 
@@ -166,6 +169,12 @@ void startUp(unsigned int bootType) {
 		// which wipes out the serial number.
 		writeVersionToDisk();	
 	}
+	SysDisableWaitMode(WAITMODE_CHANNEL_A);
+	adjustVolume(NORMAL_VOLUME,FALSE,FALSE);
+	adjustSpeed(NORMAL_SPEED,FALSE);
+
+	// Try loading config file. If doesn't load, still try firmware update, but then go to testPCB() afterwards.
+	configExists = (loadConfigFile() == -1?0:1);
 	// check for new firmware first, but don't flash if voltage is low
 	if(V_MIN_SDWRITE_VOLTAGE <= vCur_1) {
 		updateSN();
@@ -174,17 +183,14 @@ void startUp(unsigned int bootType) {
 			startUpdate(filename);
 		}
 	}
-	
-	if (loadConfigFile() == -1) { // config.txt file not found
+	processInbox();
+	if (!configExists) { // config.txt file not found
 		testPCB();	
 	}
 	if (!SNexists()) {
 		logException(32,(const char *)"no serial number",LOG_ONLY);
 		testPCB();	
 	}
-	SysDisableWaitMode(WAITMODE_CHANNEL_A);
-	adjustVolume(NORMAL_VOLUME,FALSE,FALSE);
-	adjustSpeed(NORMAL_SPEED,FALSE);
 	//loadDefaultUserPackage(); --moved this to load dynamically into pkgUser so that we could save the memory of pkgDefault
 	if (MACRO_FILE)	
 		loadMacro();

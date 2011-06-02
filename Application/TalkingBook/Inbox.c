@@ -61,11 +61,7 @@ processInbox(void) {
 	
 	struct newContent nc;	
 	
-	stop();
-	playBip();
 	setLED(LED_RED,TRUE);
-	writeVersionToDisk();  // make sure the version file wasn't deleted during USB device time
-
 	processNewPackages(&nc);
 	processSystemFiles(); //copy system files, including firmware
 	queueNewPackage(&nc);
@@ -143,7 +139,7 @@ processNewPackages(struct newContent *ncp) {
 			strcpy(strLog, "no new packages");	
 			logString(strLog, ASAP);
 			return;
-		}	
+		} 
 		ret = getcwd((LPSTR)savecwd , sizeof(savecwd) - 1 );
 		ret = chdir((LPSTR)strNewPkgPath);
 		strcat(strNewPkgPath,"/");  // add back what was removed above
@@ -155,6 +151,7 @@ processNewPackages(struct newContent *ncp) {
 		strcat(fbuf,AUDIO_FILE_EXT);
 		ret =_findfirst((LPSTR)fbuf, &file_info, D_ALL);
 		while (ret >= 0) {
+			playBip();
 			strcpy(strLog, file_info.f_name);
 			//logString(strLog,BUFFER);		
 			fret += processA18(&file_info, ncp);
@@ -172,7 +169,7 @@ processNewPackages(struct newContent *ncp) {
 			if(file_info.f_attrib & D_DIR) {
 				if(file_info.f_name[0] == '.')
 					continue;
-				
+				playBip();
 				strcpy(fname, file_info.f_name);	
 				//logString(fname,BUFFER);		
 				fret += processDir(fname, ncp);
@@ -204,8 +201,10 @@ processSystemFiles(void) {
 	l = (long)copydir((char *)strSysUpdatePath, (char *)"a:/");  // returns # of items copied
 	ret = check_new_sd_flash(strSysUpdatePath);  //strSysUpdatePath may be changed
 	if ((l > 1) || (ret != 0)) { // 1 is for the SYS_UPDATE_SUBDIR
-		if (PLEASE_WAIT_IDX) 
+		if (PLEASE_WAIT_IDX && context.package) {  // prevents trying to insert this sound before config & control files are loaded.
 			insertSound(&pkgSystem.files[PLEASE_WAIT_IDX],NULL,TRUE); 
+		}
+		playBip();
 		resetSystem(); // reset to begin new firmware reprogramming or to reload new config/system control
 	}
 }
@@ -315,9 +314,8 @@ processA18(struct f_info *fip, struct newContent *pNC) {
 			if(ret) {
 				logString((char *)tmpbuf,BUFFER);
 				logString((char *)buffer,BUFFER);
-				logString((char *)"rename failed",ASAP);
+				logString((char *)"inbox message already exists on device",ASAP);
 				unlink((LPSTR)tmpbuf);	// rename failed, remove from inbox anyway
-				return(fret);
 			} else {
 				fret++;
 			}
