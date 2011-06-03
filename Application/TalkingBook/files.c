@@ -12,6 +12,7 @@ APP_IRAM int idxLogBuffer;
 
 extern APP_IRAM unsigned int vCur_1;
 extern void refuse_lowvoltage(int);
+static int copyfiles(char *, char *);
 
 BOOL nextNameValuePair (int handle, char *buffer, char delimiter, char **name, char **value) {
 	BOOL ret;
@@ -493,6 +494,7 @@ int fileCopy(char * from, char * to) {
 //	*P_WatchDog_Ctrl &= ~0x4007; // clear bits 0-2 for 2 sec and bit 14 to select system reset
 //	*P_WatchDog_Ctrl |= 0x8000; // set bit 15 to enable watchdog
 
+	playBip();
 	if (rHandle >= 0 && wHandle >= 0) {
 		do {
 			loopCount++;
@@ -518,7 +520,7 @@ int fileCopy(char * from, char * to) {
 	return ret;
 }
 
-//dirCopy slightly modified version of copydir from inbox.c.  Modified so doesn't delete original files.
+//dirCopy slightly modified version of copyMovedir.  Modified so doesn't delete original files.
 void dirCopy(char *fromdir, char *todir, BOOL overwrite) {
 // 	copy directory tree below fromdir (all subdirectories and files at all levels)
 	int ret, r1, len_from, len_to;
@@ -718,9 +720,9 @@ void moveAudioFiles(char *fromdir, char *todir)
 unsigned int
 loadLanglisttoMemory(char *masterlist,  MLENTRY mla[], unsigned int mla_size)
 {
-	int mlfd, i, n;
+	int mlfd, i;
 	unsigned int ret = 0;
-	char packedbuf[16], *line;
+	char *line;
 	char buffer[READ_LENGTH+1];
 	MLENTRY *mlp;
 	
@@ -804,3 +806,129 @@ categoryLongtoString(char *cat, MLENTRY *mlp)
 	strcat(cat, cp);
 }
 
+//
+// copy all files in fromdir to todir
+//
+static int copyfiles(char *fromdir, char *todir)
+{
+	int ret, r1, len_from, len_to, fret;
+	char from[80], to[80];
+	struct f_info fi;
+	
+	fret = 0;
+	
+	strcpy(from, fromdir);
+	len_from = strlen(from);
+	
+	if(from[len_from-1] != '/') {
+		strcat(from, "/");
+		len_from++;
+	}
+	strcat(from, "*.*");
+	
+	strcpy(to, todir);
+	len_to = strlen(to);
+//	mkdir(to);	// just to be safe
+	if(to[len_to-1] != '/') {
+		strcat(to, "/");
+		len_to++;
+	}
+			
+	ret =_findfirst((LPSTR)from, &fi, D_FILE);
+	while(ret >= 0) {
+		if(fi.f_name[0] != '.') {
+			from[len_from] = 0;
+			to[len_to]= 0;
+			strcat(from, fi.f_name);
+			strcat(to, fi.f_name);
+			if((lower(from[0]) == 'a') && (lower(to[0]) == 'a')) {
+				unlink((LPSTR)to);
+				r1 = rename((LPSTR)from, (LPSTR)to);
+			} else {
+				setLED(LED_GREEN,FALSE);
+				setLED(LED_RED,TRUE);
+				r1 = _copy((LPSTR)from, (LPSTR)to);
+// speed up 				wait (500);
+				setLED(LED_RED,FALSE);
+				if (r1 != -1) {
+					setLED(LED_GREEN,TRUE);
+// speed up					wait(500);
+				}
+			}
+//			logString((char *)"FROM/TO:",BUFFER);
+//			logString(from,BUFFER);
+//			logString(to,ASAP);
+		}
+		ret = _findnext(&fi);
+		fret++;
+	}
+	return(fret);
+}
+
+int 
+copyMovedir(char *fromdir, char *todir) {
+// 	copy directory tree below fromdir (all subdirectories and files at all levels)
+	int ret, r1, len_from, len_to, len, fret;
+	char from[PATH_LENGTH], fromfind[PATH_LENGTH], to[PATH_LENGTH], lastdir[FILE_LENGTH];
+
+	struct f_info fi;
+	
+	fret = 0;
+	
+	strcpy(from, fromdir);
+	len_from = strlen(from);
+	
+	if(from[len_from-1] != '/') {
+		strcat(from, "/");
+		len_from++;
+	}
+	strcat(from, "*");
+	
+	strcpy(to, todir);
+	len_to = strlen(to);
+	ret = mkdir((LPSTR)to);	// just to be safe
+	if(to[len_to-1] != '/') {
+		strcat(to, "/");
+		len_to++;
+	}
+	strcpy(fromfind,from);
+	ret =_findfirst((LPSTR)fromfind, &fi, D_DIR);
+	from[len_from] = 0;
+	lastdir[0] = 0;
+	
+	while (ret >= 0) {
+		if(! (fi.f_attrib & D_DIR)) {
+			ret = _findnext(&fi);
+			continue;
+		}
+	
+		if(fi.f_name[0]=='.') {
+			ret = _findnext(&fi);
+			continue;
+		}
+		from[len_from] = 0;
+		to[len_to]= 0;
+				
+		strcat(from, fi.f_name);
+		strcat(to, fi.f_name);
+		
+		r1 = mkdir((LPSTR)to);
+		fret += copyMovedir (from, to);
+		ret = rmdir((LPSTR)from);
+				
+		fret++;
+		ret =_findfirst((LPSTR)fromfind, &fi, D_DIR);  //necessary to reset after rmdir? 
+	};
+	
+	from[len_from] = 0;
+	to[len_to]= 0;
+	fret += copyfiles(from, to);
+	cpyTopicPath(from);
+	strcpy(lastdir,from+2);
+	if ((len = strlen(lastdir)))
+		lastdir[len-1] = 0; // remove last '\'
+	if (strstr(fromdir,lastdir))
+		fret = 0; // prevents system reset if only copying list files
+	
+	return(fret);
+}

@@ -5,7 +5,6 @@
 #define	__INBOX_h__
 
 extern void processInbox(void);
-extern void copyOutbox(void);
 extern int metaRead(int, unsigned int, unsigned int *);
 
 #endif

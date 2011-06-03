@@ -12,8 +12,9 @@
 #include "Include/audio.h"
 #include "Include/SD_reprog.h"
 #include "Include/mainLoop.h"
-#include "Include/startup.h"
 #include "Include/filestats.h"
+#include "Include/d2d_copy.h"
+#include "Include/startup.h"
 #include <ctype.h>
 
 extern int testPCB(void);
@@ -158,9 +159,9 @@ void startUp(unsigned int bootType) {
 		processInbox();
 		resetSystem();
 	} else if (key == KEY_PLUS) {
-		// outbox mode: copy outbox files to connecting device
+		// copy outbox files to connecting device, get stats and audio feedback
 		loadConfigFile();
-		copyOutbox();
+		pushContentGetFeedback();
 		resetSystem();
 	}	
 

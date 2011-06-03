@@ -31,6 +31,7 @@ extern int convertDoubleToSingleChar(char *, const char *, BOOL);
 extern void trimFile(char *, unsigned long, unsigned long);
 extern int fileCopy(char *, char *);
 extern void dirCopy(char *, char *, BOOL);
+extern int copyMovedir(char *, char *);
 extern void copyAllFiles(char *, char *, BOOL);
 extern void moveAllFiles(char *, char *);
 extern void deleteAllFiles(char *);

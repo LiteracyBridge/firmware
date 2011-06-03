@@ -13,6 +13,7 @@
 #include "Include/SD_reprog.h"
 #include "Include/sys_counters.h"
 #include "Include/mainLoop.h"
+#include "Include/d2d_copy.h"
 #include "Include/Inbox.h"
 #include "Include/metadata.h"
 
@@ -37,8 +38,6 @@ static int newUpdateCategory(char *, char *, char *, struct newContent *, char);
 static void processSystemFiles(void);
 static void processNewPackages(struct newContent *);
 static void queueNewPackage(struct newContent *);
-static int copydir(char *, char *);
-static int copyfiles(char *, char *);
 static int checkRevisions(int, int);
 static int getMetaCat(char *, char *);
 
@@ -62,8 +61,8 @@ processInbox(void) {
 	struct newContent nc;	
 	
 	setLED(LED_RED,TRUE);
-	processNewPackages(&nc);
 	processSystemFiles(); //copy system files, including firmware
+	processNewPackages(&nc);
 	queueNewPackage(&nc);
 	setLED(LED_RED,FALSE);
 	checkInactivity(TRUE);
@@ -198,7 +197,7 @@ processSystemFiles(void) {
 	
 	strcpy(strSysUpdatePath,INBOX_PATH);
 	strcat(strSysUpdatePath,SYS_UPDATE_SUBDIR);
-	l = (long)copydir((char *)strSysUpdatePath, (char *)"a:/");  // returns # of items copied
+	l = (long)copyMovedir((char *)strSysUpdatePath, (char *)"a:/");  // returns # of items copied
 	ret = check_new_sd_flash(strSysUpdatePath);  //strSysUpdatePath may be changed
 	if ((l > 1) || (ret != 0)) { // 1 is for the SYS_UPDATE_SUBDIR
 		if (PLEASE_WAIT_IDX && context.package) {  // prevents trying to insert this sound before config & control files are loaded.
@@ -583,143 +582,6 @@ updateCategory(char *category, char *fnbase, char prefix) {
 	return ret;
 }
 
-extern void 
-copyOutbox() {
-	char bInbox[PATH_LENGTH];
-	
-	setUSBHost(TRUE);
-	strcpy(bInbox,INBOX_PATH);
-	bInbox[0] = 'b'; // changes a: to b:
-	
-	copydir(OUTBOX_PATH, bInbox);
-	setUSBHost(FALSE);
-}
-
-static int 
-copydir(char *fromdir, char *todir) {
-// 	copy directory tree below fromdir (all subdirectories and files at all levels)
-	int ret, r1, len_from, len_to, len, fret;
-	char from[PATH_LENGTH], fromfind[PATH_LENGTH], to[PATH_LENGTH], lastdir[FILE_LENGTH];
-
-	struct f_info fi;
-	
-	fret = 0;
-	
-	strcpy(from, fromdir);
-	len_from = strlen(from);
-	
-	if(from[len_from-1] != '/') {
-		strcat(from, "/");
-		len_from++;
-	}
-	strcat(from, "*");
-	
-	strcpy(to, todir);
-	len_to = strlen(to);
-	ret = mkdir((LPSTR)to);	// just to be safe
-	if(to[len_to-1] != '/') {
-		strcat(to, "/");
-		len_to++;
-	}
-	strcpy(fromfind,from);
-	ret =_findfirst((LPSTR)fromfind, &fi, D_DIR);
-	from[len_from] = 0;
-	lastdir[0] = 0;
-	
-	while (ret >= 0) {
-		if(! (fi.f_attrib & D_DIR)) {
-			ret = _findnext(&fi);
-			continue;
-		}
-	
-		if(fi.f_name[0]=='.') {
-			ret = _findnext(&fi);
-			continue;
-		}
-		from[len_from] = 0;
-		to[len_to]= 0;
-				
-		strcat(from, fi.f_name);
-		strcat(to, fi.f_name);
-		
-		r1 = mkdir((LPSTR)to);
-		fret += copydir (from, to);
-		ret = rmdir((LPSTR)from);
-				
-		fret++;
-		ret =_findfirst((LPSTR)fromfind, &fi, D_DIR);  //necessary to reset after rmdir? 
-	};
-	
-	from[len_from] = 0;
-	to[len_to]= 0;
-	fret += copyfiles(from, to);
-	cpyTopicPath(from);
-	strcpy(lastdir,from+2);
-	if ((len = strlen(lastdir)))
-		lastdir[len-1] = 0; // remove last '\'
-	if (strstr(fromdir,lastdir))
-		fret = 0; // prevents system reset if only copying list files
-	
-	return(fret);
-}
-//
-// copy all files in fromdir to todir
-//
-static int copyfiles(char *fromdir, char *todir)
-{
-	int ret, r1, len_from, len_to, fret;
-	char from[80], to[80];
-	struct f_info fi;
-	
-	fret = 0;
-	
-	strcpy(from, fromdir);
-	len_from = strlen(from);
-	
-	if(from[len_from-1] != '/') {
-		strcat(from, "/");
-		len_from++;
-	}
-	strcat(from, "*.*");
-	
-	strcpy(to, todir);
-	len_to = strlen(to);
-//	mkdir(to);	// just to be safe
-	if(to[len_to-1] != '/') {
-		strcat(to, "/");
-		len_to++;
-	}
-			
-	ret =_findfirst((LPSTR)from, &fi, D_FILE);
-	while(ret >= 0) {
-		if(fi.f_name[0] != '.') {
-			from[len_from] = 0;
-			to[len_to]= 0;
-			strcat(from, fi.f_name);
-			strcat(to, fi.f_name);
-			if((lower(from[0]) == 'a') && (lower(to[0]) == 'a')) {
-				unlink((LPSTR)to);
-				r1 = rename((LPSTR)from, (LPSTR)to);
-			} else {
-				setLED(LED_GREEN,FALSE);
-				setLED(LED_RED,TRUE);
-				r1 = _copy((LPSTR)from, (LPSTR)to);
-// speed up 				wait (500);
-				setLED(LED_RED,FALSE);
-				if (r1 != -1) {
-					setLED(LED_GREEN,TRUE);
-// speed up					wait(500);
-				}
-			}
-//			logString((char *)"FROM/TO:",BUFFER);
-//			logString(from,BUFFER);
-//			logString(to,ASAP);
-		}
-		ret = _findnext(&fi);
-		fret++;
-	}
-	return(fret);
-}
 
 static int 
 getMetaCat(char *filename, char *category)

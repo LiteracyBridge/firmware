@@ -6,7 +6,9 @@
 
 extern int d2dCopy(const char *, const char *);
 extern int cloneDevice(void);
+extern int cloneDir(char *, char *);
 extern int copyLanguage(char *);
 extern int setUSBHost(BOOL);
-
+extern void buildMyStatsCSV(void);
+extern void pushContentGetFeedback(void);
 #endif
