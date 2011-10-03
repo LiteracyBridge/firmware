@@ -25,7 +25,6 @@ extern INT16 SD_Initial(void);
 static char * addTextToSystemHeap (char *);
 static int loadConfigFile (void);
 //static void loadSystemNames(void);
-static char *currentSystem(void);
 static void flagConfigFile(void);
 static int resetConfigFile(void);
 
@@ -118,6 +117,7 @@ void setDefaults(void) {
 	BIT_RATE = DEFAULT_BIT_RATE;
 	INACTIVITY_SECONDS = DEFAULT_INACTIVITY_SECONDS;
 	USB_CLIENT_POLL_INTERVAL = DEFAULT_USB_CLIENT_POLL_INTERVAL;
+	DEFAULT_REWIND = DEFAULT_DEFAULT_REWIND;
 
 	PLEASE_WAIT_IDX = 0; // prevents trying to insert this sound before config & control files are loaded.
 	context.package = 0; // prevents trying to insert this sound before config & control files are loaded.
@@ -156,11 +156,13 @@ void startUp(unsigned int bootType) {
 		SystemIntoUDisk(1);	
 		SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
 		loadConfigFile();
+		loadSystemNames(); 
 		processInbox();
 		resetSystem();
 	} else if (key == KEY_PLUS) {
 		// copy outbox files to connecting device, get stats and audio feedback
 		loadConfigFile();
+		loadSystemNames(); 
 		pushContentGetFeedback();
 		resetSystem();
 	}	
@@ -184,10 +186,11 @@ void startUp(unsigned int bootType) {
 			startUpdate(filename);
 		}
 	}
-	processInbox();
-	if (!configExists) { // config.txt file not found
+	if (configExists) {
+		loadSystemNames(); 
+		processInbox();
+	} else
 		testPCB();	
-	}
 	if (!SNexists()) {
 		logException(32,(const char *)"no serial number",LOG_ONLY);
 		testPCB();	
@@ -235,6 +238,8 @@ void startUp(unsigned int bootType) {
 	strcat(buffer,"\x0d\x0a" "CYCLE "); //cycle number
 	longToDecimalString(systemCounts.powerUpNumber,(char *)(buffer+strlen(buffer)),4);
 	strcat(buffer,(const char *)" - version " VERSION);
+	if (DEBUG_MODE)
+		strcat(buffer,"\x0d\x0a" "*DEBUG MODE*");
 	logString(buffer,BUFFER);
 	
 //#ifdef TB_CAN_WAKE
@@ -260,7 +265,6 @@ void startUp(unsigned int bootType) {
 			close(ret);
 		}
 	}
-	loadSystemNames(); 
 	SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
 	loadPackage(PKG_SYS,currentSystem());
 
@@ -514,7 +518,7 @@ extern void loadSystemNames() {
 	intCurrentSystem = 0;
 }
 
-static char *currentSystem() {
+extern char *currentSystem() {
 	char * ret;
 	
 	ret = pSystemNames[intCurrentSystem];

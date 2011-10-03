@@ -3,8 +3,8 @@
 #ifndef	__TALKINGBOOK_h__
 #define	__TALKINGBOOK_h__
 
-#define MAJOR_VERSION	"v1.50"
-#define SVN_REVISION	"r791"
+#define MAJOR_VERSION	"v1.51"
+#define SVN_REVISION	"r793a"
 #define VERSION			MAJOR_VERSION SVN_REVISION
 #define TB_CAN_WAKE  // hardware that allows wake from sleep/halt
 //IMPORTANT: changes to TB_CAN_WAKE must also be made to system_head.inc!!!
@@ -79,6 +79,9 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 #define READ_LENGTH			1024
 #define FILE_LENGTH			40
 #define PATH_LENGTH			(FILE_LENGTH * 2)
+#define LANG_CODE_LENGTH	8
+#define LONG_FILE_LENGTH	256
+#define LONG_PATH_LENGTH	(LONG_FILE_LENGTH * 2)
 #define LOG_CARRYOVER_BYTES 8096
 #define TEXT_EVENT_LEFT		'<'
 #define TEXT_EVENT_RIGHT	'>'

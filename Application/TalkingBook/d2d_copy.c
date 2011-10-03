@@ -18,14 +18,110 @@ extern APP_IRAM SystemCounts systemCounts;
 static char * longToDecimalStringZ(long l, char * string, int numberOfDigits);
 
 extern int setUSBHost(BOOL enter);
+static void getAudioFeedback(void);
 static int copyApplicationOrMessage(char * packageName, char *newPkgPath);
 static int copyApplication(char * packageName, char *newPkgPath);
 static int copyMessage(char * packageName, char *newPkgPath);
 static void copyListAudio(const char * listName);
 static void exchangeStatsCSV(void);
-static int copyfiles(char *fromdir, char *todir);
+static int copyfilesFiltered(char *fromdir, char *todir);
 static void getStats(void);
-static void getAudioFeedback(void);
+
+static void getAudioFeedback(void) {
+	char languages[MAX_LANGUAGES][MAX_LANGUAGE_LENGTH];
+	char path[PATH_LENGTH];
+	char pathAudioFile[PATH_LENGTH];	
+	char buffer[READ_LENGTH+1];
+	int i, j, linesRead, gotFeedback, ret, handle;
+	char *cursor, *markAudioFile;
+
+	longToDecimalString((long)sizeof(buffer),buffer,5);
+	logString(buffer,ASAP);
+	if (DEBUG_MODE)
+		logString((char *)"getting other device's audio feedback",ASAP);
+	strcpy(buffer,LANGUAGES_PATH);
+	buffer[0] = 'b';
+	strcat(buffer,SYSTEM_ORDER_FILE);
+	strcat(buffer,".txt");
+
+	handle = open((LPSTR)buffer,O_RDONLY);
+	if (handle == -1) {
+		logString((char *)"no language file",BUFFER);
+		logString(buffer,ASAP);
+		return;
+	}
+	getLine(-1,0);  // reset in case at end from prior use
+	i = 0;
+	while(i < MAX_LANGUAGES && (cursor = getLine(handle,buffer))) {
+		LBstrncpy(languages[i],cursor,MAX_LANGUAGE_LENGTH);	
+		logString(languages[i],BUFFER);
+		i++;
+	}
+	close(handle);
+
+	strcpy(pathAudioFile,USER_PATH);
+	pathAudioFile[0] = 'b';
+	markAudioFile = pathAudioFile + strlen(pathAudioFile);
+	do {
+		i--;		
+		strcpy(path,"0");
+		path[0] += i;
+		logString(path,BUFFER);
+		
+		linesRead = 0;
+		gotFeedback = 0;
+		do {			
+			strcpy(path,LISTS_PATH);
+			path[0] = 'b';
+			strcat(path,languages[i]);
+			strcat(path,"/" FEEDBACK_CATEGORY ".txt");
+			logString(path,BUFFER);
+			handle = open((LPSTR)path,O_RDONLY);
+			if (handle == -1) {
+				strcpy(buffer,(char *)"could not access ");
+				strcat(buffer,path);	
+				logString(buffer,ASAP);
+				break;
+			}
+			getLine(-1,0);  // reset in case at end from prior use			
+			for (j=0;j <= linesRead; j++) {
+				cursor = getLine(handle,buffer);
+			}
+			close(handle);
+			linesRead++;
+			if (!cursor) 
+				break;
+			if (strlen(cursor) < FILE_LENGTH) {
+				strcpy(markAudioFile,cursor);
+				strcat(markAudioFile,AUDIO_FILE_EXT);
+				logString((char *)"_copy",BUFFER);
+				logString(pathAudioFile,BUFFER);
+				strcpy(path,INBOX_PATH);
+				strcat(path,NEW_PKG_SUBDIR);
+				strcat(path,markAudioFile);
+				logString(path,ASAP);
+				ret = _copy((LPSTR)pathAudioFile,(LPSTR)path);
+				if (!gotFeedback && !ret)
+					gotFeedback = 1;
+			}
+		} while (1);
+		if (gotFeedback) {
+			if (DEBUG_MODE)
+				logString((char *)"ensuring 'feedback' is added to the other device's list for this language",ASAP);
+			// If there's at least one feedback msg for this language, 
+			// ensure the feedback category is added to _activeLists.txt for this device, for this language.
+			strcpy(path,LISTS_PATH);
+			strcat(path, languages[i]);
+			strcat(path, "/");
+			strcat(path,(char *)LIST_MASTER);
+			strcat(path,(char *)".txt");
+			strcpy(buffer, FEEDBACK_CATEGORY);
+			ret = findDeleteStringFromFile((char *)NULL, path, buffer, 0);
+			if (ret == -1)
+				ret = appendStringToFile(path,buffer);		
+		}
+	} while (i > 0);
+}
 
 int d2dCopy(const char * packageName,const char * filenameList) {
 	int retCopy;
@@ -40,31 +136,42 @@ int d2dCopy(const char * packageName,const char * filenameList) {
 	markEndPlay(timeNow);
 	
 	//TODO: break (gracefully) after some time delay if never connected to another device
-	setUSBHost(TRUE);
-
-	// code below is borrowed from the delete fct
-	strcpy(strLog,"\x0d\x0a");
-	longToDecimalString(timeNow,strLog+2,5);
-	strcat((char *)strLog,(const char *)": COPY ");
-	
-	strcpy(newPkgPath,INBOX_PATH);
-	newPkgPath[0] = 'b'; //change a:/ drive to b:/ drive
-	strcat(newPkgPath,NEW_PKG_SUBDIR);
-	if (packageName) 
-		retCopy = copyApplicationOrMessage((char *)packageName,newPkgPath);
-	else { // copy entire category
-		list = &pkgSystem.lists[1];
-		list->currentFilePosition = -1;
-		localPackageName = getCurrentList(list);
-		do {
-			logString((char *)"catcopy",BUFFER);
-			logString(localPackageName,BUFFER);
-			retCopy = copyApplicationOrMessage(localPackageName,newPkgPath);				
-			localPackageName = getPreviousList(list);
-		} while (list->currentFilePosition);
+	retCopy = setUSBHost(TRUE);
+	if (retCopy == 0) {
+		// code below is borrowed from the delete fct
+		strcpy(strLog,"\x0d\x0a");
+		longToDecimalString(timeNow,strLog+2,5);
+		strcat((char *)strLog,(const char *)": COPY ");
+		
+		strcpy(newPkgPath,INBOX_PATH);
+		newPkgPath[0] = 'b'; //change a:/ drive to b:/ drive
+		strcat(newPkgPath,NEW_PKG_SUBDIR);
+		if (packageName) 
+			retCopy = copyApplicationOrMessage((char *)packageName,newPkgPath);
+		else { // copy entire category
+			list = &pkgSystem.lists[1];
+			list->currentFilePosition = -1;
+			localPackageName = getCurrentList(list);
+			do {
+				logString((char *)"catcopy",BUFFER);
+				logString(localPackageName,BUFFER);
+				retCopy = copyApplicationOrMessage(localPackageName,newPkgPath);				
+				if (retCopy == -1)
+					break;
+				localPackageName = getPreviousList(list);
+			} while (list->currentFilePosition);
+		}
+		if (retCopy == 0) {
+			setLED(LED_RED,TRUE);
+			copyListAudio(filenameList);
+		  	buildMyStatsCSV();
+			exchangeStatsCSV();
+			setLED(LED_RED,FALSE);
+		}
+		setUSBHost(FALSE);
+		if (retCopy != 0)
+			logException(20,localPackageName,RESET);
 	}
-	copyListAudio(filenameList);
-	setUSBHost(FALSE);
 	return retCopy;
 }
 
@@ -81,11 +188,12 @@ static int copyApplicationOrMessage(char * packageName, char *newPkgPath) {
 		retCopy = copyMessage((char *)packageName,newPkgPath);		
 	}		
 	setLED(LED_GREEN,FALSE);
+	return retCopy;
 }
 
 static int copyApplication(char * packageName, char *newPkgPath) {
 	char path[PATH_LENGTH], strLog[PATH_LENGTH], filename[PATH_LENGTH], to[PATH_LENGTH];
-	int ret, retCopy;
+	int ret, retCopy, pathLength;
 	struct f_info file_info;
 	
 	strcpy(path,newPkgPath);
@@ -112,12 +220,33 @@ static int copyApplication(char * packageName, char *newPkgPath) {
 		if (retCopy == -1) {
 			strcpy(strLog,(const char *)"Copy Failed! ");
 			strcat(strLog,filename);
+			ret = -1; // to break from loop after logging
 		} else {
 			recordStats(filename, 0L, STAT_COPIED, PKG_SYS+1);
 			strcpy(strLog,filename);
 			ret = _findnext(&file_info);
 		}
 		logString(strLog,BUFFER);
+	}
+	// remove partially copied applications
+	if (retCopy == -1) {
+		strcpy(filename,path);
+		strcat(filename,file_info.f_name);
+		strcpy(to,INBOX_PATH);
+		to[0] = 'b'; //change a:/ drive to b:/ drive
+		strcat(to,NEW_PKG_SUBDIR);
+		strcat(to,packageName); // to get directory name
+		pathLength = strlen(to) + 1;  // to include only path + '/' 
+		strcat(to,"/*.*");
+		ret =_findfirst((LPSTR)to, &file_info, D_FILE);
+		while (ret >= 0) {
+			strcpy(filename,to);
+			strcpy(filename + pathLength,file_info.f_name);
+			unlink((LPSTR)filename);
+			ret = _findnext(&file_info);
+		}		
+		to[pathLength-1] = 0;  // do not include "/*.*"
+		rmdir((LPSTR)to);
 	}
 	return retCopy;
 }
@@ -183,10 +312,6 @@ static void copyListAudio(const char * listName) {
 		logString(strLog,BUFFER);
 		ret = _findnext(&file_info);
 	}
-//	exchangeStats();
-  	buildMyStatsCSV();
-	exchangeStatsCSV();
-	setUSBHost(FALSE);
 	return;
 }
 
@@ -355,7 +480,8 @@ getStats(void) {
 	char linein[PATH_LENGTH], from[PATH_LENGTH], to[PATH_LENGTH], *cp1, *cp2;
 	int ret, i, j, f;
 	
-	logString((char *)"getting connected device's stats",ASAP);
+	if (DEBUG_MODE)
+		logString((char *)"getting connected device's stats",ASAP);
 	
 	strcpy(from, CLI_STAT_DIR);
 //	strcpy(from, "a:/b/system/stats/");  // remove after testing with a b folder on a:
@@ -401,103 +527,6 @@ getStats(void) {
 // Logic for which device has the most current stats for devices they both have connected to goes here
 //
 }
-
-static void
-getAudioFeedback(void) {
-	const int MAX_LANGUAGES = 6;
-	const int MAX_LANGUAGE_LENGTH = 8;
-	char languages[MAX_LANGUAGES][MAX_LANGUAGE_LENGTH];
-	char path[PATH_LENGTH];
-	char pathAudioFile[PATH_LENGTH];	
-	char buffer[READ_LENGTH+1];
-	int i, j, linesRead, gotFeedback, ret, handle;
-	char *cursor, *markAudioFile;
-
-	longToDecimalString((long)sizeof(buffer),buffer,5);
-	logString(buffer,ASAP);
-
-	strcpy(buffer,LANGUAGES_PATH);
-	buffer[0] = 'b';
-	strcat(buffer,SYSTEM_ORDER_FILE);
-	strcat(buffer,".txt");
-
-	handle = open((LPSTR)buffer,O_RDONLY);
-	if (handle == -1) {
-		logString((char *)"no language file",BUFFER);
-		logString(buffer,ASAP);
-		return;
-	}
-	getLine(-1,0);  // reset in case at end from prior use
-	i = 0;
-	while(i < MAX_LANGUAGES && (cursor = getLine(handle,buffer))) {
-		LBstrncpy(languages[i],cursor,MAX_LANGUAGE_LENGTH);	
-		logString(languages[i],BUFFER);
-		i++;
-	}
-	close(handle);
-
-	strcpy(pathAudioFile,USER_PATH);
-	pathAudioFile[0] = 'b';
-	markAudioFile = pathAudioFile + strlen(pathAudioFile);
-	do {
-		i--;		
-		strcpy(path,"0");
-		path[0] += i;
-		logString(path,BUFFER);
-		
-		linesRead = 0;
-		gotFeedback = 0;
-		do {			
-			strcpy(path,LISTS_PATH);
-			path[0] = 'b';
-			strcat(path,languages[i]);
-			strcat(path,"/" FEEDBACK_CATEGORY ".txt");
-			logString(path,BUFFER);
-			handle = open((LPSTR)path,O_RDONLY);
-			if (handle == -1) {
-				strcpy(buffer,(char *)"could not access ");
-				strcat(buffer,path);	
-				logString(buffer,ASAP);
-				break;
-			}
-			getLine(-1,0);  // reset in case at end from prior use			
-			for (j=0;j <= linesRead; j++) {
-				cursor = getLine(handle,buffer);
-			}
-			close(handle);
-			linesRead++;
-			if (!cursor) 
-				break;
-			if (strlen(cursor) < FILE_LENGTH) {
-				strcpy(markAudioFile,cursor);
-				strcat(markAudioFile,AUDIO_FILE_EXT);
-				logString((char *)"_copy",BUFFER);
-				logString(pathAudioFile,BUFFER);
-				strcpy(path,INBOX_PATH);
-				strcat(path,NEW_PKG_SUBDIR);
-				strcat(path,markAudioFile);
-				logString(path,ASAP);
-				ret = _copy((LPSTR)pathAudioFile,(LPSTR)path);
-				if (!gotFeedback && !ret)
-					gotFeedback = 1;
-			}
-		} while (1);
-		if (gotFeedback) {
-			// If there's at least one feedback msg for this language, 
-			// ensure the feedback category is added to _activeLists.txt for this device, for this language.
-			strcpy(path,LISTS_PATH);
-			strcat(path, languages[i]);
-			strcat(path, "/");
-			strcat(path,(char *)LIST_MASTER);
-			strcat(path,(char *)".txt");
-			strcpy(buffer, FEEDBACK_CATEGORY);
-			ret = findDeleteStringFromFile((char *)NULL, path, buffer, 0);
-			if (ret == -1)
-				ret = appendStringToFile(path,buffer);		
-		}
-	} while (i > 0);
-}
-
 
 // supress leading zeros from longToDecimalString
 //
@@ -631,11 +660,12 @@ cloneDevice() {
 	}
 	strcat(path, "*.img");
 
-	// move any b:/system/*.img to b:/Inbox/sys-updates so it will be processed by processSystemFiles
+	// move any b:/system/*.img to b:/*.img so it will be processed by processSystemFiles
 	for(ret =_findfirst((LPSTR)path, &fi, D_FILE); ret >= 0; ret = _findnext(&fi)) {	
-		strcpy(to,INBOX_PATH);
-		to[0] = 'b';
-		strcat(to,SYS_UPDATE_SUBDIR);
+		//strcpy(to,INBOX_PATH);
+		//to[0] = 'b';
+		//strcat(to,SYS_UPDATE_SUBDIR);
+		strcpy(to, (char *)"b:/");
 		strcat(to, fi.f_name);
 		strcpy(from, path);
 		from[len_path] = 0;
@@ -727,17 +757,17 @@ cloneDir(char *fromdir, char *todir) {
 	
 	from[len_from] = 0;
 	to[len_to]= 0;
-	fret += copyfiles(from, to);
+	fret += copyfilesFiltered(from, to);
 	
 	return(fret);
 }
 //
 // copy all files in fromdir to todir
 //
-static int copyfiles(char *fromdir, char *todir)
+static int copyfilesFiltered(char *fromdir, char *todir)
 {
 	int ret, r1, len_from, len_to, fret;
-	char from[80], to[80];
+	char from[PATH_LENGTH], to[PATH_LENGTH];
 	struct f_info fi;
 //	char dbgbuf[96], dbghex[16];
 	
@@ -778,22 +808,25 @@ static int copyfiles(char *fromdir, char *todir)
 			if(!strcmp(from+strlen(from)-strlen(SERIAL_EXT), SERIAL_EXT)) {
 				continue;
 			}		
-			
-				setLED(LED_GREEN,TRUE);
+	
+			if ((fi.f_size == 0) && strcmp(fi.f_name+strlen(fi.f_name)-4, ".txt")) 
+				continue; // don't copy 0-size files (should prevent the volume label from being copied as a file) unless they are .txt files
+					
+			setLED(LED_GREEN,TRUE);
 				
-//				longToHexString((long)r1, (char *)dbghex, 1);
-//				strcpy(dbgbuf, dbghex);
-//				strcat(dbgbuf, " copy ");
-//				strcat(dbgbuf, to);
-//		 		logString(dbgbuf,ASAP);
+//			longToHexString((long)r1, (char *)dbghex, 1);
+//			strcpy(dbgbuf, dbghex);
+//			strcat(dbgbuf, " copy ");
+//			strcat(dbgbuf, to);
+//	 		logString(dbgbuf,ASAP);
 
-				setLED(LED_RED,FALSE);
-				if (DEBUG_MODE)
-					logString(from,ASAP);
-				r1 = _copy((LPSTR)from, (LPSTR)to);
-				playBip();
-				setLED(LED_RED,TRUE);
-				setLED(LED_GREEN,FALSE);
+			setLED(LED_RED,FALSE);
+			if (DEBUG_MODE)
+				logString(from,ASAP);
+			r1 = _copy((LPSTR)from, (LPSTR)to);
+			playBip();
+			setLED(LED_RED,TRUE);
+			setLED(LED_GREEN,FALSE);
 		}
 		if (r1 == -1) 
 			fret = -(1<<14); // fret = very negative number so that we know at least one copy didn't work 
@@ -806,18 +839,22 @@ static int copyfiles(char *fromdir, char *todir)
 void 
 pushContentGetFeedback() {
 	char bInbox[PATH_LENGTH];
+	int ret;
 	
-	setUSBHost(TRUE);
-	
-	//copy this device's outbox to connected device's inbox
-	if (dirExists((LPSTR)OUTBOX_PATH)) {
-		strcpy(bInbox,INBOX_PATH);
-		bInbox[0] = 'b'; // changes a: to b:
-		copyMovedir(OUTBOX_PATH, bInbox);
+	ret = setUSBHost(TRUE);
+	if (ret == 0) {
+		//copy this device's outbox to connected device's inbox
+		if (dirExists((LPSTR)OUTBOX_PATH)) {
+			strcpy(bInbox,INBOX_PATH);
+			bInbox[0] = 'b'; // changes a: to b:
+			copyMovedir(OUTBOX_PATH, bInbox);
+		} else
+			logString((char *)"no outbox folder",ASAP);
+		getStats();  //grab all connected device's stats
+		playBip();
+		getAudioFeedback();  //grab all connected device's messages in User Feedback category
+		playDing();
+		setUSBHost(FALSE);
 	} else
-		logString((char *)"no outbox folder",ASAP);
-	getStats();  //grab all connected device's stats
-	getAudioFeedback();  //grab all connected device's messages in User Feedback category
-	playDings(2);
-	setUSBHost(FALSE);
+		playBips(3);
 }

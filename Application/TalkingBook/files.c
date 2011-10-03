@@ -109,8 +109,12 @@ int insertStringInFile(const char * filename, char * strText, long posInsert) {
 		return -1;
 	}
 
-	strcpy(wFilepath,"temp.txt");
 	rHandle = tbOpen((LPSTR)(filename),O_RDONLY);
+	if (rHandle == -1) { // if file to insert into doesn't exist, just create it
+		ret = insertStringInNewFile(filename,strText);	
+		return ret;
+	}
+	strcpy(wFilepath,"temp.txt");
 	wHandle = tbOpen((LPSTR)wFilepath,O_CREAT|O_TRUNC|O_WRONLY);
 	ret = -1;
 	if (rHandle != -1 && wHandle != -1) {
@@ -146,8 +150,29 @@ int insertStringInFile(const char * filename, char * strText, long posInsert) {
 	return ret;
 }
 
+int insertStringInNewFile (const char * filename, char * strText) {
+	int handle, ret;
+	unsigned int bytesToWrite;
+
+	if(vCur_1 < V_MIN_SDWRITE_VOLTAGE) {
+		refuse_lowvoltage(0);
+		return -1;
+	}
+
+	ret = -1;
+	handle = tbOpen((LPSTR)filename,O_CREAT|O_RDWR|O_TRUNC);
+	if (handle == -1)
+		ret = -1;
+	else {
+		bytesToWrite = convertDoubleToSingleChar(strText,strText,TRUE);
+	 	ret = write(handle, (unsigned long)strText << 1, bytesToWrite);
+		close(handle);
+	}
+	return ret;
+}
+
 int appendStringToFile(const char * filename, char * strText) {
-	// WARNING: This function destroys strText.
+	// WARNING: This function destroys strText. TODO: fix this by using a buffer 
 	// WARNING: reading/writing to NAND while audio is playing/recording is bad!
 	
 	// This fct is used to ensure a fatal error can be logged to some file, 
@@ -171,14 +196,10 @@ int appendStringToFile(const char * filename, char * strText) {
 
 	ret = -1;
 	handle = tbOpen((LPSTR)filename,O_RDWR);
-	if (handle == -1) {
-		handle = tbOpen((LPSTR)filename,O_CREAT|O_RDWR|O_TRUNC);
-		if (handle == -1)
-			ret = -1;
-	} else
+	if (handle == -1)
+		ret = insertStringInNewFile (filename,strText);
+	else {
 		lseek(handle,0,SEEK_END);
-
-	if(handle >= 0 ) {
 		ret = 0;
 		bytesToWrite = convertDoubleToSingleChar(strText,strText,TRUE);
 	 	ret = write(handle, (unsigned long)strText << 1, bytesToWrite);
@@ -224,6 +245,9 @@ int findDeleteStringFromFile(char *path, char *filename, const char * string, BO
 		return -1;
 	}
 		
+	rHandle = tbOpen((LPSTR)filename,O_RDONLY);
+	if (rHandle == -1)
+		return -1;
 	LBstrncpy(find,string,PATH_LENGTH);
 	buffer[READ_LENGTH] = '\0';
 	
@@ -239,36 +263,33 @@ int findDeleteStringFromFile(char *path, char *filename, const char * string, BO
 	if (shouldDelete) {
 		strcpy(tempFilename,"temp.txt");	
 		wHandle = tbOpen((LPSTR)tempFilename,O_CREAT|O_TRUNC|O_WRONLY);
+		if (wHandle == -1)
+			logException(35,(const char *)"can't create new file",RESET);
 	}
-	if (!shouldDelete || wHandle != -1) {
-		rHandle = tbOpen((LPSTR)filename,O_RDONLY);
-		if (rHandle == -1 || wHandle == -1)
-			return -1;
-		getLine(-1,0);  // reset in case at end from prior use
-		while ((rCursor = getLine(rHandle,buffer))) {
-			unequal = strcmp(rCursor, string);
-			if (unequal && shouldDelete) {
-				bytesToWrite = convertDoubleToSingleChar(tempLine,rCursor,TRUE);
-				ret = write(wHandle,(unsigned long)tempLine<<1,bytesToWrite);
-			}
-			if (!unequal) {
-				ret = 0;
-				if (!shouldDelete)	// no need to continue while() 
-					break;  		//if already found text and not copying file
-			}	
+	getLine(-1,0);  // reset in case at end from prior use
+	while ((rCursor = getLine(rHandle,buffer))) {
+		unequal = strcmp(rCursor, string);
+		if (unequal && shouldDelete) {
+			bytesToWrite = convertDoubleToSingleChar(tempLine,rCursor,TRUE);
+			ret = write(wHandle,(unsigned long)tempLine<<1,bytesToWrite);
 		}
-		close(rHandle);
-		if (shouldDelete) {
-			close(wHandle);
-			i = unlink((LPSTR)filename);
-			if (i != -1) {
-				i = rename((LPSTR)tempFilename,(LPSTR)filename);
+		if (!unequal) {
+			ret = 0;
+			if (!shouldDelete)	// no need to continue while() 
+				break;  		//if already found text and not copying file
+		}	
+	}
+	close(rHandle);
+	if (shouldDelete) {
+		close(wHandle);
+		i = unlink((LPSTR)filename);
+		if (i != -1) {
+			i = rename((LPSTR)tempFilename,(LPSTR)filename);
 //				i = _copy((LPSTR)tempFilename,(LPSTR)filename);
-				if (i != 0)
-					i = unlink((LPSTR)tempFilename);
-			}
-			ret = i;
+			if (i != 0)
+				i = unlink((LPSTR)tempFilename);
 		}
+		ret = i;
 	}
 	return ret;
 }
@@ -494,12 +515,10 @@ int fileCopy(char * from, char * to) {
 //	*P_WatchDog_Ctrl &= ~0x4007; // clear bits 0-2 for 2 sec and bit 14 to select system reset
 //	*P_WatchDog_Ctrl |= 0x8000; // set bit 15 to enable watchdog
 
-	playBip();
 	if (rHandle >= 0 && wHandle >= 0) {
 		do {
-			loopCount++;
 //			*P_WatchDog_Clear = 0xA005; 	
-			if (!(loopCount % 64))
+			if (!(loopCount++ % 64))
 				playBip();
 			rCount = read(rHandle,(unsigned long)&buffer<<1,COPY_BUFFER_SIZE<<2);
 			if (rCount > 0) {
@@ -513,10 +532,13 @@ int fileCopy(char * from, char * to) {
 				break;
 			}
 		} while (rCount == (COPY_BUFFER_SIZE<<2));
-	}	
+	} else { // one of the handles < 0
+		ret = -1;
+	}
 	close(wHandle);
-//	*P_WatchDog_Ctrl &= ~0x8000; // clear bit 15 to disable watchdog reset
+	//	*P_WatchDog_Ctrl &= ~0x8000; // clear bit 15 to disable watchdog reset
 	close(rHandle);
+	playBip();
 	return ret;
 }
 
@@ -631,7 +653,7 @@ void copyAllFiles(char *fromdir, char *todir, BOOL overwrite)
 
 void deleteAllFiles(char *fromdir)
 {
-	int ret, r1, len_from;
+	int ret, len_from;
 	//int fret;
 	char from[80];
 	//char temp[80];
@@ -655,12 +677,14 @@ void deleteAllFiles(char *fromdir)
 			setLED(LED_GREEN,FALSE);
 			setLED(LED_RED,TRUE);
 			unlink((LPSTR)from);
-			wait (500);
-			setLED(LED_RED,FALSE);
-			if (r1 != -1) {
-				setLED(LED_GREEN,TRUE);
-				wait(500);
-			}
+			if (DEBUG_MODE)
+				logString(from,ASAP);
+//			wait (500);
+//			setLED(LED_RED,FALSE);
+//			if (r1 != -1) {
+//				setLED(LED_GREEN,TRUE);
+//				wait(500);
+//			}
 		}
 		ret = _findnext(&fi);
 	}

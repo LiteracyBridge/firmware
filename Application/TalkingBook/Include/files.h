@@ -20,6 +20,7 @@ extern void clearStaleLog(void);
 extern void flushLog(void);
 extern int appendStringToFile(const char *, char *);
 extern int insertStringInFile(const char *, char *, long);
+extern int insertStringInNewFile (const char *, char *);
 //extern int createControlFromTemplate(char *, char *);
 extern int findDeleteStringFromFile(char *, char *, const char *, BOOL);
 extern long getFilePosition(void);

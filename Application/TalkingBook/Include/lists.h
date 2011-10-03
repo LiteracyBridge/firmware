@@ -4,9 +4,11 @@
 #ifndef	__LISTS_h__
 #define	__LISTS_h__
 
-#define LIST_ITEM_LENGTH	40
+#include "talkingbook.h"
+#define LIST_ITEM_LENGTH	FILE_LENGTH
 #define MAX_TRANSLATE_FILE  120
 #define TRANSLATE_TEMP_DIR  "translate_temp"
+#define OTHER_CATEGORY		"0"
 #define FAVORITES_CATEGORY	"0-2"
 #define FEEDBACK_CATEGORY	"9"
 #define TEMPLATE_LISTS_DIR	"copy-for-new-language"
@@ -50,6 +52,6 @@ extern char *getPreviousList(ListItem *);
 extern void setListRotation(int *, int);
 extern int getListRotation(unsigned int);
 extern int getListFilename(char *, int, BOOL);
-extern int insertIntoList(ListItem *, long, char *);
 extern void catLangDir(char *);
+extern int addCategoryToActiveLists(char *, char *);
 #endif

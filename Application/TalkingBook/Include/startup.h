@@ -21,6 +21,7 @@ extern void startUp(unsigned int);
 extern void setDefaults(void);
 extern char *nextSystem(void);
 extern char *prevSystem(void); 
+extern char *currentSystem(void);
 extern unsigned int GetMemManufacturer(void);
 extern void cleanUpOldRevs(void);
 extern void loadSystemNames(void);
@@ -89,6 +90,6 @@ extern void loadSystemNames(void);
 #define DEFAULT_USB_CLIENT_POLL_INTERVAL	3
 #define DEFAULT_V_FAST_VOLTAGE_DROP_TIME_SEC	60
 #define DEFAULT_V_VOLTAGE_DROP_CHECK_INTERVAL 	3  // check every .03 volts
-
+#define DEFAULT_DEFAULT_REWIND	1000
 #endif
 

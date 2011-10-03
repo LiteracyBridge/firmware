@@ -4,6 +4,8 @@
 #ifndef	__INBOX_h__
 #define	__INBOX_h__
 
+#define 	BAD_IMPORTS_SUBDIR	(char *)"bad-imports/"
+
 extern void processInbox(void);
 extern int metaRead(int, unsigned int, unsigned int *);
 

@@ -14,15 +14,16 @@
 #include "Include/sys_counters.h"
 #include "Include/mainLoop.h"
 #include "Include/d2d_copy.h"
-#include "Include/Inbox.h"
+#include "Include/startup.h"
 #include "Include/metadata.h"
+#include "Include/Inbox.h"
 
 struct newContent {
-	char newAudioFileCat  [FILE_LENGTH];
-	char newAudioFileName [FILE_LENGTH];
-	char newAudioDirCat   [FILE_LENGTH];
-	char newAudioDirName  [FILE_LENGTH];
-	char newAudioLanguage [FILE_LENGTH];
+	// LENGTH + 1 allows for LENGTH chars + '/0'
+	char newAudioCategory  [FILE_LENGTH+1];
+	char newAudioName [FILE_LENGTH+1];
+	char newAudioLanguage [LANG_CODE_LENGTH+1];
+	int isNew;
 };
 
 extern APP_IRAM char logBuffer[LOG_BUFFER_SIZE];
@@ -34,14 +35,14 @@ static int processA18(struct f_info *, struct newContent *);
 static int processDir(char *, struct newContent *);
 //static int copyCWD(char *);
 static int updateCategory(char *, char *, char);
-static int newUpdateCategory(char *, char *, char *, struct newContent *, char);
+static int newUpdateCategory(struct newContent *, int);
 static void processSystemFiles(void);
 static void processNewPackages(struct newContent *);
 static void queueNewPackage(struct newContent *);
 static int checkRevisions(int, int);
 static int getMetaCat(char *, char *);
 
-char Lang[8] = {0};
+char Lang[LANG_CODE_LENGTH] = {0};
 char *MLp = (unsigned int *) 0;
 int  nMLp = 0;
 
@@ -60,6 +61,7 @@ processInbox(void) {
 	
 	struct newContent nc;	
 	
+	stop(); // if audio was paused, this prevents it from resuming during inbox processing, which can lead to file corruption
 	setLED(LED_RED,TRUE);
 	processSystemFiles(); //copy system files, including firmware
 	processNewPackages(&nc);
@@ -75,20 +77,22 @@ queueNewPackage(struct newContent *ncp) {
 	char *strList;
 
 	// First, be sure that the queued package is of the same language as the current system.
+	// Also, be sure that the queued message is new (wasn't already on the device).
 	// If not, then don't queue it up.
 	strcpy(system_language,&pkgSystem.strHeapStack[pkgSystem.idxLanguageCode]);
-	if (strcmp(system_language,ncp->newAudioLanguage))
+	if (!ncp->isNew || strcmp(system_language,ncp->newAudioLanguage))
 		return;
 	
 	// Set up current list to position at one of the newly copied messages and queue it up to play
 	// This point is only reached if there was not a successful copy made of new firmware
-	if (ncp->newAudioFileCat[0])
-		strcpy(fbuf,ncp->newAudioFileCat);
-	else if (ncp->newAudioDirCat[0])
-		strcpy(fbuf,ncp->newAudioDirCat);
+	if (ncp->newAudioCategory[0])
+		strcpy(fbuf,ncp->newAudioCategory);
 	else
 		fbuf[0] = 0;
-	//logString(ncp->newAudioFileCat,BUFFER);
+	if (DEBUG_MODE) {
+		logString((char *)"queued category:",BUFFER);
+		logString(ncp->newAudioCategory,BUFFER);
+	}
 	//flushLog();
 	if (fbuf[0]) {
 		context.package = &pkgSystem; // in case paused on content
@@ -111,10 +115,11 @@ queueNewPackage(struct newContent *ncp) {
 
 static void
 processNewPackages(struct newContent *ncp) {
+	struct newContent lastAddedNewContent;
 	struct f_info file_info;
 	char strLog[PATH_LENGTH], savecwd[PATH_LENGTH];
-	char fbuf[PATH_LENGTH], strNewPkgPath[PATH_LENGTH], fname[FILE_LENGTH];
-	int ret, len, fret;
+	char fbuf[PATH_LENGTH], strNewPkgPath[PATH_LENGTH], strBadImports[PATH_LENGTH];
+	int ret, len, fret, wait;
 	MLENTRY mla[MAX_ML_ENTRIES]= { 0 };
 	Lang[0] = 0;
 	MLp = &mla[0];
@@ -123,8 +128,7 @@ processNewPackages(struct newContent *ncp) {
 //	struct newContent nc;	
 
 	fret = 0;
-	ncp->newAudioFileCat[0] = ncp->newAudioFileName[0] = 0;
-	ncp->newAudioDirCat [0] = ncp->newAudioDirName [0] = 0;
+	ncp->newAudioCategory[0] = ncp->newAudioName[0] = 0;
 		
 //  check for *.a18 files in Inbox
 	strcpy(strNewPkgPath, INBOX_PATH);
@@ -151,10 +155,35 @@ processNewPackages(struct newContent *ncp) {
 		ret =_findfirst((LPSTR)fbuf, &file_info, D_ALL);
 		while (ret >= 0) {
 			playBip();
-			strcpy(strLog, file_info.f_name);
+			//strcpy(strLog, file_info.f_name);
 			//logString(strLog,BUFFER);		
-			fret += processA18(&file_info, ncp);
-			ret = unlink((LPSTR)file_info.f_name);					
+			if (file_info.f_size!= 0 && file_info.f_name[0] != ' ') { 
+				// 0 KB file and filenames beginning with a space are a problem to open
+				if (!wait && PLEASE_WAIT_IDX && context.package) {  // prevents trying to insert this sound before config & control files are loaded.
+					insertSound(&pkgSystem.files[PLEASE_WAIT_IDX],NULL,TRUE); 
+					wait = 1; // so msg isn't repeated
+				}
+				fret += processA18(&file_info, ncp);
+				if (!lastAddedNewContent.isNew && ncp->isNew) {
+					// This latest item was new and we haven't saved at least one new content yet.
+					// So save this to have at least something new to queue up after finished processing.
+					lastAddedNewContent.isNew = 1;
+					strcpy(lastAddedNewContent.newAudioCategory,ncp->newAudioCategory);
+					strcpy(lastAddedNewContent.newAudioLanguage,ncp->newAudioLanguage);
+					strcpy(lastAddedNewContent.newAudioName,ncp->newAudioName);
+				}
+				ret = unlink((LPSTR)file_info.f_name);
+			} else {
+				// move files that can't be imported into a bad-import folder
+				// todo: use this for other issues, not just files beginning with a space
+				strcpy(strBadImports,INBOX_PATH);
+				strcat(strBadImports,BAD_IMPORTS_SUBDIR);
+				mkdir((LPSTR)strBadImports);
+				strcat(strBadImports,file_info.f_name);
+				ret = rename((LPSTR)file_info.f_name,(LPSTR)strBadImports);
+				if (ret == -1) // in case the bad file has had an attempted import before
+					unlink((LPSTR)file_info.f_name);
+			}					
 			ret = _findnext(&file_info);
 		}
 	//
@@ -163,15 +192,25 @@ processNewPackages(struct newContent *ncp) {
 		strcat(fbuf, "*.*");
 		
 		ret =_findfirst((LPSTR)fbuf, &file_info, D_DIR);
-		
 		for (; ret >= 0; ret = _findnext(&file_info)) {
 			if(file_info.f_attrib & D_DIR) {
 				if(file_info.f_name[0] == '.')
 					continue;
 				playBip();
-				strcpy(fname, file_info.f_name);	
+				//strcpy(fname, file_info.f_name);	
 				//logString(fname,BUFFER);		
-				fret += processDir(fname, ncp);
+				if (!wait && PLEASE_WAIT_IDX && context.package) {  // prevents trying to insert this sound before config & control files are loaded.
+					insertSound(&pkgSystem.files[PLEASE_WAIT_IDX],NULL,TRUE); 
+					wait = 1; // so directory check doesn't duplicate
+				}
+				fret += processDir(file_info.f_name, ncp);
+				if (ncp->isNew) {
+					// Save the most recent new content to have something new to queue up after finished processing.
+					lastAddedNewContent.isNew = 1;
+					strcpy(lastAddedNewContent.newAudioCategory,ncp->newAudioCategory);
+					strcpy(lastAddedNewContent.newAudioLanguage,ncp->newAudioLanguage);
+					strcpy(lastAddedNewContent.newAudioName,ncp->newAudioName);
+				}
 				  // RHM: something I do below makes this necessary
 				  //      upon return after _findnext returns -1 even if there are more dirs
 				ret = _findfirst((LPSTR)fbuf, &file_info, D_ALL);
@@ -185,6 +224,14 @@ processNewPackages(struct newContent *ncp) {
 	MLp = 0;
 	nMLp = 0;
 	
+	if (!ncp->isNew && lastAddedNewContent.isNew) {
+		// before returning, replace ncp with new content if last wasn't new and some earlier content was new
+		// (because the queueNewContent() fct will play the content in the first position)
+		ncp->isNew = 1;
+		strcpy(ncp->newAudioCategory,lastAddedNewContent.newAudioCategory);
+		strcpy(ncp->newAudioLanguage,lastAddedNewContent.newAudioLanguage);
+		strcpy(ncp->newAudioName,lastAddedNewContent.newAudioName);
+	}
 	return;
 }
 
@@ -212,129 +259,84 @@ processSystemFiles(void) {
 static int 
 processA18(struct f_info *fip, struct newContent *pNC) {
 	int getMetaCat(char *filename, char *category);
-	char buffer[READ_LENGTH+1], *line, tmpbuf[READ_LENGTH+1];
-	char fnbase[80], category[FILE_LENGTH], subcategory[FILE_LENGTH], lan[FILE_LENGTH];
-	int ret, len_fnbase, i, catidx, subidx, cat_base, fret, handle;
+	char toPath[PATH_LENGTH], fromPath[LONG_PATH_LENGTH];
+	char newFileName[LONG_PATH_LENGTH], category[FILE_LENGTH], lang[FILE_LENGTH];
+	int ret, len, /*i, catidx, subidx, cat_base, */ fret, handle;
 
-	category[0] = subcategory[0] = lan[0] = 0;
-	cat_base = strIndex(fip->f_name, CATEGORY_DELIM);
-	catidx = subidx = fret = 0;
-	if(cat_base >= 1) {	// category info in filename
-		strcpy(fnbase, fip->f_name);
-//	Commenting line below since we want to carry through category info
-//		fnbase[cat_base] = 0; 
-		len_fnbase = strIndex(fip->f_name, '.');
-		for(i=cat_base; ; i++ ) {
-			if(fip->f_name[i] == '.')
-				break;
-			// categories must be caps; subcategories must be lower; each can have digits but not in first position
-			if(isupper(fip->f_name[i]) || (catidx && isdigit(fip->f_name[i])) ) {
-				category[catidx++] = fip->f_name[i];
-				continue;
-			}
-			if(islower(fip->f_name[i])|| (catidx && isdigit(fip->f_name[i])))
-				subcategory[subidx++] = fip->f_name[i]; 
+	category[0] = lang[0] = 0;
+	if(getMetaCat(fip->f_name, category))  {				
+		handle = open((LPSTR)fip->f_name, O_RDONLY);
+		if(handle >= 0) {
+			ret = metaRead(handle, DC_LANGUAGE, (unsigned int*)&lang);
+			close(handle);
 		}
-		category[catidx] = 0;
-		subcategory[subidx] = 0;
 	} else {
-		len_fnbase = strIndex(fip->f_name, '.');
-		strcpy(fnbase, fip->f_name);
-		fnbase[len_fnbase] = 0;
-		strcat(fnbase, ".txt");
-		ret = fileExists((LPSTR)fnbase);
-		if(ret) {	//open txt file, read category
-			getLine(-1,0);
-			ret = tbOpen((LPSTR)fnbase,O_RDONLY);
-			line = getLine(ret, buffer);
-			strncpy(category, line, sizeof(category)-1);
-			close(ret);	
-			for(i=0; i < sizeof(category)-1; i++) {
-				if(category[i] <= 0x20) {
-					category[i] = 0;
-					break;
-				}
-			}
-			category[sizeof(category)-1] = 0;
-			unlink((LPSTR)fnbase);		
-		} else { // .a18 file without category info
-			if(getMetaCat(fip->f_name, category))  {				
-				handle = open(fip->f_name, O_RDONLY);
-				if(handle >= 0) {
-					ret = metaRead(handle, DC_LANGUAGE, (unsigned int*)&lan);
-					close(handle);
-					strcpy(pNC->newAudioLanguage,lan);
-				}
-			} else {
-				strcpy(category, "0");
-			}
+		strcpy(category, "0");
+		handle = tbOpen((LPSTR)fip->f_name, O_RDONLY);
+		if(handle >= 0) {
+			metaRead(handle, DC_LANGUAGE, (unsigned int*)&lang);
+			close(handle);
 		}
 	}
+	if (DEBUG_MODE) {
+		logString((char *)"category is",BUFFER);
+		logString(category,BUFFER);
+	}
+	if (!lang[0]) {
+		if (pkgSystem.idxLanguageCode)
+			strcpy(lang,&pkgSystem.strHeapStack[pkgSystem.idxLanguageCode]);
+		else 
+			strcpy(lang,currentSystem()); // use default language from languages.txt file when processing inbox before system start
+	} 		
+	strcpy(pNC->newAudioCategory, category);
+	strcpy(pNC->newAudioLanguage,lang);
 
-	strcpy(buffer, USER_PATH);
-	fnbase[len_fnbase] = 0;
+	strcpy(fromPath,INBOX_PATH);
+	strcat(fromPath,NEW_PKG_SUBDIR);
+	strcat(fromPath,fip->f_name);
 
-	strcpy(tmpbuf,INBOX_PATH);
-	strcat(tmpbuf,NEW_PKG_SUBDIR);
-	strcat(tmpbuf,fip->f_name);
-
-// TODO: should some other test be applied here??
-	if(0 == strncmp(fnbase,PKG_NUM_PREFIX,strlen(PKG_NUM_PREFIX))) {
-		ret = 1;
-		fret++;
-		do {
-			strcpy(buffer,USER_PATH);
-			getrevdPkgNumber(fnbase,TRUE);
-			strcat(fnbase,CATEGORY_DELIM_STR);
-			strcat(fnbase, category);
-			strcat(fnbase, subcategory);
-			strcat(buffer, fnbase);
-			strcat(buffer,AUDIO_FILE_EXT);
-			ret = rename((LPSTR)tmpbuf, (LPSTR)buffer);
-//			logString((char *)"Rename from/to",BUFFER);
-//			logString(tmpbuf,BUFFER);
-//			logString(buffer,ASAP);
-		} while (ret);
-	} else {
-		strcat(buffer, fip->f_name);
-		ret = rename((LPSTR)tmpbuf, (LPSTR)buffer);
-//			logString((char *)"Rename from/to",BUFFER);
-//			logString(tmpbuf,BUFFER);
-//			logString(buffer,ASAP);
-		if(ret) {   // rename failed, probably already exists
-			int fdinbox, fdcard;
-			fdcard  = tbOpen(buffer, O_RDONLY);
-			fdinbox = tbOpen(tmpbuf, O_RDONLY);
-			ret = checkRevisions(fdcard, fdinbox);
-			if(ret == 0) {  // revision in inbox > revision on card
-				unlink((LPSTR)buffer);
-				ret = rename((LPSTR)tmpbuf, (LPSTR)buffer);
-			}
-			if(ret) {
-				logString((char *)tmpbuf,BUFFER);
-				logString((char *)buffer,BUFFER);
-				logString((char *)"inbox message already exists on device",ASAP);
-				unlink((LPSTR)tmpbuf);	// rename failed, remove from inbox anyway
-			} else {
-				fret++;
-			}
+	strcpy(newFileName, fip->f_name);
+	len =  strlen(newFileName) - strlen(AUDIO_FILE_EXT);   //todo: handle 0-length 
+	if (len > FILE_LENGTH)
+		len = FILE_LENGTH;
+	while (newFileName[len-1] == ' ')
+		len--; // don't let a filename end in a space
+	newFileName[len] = 0;	
+	strcpy(pNC->newAudioName, newFileName);
+			
+	strcpy(toPath, USER_PATH);
+	strcat(toPath, newFileName);
+	strcat(toPath, AUDIO_FILE_EXT);
+	ret = rename((LPSTR)fromPath, (LPSTR)toPath);
+	logString((char *)fromPath,BUFFER);
+	if (DEBUG_MODE) {
+		logString((char *)toPath,BUFFER);
+		logString((char *)pNC->newAudioLanguage,ASAP);
+	}
+	
+	if(ret) {   // rename failed, probably already exists
+		int fdinbox, fdcard;
+		fdcard  = tbOpen((LPSTR)toPath, O_RDONLY);
+		fdinbox = tbOpen((LPSTR)fromPath, O_RDONLY);
+		ret = checkRevisions(fdcard, fdinbox);
+		if(ret == 0) {  // revision in inbox > revision on card
+			unlink((LPSTR)toPath);
+			ret = rename((LPSTR)fromPath, (LPSTR)toPath);
+		}
+		if(ret) {
+			pNC->isNew = 0;
+			logString((char *)"inbox message already exists on device",ASAP);
+			unlink((LPSTR)fromPath);	// rename failed, remove from inbox anyway
 		} else {
+			pNC->isNew = 1;
 			fret++;
 		}
+	} else {
+		pNC->isNew = 1;
+		fret++;
 	}
 		
-	if(pNC->newAudioFileCat[0] == 0) {
-		strcpy(pNC->newAudioFileCat, category);
-		strcpy(pNC->newAudioFileName, fnbase);
-	}
-			
-// TODO - currently doing nothing with subcategory
-	
-	if(lan[0] != 0) {
-		ret = newUpdateCategory((char *)category, (char *)fnbase, (char *)lan, pNC, 0);
-	} else {
-		ret = updateCategory((char *)category, (char *)fnbase, 0);
-	}
+	ret = newUpdateCategory(pNC,0);
 	
 	return(fret);
 
@@ -342,100 +344,108 @@ processA18(struct f_info *fip, struct newContent *pNC) {
 
 static int 
 processDir(char *dirname, struct newContent *pNC) {
-	char savecwd[80];
-	char buffer[READ_LENGTH+1], tempbuf[80];
-	char fnbase[80], category[40], subcategory[40], lang[8];
-	int ret, fret, catidx, subidx, len_fnbase, i, cat_base, fd;
+	char savecwd[PATH_LENGTH];
+	char fromPath[LONG_PATH_LENGTH], toPath[PATH_LENGTH];
+	char newDirName[LONG_PATH_LENGTH], category[FILE_LENGTH], lang[FILE_LENGTH];
+	char metadataFilePath[LONG_PATH_LENGTH];
+	
+	int ret, fret, catidx, subidx, i, handle, len;
+	char *endOfPath;
 
 	ret = getcwd((LPSTR)savecwd , sizeof(savecwd) - 1 );
 	ret = chdir((LPSTR)dirname);
 	
-	category[0] = subcategory[0] = 0;
-	catidx = subidx = 0;
-	strcpy(lang,&pkgSystem.strHeapStack[pkgSystem.idxLanguageCode]);
-	
+	category[0] = 0;
+	lang[0] = 0;
+	catidx = subidx = 0;	
 	fret = 1;
 	
-	cat_base = strIndex(dirname, CATEGORY_DELIM);
-
-	if(cat_base >= 1) {	// category info in filename
-		strcpy(fnbase, dirname);
-		//fnbase[ret] = 0;
-		len_fnbase = cat_base;
-		for(i=cat_base+1; ; i++ ) {
-			if(dirname[i] == '.')
-				break;
-			if(isupper(dirname[i])) {
-				category[catidx++] = dirname[i];
-				continue;
-			}
-			if(islower(dirname[i])) {
-				subcategory[subidx++] = dirname[i];
-				continue;
-			}
-			break; 
-		}
-	category[catidx] = 0;
-	subcategory[subidx] = 0;
-	}	
 	//copyCWD(USER_PATH);
-	strcpy(buffer,INBOX_PATH);
-	strcat(buffer,NEW_PKG_SUBDIR);
-	strcat(buffer,dirname);
+	strcpy(fromPath,INBOX_PATH);
+	strcat(fromPath,NEW_PKG_SUBDIR);
+	strcat(fromPath,dirname);
+	strcpy(metadataFilePath,fromPath);
+	strcat(metadataFilePath,"/");
+	strcat(metadataFilePath, dirname);
+	strcat(metadataFilePath,AUDIO_FILE_EXT);	
 	
-	if(0 == strncmp(dirname,PKG_NUM_PREFIX,strlen(PKG_NUM_PREFIX))) {
-		ret = 1;
-		while(ret) {
-			strcpy(tempbuf,USER_PATH);
-//			getrevdPkgNumber(tempbuf+strlen(tempbuf),TRUE);
-			getrevdPkgNumber(fnbase,TRUE);
-			strcat(fnbase, dirname+cat_base);
-			strcat(tempbuf, fnbase);
-			ret = rename((LPSTR)buffer,(LPSTR)tempbuf);
+	if(getMetaCat(metadataFilePath, category))  {				
+		if (DEBUG_MODE) {
+			logString((char *)"category is",BUFFER);
+			logString(category,ASAP);
+		}
+		handle = open((LPSTR)metadataFilePath, O_RDONLY);
+		if(handle >= 0) {
+			ret = metaRead(handle, DC_LANGUAGE, (unsigned int*)&lang);
+			close(handle);
+		} else {
+			strcpy(lang,&pkgSystem.strHeapStack[pkgSystem.idxLanguageCode]);
 		}
 	} else {
-		strcpy(tempbuf,USER_PATH);
-		strcat(tempbuf,dirname);
-		strcpy(fnbase, dirname);
-		ret = rename((LPSTR)buffer,(LPSTR)tempbuf);
-		if (ret == -1) {
-			// assume the directory already exists
-			deleteAllFiles(buffer);
-			rmdir((LPSTR)buffer);			
+		strcpy(category, "0");
+		handle = tbOpen((LPSTR)metadataFilePath, O_RDONLY);
+		if(handle >= 0) {
+			i = metaRead(handle, DC_LANGUAGE,  (unsigned int*)&lang);
+			close(handle);
 		}
 	}
-		
-	if(catidx == 0) {
-		strcat(tempbuf,"/");
-		strcat(tempbuf, dirname);
-		strcat(tempbuf,".a18");
-		if(!getMetaCat(tempbuf, category))  {
-			strcpy(category, "0");  // "O"
+	if (!lang[0])
+		strcpy(lang,&pkgSystem.strHeapStack[pkgSystem.idxLanguageCode]);
+	strcpy(pNC->newAudioCategory, category);
+	strcpy(pNC->newAudioLanguage,lang);
+
+	strcpy(newDirName,dirname);
+	len = strlen(newDirName);
+	if (len > FILE_LENGTH)
+		len = FILE_LENGTH;
+	while (newDirName[len-1] == ' ')
+		len--; // don't let a directory end in a space
+	newDirName[len] = 0;	
+	strcpy(pNC->newAudioName, newDirName);
+	strcpy(toPath,USER_PATH);
+	strcat(toPath,newDirName);
+	
+	ret = rename((LPSTR)fromPath,(LPSTR)toPath);
+	logString((char *)fromPath,BUFFER);
+	if (DEBUG_MODE) {
+		logString((char *)toPath,BUFFER);
+		logString((char *)pNC->newAudioLanguage,ASAP);
+	}
+	if(ret) {   // rename failed, probably already exists
+		int fdinbox, fdcard;
+		endOfPath = toPath + strlen(toPath);
+		strcat(toPath,"/");
+		strcat(toPath, dirname);
+		strcat(toPath,AUDIO_FILE_EXT);	
+		fdinbox = tbOpen((LPSTR)metadataFilePath, O_RDONLY);
+		fdcard  = tbOpen((LPSTR)toPath, O_RDONLY);
+		ret = checkRevisions(fdcard, fdinbox);
+		if(ret == 0) {  // revision in inbox > revision on card
+			*endOfPath = 0; // return toPath to directory name only
+			deleteAllFiles(toPath);
+			rmdir((LPSTR)toPath);			
+			ret = rename((LPSTR)fromPath, (LPSTR)toPath);
+		}
+		if(ret) {
+			pNC->isNew = 0;
+			logString((char *)"inbox message already exists on device",ASAP);
+			deleteAllFiles(fromPath);
+			rmdir((LPSTR)fromPath);			
 		} else {
-			fd = tbOpen(tempbuf, O_RDONLY);
-			if(fd >= 0) {
-				i = metaRead(fd, DC_LANGUAGE, lang);
-				close(fd);
-			}
+			pNC->isNew = 1;
+			fret++;
 		}
+	} else {
+		pNC->isNew = 1;
+		fret++;
 	}
-	
-// TODO: - currently doing nothing with subcategory
-
-	if (ret != -1) // dont bother if move didnt happen, which means it probably already exists	
-		ret = newUpdateCategory(category, fnbase, lang, pNC, APP_PKG_CHAR);
-	
-	if(pNC->newAudioDirCat[0] == 0) {
-		strcpy(pNC->newAudioDirCat, category);
-		strcat(pNC->newAudioDirName, fnbase);
-	}
-
-		
-	ret = chdir((LPSTR)savecwd);	
-	ret = rmdir((LPSTR)dirname);
-	
+					
+	ret = newUpdateCategory(pNC,1);
+			
+	ret = chdir((LPSTR)savecwd);		
 	return (fret);
 }
+
 MLENTRY 
 matchCategory(MLENTRY *mlp, MLENTRY *filecat) {
 	int i;
@@ -467,12 +477,12 @@ matchCategory(MLENTRY *mlp, MLENTRY *filecat) {
 	return((MLENTRY)0);
 }
 static int 
-newUpdateCategory(char *category, char *fnbase, char *lang, struct newContent *pNC, char prefix) {
-	char buffer[80], tmpbuf[80], path[PATH_LENGTH], catwrk[20], *cp;
+newUpdateCategory(struct newContent *pNC, int isDir) {
+	char buffer[80], tmpbuf[80], path[PATH_LENGTH], catwrk[20], *cp, *lang;
 	int ret;
 	MLENTRY filecat, mlret;
 
-	
+	lang = pNC->newAudioLanguage;
 	strcpy(path,LISTS_PATH);
 	strcat(path,lang);
 	strcat(path, "/");
@@ -483,14 +493,26 @@ newUpdateCategory(char *category, char *fnbase, char *lang, struct newContent *p
 		ret = loadLanglisttoMemory(path,  MLp, MAX_ML_ENTRIES);
 		nMLp = ret;
 	}
-	
-	categoryStringtoLong(category, &filecat);
-	mlret = matchCategory(MLp, &filecat);		
-	categoryLongtoString(&catwrk[0], &mlret);
-	strcpy(pNC->newAudioFileCat, catwrk);
-	
+
+	if (!strcmp((char *)FEEDBACK_CATEGORY,(char *)pNC->newAudioCategory))
+		// Feedback messages stay in the feedback category -- add the category if needed
+		addCategoryToActiveLists((char *)FEEDBACK_CATEGORY,lang);
+	else {
+		categoryStringtoLong(pNC->newAudioCategory, &filecat);
+		if (DEBUG_MODE) {
+			logString((char *)"Metadata category is:",BUFFER);
+			logString(pNC->newAudioCategory,ASAP);
+		}
+		mlret = matchCategory(MLp, &filecat);		
+		categoryLongtoString(&catwrk[0], &mlret);
+		strcpy(pNC->newAudioCategory, catwrk);
+		if (DEBUG_MODE) {
+			logString((char *)"Assigned list is:",BUFFER);
+			logString(pNC->newAudioCategory,ASAP);
+		}
+	}	
 //	cpyListPath(path,&catwrk[0]);
-	if (catwrk[0] == SYS_MSG_CHAR)
+	if (pNC->newAudioCategory[0] == SYS_MSG_CHAR)
 		strcpy(path,LANGUAGES_PATH);
 	else
 		strcpy(path,LISTS_PATH);
@@ -498,19 +520,24 @@ newUpdateCategory(char *category, char *fnbase, char *lang, struct newContent *p
 	strcat(path, "/");
 	
 	strcpy(buffer, path);
-	strcat(buffer, catwrk);
+	strcat(buffer, pNC->newAudioCategory);
 	strcat(buffer,".txt");
-	
+
+/*	
 	if(!fileExists((LPSTR)buffer)) {  // if category does not exist, put file in OTHER - 0.txt
 		strcpy(buffer, path);
 		strcat(buffer,"0.txt");
 	}
-	
-	if(prefix) {
-		tmpbuf[0] = prefix;
-		strcpy(tmpbuf+1, fnbase);
+*/	
+    if(isDir) {
+		tmpbuf[0] = APP_PKG_CHAR;
+		strcpy(tmpbuf+1, pNC->newAudioName);
 	} else {
-		strcpy(tmpbuf,fnbase);
+		strcpy(tmpbuf,pNC->newAudioName);
+	}
+	if (DEBUG_MODE) {
+		logString(buffer, BUFFER);
+		logString(tmpbuf, BUFFER);
 	}
 // This checks if entry already exists and adds a new line only if it does not.
 	ret = findDeleteStringFromFile((char *)NULL, buffer, tmpbuf, 0);
@@ -518,21 +545,21 @@ newUpdateCategory(char *category, char *fnbase, char *lang, struct newContent *p
 //  append the basename to the proper .txt file in lists
 	if (ret == -1)
 		ret = insertStringInFile(buffer,tmpbuf,0);
-	
-	if((cp = strrchr(buffer, '/'))) {
-		if(!strcmp(cp+1, "0.txt")) {
-			strcpy(path,LISTS_PATH);
-			strcat(path, lang);
-			strcat(path, "/");
-			strcat(path,(char *)LIST_MASTER);
-			strcat(path,(char *)".txt");
-			strcpy(tmpbuf, "0");
-			ret = findDeleteStringFromFile((char *)NULL, path, tmpbuf, 0);
-			if (ret == -1)
-				ret = appendStringToFile(path,tmpbuf);
-		}
-	}
 
+/*
+	// FOR TESTING ONLY: To test lots of writes to a list file
+	for(ret = 0;ret < MAX_VOLUME; ret++) {
+		tmpbuf[0]='0'+ret%65;
+		insertStringInFile(buffer,tmpbuf,0);	
+		setLED(LED_RED,FALSE);
+		wait(200);
+		setLED(LED_RED,TRUE);			
+	} 
+
+*/
+	// if categorized as other, ensure other is on the activeList
+	if((cp = strrchr(buffer, '/')) && (!strcmp(cp+1, OTHER_CATEGORY ".txt")))
+		addCategoryToActiveLists((char *)OTHER_CATEGORY,lang);
 	return(ret);
 
 }
@@ -568,7 +595,7 @@ updateCategory(char *category, char *fnbase, char prefix) {
 	}
 	
 	if(prefix) {
-		tmpbuf[0] = prefix;
+		tmpbuf[0] = APP_PKG_CHAR;
 		strcpy(tmpbuf+1, fnbase);
 	} else {
 		strcpy(tmpbuf,fnbase);

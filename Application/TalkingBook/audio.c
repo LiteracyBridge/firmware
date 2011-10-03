@@ -17,6 +17,8 @@
 APP_IRAM unsigned long stat_audio_length;
 APP_IRAM unsigned int  stat_pkg_type;
 APP_IRAM int statINIT = 0;
+APP_IRAM unsigned long SACM_A1800_Bytes;
+APP_IRAM unsigned long SACM_A1800_Msec;		 
 
 static char STAT_FN[FILE_LENGTH];
 
@@ -29,7 +31,7 @@ extern void User_SetDecodeLength(unsigned long);
 static int getFileHandle (CtnrFile *);
 static void playLongInt(CtnrFile *, unsigned long);
 static int recordAudio(char *, char *, BOOL);
-static void createStatsFile(unsigned long);
+//static void createStatsFile(unsigned long);
 
 extern APP_IRAM unsigned int vCur_1;
 
@@ -79,12 +81,12 @@ void playDings(int count) {
 		playDing();	
 }
 unsigned long wordsFromFrames(unsigned long frames) {
-	unsigned long words = frames * 40;
+	unsigned long words = frames * SACM_A1800_Mode / 800;
 	return words;
 }
 
 unsigned long framesFromBytes(unsigned long bytes) {
-	unsigned long frames = bytes / 80;	
+	unsigned long frames = bytes / (SACM_A1800_Mode / 400);	
 	return frames;
 }
 
@@ -103,6 +105,12 @@ unsigned long getCurrentFrame(void) {
 	unsigned long word = ( unsigned long )User_GetCurDecodeLength();
 	unsigned long frame = word / wordsPerFrame;
 	return frame;	
+}
+
+unsigned long getCurrentMsec(void) {
+	unsigned long frame = getCurrentFrame();
+	unsigned long msec = msecFromFrames(frame);
+	return msec;
 }
 
 int gotoFrame(unsigned long frameDest) {
@@ -137,6 +145,12 @@ int gotoFrame(unsigned long frameDest) {
 	User_SetDecodeLength(wordDest);
 	resume();	
 	return 0;
+}
+
+int gotoMsec(unsigned long msec) {
+	int ret;
+	ret = gotoFrame(framesFromMSec(msec));
+	return ret;
 }
 
 unsigned long setFileHeader(char *filePath, unsigned long frames) {
@@ -259,6 +273,7 @@ static void playLongInt(CtnrFile *file, unsigned long lTimeNew) {
 	
 	if (context.lastFile && (context.lastFile->idxFilename == file->idxFilename && SACM_Status())) {
 		lTimeCurrent = Snd_A1800_GetCurrentTime();
+		lTimeCurrent = getCurrentMsec();
 		lDifference = lTimeNew - lTimeCurrent;
 		if (lDifference >= 0)
 			SACM_A1800FAT_SeekTime(lDifference,FORWARD_SKIP);
@@ -428,24 +443,35 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 		
 	file = getTempFileFromName(cursor,0);
 	if (strcmp(cursor,TRANSLATE_TEMP_DIR) != 0)
-		insertSound(file,NULL,TRUE);
-	start = getRTCinSeconds();
-	strcpy(temp,"\x0d\x0a");
-	longToDecimalString(start,temp+2,8);
-	strcat(temp,(const char *)": RECORD ");
-	LBstrncat(temp,pkgName,60);
-	LBstrncat(temp," -> ",60);
-	LBstrncat(temp,cursor,60);	
-	logString(temp,BUFFER);
-	if (strcmp(cursor,TRANSLATE_TEMP_DIR) != 0) {
-		insertSound(&pkgSystem.files[SPEAK_SOUND_FILE_IDX],NULL,TRUE);
+		insertSound(file,NULL,FALSE);
+	if (context.keystroke == KEY_HOME) {
+		//let context.keystroke  propogate through
+		ret = 1; // signals no audio recorded but not necessary to throw exception
+	} else {
+		start = getRTCinSeconds();
+		strcpy(temp,"\x0d\x0a");
+		longToDecimalString(start,temp+2,8);
+		strcat(temp,(const char *)": RECORD ");
+		LBstrncat(temp,pkgName,60);
+		LBstrncat(temp," -> ",60);
+		LBstrncat(temp,cursor,60);	
+		logString(temp,BUFFER);
+		// play record prompt message unless running translation app or if a button was just pressed 
+		if (!context.keystroke && strcmp(cursor,TRANSLATE_TEMP_DIR) != 0) {
+			insertSound(&pkgSystem.files[SPEAK_SOUND_FILE_IDX],NULL,FALSE);
+			if (context.keystroke == KEY_HOME)
+				ret = 1; // signals no audio recorded but not necessary to throw exception
+			else
+				context.keystroke = 0;
+		} else
+			context.keystroke = 0; // reset context.keystroke so a second action doesn't take place
+		stop();
+		start = getRTCinSeconds();
+		prev = end = start;
+		//asm("INT OFF"); // to prevent recordings with bad blocks
 	}
-	stop();
-	start = getRTCinSeconds();
-	prev = end = start;
-	//asm("INT OFF"); // to prevent recordings with bad blocks
-	handle = tbOpen((LPSTR)filepath,O_CREAT|O_RDWR);
-	if (handle != -1) {
+	// only open file to record if HOME was not pressed and only proceed if file opens correctly 
+	if (ret != 1 && ((handle = tbOpen((LPSTR)filepath,O_CREAT|O_RDWR)) != -1)) {
 		setLED(LED_RED,TRUE);
 		playBip();
 		turnAmpOff();
@@ -613,7 +639,7 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 		//logString(temp,ASAP);
 
 		ret = 0;  // used to set this based on fileExists() check, but too slow
-	} else {
+	} else if (ret == -1) {
 		logException(16, filepath,RESET);  //can't open file for new recording
 	}
 	BIT_RATE = previousBitRate;
@@ -621,7 +647,7 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 }	
 
 int createRecording(char *pkgName, int fromHeadphone, char *listName, BOOL relatedToLastPlayed) {
-	int SPINS; //from page 102 of GPL Progammers Manual v1.0/Dec20,2006 
+	int ret, SPINS; //from page 102 of GPL Progammers Manual v1.0/Dec20,2006 
 	           //headphone amp audio driver input source select 
 	
 	markEndPlay(getRTCinSeconds());
@@ -644,14 +670,14 @@ int createRecording(char *pkgName, int fromHeadphone, char *listName, BOOL relat
 		*P_HPAMP_Ctrl |= SPINS;	
 	}
 
-	recordAudio(pkgName,listName,relatedToLastPlayed);
+	ret = recordAudio(pkgName,listName,relatedToLastPlayed);
 	if (SPINS)
 		*P_HPAMP_Ctrl &= 0xFFF3; // zero bits 2 and 3, returning SPINS to 0
 	
-	if(strcmp(listName, TRANSLATE_TEMP_DIR) != 0)
+	if((ret == 0) && strcmp(listName, TRANSLATE_TEMP_DIR) != 0)
 		packageRecording(pkgName,listName); // packageRecording turns it into single byte characters
 
-	return 0;
+	return ret;
 }
 
 void markEndPlay(long timeNow) {
@@ -905,7 +931,7 @@ unsigned long getAvailRand() {
 
 	return(uid);
 }
-
+/* NOT CURRENTLY USED
 void createStatsFile(unsigned long uid) {
 	char statpath[PATH_LENGTH], digits[16];
 	struct ondisk_filestats tmp_file_stats = {0};
@@ -920,6 +946,7 @@ void createStatsFile(unsigned long uid) {
 	ret = write(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
 	close(stathandle);
 }
+*/
 
 int readLE32(int handle, long value, long offset) {
 	int ret = 0;

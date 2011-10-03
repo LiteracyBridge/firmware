@@ -6,6 +6,8 @@
 
 #include "containers.h"
 
+extern unsigned long SACM_A1800_Bytes;
+extern unsigned long SACM_A1800_Msec;		 
 extern void SACM_Stop(void);
 
 extern void playDing(void);
@@ -18,7 +20,9 @@ extern unsigned long framesFromBytes(unsigned long);
 extern unsigned long msecFromFrames(unsigned long);
 extern unsigned long framesFromMSec(unsigned long);
 extern unsigned long getCurrentFrame(void);
+extern unsigned long getCurrentMsec(void);
 extern int gotoFrame(unsigned long frameDest);
+extern int gotoMsec(unsigned long msec);
 extern unsigned long setFileHeader(char *, unsigned long);
 extern void playActionSound(EnumAction); 
 extern void pause(void);

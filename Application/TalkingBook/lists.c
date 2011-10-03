@@ -54,7 +54,10 @@ static int openList(ListItem *list, char *outFilename) {
 		strcpy(outFilename,filename);
 	ret = tbOpen((LPSTR)(filename),O_RDONLY);
 	if (ret == -1) {
-		logException(5,filename,RESET); //todo: package name or path does not exist
+		ret = tbOpen((LPSTR)(filename), O_CREAT|O_RDWR);
+		if (ret == -1)
+			close(ret);
+		// logException(5,filename,RESET); //todo: package name or path does not exist
 	}
 	return ret;	
 }
@@ -303,7 +306,8 @@ int getListFilename(char * filename, int idList, BOOL addExtension) {
 
 	return 0;	
 }
-
+/*
+REMOVING THIS FCT SINCE IT WAS ONLY BEING USED BY PACKAGERECORDING(), WHICH NOW USES INSERTSTRINGINFILE()
 int insertIntoList(ListItem *list, long posInsert, char * string) {
 	//todo: create a version without a roundtrip between single/dbl-byte chars	
 	int rHandle, wHandle, ret, i, bytesToWrite;
@@ -354,4 +358,28 @@ int insertIntoList(ListItem *list, long posInsert, char * string) {
 	}
 	return ret;
 }
+*/
 
+int addCategoryToActiveLists(char * strCategoryCode, char * strLanguage) {
+	char filepath[PATH_LENGTH];
+	char tempCategoryCode[LIST_ITEM_LENGTH];
+	int ret;
+	
+	// be sure category is in master-list.txt
+	if (strLanguage) {
+		strcpy(filepath,LISTS_PATH);
+		strcat(filepath,strLanguage);
+		strcat(filepath,"/");
+	} else 
+		cpyListPath(filepath,LIST_MASTER);
+	strcat(filepath,(char *)LIST_MASTER);
+	strcat(filepath,(char *)".txt");
+	// Only add category entry if doesn't already exist.
+	// Checking for existence without deleting and appending preserves category order.
+	ret = findDeleteStringFromFile((char *)NULL, filepath, strCategoryCode, 0);
+	if (ret == -1) { // not found in file
+		strcpy(tempCategoryCode,strCategoryCode); // since appendStringToFile destroys string
+		ret = appendStringToFile(filepath, tempCategoryCode); 
+	}
+	return ret;
+}

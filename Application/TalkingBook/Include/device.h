@@ -5,6 +5,8 @@
 
 #include ".\Component\Include\component_head.h"
 
+#define MIN_VOLUME	1
+
 //refuse to go into usb mode if voltage below this value
 #define V_MIN_USB_VOLTAGE 190
 
@@ -62,6 +64,7 @@ extern unsigned int getCurVoltageSample();
 extern int keyCheck(int);
 extern int waitForButton(int);
 extern void wait(int);
+extern int waitAndCheckKeys(int);
 extern void resetSystem(void);
 extern void setOperationalMode(int);
 extern int logLongHex(unsigned long);

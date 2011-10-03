@@ -1083,17 +1083,16 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			ret = createRecording(filename,aux,TRANSLATE_TEMP_DIR, FALSE);
 			if (ret == -1)
 				logException(28,"recording failed",RESET); //todo: add voice error msg?
-				
-			transList->translatedFileMarker[transList->currFileIdx] = '1';
+			else if (ret == 0) {	
+				transList->translatedFileMarker[transList->currFileIdx] = '1';
 			
-			//Set mode to re-play file just recorded in translated tracks
-			transList->mode = '1';
-			insertSound(&pkgSystem.files[transList->currFileIdx+1],NULL,TRUE);
-			transList->mode = tempBuffer[0];
+				//Set mode to re-play file just recorded in translated tracks
+				transList->mode = '1';
+				insertSound(&pkgSystem.files[transList->currFileIdx+1],NULL,TRUE);
+				transList->mode = tempBuffer[0];
 		
-			finishTranslation();
-			//finishTranslation(FALSE);
-			
+				finishTranslation();
+			}			
 			break;
 		case JUMP_LIST:
 			stop();
@@ -1152,6 +1151,10 @@ static void takeAction (Action *action, EnumAction actionCode) {
 					case -1:
 					    strcpy(filename,getPreviousList(list));
 						break;
+				}
+				if (DEBUG_MODE) {
+					logString((char *)"new list item:",BUFFER);
+					logString(filename,ASAP);
 				}
 				if (!filename[0]) { 
 					// empty list
@@ -1232,11 +1235,14 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			stop();
 			if (PRE_COPY_FILE_IDX)
 				insertSound(&pkgSystem.files[PRE_COPY_FILE_IDX],NULL,TRUE);  
-			setUSBHost(TRUE);
-			ret = cloneDevice();
-			setUSBHost(FALSE);
-			if (POST_COPY_FILE_IDX) 
-				insertSound(&pkgSystem.files[POST_COPY_FILE_IDX],NULL,TRUE); 
+			ret = setUSBHost(TRUE);
+			if (ret == 0) {
+				ret = cloneDevice();
+				setUSBHost(FALSE);
+				if (POST_COPY_FILE_IDX) 
+					insertSound(&pkgSystem.files[POST_COPY_FILE_IDX],NULL,TRUE); 
+			} else
+				playBips(3);
 			checkInactivity(TRUE); // stop from sleeping after long time out of the mainLoop
 			break;
 
@@ -1244,11 +1250,15 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			stop();
 			if (PRE_COPY_FILE_IDX)
 				insertSound(&pkgSystem.files[PRE_COPY_FILE_IDX],NULL,TRUE);  
-			setUSBHost(TRUE);
-			ret = copyLanguage(pkgSystem.strHeapStack + pkgSystem.idxName);
-			setUSBHost(FALSE);
-			if (POST_COPY_FILE_IDX) 
-				insertSound(&pkgSystem.files[POST_COPY_FILE_IDX],NULL,TRUE); 
+			ret = setUSBHost(TRUE);
+			if (ret == 0) {
+				ret = copyLanguage(pkgSystem.strHeapStack + pkgSystem.idxName);
+				setUSBHost(FALSE);
+				if (POST_COPY_FILE_IDX) 
+					insertSound(&pkgSystem.files[POST_COPY_FILE_IDX],NULL,TRUE); 
+			} else
+				playBips(3);
+
 			checkInactivity(TRUE); // stop from sleeping after long time out of the mainLoop
 			break;
 								
@@ -1265,6 +1275,9 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			ret = d2dCopy((const char *)cursor,(const char *)filename);
 			if (ret == 0 && POST_COPY_FILE_IDX) 
 				insertSound(&pkgSystem.files[POST_COPY_FILE_IDX],NULL,TRUE); 
+			else
+				playBips(3);
+
 			//TODO: return copying device to some other point.
 //			newBlock = &context.package->blocks[aux];
 //			newTime = newBlock->startTime;
@@ -1434,15 +1447,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			strcat(filepath,".txt");
 			insertStringInFile(filepath,cursor,0);
 			// be sure category is in master-list.txt
-			cpyListPath(filepath,LIST_MASTER);
-			strcat(filepath,(char *)LIST_MASTER);
-			strcat(filepath,(char *)".txt");
-			strcpy(tempBuffer,(char *)FAVORITES_CATEGORY);
-			// Only add category entry if doesn't already exist.
-			// Checking for existence without deleting and appending preserves category order.
-			ret = findDeleteStringFromFile((char *)NULL, filepath, tempBuffer, 0);
-			if (ret == -1) // not found in file
-				ret = appendStringToFile(filepath, tempBuffer); 
+			addCategoryToActiveLists((char *)FAVORITES_CATEGORY,0);
 			context.queuedPackageNameIndex = SAME_SYSTEM;
 			context.queuedPackageType = PKG_SYS;
 			reposition = TRUE;
@@ -1603,14 +1608,14 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			//filename is now output from createRecording - name of new file without the .a18 suffix
 			//cursor is name of current list
 			ret = createRecording(filename,aux,cursor,FALSE);
-			if (ret != -1) {
+			if (ret == 0) {
 				destination = replaceStack(filename,context.package);
 				context.queuedPackageNameIndex = destination;
 				if (*cursor == SYS_MSG_CHAR) 
 					context.queuedPackageType = SYS_MSG;
 				else
 					context.queuedPackageType = PKG_MSG;
-			} else
+			} else if (ret == -1)
 				logException(28,"recording failed",RESET); //todo: add voice error msg?
 			break;	
 
@@ -1646,14 +1651,15 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			//filename is name of new file
 			//cursor is name of current list
 			ret = createRecording(filename,aux,tempPath,TRUE);
-			if (ret != -1) {
+			if (ret == 0) {
+				addCategoryToActiveLists((char *)FEEDBACK_CATEGORY,0);
 				destination = replaceStack(filename,context.package);
 				context.queuedPackageNameIndex = destination;
 				if (*cursor == SYS_MSG_CHAR) 
 					context.queuedPackageType = SYS_MSG;
 				else
 					context.queuedPackageType = PKG_MSG;
-			} else
+			} else if (ret == -1)
 				logException(28,"recording failed",RESET); //todo: add voice error msg?
 			break;	
 
@@ -1735,11 +1741,14 @@ static void takeAction (Action *action, EnumAction actionCode) {
 				context.package = context.returnPackage;
 			if (context.package != &pkgSystem) {
 				longOldTime = Snd_A1800_GetCurrentTime();
+				longOldTime = getCurrentMsec();
 				l = (signed long)extractSignedTime(destination,context.package->timePrecision); // hoping this brings back an originally negative number
 				longNewTime = longOldTime + l;
-				if (l >= 0) 
+				if (l >= 0) {
 					direction = FORWARD_JUMPING;
-				else {
+					if (longNewTime >= SACM_A1800_Msec)
+						longNewTime = (SACM_A1800_Msec > DEFAULT_REWIND)?(SACM_A1800_Msec - DEFAULT_REWIND):0;
+				} else {
 					direction = BACKWARD_JUMPING;
 					if (abs(l) > longOldTime)
 						longNewTime = 0;

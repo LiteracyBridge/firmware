@@ -88,6 +88,7 @@ void setLED(unsigned int color, BOOL on) {
 		unsigned int nDrv;
 	};
 	struct GPIO *LEDPort = (struct GPIO *)P_IOB_Data;
+	// on = FALSE;
 	if (on) {
  		LEDPort->nDir 	 |= color;
 		LEDPort->nAttrib |= color;  // LEDPort->nData   |= color;
@@ -141,8 +142,8 @@ int adjustVolume (int amount, BOOL relative, BOOL rememberOldVolume) {
 		volume = MAX_VOLUME;
 		playBip();	
 	}
-	if (volume < 1)  
-		volume = 1;
+	if (volume < MIN_VOLUME)  
+		volume = MIN_VOLUME;
 	SACM_Volume(volume);	
 	return volume;
 }
@@ -378,6 +379,26 @@ void wait(int t) { //t=time in msec
 			asm("nop\n");  // a CPU no-op instruction to pass the time
 }
 
+
+int waitAndCheckKeys(int t) { //t=time in msec
+	unsigned int i;
+	unsigned long j;
+	int key;
+	unsigned long int cyclesPerMilliSecond = (long)(*P_PLLN & 0x3f) * 1000L;  // 96000 at 96MHz	
+	const unsigned int cyclesPerKeyCheck = 400; // cycles for each no-operation instruction
+	const unsigned int KeyChecksPerMilliSecond = cyclesPerMilliSecond / cyclesPerKeyCheck; // loop count per millisecond
+	for (i = 0; i < t; i++) {
+		for (j = 0; j < KeyChecksPerMilliSecond; j++) {
+			key = keyCheck(0);
+			if (key)
+				break;
+		}
+		if (key)
+			break;
+	}
+	return key;	
+}
+
 void resetSystem(void) {
 	// set watchdog timer to reset device; 0x780A (Watchdog Reset Control Register)
 	// see GPL Programmer's Manual (V1.0 Dec 20,2006), Section 3.5, page 18
@@ -434,7 +455,8 @@ void setOperationalMode(int newmode) {
   		buildMyStatsCSV();
 		writeVersionToDisk();  // make sure the version file is correct
   		confirmSNonDisk(); // make sure the serial number file is correct 
-     	// assume calling for sleep or halt
+ 		cleanUpOldRevs(); // cleanup any old revs 
+    	// assume calling for sleep or halt
 		*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
 		if (newmode == (int)P_HALT)
 			logString((char *)"Halting",BUFFER);
