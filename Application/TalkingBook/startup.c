@@ -133,8 +133,8 @@ void startUp(unsigned int bootType) {
 	char buffer[200];
 	char strCounts[32];
 	char filename[FILE_LENGTH];
-	int key;
-	int configExists;
+	int key, ret;
+	int configExists, normal_shutdown=1;
 	
 	SetSystemClockRate(MAX_CLOCK_SPEED); // to speed up initial startup -- set CLOCK_RATE later
 
@@ -176,8 +176,17 @@ void startUp(unsigned int bootType) {
 	adjustVolume(NORMAL_VOLUME,FALSE,FALSE);
 	adjustSpeed(NORMAL_SPEED,FALSE);
 
-	// Try loading config file. If doesn't load, still try firmware update, but then go to testPCB() afterwards.
-	configExists = (loadConfigFile() == -1?0:1);
+// try to load a saved config.bin if present
+	configExists = (restore_config_bin() == -1?0:1);
+		
+	if(!configExists) {
+		//config.bin does not exist or is corrupted so not a normal shutdown
+		normal_shutdown = 0;
+		
+		// Try loading config.txt file. If doesn't load, still try firmware update, but then go to testPCB() afterwards.
+		configExists = (loadConfigFile() == -1?0:1);
+	}
+			
 	// check for new firmware first, but don't flash if voltage is low
 	if(V_MIN_SDWRITE_VOLTAGE <= vCur_1) {
 		updateSN();
@@ -241,6 +250,12 @@ void startUp(unsigned int bootType) {
 	if (DEBUG_MODE)
 		strcat(buffer,"\x0d\x0a" "*DEBUG MODE*");
 	logString(buffer,BUFFER);
+	
+	if(normal_shutdown) {
+		logString((char *)"Restored configuration from config.bin successfully" ,BUFFER);
+	} else {
+		logString((char *)"Apparently ABNORMAL shutdown (no or corrupt config.bin)", BUFFER);
+	}
 	
 //#ifdef TB_CAN_WAKE
 	if(MEM_TYPE == MX_MID) {
@@ -352,6 +367,18 @@ int loadConfigFile(void) {
 				logException(14,0,0);
 				break; //out of while,but continue with for loop
 			}
+			//
+			// to add an integer VALUE here be sure to
+			//   1) add it to the struct config_bin in starup.h
+			//   2) add a macro SAV_CONFIG_INT(VALUE) to the function write_config.bin
+			//   3) add a macro SAV_CONFIG_INT(VALUE) to the function restore_config.bin
+			//
+			// to add a string VALUE here be sure to
+			//   1) add offset_VALUE to the struct config_bin in starup.h
+			//   2) add a macro SET_CONFIG_INT(VALUE) to the function write_config.bin
+			//   3) add a macro SET_CONFIG_STRING(VALUE) to the function restore_config.bin
+			//   4) add the "strlen (VALUE) + 1 + \"  to the CONFIG_BUFLEN macro in startup.h
+			//
 			if (!strcmp(name,(char *)"KEY_PLAY")) KEY_PLAY=strToInt(value);
 				else if (!strcmp(name,(char *)"KEY_LEFT")) KEY_LEFT=strToInt(value);
 				else if (!strcmp(name,(char *)"KEY_RIGHT")) KEY_RIGHT=strToInt(value);
@@ -558,3 +585,355 @@ void cleanUpOldRevs() {
 		rmdir((LPSTR)"a://Firmware");
 	}
 }
+
+#define SAV_CONFIG_INT(arg) cfg. ## arg = arg
+#define SAV_CONFIG_STRING(string) \
+		if(string) { \
+			strcpy(cfg_string_buf + offset, string); \
+			cfg.offset_ ## string = offset; \
+			offset += strlen(string) + 1; \
+		} else { \
+			cfg.offset_ ## string = offset; \
+			cfg_string_buf[offset++] = 0; \
+		}
+
+int write_config_bin () {
+	int offset = 0, ret = 0, handle;
+	CONFIG_BIN cfg;
+	int cfg_string_buf_len = CONFIG_BUFLEN;
+	char cfg_string_buf[cfg_string_buf_len];
+
+		SAV_CONFIG_INT (KEY_PLAY);
+		SAV_CONFIG_INT (KEY_LEFT);
+		SAV_CONFIG_INT (KEY_RIGHT);
+		SAV_CONFIG_INT (KEY_UP);
+		SAV_CONFIG_INT (KEY_DOWN);
+		SAV_CONFIG_INT (KEY_SELECT);
+		SAV_CONFIG_INT (KEY_STAR);
+		SAV_CONFIG_INT (KEY_HOME);
+		SAV_CONFIG_INT (KEY_PLUS);
+		SAV_CONFIG_INT (KEY_MINUS);			
+		SAV_CONFIG_INT (LED_GREEN);
+		SAV_CONFIG_INT (LED_RED);
+		SAV_CONFIG_INT (MAX_SPEED);
+		SAV_CONFIG_INT (NORMAL_SPEED);
+		SAV_CONFIG_INT (MAX_VOLUME);
+		SAV_CONFIG_INT (NORMAL_VOLUME);
+		SAV_CONFIG_INT (SPEED_INCREMENT);
+		SAV_CONFIG_INT (VOLUME_INCREMENT);		
+		SAV_CONFIG_STRING (SYSTEM_ORDER_FILE);
+		SAV_CONFIG_STRING (SYSTEM_PATH);
+		SAV_CONFIG_STRING (LANGUAGES_PATH);
+		SAV_CONFIG_STRING (UI_SUBDIR);
+		SAV_CONFIG_STRING (TOPICS_SUBDIR);
+		SAV_CONFIG_STRING (USER_PATH);
+		SAV_CONFIG_STRING (LISTS_PATH);
+		SAV_CONFIG_STRING (INBOX_PATH);
+		SAV_CONFIG_STRING (OUTBOX_PATH);
+		SAV_CONFIG_STRING (NEW_PKG_SUBDIR);
+		SAV_CONFIG_STRING (SYS_UPDATE_SUBDIR);
+		SAV_CONFIG_STRING (LOG_FILE);
+		SAV_CONFIG_STRING (LIST_MASTER);
+		SAV_CONFIG_INT (MAX_PWR_CYCLES_IN_LOG);
+		SAV_CONFIG_STRING (SYSTEM_VARIABLE_FILE);
+		SAV_CONFIG_STRING (PKG_NUM_PREFIX);
+		SAV_CONFIG_STRING (CUSTOM_PKG_PREFIX);
+		SAV_CONFIG_STRING (LIST_NUM_PREFIX);
+		SAV_CONFIG_STRING (AUDIO_FILE_EXT);
+		SAV_CONFIG_INT (DEFAULT_TIME_PRECISION);
+		SAV_CONFIG_INT (DEFAULT_REWIND);
+		SAV_CONFIG_INT (INSERT_SOUND_REWIND_MS);
+		SAV_CONFIG_INT (SPEAK_SOUND_FILE_IDX);
+		SAV_CONFIG_INT (REC_PAUSED_FILE_IDX);
+		SAV_CONFIG_INT (POST_REC_FILE_IDX);
+		SAV_CONFIG_INT (PLEASE_WAIT_IDX);
+		SAV_CONFIG_INT (NO_TRANSLATION_FILE_IDX);
+		SAV_CONFIG_INT (POST_TRANSLATE_FILE_IDX);
+		SAV_CONFIG_INT (OVERWRITE_WARNING_FILE_IDX);				
+		SAV_CONFIG_INT (NOT_YET_TRANSLATED_FILE_IDX);
+		SAV_CONFIG_INT (PLS_RECORD_TRANSLATION_FILE_IDX);
+		SAV_CONFIG_INT (PLS_WAIT_FILE_IDX);
+		SAV_CONFIG_INT (NEW_RECORDING_FILE_IDX);
+		SAV_CONFIG_INT (ORIG_RECORDING_FILE_IDX);
+		SAV_CONFIG_INT (INACTIVITY_SOUND_FILE_IDX);
+		SAV_CONFIG_INT (ERROR_SOUND_FILE_IDX);
+		SAV_CONFIG_INT (EMPTY_LIST_FILE_IDX);
+		SAV_CONFIG_INT (DELETED_FILE_IDX);
+		SAV_CONFIG_INT (PRE_COPY_FILE_IDX);
+		SAV_CONFIG_INT (POST_COPY_FILE_IDX);
+		SAV_CONFIG_INT (POST_PLAY_FILE_IDX);				
+		SAV_CONFIG_INT (HYPERLINK_SOUND_FILE_IDX);
+		SAV_CONFIG_INT (BLOCK_START_LEADER);
+		SAV_CONFIG_INT (BLOCK_END_LEADER);
+		SAV_CONFIG_INT (BIT_RATE);
+		SAV_CONFIG_INT (GREEN_LED_WHEN_PLAYING);
+		SAV_CONFIG_INT (INACTIVITY_SECONDS);
+		SAV_CONFIG_INT (MIC_GAIN_NORMAL);
+		SAV_CONFIG_INT (MIC_GAIN_HEADPHONE);		
+ 		SAV_CONFIG_STRING (USER_CONTROL_TEMPLATE);
+		SAV_CONFIG_STRING (MACRO_FILE);
+		SAV_CONFIG_INT (VOLTAGE_SAMPLE_FREQ_SEC);
+		SAV_CONFIG_INT (USB_CLIENT_POLL_INTERVAL);
+		SAV_CONFIG_INT (DEBUG_MODE);
+		SAV_CONFIG_INT (LOG_KEYS);
+		SAV_CONFIG_INT (CLOCK_RATE);
+		SAV_CONFIG_INT (LONG_LIST_NAMES);
+		SAV_CONFIG_INT (V_FAST_VOLTAGE_DROP_TIME_SEC);
+		SAV_CONFIG_INT (V_VOLTAGE_DROP_CHECK_INTERVAL);
+		SAV_CONFIG_INT (LONG_KEYPRESS_COUNTER);\
+		
+		cfg.len_string_buf = cfg_string_buf_len;
+		
+		handle = tbOpen((unsigned long)(CONFIG_BIN_FILE),O_WRONLY|O_CREAT|O_TRUNC);
+		if(handle >= 0) {
+			int byteswritten;
+			byteswritten = sizeof(cfg);
+			byteswritten = write(handle, (unsigned long)&cfg<< 1, sizeof(cfg)<< 1);
+			byteswritten += write(handle, (unsigned long)&cfg_string_buf<<1, cfg_string_buf_len<<1);
+			close(handle);
+			ret = byteswritten;
+		} else {
+			ret = -1;
+			logString((char *)"CANNOT OPEN CONFIG_BIN_FILE" ,ASAP);
+		}
+		
+	return(ret);	
+}
+
+//restore from a saved config.bin if possible, unlink CONFIG_BIN_FILE before returning
+int restore_config_bin () {
+	int ret = -1, handle, offset = 0, stringbuf_size, bytesread, stringsread, err = 0;
+	CONFIG_BIN cfg;
+//	int debug = 0;
+		
+	handle = tbOpen((unsigned long)(CONFIG_BIN_FILE),O_RDONLY);
+	if(handle < 0) {
+		logString((char *)"Binary config not present" ,BUFFER);
+		return(ret);
+	}
+	bytesread = read(handle, (unsigned long)&cfg<< 1, sizeof(cfg)<< 1);
+	if(bytesread != (sizeof(cfg)<< 1)) {
+		logString((char *)"config.bin too short" ,BUFFER);
+		close(handle);
+		unlink(CONFIG_BIN_FILE);
+		return(ret);
+	}
+	
+#if 0	
+	if(debug != 0) {
+		ret = chkconfig_debug(&cfg, handle);
+		close(handle);
+		if(ret == 0) {
+			logString((char *)"config.bin good" ,BUFFER);
+		}else {
+			logString((char *)"config.bin has errors" ,BUFFER);
+		}
+		return(ret);
+	}
+#endif
+	
+#define SET_CONFIG_INT(key) key = cfg. ## key	
+	SET_CONFIG_INT(KEY_PLAY);
+	SET_CONFIG_INT(KEY_LEFT);
+	SET_CONFIG_INT(KEY_RIGHT);
+	SET_CONFIG_INT(KEY_UP);
+	SET_CONFIG_INT(KEY_DOWN);
+	SET_CONFIG_INT(KEY_SELECT);
+	SET_CONFIG_INT(KEY_STAR);
+	SET_CONFIG_INT(KEY_HOME);
+	SET_CONFIG_INT(KEY_PLUS);
+	SET_CONFIG_INT(KEY_MINUS);			
+	SET_CONFIG_INT(LED_GREEN);
+	SET_CONFIG_INT(LED_RED);
+	SET_CONFIG_INT(MAX_SPEED);
+	SET_CONFIG_INT(NORMAL_SPEED);
+	SET_CONFIG_INT(MAX_VOLUME);
+	SET_CONFIG_INT(NORMAL_VOLUME);
+	SET_CONFIG_INT(SPEED_INCREMENT);
+	SET_CONFIG_INT(VOLUME_INCREMENT);
+	SET_CONFIG_INT(MAX_PWR_CYCLES_IN_LOG);
+	SET_CONFIG_INT(DEFAULT_TIME_PRECISION);
+	SET_CONFIG_INT(DEFAULT_REWIND);
+	SET_CONFIG_INT(INSERT_SOUND_REWIND_MS);
+	SET_CONFIG_INT(SPEAK_SOUND_FILE_IDX);
+	SET_CONFIG_INT(REC_PAUSED_FILE_IDX);
+	SET_CONFIG_INT(POST_REC_FILE_IDX);
+	SET_CONFIG_INT(PLEASE_WAIT_IDX);
+	SET_CONFIG_INT(NO_TRANSLATION_FILE_IDX);
+	SET_CONFIG_INT(POST_TRANSLATE_FILE_IDX);
+	SET_CONFIG_INT(OVERWRITE_WARNING_FILE_IDX);				
+	SET_CONFIG_INT(NOT_YET_TRANSLATED_FILE_IDX);
+	SET_CONFIG_INT(PLS_RECORD_TRANSLATION_FILE_IDX);
+	SET_CONFIG_INT(PLS_WAIT_FILE_IDX);
+	SET_CONFIG_INT(NEW_RECORDING_FILE_IDX);
+	SET_CONFIG_INT(ORIG_RECORDING_FILE_IDX);
+	SET_CONFIG_INT(INACTIVITY_SOUND_FILE_IDX);
+	SET_CONFIG_INT(ERROR_SOUND_FILE_IDX);
+	SET_CONFIG_INT(EMPTY_LIST_FILE_IDX);
+	SET_CONFIG_INT(DELETED_FILE_IDX);
+	SET_CONFIG_INT(PRE_COPY_FILE_IDX);
+	SET_CONFIG_INT(POST_COPY_FILE_IDX);
+	SET_CONFIG_INT(POST_PLAY_FILE_IDX);				
+	SET_CONFIG_INT(HYPERLINK_SOUND_FILE_IDX);
+	SET_CONFIG_INT(BLOCK_START_LEADER);
+	SET_CONFIG_INT(BLOCK_END_LEADER);
+	SET_CONFIG_INT(BIT_RATE);
+	SET_CONFIG_INT(GREEN_LED_WHEN_PLAYING);
+	SET_CONFIG_INT(INACTIVITY_SECONDS);
+	SET_CONFIG_INT(MIC_GAIN_NORMAL);
+	SET_CONFIG_INT(MIC_GAIN_HEADPHONE);
+	SET_CONFIG_INT(VOLTAGE_SAMPLE_FREQ_SEC);
+	SET_CONFIG_INT(USB_CLIENT_POLL_INTERVAL);
+	SET_CONFIG_INT(DEBUG_MODE);
+	SET_CONFIG_INT(LOG_KEYS);
+	SET_CONFIG_INT(CLOCK_RATE);
+	SET_CONFIG_INT(LONG_LIST_NAMES);
+	SET_CONFIG_INT(V_FAST_VOLTAGE_DROP_TIME_SEC);
+	SET_CONFIG_INT(V_VOLTAGE_DROP_CHECK_INTERVAL);
+	SET_CONFIG_INT(LONG_KEYPRESS_COUNTER);
+
+// read int string table		
+	stringbuf_size = cfg.len_string_buf;
+	{
+		char cfg_string_buf[stringbuf_size];
+		stringsread = read(handle, (unsigned long)&cfg_string_buf<< 1, stringbuf_size<< 1);
+		close(handle);
+		unlink(CONFIG_BIN_FILE);
+		if(stringsread != (stringbuf_size<< 1)) {
+			logString((char *)"config.bin stringtable too short" ,BUFFER);
+			return(ret);
+		}
+#define SET_CONFIG_STRING(str) if(cfg_string_buf[cfg.offset_ ## str]) \
+	str = addTextToSystemHeap(cfg_string_buf + cfg.offset_ ## str)
+				
+		SET_CONFIG_STRING(SYSTEM_ORDER_FILE);
+		SET_CONFIG_STRING(SYSTEM_PATH);
+		SET_CONFIG_STRING(LANGUAGES_PATH);
+		SET_CONFIG_STRING(UI_SUBDIR);
+		SET_CONFIG_STRING(TOPICS_SUBDIR);
+		SET_CONFIG_STRING(USER_PATH);
+		SET_CONFIG_STRING(LISTS_PATH);
+		SET_CONFIG_STRING(INBOX_PATH);
+		SET_CONFIG_STRING(OUTBOX_PATH);
+		SET_CONFIG_STRING(NEW_PKG_SUBDIR);
+		SET_CONFIG_STRING(SYS_UPDATE_SUBDIR);
+		SET_CONFIG_STRING(LOG_FILE);
+		SET_CONFIG_STRING(LIST_MASTER);
+		SET_CONFIG_STRING(SYSTEM_VARIABLE_FILE);
+		SET_CONFIG_STRING(PKG_NUM_PREFIX);
+		SET_CONFIG_STRING(LIST_NUM_PREFIX);
+		SET_CONFIG_STRING(CUSTOM_PKG_PREFIX);				
+		SET_CONFIG_STRING(AUDIO_FILE_EXT);
+		SET_CONFIG_STRING(USER_CONTROL_TEMPLATE);
+		SET_CONFIG_STRING(MACRO_FILE);
+	}
+	
+	LED_ALL = LED_GREEN | LED_RED;
+	if (*(LOG_FILE+1) != ':')
+		LOG_FILE = 0; // should be == "a://....." otherwise, logging is turned off
+
+	ret = bytesread + stringsread;
+	return(ret);
+
+}
+
+// following used during debugging
+#if 0
+int
+chkconfig_debug(CONFIG_BIN *cfg, int handle)
+{
+	int err = 0, offset = 0, stringbuf_size, bytesread;
+
+#define CHKCFG(key) if(cfg-> ## key != key) logString( # key, BUFFER), err++
+	CHKCFG(KEY_PLAY);
+	CHKCFG(KEY_LEFT);
+	CHKCFG(KEY_RIGHT);
+	CHKCFG(KEY_UP);
+	CHKCFG(KEY_DOWN);
+	CHKCFG(KEY_SELECT);
+	CHKCFG(KEY_STAR);
+	CHKCFG(KEY_HOME);
+	CHKCFG(KEY_PLUS);
+	CHKCFG(KEY_MINUS);			
+	CHKCFG(LED_GREEN);
+	CHKCFG(LED_RED);
+	CHKCFG(MAX_SPEED);
+	CHKCFG(NORMAL_SPEED);
+	CHKCFG(MAX_VOLUME);
+	CHKCFG(NORMAL_VOLUME);
+	CHKCFG(SPEED_INCREMENT);
+	CHKCFG(VOLUME_INCREMENT);
+	CHKCFG(MAX_PWR_CYCLES_IN_LOG);
+	CHKCFG(DEFAULT_TIME_PRECISION);
+	CHKCFG(DEFAULT_REWIND);
+	CHKCFG(INSERT_SOUND_REWIND_MS);
+	CHKCFG(SPEAK_SOUND_FILE_IDX);
+	CHKCFG(REC_PAUSED_FILE_IDX);
+	CHKCFG(POST_REC_FILE_IDX);
+	CHKCFG(PLEASE_WAIT_IDX);
+	CHKCFG(NO_TRANSLATION_FILE_IDX);
+	CHKCFG(POST_TRANSLATE_FILE_IDX);
+	CHKCFG(OVERWRITE_WARNING_FILE_IDX);				
+	CHKCFG(NOT_YET_TRANSLATED_FILE_IDX);
+	CHKCFG(PLS_RECORD_TRANSLATION_FILE_IDX);
+	CHKCFG(PLS_WAIT_FILE_IDX);
+	CHKCFG(NEW_RECORDING_FILE_IDX);
+	CHKCFG(ORIG_RECORDING_FILE_IDX);
+	CHKCFG(INACTIVITY_SOUND_FILE_IDX);
+	CHKCFG(ERROR_SOUND_FILE_IDX);
+	CHKCFG(EMPTY_LIST_FILE_IDX);
+	CHKCFG(DELETED_FILE_IDX);
+	CHKCFG(PRE_COPY_FILE_IDX);
+	CHKCFG(POST_COPY_FILE_IDX);
+	CHKCFG(POST_PLAY_FILE_IDX);				
+	CHKCFG(HYPERLINK_SOUND_FILE_IDX);
+	CHKCFG(BLOCK_START_LEADER);
+	CHKCFG(BLOCK_END_LEADER);
+	CHKCFG(BIT_RATE);
+	CHKCFG(GREEN_LED_WHEN_PLAYING);
+	CHKCFG(INACTIVITY_SECONDS);
+	CHKCFG(MIC_GAIN_NORMAL);
+	CHKCFG(MIC_GAIN_HEADPHONE);
+	CHKCFG(VOLTAGE_SAMPLE_FREQ_SEC);
+	CHKCFG(USB_CLIENT_POLL_INTERVAL);
+	CHKCFG(DEBUG_MODE);
+	CHKCFG(LOG_KEYS);
+	CHKCFG(CLOCK_RATE);
+	CHKCFG(LONG_LIST_NAMES);
+	CHKCFG(V_FAST_VOLTAGE_DROP_TIME_SEC);
+	CHKCFG(V_VOLTAGE_DROP_CHECK_INTERVAL);
+	CHKCFG(LONG_KEYPRESS_COUNTER);
+
+	stringbuf_size = cfg->len_string_buf;
+	{
+	char cfg_string_buf[stringbuf_size];
+	bytesread = read(handle, (unsigned long)&cfg_string_buf<< 1, stringbuf_size<< 1);
+
+#define CHKSTRING(str) if(cfg_string_buf[cfg->offset_ ## str]) \
+	if(strcmp(str, cfg_string_buf + cfg->offset_ ## str)) err++
+	
+	CHKSTRING(SYSTEM_ORDER_FILE);
+	CHKSTRING(SYSTEM_PATH);
+	CHKSTRING(LANGUAGES_PATH);
+	CHKSTRING(UI_SUBDIR);
+	CHKSTRING(TOPICS_SUBDIR);
+	CHKSTRING(USER_PATH);
+	CHKSTRING(LISTS_PATH);
+	CHKSTRING(INBOX_PATH);
+	CHKSTRING(OUTBOX_PATH);
+	CHKSTRING(NEW_PKG_SUBDIR);
+	CHKSTRING(SYS_UPDATE_SUBDIR);
+	CHKSTRING(LOG_FILE);
+	CHKSTRING(LIST_MASTER);
+	CHKSTRING(SYSTEM_VARIABLE_FILE);
+	CHKSTRING(PKG_NUM_PREFIX);
+	CHKSTRING(LIST_NUM_PREFIX);
+	CHKSTRING(CUSTOM_PKG_PREFIX);				
+	CHKSTRING(AUDIO_FILE_EXT);
+	CHKSTRING(USER_CONTROL_TEMPLATE);
+	CHKSTRING(MACRO_FILE);
+	}
+	
+	return(err);	
+}
+#endif

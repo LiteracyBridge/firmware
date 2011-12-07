@@ -12,6 +12,7 @@
 #include "Include/sys_counters.h"
 #include "Include/SD_reprog.h"
 
+extern int write_config_bin();
 extern void _SystemOnOff(void);
 extern int SystemIntoUDisk(unsigned int);
 extern void KeyScan_ServiceLoop(void);
@@ -453,6 +454,7 @@ void setOperationalMode(int newmode) {
     return;
   } else {
   		buildMyStatsCSV();
+  		write_config_bin();  // build a config.bin
 		writeVersionToDisk();  // make sure the version file is correct
   		confirmSNonDisk(); // make sure the serial number file is correct 
  		cleanUpOldRevs(); // cleanup any old revs 
