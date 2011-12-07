@@ -251,6 +251,10 @@ void startUp(unsigned int bootType) {
 		strcat(buffer,"\x0d\x0a" "*DEBUG MODE*");
 	logString(buffer,BUFFER);
 	
+	if(bootType == BOOT_TYPE_COLD_RESET) {
+		logString((char *)"Cold reset (New batteries?) clock set to midnight" ,BUFFER);
+	}
+	
 	if(normal_shutdown) {
 		logString((char *)"Restored configuration from config.bin successfully" ,BUFFER);
 	} else {
