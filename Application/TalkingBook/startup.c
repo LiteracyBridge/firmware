@@ -27,6 +27,8 @@ static int loadConfigFile (void);
 //static void loadSystemNames(void);
 static void flagConfigFile(void);
 static int resetConfigFile(void);
+static int restore_config_bin();
+static int disaster_config_strings();
 
 // These capitalized variables are set in the config file.
 APP_IRAM int KEY_PLAY, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_SELECT, KEY_STAR, KEY_HOME, KEY_PLUS, KEY_MINUS;
@@ -75,7 +77,7 @@ APP_IRAM static int totalSystems;
 void setDefaults(void) {
 	// This function sets variables that are usually set in config file, 
 	// but they need defaults in case config file doesn't list them or isn't loaded yet
-	
+		
 	if(MEM_TYPE == MX_MID) {
 		// BELOW ARE THE GOOD KEY CODES FOR SCH 3.1+
 		KEY_DOWN   = V1_DEFAULT_KEY_DOWN;
@@ -102,30 +104,66 @@ void setDefaults(void) {
 		KEY_HOME   = V0_DEFAULT_KEY_HOME;
 	}
 	
-	LED_GREEN = DEFAULT_LED_GREEN;
-	LED_RED = DEFAULT_LED_RED;
-	LED_ALL = LED_GREEN | LED_RED;
-	MIC_GAIN_NORMAL = DEFAULT_MIC_GAIN_NORMAL;
-	MIC_GAIN_HEADPHONE = DEFAULT_MIC_GAIN_HEADPHONE; 
-	CLOCK_RATE = DEFAULT_CLOCK_RATE;
-	NORMAL_VOLUME = DEFAULT_NORMAL_VOLUME;
-	MAX_VOLUME = DEFAULT_MAX_VOLUME;
+	LED_GREEN        = DEFAULT_LED_GREEN;
+	LED_RED          = DEFAULT_LED_RED;
+	MAX_SPEED        = DEFAULT_MAX_SPEED;
+	NORMAL_SPEED     = DEFAULT_NORMAL_SPEED;
+	MAX_VOLUME       = DEFAULT_MAX_VOLUME;
+	NORMAL_VOLUME    = DEFAULT_NORMAL_VOLUME;
+	SPEED_INCREMENT  = DEFAULT_SPEED_INCREMENT;
 	VOLUME_INCREMENT = DEFAULT_VOLUME_INCREMENT;
-	NORMAL_SPEED = DEFAULT_NORMAL_SPEED;
-	MAX_SPEED = DEFAULT_MAX_SPEED;
-	SPEED_INCREMENT = DEFAULT_SPEED_INCREMENT;
-	BIT_RATE = DEFAULT_BIT_RATE;
+	
+	MAX_PWR_CYCLES_IN_LOG  = DEFAULT_MAX_PWR_CYCLES_IN_LOG;
+	
+	DEFAULT_TIME_PRECISION          = DEFAULT_DEFAULT_TIME_PRECISION;
+	DEFAULT_REWIND                  = DEFAULT_DEFAULT_REWIND;
+	INSERT_SOUND_REWIND_MS          = DEFAULT_INSERT_SOUND_REWIND_MS;
+	SPEAK_SOUND_FILE_IDX            = DEFAULT_SPEAK_SOUND_FILE_IDX;	
+	REC_PAUSED_FILE_IDX             = DEFAULT_REC_PAUSED_FILE_IDX;
+	POST_REC_FILE_IDX               = DEFAULT_POST_REC_FILE_IDX;
+	PLEASE_WAIT_IDX                 = DEFAULT_PLEASE_WAIT_IDX;
+	NO_TRANSLATION_FILE_IDX         = DEFAULT_NO_TRANSLATION_FILE_IDX;
+	POST_TRANSLATE_FILE_IDX         = DEFAULT_POST_TRANSLATE_FILE_IDX;
+	OVERWRITE_WARNING_FILE_IDX      = DEFAULT_OVERWRITE_WARNING_FILE_IDX;				
+	NOT_YET_TRANSLATED_FILE_IDX     = DEFAULT_NOT_YET_TRANSLATED_FILE_IDX;
+	PLS_RECORD_TRANSLATION_FILE_IDX = DEFAULT_PLS_RECORD_TRANSLATION_FILE_IDX;
+	PLS_WAIT_FILE_IDX               = DEFAULT_PLS_WAIT_FILE_IDX;
+	NEW_RECORDING_FILE_IDX          = DEFAULT_NEW_RECORDING_FILE_IDX;
+	ORIG_RECORDING_FILE_IDX         = DEFAULT_ORIG_RECORDING_FILE_IDX;
+	INACTIVITY_SOUND_FILE_IDX       = DEFAULT_INACTIVITY_SOUND_FILE_IDX;
+	
+	ERROR_SOUND_FILE_IDX          = DEFAULT_ERROR_SOUND_FILE_IDX;	
+	EMPTY_LIST_FILE_IDX           = DEFAULT_EMPTY_LIST_FILE_IDX;
+	DELETED_FILE_IDX              = DEFAULT_DELETED_FILE_IDX;
+	PRE_COPY_FILE_IDX             = DEFAULT_PRE_COPY_FILE_IDX;
+	POST_COPY_FILE_IDX            = DEFAULT_POST_COPY_FILE_IDX;
+	POST_PLAY_FILE_IDX            = DEFAULT_POST_PLAY_FILE_IDX;				
+	HYPERLINK_SOUND_FILE_IDX      = DEFAULT_HYPERLINK_SOUND_FILE_IDX;
+	BLOCK_START_LEADER            = DEFAULT_BLOCK_START_LEADER;
+	BLOCK_END_LEADER              = DEFAULT_BLOCK_END_LEADER;
+	BIT_RATE                      = DEFAULT_BIT_RATE;
+	GREEN_LED_WHEN_PLAYING        = DEFAULT_GREEN_LED_WHEN_PLAYING;
+	INACTIVITY_SECONDS            = DEFAULT_INACTIVITY_SECONDS;
+	MIC_GAIN_NORMAL               = DEFAULT_MIC_GAIN_NORMAL;
+	MIC_GAIN_HEADPHONE            = DEFAULT_MIC_GAIN_HEADPHONE; 
+	VOLTAGE_SAMPLE_FREQ_SEC       = DEFAULT_VOLTAGE_SAMPLE_FREQ_SEC;
+	USB_CLIENT_POLL_INTERVAL      = DEFAULT_USB_CLIENT_POLL_INTERVAL;
+	DEBUG_MODE                    = DEFAULT_DEBUG_MODE;
+	LOG_KEYS                      = DEFAULT_LOG_KEYS;
+	CLOCK_RATE                    = DEFAULT_CLOCK_RATE;
+	LONG_LIST_NAMES               = DEFAULT_LONG_LIST_NAMES;
+	V_FAST_VOLTAGE_DROP_TIME_SEC  = DEFAULT_V_FAST_VOLTAGE_DROP_TIME_SEC;
+	V_VOLTAGE_DROP_CHECK_INTERVAL = DEFAULT_V_VOLTAGE_DROP_CHECK_INTERVAL;
+	LONG_KEYPRESS_COUNTER         = KEY_LONG_DOWN_THRESH;
+	
+	LED_ALL            = LED_GREEN | LED_RED;
+	BIT_RATE           = DEFAULT_BIT_RATE;
 	INACTIVITY_SECONDS = DEFAULT_INACTIVITY_SECONDS;
-	USB_CLIENT_POLL_INTERVAL = DEFAULT_USB_CLIENT_POLL_INTERVAL;
-	DEFAULT_REWIND = DEFAULT_DEFAULT_REWIND;
 
 	PLEASE_WAIT_IDX = 0; // prevents trying to insert this sound before config & control files are loaded.
 	context.package = 0; // prevents trying to insert this sound before config & control files are loaded.
 	
-	ADMIN_COMBO_KEYS = KEY_UP | KEY_DOWN;
-	LONG_KEYPRESS_COUNTER = KEY_LONG_DOWN_THRESH;
-	V_FAST_VOLTAGE_DROP_TIME_SEC = DEFAULT_V_FAST_VOLTAGE_DROP_TIME_SEC;
-	V_VOLTAGE_DROP_CHECK_INTERVAL = DEFAULT_V_VOLTAGE_DROP_CHECK_INTERVAL;
+	ADMIN_COMBO_KEYS   = KEY_UP | KEY_DOWN;
 
 }
 
@@ -133,8 +171,8 @@ void startUp(unsigned int bootType) {
 	char buffer[200];
 	char strCounts[32];
 	char filename[FILE_LENGTH];
-	int key, ret;
-	int configExists, normal_shutdown=1;
+	int key;
+	int configExists = 0, normal_shutdown=1;
 	
 	SetSystemClockRate(MAX_CLOCK_SPEED); // to speed up initial startup -- set CLOCK_RATE later
 
@@ -195,11 +233,16 @@ void startUp(unsigned int bootType) {
 			startUpdate(filename);
 		}
 	}
-	if (configExists) {
-		loadSystemNames(); 
+	
+	if (!configExists) {
+		disaster_config_strings();
+	}
+
+	if (loadSystemNames()) { 
 		processInbox();
 	} else
-		testPCB();	
+		testPCB();
+
 	if (!SNexists()) {
 		logException(32,(const char *)"no serial number",LOG_ONLY);
 		testPCB();	
@@ -376,12 +419,14 @@ int loadConfigFile(void) {
 			//   1) add it to the struct config_bin in starup.h
 			//   2) add a macro SAV_CONFIG_INT(VALUE) to the function write_config.bin
 			//   3) add a macro SAV_CONFIG_INT(VALUE) to the function restore_config.bin
+			//   4) specify a default value in startup.h and initialize in setDefaults()
 			//
 			// to add a string VALUE here be sure to
 			//   1) add offset_VALUE to the struct config_bin in starup.h
 			//   2) add a macro SET_CONFIG_INT(VALUE) to the function write_config.bin
 			//   3) add a macro SET_CONFIG_STRING(VALUE) to the function restore_config.bin
 			//   4) add the "strlen (VALUE) + 1 + \"  to the CONFIG_BUFLEN macro in startup.h
+			//   5) specify a default value in startup.h and initialize in disaster_config_strings()
 			//
 			if (!strcmp(name,(char *)"KEY_PLAY")) KEY_PLAY=strToInt(value);
 				else if (!strcmp(name,(char *)"KEY_LEFT")) KEY_LEFT=strToInt(value);
@@ -529,8 +574,8 @@ unsigned int GetMemManufacturer()
 }
 
 
-extern void loadSystemNames() {
-	int handle;
+extern int loadSystemNames() {
+	int handle, ret = 0;
 	char *cursorRead;
 	char systemOrderFile[PATH_LENGTH];
 	char buffer[READ_LENGTH+1];
@@ -540,13 +585,17 @@ extern void loadSystemNames() {
 	strcat(systemOrderFile,".txt"); //todo: move to config file	
 	handle = tbOpen((LPSTR)systemOrderFile,O_RDONLY);
 	if (handle == -1) {
-		logException(33,systemOrderFile,USB_MODE);
+		return(ret);
+//		logException(33,systemOrderFile,USB_MODE);
 	}
 	getLine(-1,0);  // reset in case at end from prior use
 	while ((cursorRead = getLine(handle,buffer)) && (intCurrentSystem < MAX_SYSTEMS))	
 		pSystemNames[intCurrentSystem++] = addTextToSystemHeap(cursorRead);
 	totalSystems = intCurrentSystem;
 	intCurrentSystem = 0;
+	if(totalSystems > 0) ret = 1;  // at least one language found
+	close(handle);
+	return(ret);
 }
 
 extern char *currentSystem() {
@@ -705,8 +754,8 @@ int write_config_bin () {
 }
 
 //restore from a saved config.bin if possible, unlink CONFIG_BIN_FILE before returning
-int restore_config_bin () {
-	int ret = -1, handle, offset = 0, stringbuf_size, bytesread, stringsread, err = 0;
+static int restore_config_bin () {
+	int ret = -1, handle, stringbuf_size, bytesread, stringsread;
 	CONFIG_BIN cfg;
 //	int debug = 0;
 		
@@ -719,7 +768,7 @@ int restore_config_bin () {
 	if(bytesread != (sizeof(cfg)<< 1)) {
 		logString((char *)"config.bin too short" ,BUFFER);
 		close(handle);
-		unlink(CONFIG_BIN_FILE);
+		unlink((LPSTR)CONFIG_BIN_FILE);
 		return(ret);
 	}
 	
@@ -802,7 +851,7 @@ int restore_config_bin () {
 		char cfg_string_buf[stringbuf_size];
 		stringsread = read(handle, (unsigned long)&cfg_string_buf<< 1, stringbuf_size<< 1);
 		close(handle);
-		unlink(CONFIG_BIN_FILE);
+		unlink((LPSTR)CONFIG_BIN_FILE);
 		if(stringsread != (stringbuf_size<< 1)) {
 			logString((char *)"config.bin stringtable too short" ,BUFFER);
 			return(ret);
@@ -840,6 +889,30 @@ int restore_config_bin () {
 	return(ret);
 
 }
+
+static int disaster_config_strings() {
+		SYSTEM_ORDER_FILE     = addTextToSystemHeap(DEFAULT_SYSTEM_ORDER_FILE);
+		SYSTEM_PATH           = addTextToSystemHeap(DEFAULT_SYSTEM_PATH);
+		LANGUAGES_PATH        = addTextToSystemHeap(DEFAULT_LANGUAGES_PATH);
+		UI_SUBDIR             = addTextToSystemHeap(DEFAULT_UI_SUBDIR);
+		TOPICS_SUBDIR         = addTextToSystemHeap(DEFAULT_TOPICS_SUBDIR);
+		USER_PATH             = addTextToSystemHeap(DEFAULT_USER_PATH);
+		LISTS_PATH            = addTextToSystemHeap(DEFAULT_LISTS_PATH);
+		INBOX_PATH            = addTextToSystemHeap(DEFAULT_INBOX_PATH);
+		OUTBOX_PATH           = addTextToSystemHeap(DEFAULT_OUTBOX_PATH);
+		NEW_PKG_SUBDIR        = addTextToSystemHeap(DEFAULT_NEW_PKG_SUBDIR);
+		SYS_UPDATE_SUBDIR     = addTextToSystemHeap(DEFAULT_SYS_UPDATE_SUBDIR);
+		LOG_FILE              = addTextToSystemHeap(DEFAULT_LOG_FILE);
+		LIST_MASTER           = addTextToSystemHeap(DEFAULT_LIST_MASTER);
+		SYSTEM_VARIABLE_FILE  = addTextToSystemHeap(DEFAULT_SYSTEM_VARIABLE_FILE);
+		PKG_NUM_PREFIX        = addTextToSystemHeap(DEFAULT_PKG_NUM_PREFIX);
+		LIST_NUM_PREFIX       = addTextToSystemHeap(DEFAULT_LIST_NUM_PREFIX);
+		CUSTOM_PKG_PREFIX     = addTextToSystemHeap(DEFAULT_CUSTOM_PKG_PREFIX);				
+		AUDIO_FILE_EXT        = addTextToSystemHeap(DEFAULT_AUDIO_FILE_EXT);
+		USER_CONTROL_TEMPLATE = addTextToSystemHeap(DEFAULT_USER_CONTROL_TEMPLATE);
+		MACRO_FILE            = addTextToSystemHeap(DEFAULT_MACRO_FILE);
+}
+
 
 // following used during debugging
 #if 0

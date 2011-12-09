@@ -115,7 +115,7 @@ queueNewPackage(struct newContent *ncp) {
 
 static void
 processNewPackages(struct newContent *ncp) {
-	struct newContent lastAddedNewContent;
+	struct newContent lastAddedNewContent = {0};
 	struct f_info file_info;
 	char strLog[PATH_LENGTH], savecwd[PATH_LENGTH];
 	char fbuf[PATH_LENGTH], strNewPkgPath[PATH_LENGTH], strBadImports[PATH_LENGTH];
