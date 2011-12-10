@@ -182,6 +182,37 @@ void startUp(unsigned int bootType) {
 	
 	//to stop user from wondering if power is on and possibly cycling too quickly,
 	playDing();  // it is important to play a sound immediately 
+	
+	if(bootType == BOOT_TYPE_COLD_RESET) {
+		extern unsigned long rtcAlarm[];
+		extern unsigned long curAlarmSet;    
+		extern unsigned long rtc_fired;
+		for(key=0; key<N_RTC_INIT; key++) {
+			rtcAlarm[key] = 0;
+		}
+		curAlarmSet = 0;
+		rtc_fired = 0;
+		resetRTC();  //  reset before saving anything to disk and running macros
+		systemCounts.month = 1;
+		systemCounts.monthday = 1;
+		systemCounts.poweredDays = 1;
+
+		//setOperationalMode((int)P_SLEEP);  //DEVICE-90 - does too much fs activity
+		*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
+		setLED(LED_ALL,FALSE);	
+		turnAmpOff();
+		
+		//disable SD card
+ 		*P_IOA_Dir  |= 0x1000;
+ 		*P_IOA_Attrib |= 0x1000; 	
+    	*P_IOA_Buffer  |= 0x1000;	
+		// disable NOR flash
+	 	*P_IOD_Dir  |= 0x0001;	 
+	 	*P_IOD_Attrib |= 0x0001;
+	    *P_IOD_Buffer  |= 0x0001;	
+		//_SystemOnOff();  // go to P_SLEEP mode, does not return
+		SysIntoHaltMode();
+	}
 //	cleanUpOldRevs();	
 	key = keyCheck(1);  // long keycheck 
 	key &= ~LONG_KEY_STROKE;
@@ -256,24 +287,7 @@ void startUp(unsigned int bootType) {
 		systemCounts.lastLogErase = systemCounts.powerUpNumber;
 		clearStaleLog();	
 	}
-//#ifndef TB_CAN_WAKE
-//	if(MEM_TYPE == MX_MID) {
-	if(bootType == BOOT_TYPE_COLD_RESET) {
-		extern unsigned long rtcAlarm[];
-		extern unsigned long curAlarmSet;    
-		extern unsigned long rtc_fired;
-		for(key=0; key<N_RTC_INIT; key++) {
-			rtcAlarm[key] = 0;
-		}
-		curAlarmSet = 0;
-		rtc_fired = 0;
-		resetRTC();  //  reset before saving anything to disk and running macros
-		systemCounts.month = 1;
-		systemCounts.monthday = 1;
-		systemCounts.poweredDays = 1;
-	}
-//	}
-//#endif	
+	
 	saveSystemCounts();
 	
 	strcpy(buffer,"\x0d\x0a" "---------------------------------------------------\x0d\x0a");
@@ -293,11 +307,7 @@ void startUp(unsigned int bootType) {
 	if (DEBUG_MODE)
 		strcat(buffer,"\x0d\x0a" "*DEBUG MODE*");
 	logString(buffer,BUFFER);
-	
-	if(bootType == BOOT_TYPE_COLD_RESET) {
-		logString((char *)"Cold reset (New batteries?) clock set to midnight" ,BUFFER);
-	}
-	
+		
 	if(normal_shutdown) {
 		logString((char *)"Restored configuration from config.bin successfully" ,BUFFER);
 	} else {
