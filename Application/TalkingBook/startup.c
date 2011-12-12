@@ -29,6 +29,7 @@ static void flagConfigFile(void);
 static int resetConfigFile(void);
 static int restore_config_bin();
 static int disaster_config_strings();
+static void fixnull_config_strings();
 
 // These capitalized variables are set in the config file.
 APP_IRAM int KEY_PLAY, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_SELECT, KEY_STAR, KEY_HOME, KEY_PLUS, KEY_MINUS;
@@ -265,7 +266,9 @@ void startUp(unsigned int bootType) {
 		}
 	}
 	
-	if (!configExists) {
+	if (configExists) {
+		fixnull_config_strings();
+	} else {
 		disaster_config_strings();
 	}
 
@@ -921,6 +924,30 @@ static int disaster_config_strings() {
 		AUDIO_FILE_EXT        = addTextToSystemHeap(DEFAULT_AUDIO_FILE_EXT);
 		USER_CONTROL_TEMPLATE = addTextToSystemHeap(DEFAULT_USER_CONTROL_TEMPLATE);
 		MACRO_FILE            = addTextToSystemHeap(DEFAULT_MACRO_FILE);
+}
+
+#define FIXNULL(string) if(string == 0) string = addTextToSystemHeap(DEFAULT_ ## string)
+static void fixnull_config_strings() {
+		FIXNULL(SYSTEM_ORDER_FILE);
+		FIXNULL(SYSTEM_PATH);
+		FIXNULL(LANGUAGES_PATH);
+		FIXNULL(UI_SUBDIR);
+		FIXNULL(TOPICS_SUBDIR);
+		FIXNULL(USER_PATH);
+		FIXNULL(LISTS_PATH);
+		FIXNULL(INBOX_PATH);
+		FIXNULL(OUTBOX_PATH);
+		FIXNULL(NEW_PKG_SUBDIR);
+		FIXNULL(SYS_UPDATE_SUBDIR);
+		FIXNULL(LOG_FILE);
+		FIXNULL(LIST_MASTER);
+		FIXNULL(SYSTEM_VARIABLE_FILE);
+		FIXNULL(PKG_NUM_PREFIX);
+		FIXNULL(LIST_NUM_PREFIX);
+		FIXNULL(CUSTOM_PKG_PREFIX);				
+		FIXNULL(AUDIO_FILE_EXT);
+	    FIXNULL(USER_CONTROL_TEMPLATE);
+		FIXNULL(MACRO_FILE);
 }
 
 
