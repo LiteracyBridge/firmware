@@ -247,8 +247,24 @@ static int getFileHandle (CtnrFile *newFile) {
 		}
 	}
 	
-	if ((ret >= 0)/* && (pkg->pkg_type > PKG_SYS)*/) {
+	if ((ret >= 0)) {  /* && (pkg->pkg_type > PKG_SYS)*/
+		struct stat_t stat;
+		int ret1;
+		
 		recordStats(sTemp, (long)ret, STAT_OPEN, pkg->pkg_type);
+		
+		ret1 = fstat(ret , &stat);  // check file size
+		if(ret1 >= 0) {
+			if(stat.st_size <= MIN_AUDIO_FILE_SIZE) {
+				char msg[100];
+				close(ret);
+				ret = -2;
+				strcpy(msg,"Audio file too small ");
+				strcat(msg, sTemp);
+				logString(msg, BUFFER);
+			}
+		}
+		
 	}
 	
 //	logString(sTemp,ASAP);
