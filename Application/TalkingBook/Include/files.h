@@ -12,6 +12,18 @@
 #define ASAP				0
 #define BUFFER				1
 
+// states in expandOstatFile, processing a csv from some other device
+#define FIND_SRN      0
+#define PROCESS_STATS 1
+#define FIND_DELIM    2
+// delimiter between systems in an ostats csv file
+#define OSTATS_DELIM  "----"
+//#define DELIM "\r\n------\r\n"
+#define DELIM "\r\n" OSTATS_DELIM "\r\n"
+// extension of ostats exchage file
+#define OSTATS_EXCHG_EXT    ".txt"
+
+
 extern void logString(char *, int);
 extern char *getLine (int, char *);
 extern BOOL readBuffer(int, char *, int);

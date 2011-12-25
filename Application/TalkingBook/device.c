@@ -454,6 +454,7 @@ void setOperationalMode(int newmode) {
     return;
   } else {
   		buildMyStatsCSV();
+		buildExchgOstats();
   		write_config_bin();  // build a config.bin
 		writeVersionToDisk();  // make sure the version file is correct
   		confirmSNonDisk(); // make sure the serial number file is correct 

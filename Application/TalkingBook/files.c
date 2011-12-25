@@ -5,6 +5,7 @@
 #include "Include/device.h"
 #include "Include/audio.h"
 #include "Include/files.h"
+#include "Include/filestats.h"
 
 APP_IRAM static long filePosition;
 APP_IRAM char logBuffer[LOG_BUFFER_SIZE];
@@ -446,7 +447,6 @@ INT16 tbOpen(LPSTR path, INT16 open_flag) {
 	int i;
 	INT16 handle;
 	//todo: move number of attempts into config file, but have fall back number in define (since config has to be open)
-
 	for (i = 0; i < RETRIES; i++) { 
 		handle = open(path, open_flag);
 		if (handle >= 0)
@@ -658,6 +658,10 @@ void deleteAllFiles(char *fromdir)
 	char from[80];
 	//char temp[80];
 	struct f_info fi;
+	
+	
+	logString("deleteAllFiles",BUFFER);
+	logString(fromdir, BUFFER);
 	
 	strcpy(from, fromdir);
 	len_from = strlen(from);
@@ -955,4 +959,241 @@ copyMovedir(char *fromdir, char *todir) {
 		fret = 0; // prevents system reset if only copying list files
 	
 	return(fret);
+}
+
+int concatFiles(int tofd, LPSTR fromname) {
+	char strLog[PATH_LENGTH * 2], buf[1024];
+	int fromfd, ret = 0, wrk, wrk1, ends_with_lf;
+	
+	wrk = sizeof(buf);
+	
+	fromfd = tbOpen(fromname, O_RDONLY);
+	if(fromfd < 0) {
+		strcpy(strLog, "concatFiles cannot open ");
+		strcat(strLog, (char *)fromname);
+		logString(strLog, BUFFER);
+		return(-1);
+	}
+	while((wrk = read(fromfd,(unsigned long)&buf<<1,sizeof(buf)<<1)) > 0) {
+		if(wrk & 1) {
+			wrk1 = buf[(wrk-1)/2] & 0xff;
+		} else {
+			wrk1 = buf[(wrk-1)/2] >> 8;
+		}
+		if(wrk1 == 0xa) {
+			ends_with_lf = 1;
+		} else {
+			ends_with_lf = 0;
+		}
+		wrk = write(tofd, (unsigned long)&buf<<1, wrk);
+		if(wrk <= 0) {
+			strcpy(strLog, "concatFiles write failed to ");
+			strcat(strLog, (char *)fromname);
+			logString(strLog, BUFFER);
+		} else {
+			ret += wrk;
+		}
+	}
+	close(fromfd);
+
+	return(ends_with_lf);
+}
+int
+buildExchgOstats() {
+	char strLog[PATH_LENGTH * 2], to[PATH_LENGTH], filename[PATH_LENGTH], delim[20];
+	int myexchgfd, ret, delim_len, have_new = 0, ends_with_lf;
+	struct f_info file_info;
+	
+	strcpy(delim,DELIM);
+	delim_len = convertDoubleToSingleChar(delim,delim,FALSE);
+	
+	strcpy(to, OSTAT_DIR);
+	strcat(to, (const char *)TB_SERIAL_NUMBER_ADDR);
+	strcat(to, OSTATS_EXCHG_EXT);
+
+	// process any ostats files from other devices	
+	strcpy(filename,OSTAT_DIR); 
+	strcat(filename, "*");
+	strcat(filename, OSTATS_EXCHG_EXT);
+	
+	ret =_findfirst((LPSTR)filename, &file_info, D_FILE);
+	
+	for (;ret >= 0; ret = _findnext(&file_info)) {
+	
+		strcpy(filename,OSTAT_DIR); 
+		strcat(filename,file_info.f_name);
+		
+		if(!strcmp(to, filename)) {	// don't process this device's concatenated ostats file
+			continue;
+		}
+		
+		ret = expandOstatFile( (char *)filename);	// will delete the file
+		have_new++;
+		strcpy(strLog, "buildExchgOstats processed ");
+		strcat(strLog, (char *) filename);
+		logString(strLog, BUFFER);
+	}
+	
+	if(have_new == 0) {
+		if(fileExists(to)) {
+			strcpy(strLog, "buildExchgOstats returns, no new ostat data");
+			logString(strLog, BUFFER);
+			return(0);
+		}
+	}
+
+	myexchgfd = open((LPSTR)to, O_CREAT|O_RDWR|O_TRUNC);
+	if(myexchgfd < 0) {   // can't open exchange file
+		strcpy(strLog, "buildExchgOstats can't open ");
+		strcat(strLog, to);
+		logString(strLog, BUFFER);
+		return(-1);
+	}
+//
+//  concatenate all our ostats csv files into one OSTATS_EXCHG_EXT file
+	strcpy(filename,OSTAT_DIR); 
+	strcat(filename,"*.csv");
+
+	ret =_findfirst((LPSTR)filename, &file_info, D_FILE);
+
+	for (;ret >= 0; ret = _findnext(&file_info)) {
+		
+		strcpy(filename,OSTAT_DIR); 
+		strcat(filename,file_info.f_name);
+		
+		ends_with_lf = concatFiles(myexchgfd, (char *)filename);
+		if(ends_with_lf) {
+			ret = write(myexchgfd, (unsigned long)(&delim[1])<<1, delim_len-2);
+		} else {
+			ret = write(myexchgfd, (unsigned long)&delim<<1, delim_len);
+		}
+		strcpy(strLog, "buildExchgOstats processed ");
+		strcat(strLog, (char *) filename);
+		logString(strLog, BUFFER);
+	}
+	
+	strcpy(strLog, "buildExchgOstats created new ostat data file ");
+	strcat(strLog, to);
+	logString(strLog, BUFFER);
+
+	close(myexchgfd);
+}
+
+// process an ostats exchange file from some other device
+//     this file is a concatenation of all ostats files from the other device
+//     a line beginning with OSTATS_DELIM separates different devices data in this file
+// if the other device has stats from a third device:
+//    add to our ostats if we have not seen the third device
+//    replace our ostats for third device if the boot sequence number in tis file is larger than what we have now
+// 
+int
+expandOstatFile(char *filename) {
+	char strLog[PATH_LENGTH * 2], to[PATH_LENGTH], from[PATH_LENGTH], buffer[READ_LENGTH+1];
+	char *line, *cp, *cp1, verbuf[PATH_LENGTH+1];
+	int fromfd, tofd, ret, checkfd, len, state = FIND_SRN, bytestowrite;
+	unsigned long newver, diskver;
+	
+	buffer[READ_LENGTH] = '\0';
+	strcpy(from, filename);
+	
+	fromfd = tbOpen(filename, O_RDONLY);
+	if(fromfd < 0) {
+		strcpy(strLog,"expandOstatFile can't open ");
+		strcat(strLog, filename);
+		logString(strLog, BUFFER);
+	} else {
+		strcpy(strLog, "expandOstatFile processing ");
+		strcat(strLog, filename);
+		logString(strLog, BUFFER);
+	}
+	getLine(-1,0); // reset
+	
+	while(line = getLine(fromfd, buffer)) {   
+		len = strlen(line);
+		if(len <= 1)
+			continue;
+		
+		switch(state) {
+		case FIND_SRN:		// we are looking for a line starting with a device serial number
+			// does line start with serial number prefix
+			if(strncmp(CONST_TB_SERIAL_PREFIX, line, strlen(CONST_TB_SERIAL_PREFIX)))
+				break;  // nope
+				
+			strcpy(from, line);
+			cp = strchr(from, ',');
+			if(cp == NULL)
+				break;
+			*cp = 0;
+			if(!strcmp(from, (const char *)TB_SERIAL_NUMBER_ADDR)) {
+				state = FIND_DELIM;
+				break;   // its me, some other device reported this device's stats
+			}
+			newver = strToLong(cp+1);
+			strcpy(to,OSTAT_DIR);
+			strcat(to, from);
+			strcat(to,".csv");
+			checkfd = tbOpen(to, O_RDONLY);
+			if(checkfd >= 0) {   //a csv from this third device exists on this device
+				ret = read(checkfd,(unsigned long)&verbuf<<1,PATH_LENGTH);
+				verbuf[PATH_LENGTH] = 0;
+				ret = convertTwoByteToSingleChar((unsigned int *)strLog, (unsigned int *)&verbuf, PATH_LENGTH/2);
+				close(checkfd);	
+				cp1 = strchr(strLog, ',');
+				if(cp1 == NULL)
+					break;
+				*cp1++;
+				diskver = strToLong(cp1);
+			} else {
+				diskver = -1;
+			}
+			state = FIND_DELIM;  // may be reset shortly
+			if(diskver < newver) {
+				strcpy(strLog, to);
+				strcat(strLog, " newer from other device");
+				logString(strLog,BUFFER);  
+				checkfd = tbOpen(to, O_WRONLY|O_CREAT|O_TRUNC);
+				if(checkfd >= 0) {
+					state = PROCESS_STATS;
+					*cp = ',';
+					bytestowrite = convertDoubleToSingleChar(strLog,line,TRUE);
+					ret = write(checkfd, (unsigned long)&strLog<<1, bytestowrite);
+				}
+			} else {
+				strcpy(strLog, to);
+				strcat(strLog, " my stats are newer");
+				logString(strLog,BUFFER);  
+			}
+			break;
+			
+		case PROCESS_STATS:
+			// writing some other devices stats to our ostat dir
+			if(!strncmp(line, OSTATS_DELIM, 3)) {	// line starts with the delimiter
+				close(checkfd);
+				state = FIND_SRN;
+				break;
+			}
+			bytestowrite = convertDoubleToSingleChar(strLog,line,TRUE);
+			ret = write(checkfd, (unsigned long)&strLog<<1, bytestowrite);
+			break;
+			
+		case FIND_DELIM:
+			// we are searching for a line beginning with our delimiter 
+			if(!strncmp(line, OSTATS_DELIM, 3)) {
+				state = FIND_SRN;
+				break;
+			}
+
+		default:
+			break;
+		}
+	}
+	
+	close(fromfd);
+	unlink(filename);
+	
+	strcpy(strLog, "expandOstatFile deleting ");
+	strcat(strLog, filename);
+	logString(strLog, BUFFER);
+	
+	return(0);
 }

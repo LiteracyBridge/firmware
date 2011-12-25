@@ -164,7 +164,8 @@ int d2dCopy(const char * packageName,const char * filenameList) {
 		if (retCopy == 0) {
 			setLED(LED_RED,TRUE);
 			copyListAudio(filenameList);
-		  	buildMyStatsCSV();
+//   built in device.c setOperationalMode when device halts or sleeps
+//		  	buildMyStatsCSV();
 			exchangeStatsCSV();
 			setLED(LED_RED,FALSE);
 		}
@@ -473,11 +474,24 @@ void exchangeStatsCSV() {
 //	
 // Logic for which device has the most current stats for devices they both have connected to goes here
 //
+
+	strcpy(to, CLI_OSTAT_DIR);
+	strcat(to, (const char *)TB_SERIAL_NUMBER_ADDR);
+	strcat(to, OSTATS_EXCHG_EXT);
+	
+	strcpy(from, OSTAT_DIR);
+	strcat(from, (const char *)TB_SERIAL_NUMBER_ADDR);
+	strcat(from, OSTATS_EXCHG_EXT);
+
+//  from a: to b:
+	ret = fileCopy((char *)from, (char *)to);
+
 }
 
 static void
 getStats(void) {
 	char linein[PATH_LENGTH], from[PATH_LENGTH], to[PATH_LENGTH], *cp1, *cp2;
+	char cli_serial_number[PATH_LENGTH], strLog[PATH_LENGTH];
 	int ret, i, j, f;
 	
 	if (DEBUG_MODE)
@@ -515,17 +529,41 @@ getStats(void) {
 		if(to[i++] == 0)
 			break;
 	}
-	
+	strcpy(cli_serial_number, (char *)cp2);
+
 	strcat(to, ".csv");
 	strcpy((char *)cp1, (char *)cp2);
+
 	
 	logString(from,BUFFER);
 	logString(to,ASAP);
+	
+	// from b: to a:
 	ret = fileCopy((char *)from, (char *)to);
 
 //	
 // Logic for which device has the most current stats for devices they both have connected to goes here
 //
+
+	strcpy(from, CLI_OSTAT_DIR);
+	strcat(from, cli_serial_number);
+	strcat(from, OSTATS_EXCHG_EXT);
+	
+	strcpy(to, OSTAT_DIR);
+	strcat(to, cli_serial_number);
+	strcat(to, OSTATS_EXCHG_EXT);
+	
+	// from b: to a:
+	ret = fileCopy((char *)from, (char *)to);
+	
+	strcpy(strLog, "getStats ostats copy from ");
+	strcat(strLog, from);
+	logString(strLog, BUFFER);
+	
+	strcpy(strLog, "getStats ostats copy  to  ");
+	strcat(strLog, to);
+	logString(strLog, BUFFER); 
+
 }
 
 // supress leading zeros from longToDecimalString
