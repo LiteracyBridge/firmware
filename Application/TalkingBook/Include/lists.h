@@ -40,6 +40,7 @@ struct ListItem {
     unsigned int idxListWithFilename;
     unsigned long posListWithFilename;
     EnumListType listType;
+    BOOL isLocked;
 };
 
 extern void cpyListPath(char *, char *);

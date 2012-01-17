@@ -1083,6 +1083,9 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			ret = createRecording(filename,aux,TRANSLATE_TEMP_DIR, FALSE);
 			if (ret == -1)
 				logException(28,"recording failed",RESET); //todo: add voice error msg?
+			else if(ret == ERR_CATEGORY_LOCKED) {    // handle locked category here
+				break;
+			}
 			else if (ret == 0) {	
 				transList->translatedFileMarker[transList->currFileIdx] = '1';
 			
@@ -1615,7 +1618,11 @@ static void takeAction (Action *action, EnumAction actionCode) {
 					context.queuedPackageType = SYS_MSG;
 				else
 					context.queuedPackageType = PKG_MSG;
-			} else if (ret == -1)
+			}
+			else if(ret == ERR_CATEGORY_LOCKED) {    // handle locked category here
+				break;
+			}
+ 			else if (ret == -1)
 				logException(28,"recording failed",RESET); //todo: add voice error msg?
 			break;	
 
@@ -1659,7 +1666,11 @@ static void takeAction (Action *action, EnumAction actionCode) {
 					context.queuedPackageType = SYS_MSG;
 				else
 					context.queuedPackageType = PKG_MSG;
-			} else if (ret == -1)
+			}
+			else if(ret == ERR_CATEGORY_LOCKED) {    // handle locked category here
+				break;
+			}
+			 else if (ret == -1)
 				logException(28,"recording failed",RESET); //todo: add voice error msg?
 			break;	
 

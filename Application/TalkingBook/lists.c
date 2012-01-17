@@ -66,8 +66,9 @@ char *getCurrentList(ListItem *list) {
 	char *ret;
 	char buffer[READ_LENGTH+1];
 	int fileHandle;
-	char *cursor;
+	char *cursor, *cp;
 	int attempt, goodPass;
+	ListItem *masterlist;
 	const int MAX_ATTEMPTS = 3;
 	
 	buffer[READ_LENGTH] = '\0';
@@ -89,7 +90,19 @@ char *getCurrentList(ListItem *list) {
 		for (cursor = buffer;*cursor != 0x0a && *cursor != 0x0d && *cursor != 0x00;cursor++);
 		*cursor = 0x00;
 		close(fileHandle);
-		strcpy(list->currentString,buffer);
+		
+		//device-58
+		masterlist = &pkgSystem.lists[context.package->idxMasterList];
+		list->isLocked = 0;
+		cp = buffer;
+		if(list == masterlist) {
+			if(*buffer == '!') { // catagory locked, no writing allowed
+				list->isLocked = 1;
+				cp++;
+			}
+		}
+		//device-58
+		strcpy(list->currentString,buffer);		
 	}
 	ret = list->currentString;
 	return ret;
@@ -140,13 +153,14 @@ BOOL getNextTransList(TranslationList *transList, BOOL advance, CtnrPackage *pkg
 }
 
 char *getNextList(ListItem *list, BOOL shouldAdvance) {
-	char *ret;
+	char *ret, *cp;
 	char buffer[READ_LENGTH+1];
 	int fileHandle;
 	char *line, *tempCursor;
 	int cursor;
 	long position, bytesToRead;
 	int attempt, goodPass;
+	ListItem *masterlist;
 	const int MAX_ATTEMPTS = 3;
 	
 	for (attempt=0,goodPass=0;attempt < MAX_ATTEMPTS && !goodPass;attempt++) {
@@ -182,6 +196,17 @@ char *getNextList(ListItem *list, BOOL shouldAdvance) {
 			for (;cursor > 0 && buffer[cursor-1] != 0x0a && buffer[cursor-1] != 0x0d; cursor--);		
 			for (tempCursor = &buffer[cursor];*tempCursor != 0x0a && *tempCursor != 0x0d && *tempCursor != 0x00;tempCursor++);
 			*tempCursor = 0x00;
+			
+			//device-58
+			masterlist = &pkgSystem.lists[context.package->idxMasterList];
+			list->isLocked = 0;
+			if(list == masterlist) {
+				if(*(buffer+cursor) == '!') { // catagory locked, no writing allowed
+					list->isLocked = 1;
+					cursor++;
+				}
+			}
+			//device-58
 
 			strcpy(list->currentString,&buffer[cursor]);
 			goodString(list->currentString,1);
@@ -204,11 +229,12 @@ char *getNextList(ListItem *list, BOOL shouldAdvance) {
 } 	
 
 char *getPreviousList(ListItem *list) {
-	char *ret;
+	char *ret, *cp;
 	char buffer[READ_LENGTH+1];
 	int fileHandle;
 	char *line, *tempCursor;
 	int attempt,goodPass;
+	ListItem *masterlist;
 	const int MAX_ATTEMPTS = 3;
 	
 	if (list->currentFilePosition == -1)
@@ -239,6 +265,18 @@ char *getPreviousList(ListItem *list) {
 			close(fileHandle);
 			for (tempCursor = line;*tempCursor != 0x0a && *tempCursor != 0x0d && *tempCursor != 0x00;tempCursor++);
 			*tempCursor = 0x00;
+			
+			//device-58
+			masterlist = &pkgSystem.lists[context.package->idxMasterList];
+			list->isLocked = 0;
+			if(list == masterlist) {
+				if(*line == '!') { // catagory locked, no writing allowed
+					list->isLocked = 1;
+					line++;
+				}
+			}
+			//device-58
+
 			strcpy(list->currentString,line);
 			ret = list->currentString;
 			if ((goodPass = goodString(ret,1)))
@@ -382,4 +420,96 @@ int addCategoryToActiveLists(char * strCategoryCode, char * strLanguage) {
 		ret = appendStringToFile(filepath, tempCategoryCode); 
 	}
 	return ret;
+}
+
+BOOL
+isCategoryLocked(char *cat)
+{
+	char buffer[READ_LENGTH+1];
+	char filepath[PATH_LENGTH];
+	char *line;
+
+	int handle, locked;
+		
+	cpyListPath(filepath,LIST_MASTER); // gets the right path using the current system language
+	strcat(filepath,(char *)LIST_MASTER);
+	strcat(filepath,(char *)".txt");
+	
+	handle = tbOpen(filepath, O_RDONLY);
+	if(handle < 0) {
+		logString("isCategoryLocked: unable to open following path:",BUFFER);
+		logString(filepath, BUFFER);
+		return(FALSE);
+	}
+
+	getLine(-1,0);  // reset in case at end from prior use
+	for(locked = 0; line = getLine(handle,buffer); locked = 0) {
+		if(*line == '!') {
+			line++;
+			locked = 1;
+		}
+		if(!strcmp(line, cat))
+			break;
+	} 
+	
+	close(handle);
+	
+	return(locked == 1);
+
+}
+void
+setLockCat(char *cat, int newlock_value) {
+	char buffer[READ_LENGTH+1];
+	char filepath[PATH_LENGTH];
+	char *line, tempLine[80];
+	int handle, wHandle, i, locked, bytesToWrite, ret;
+	char wFilepath[PATH_LENGTH];
+	ListItem *list; 
+	
+	cpyListPath(filepath,LIST_MASTER); // gets the right path using the current system language
+	strcat(filepath,(char *)LIST_MASTER);
+	strcat(filepath,(char *)".txt");
+	
+	handle = tbOpen(filepath, O_RDONLY);
+	if(handle < 0) {
+		logString("lockCat: unable to open following path:",BUFFER);
+		logString(filepath, BUFFER);
+		return(FALSE);
+	}
+	strcpy(wFilepath,"temp.txt");
+	wHandle = tbOpen((LPSTR)wFilepath,O_CREAT|O_TRUNC|O_WRONLY);
+
+	getLine(-1,0);  // reset in case at end from prior use
+	for(;line = getLine(handle,buffer);) {
+		locked = 0;
+		if(*line == '!') {
+			line++;
+			locked = 1;
+		}
+		if(!strcmp(line, cat)) {	// the category we want
+			if(locked == newlock_value) { // nothing to do
+				close(handle);
+				close(wHandle);
+				unlink(wFilepath);
+				return;
+			}
+			if(newlock_value) {
+				bytesToWrite = convertDoubleToSingleChar(tempLine,"!",FALSE);
+				ret = write(wHandle,(unsigned long)tempLine<<1,1);		
+			}
+		}
+		bytesToWrite = convertDoubleToSingleChar(tempLine,line,TRUE);
+		ret = write(wHandle,(unsigned long)tempLine<<1,bytesToWrite);		
+	}
+	close(handle);
+	close(wHandle);
+	i = unlink((LPSTR)filepath);
+	if (i != -1) {
+		i = rename((LPSTR)wFilepath,(LPSTR)filepath);
+	}
+	
+	list = &pkgSystem.lists[context.package->idxMasterList];
+	if(!strcmp(list->currentString, cat)) {
+		list->isLocked = newlock_value;
+	}
 }

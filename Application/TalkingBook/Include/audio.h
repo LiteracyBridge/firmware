@@ -32,6 +32,7 @@ extern void play(CtnrFile *, unsigned int);
 extern void insertSound(CtnrFile *, CtnrBlock *, BOOL);
 extern void insertSoundFile(int);
 extern int createRecording(char *, int, char *, BOOL);
+#define ERR_CATEGORY_LOCKED         -2
 #define MINIMUM_PLAY_SEC_TO_LOG 	3
 #define MIN_AUDIO_FILE_SIZE         0		
 extern void markEndPlay(long);

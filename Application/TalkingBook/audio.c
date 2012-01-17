@@ -664,7 +664,8 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 
 int createRecording(char *pkgName, int fromHeadphone, char *listName, BOOL relatedToLastPlayed) {
 	int ret, SPINS; //from page 102 of GPL Progammers Manual v1.0/Dec20,2006 
-	           //headphone amp audio driver input source select 
+	           //headphone amp audio driver input source select
+	ListItem *list; 
 	
 	markEndPlay(getRTCinSeconds());
 		
@@ -685,6 +686,13 @@ int createRecording(char *pkgName, int fromHeadphone, char *listName, BOOL relat
 		SPINS <<= 2; // move SPINS into bits 2 and 3 position
 		*P_HPAMP_Ctrl |= SPINS;	
 	}
+	
+//	device-58		
+	list = &pkgSystem.lists[context.package->idxMasterList];
+	if(list->isLocked) {
+		return(ERR_CATEGORY_LOCKED);
+	}
+//	device-58
 
 	ret = recordAudio(pkgName,listName,relatedToLastPlayed);
 	if (SPINS)
