@@ -479,8 +479,11 @@ void setOperationalMode(int newmode) {
 */
 		  	SysIntoHaltMode();
 	  	}
-		else // newmode == (int)P_SLEEP
+		else { // newmode == (int)P_SLEEP
+			disk_safe_exit(0);
+
 			_SystemOnOff();
+		}
 	
 		while(1);	
 	    // cpu reset on exiting halt/sleep mode, so nothing below here executes

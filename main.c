@@ -112,6 +112,7 @@ backfromRTC()
 	if(hr == 0 && min == 0) {
 		setOperationalMode((int)P_HALT);    //go back to HALT, does not return
 	} else {
+		disk_safe_exit(0); // close all open files - we are reiniting
 		Fake_Keypress();	// initialize memory, fake a key press wakeup
 	}
 }
