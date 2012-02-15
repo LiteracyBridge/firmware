@@ -181,9 +181,6 @@ void startUp(unsigned int bootType) {
 	setLED(LED_RED,FALSE);  // red light can be left on after reprog restart
 	setLED(LED_GREEN,TRUE);  // red light can be left on after reprog restart
 	
-	//to stop user from wondering if power is on and possibly cycling too quickly,
-	playDing();  // it is important to play a sound immediately 
-	
 	if(bootType == BOOT_TYPE_COLD_RESET) {
 		extern unsigned long rtcAlarm[];
 		extern unsigned long curAlarmSet;    
@@ -214,6 +211,14 @@ void startUp(unsigned int bootType) {
 		//_SystemOnOff();  // go to P_SLEEP mode, does not return
 		SysIntoHaltMode();
 	}
+// for really low batteries the playDing() below will cause a low voltage reset
+// handling that will go into Halt mode above
+// pressing play or black circle will get back here and the cycle will repeat
+// the user will see a long green flash then a short green flash and perhaps hear a partial ding
+
+	//to stop user from wondering if power is on and possibly cycling too quickly,
+	playDing();  // it is important to play a sound immediately 
+
 //	cleanUpOldRevs();	
 	key = keyCheck(1);  // long keycheck 
 	key &= ~LONG_KEY_STROKE;
