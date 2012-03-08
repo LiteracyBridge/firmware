@@ -5,6 +5,7 @@
 #include "./Application/TalkingBook/Include/talkingbook.h"
 #include "./Application/TalkingBook/Include/sys_counters.h"
 #include "./Application/TalkingBook/Include/device.h"
+#include "./Application/TalkingBook/Include/startup.h"
 #include "./Application/TalkingBook/Include/files.h"
 #include "./Application/TalkingBook/Include/audio.h"
 #include "./Application/TalkingBook/Include/app_exception.h"
@@ -16,6 +17,7 @@ void logException(unsigned int errorCode, const char * pStrError, int takeAction
 	// errorcode == 1 means memory error from BodyInit() and ucBSInit()
 	int i; 
 	char errorString[160];
+	char filePath[PATH_LENGTH];
 	
 	if(vCur_1 < V_MIN_SDWRITE_VOLTAGE) {
 	}
@@ -54,6 +56,15 @@ void logException(unsigned int errorCode, const char * pStrError, int takeAction
 //		if (errorCode != 10 && errorCode != 14)  // can't access config or system boot 
 //			insertSoundFile(ERROR_SOUND_FILE_IDX);
 //		if (errorCode != 14) // LED_GREEN and LED_RED are not assigned without config file
+
+		// delete compiled version of current control file to force recompilation
+		strcpy(filePath,LANGUAGES_PATH);
+		strcat(filePath,currentSystem());
+		strcat(filePath,"/");
+		strcat(filePath,UI_SUBDIR);
+		strcat(filePath,PKG_CONTROL_FILENAME_BIN);
+		unlink((LPSTR)filePath);
+
 			for (i=0; i < 5; i++) {
 				setLED(LED_GREEN,FALSE);
 				setLED(LED_RED,TRUE);
