@@ -196,6 +196,8 @@ char *getNextList(ListItem *list, BOOL shouldAdvance) {
 			for (;cursor > 0 && buffer[cursor-1] != 0x0a && buffer[cursor-1] != 0x0d; cursor--);		
 			for (tempCursor = &buffer[cursor];*tempCursor != 0x0a && *tempCursor != 0x0d && *tempCursor != 0x00;tempCursor++);
 			*tempCursor = 0x00;
+			position += cursor;
+			list->currentFilePosition = position;	
 			
 			//device-58
 			masterlist = &pkgSystem.lists[context.package->idxMasterList];
@@ -210,8 +212,6 @@ char *getNextList(ListItem *list, BOOL shouldAdvance) {
 
 			strcpy(list->currentString,&buffer[cursor]);
 			goodString(list->currentString,1);
-			position += cursor;
-			list->currentFilePosition = position;	
 			close(fileHandle);
 		}
 		if (!buffer[0]) 
