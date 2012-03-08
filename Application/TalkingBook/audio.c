@@ -239,6 +239,8 @@ static int getFileHandle (CtnrFile *newFile) {
 	strcat(sTemp,AUDIO_FILE_EXT);
 
 	ret = tbOpen((LPSTR)sTemp,O_RDONLY);
+	if (ret == -1 && pkg->pkg_type == PKG_SYS)
+		logException(35,sTemp,RESET);
 	if (DEBUG_MODE) {
 		logString(sTemp,BUFFER);
 		if (ret == -1) {
