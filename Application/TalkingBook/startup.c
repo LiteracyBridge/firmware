@@ -248,8 +248,6 @@ void startUp(unsigned int bootType) {
 		writeVersionToDisk();	
 	}
 	SysDisableWaitMode(WAITMODE_CHANNEL_A);
-	adjustVolume(NORMAL_VOLUME,FALSE,FALSE);
-	adjustSpeed(NORMAL_SPEED,FALSE);
 
 // try to load a saved config.bin if present
 	configExists = (restore_config_bin() == -1?0:1);
@@ -262,6 +260,8 @@ void startUp(unsigned int bootType) {
 		configExists = (loadConfigFile() == -1?0:1);
 	}
 			
+	adjustVolume(NORMAL_VOLUME,FALSE,FALSE);
+	adjustSpeed(NORMAL_SPEED,FALSE);
 	// check for new firmware first, but don't flash if voltage is low
 	if(V_MIN_SDWRITE_VOLTAGE <= vCur_1) {
 		updateSN();
