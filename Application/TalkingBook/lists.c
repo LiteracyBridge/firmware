@@ -102,7 +102,7 @@ char *getCurrentList(ListItem *list) {
 			}
 		}
 		//device-58
-		strcpy(list->currentString,buffer);		
+		strcpy(list->currentString,cp);		
 	}
 	ret = list->currentString;
 	return ret;
