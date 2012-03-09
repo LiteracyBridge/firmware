@@ -1290,6 +1290,11 @@ static void takeAction (Action *action, EnumAction actionCode) {
 
 		case DELETE:
 			stop();
+			list = &pkgSystem.lists[context.package->idxMasterList];
+			if(list->isLocked) {
+				insertSound(&pkgSystem.files[SORRY_LOCKED_SUBJECT_IDX],NULL,TRUE);
+				break;
+			}
 			tempList = &context.package->lists[destination];
 			if (destination == 0) {
 				// delete subject/category from master list	
@@ -1392,6 +1397,30 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			reposition = TRUE;
 			break;
 
+		case TOGGLE_LOCK:
+			stop();
+			tempList = &pkgSystem.lists[destination];
+			if(tempList->isLocked) {
+				// must unlock current list
+				setLockCat(getCurrentList(tempList), 0);
+				insertSound(&pkgSystem.files[SUBJECT_NOW_UNLOCKED_IDX],NULL,TRUE);
+			} else {
+				// must lock current list
+				setLockCat(getCurrentList(tempList), 1);
+				insertSound(&pkgSystem.files[SUBJECT_NOW_LOCKED_IDX],NULL,TRUE);
+			}
+			tempList = &context.package->lists[aux];
+			cursor = getCurrentList(tempList);		
+			context.idxActiveList = aux;
+			newFile = getTempFileFromName(cursor,0);
+			if (LONG_LIST_NAMES) {
+				insertSound(newFile,NULL,FALSE);
+				newFile = getTempFileFromName(cursor,1);
+			}
+			newTime = 0;
+			reposition = TRUE;			
+			break;
+			
 		case POSITION_TO_TOP:
 			stop();
 			longToDecimalString(destination,filename,3);
@@ -1620,6 +1649,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 					context.queuedPackageType = PKG_MSG;
 			}
 			else if(ret == ERR_CATEGORY_LOCKED) {    // handle locked category here
+				insertSound(&pkgSystem.files[SORRY_LOCKED_SUBJECT_IDX],NULL,TRUE);
 				break;
 			}
  			else if (ret == -1)

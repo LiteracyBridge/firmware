@@ -17,8 +17,8 @@
 #define APP_QUIZ_PLAY   1
 #define APP_QUIZ_REC 	2
 
-#define MAX_FILES		110
-#define MAX_BLOCKS		110
+#define MAX_FILES		112
+#define MAX_BLOCKS		112
 #define MAX_STATES		(2 * MAX_BLOCKS)   // should always be 2 x MAX_BLOCKS
 #define MAX_ACTIONS		170   // a little more than 2 actions per block (in addition to start/end actions)
 #define MAX_LISTS		3  		// includes 2 regular lists (list of lists and list of packages) and translation list
@@ -46,7 +46,7 @@ enum EnumEvent {
 };
 enum EnumAction {NOP = 0, STOP, PAUSE, JUMP_BLOCK, RETURN, INSERT_SOUND, START_END_MARKER,			
 				PLAY_PAUSE, COPY, CLONE, COPY_LANGUAGE, RECORD_TITLE, RECORD_MSG, PACKAGE_RECORDING, RECORD_FEEDBACK, RECORD_TRANSLATION, TRIM,
-				POSITION_TO_TOP, SURVEY_TAKEN, SURVEY_APPLY, SURVEY_USELESS, FWD, BACK, JUMP_TIME, CALL_BLOCK, JUMP_PACKAGE, 
+				TOGGLE_LOCK, POSITION_TO_TOP, SURVEY_TAKEN, SURVEY_APPLY, SURVEY_USELESS, FWD, BACK, JUMP_TIME, CALL_BLOCK, JUMP_PACKAGE, 
 				JUMP_LIST, TRANSLATED_LIST, NOT_TRANSLATED_LIST, TRANSLATE_DELETE_FINISH, 
 				TRANSLATE_NEW, TRANSLATE_OVERWRITE,DELETE, DELETE_MESSAGES, DELETE_TRANSLATION, WRAP_TRANSLATION,
 				MAKE_FAVORITE,
@@ -54,6 +54,7 @@ enum EnumAction {NOP = 0, STOP, PAUSE, JUMP_BLOCK, RETURN, INSERT_SOUND, START_E
 				USB_MARKER, USB_DEVICE_ON, USB_HOST_ON, USB_DEVICE_OFF, USB_HOST_OFF,  
                 LED_MARKER, LED_RED_ON, LED_GREEN_ON, LED_ALL_ON, LED_RED_OFF, LED_GREEN_OFF, LED_ALL_OFF,
                 HALT, SLEEP, TEST_PCB, EOL_MARKER}; //end-of-list marker
+///WARNING: I think EnumAction has to be limited to 64 items (last count with TOGGLE_LOCK:61), based on available bits for it in eventAction.
 enum EnumBorderCrossing {PLAYING, FORWARD_JUMPING, BACKWARD_JUMPING};
 
 struct CtnrFile {

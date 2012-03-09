@@ -55,4 +55,5 @@ extern int getListRotation(unsigned int);
 extern int getListFilename(char *, int, BOOL);
 extern void catLangDir(char *);
 extern int addCategoryToActiveLists(char *, char *);
+extern void setLockCat(char *, int);
 #endif

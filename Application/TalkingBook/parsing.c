@@ -68,7 +68,7 @@ static int getEventEnumFromChar (char *c) {
 
 static int getActionEnumFromChar (char *c) {
 	int ret = -1;
-	const char *ACTION_CODES = "~.,[)I`PCCCEEEEEMOYYYFBT(<LLLLLLDDDW*`VVVSSSS`UUUU`RGARGAHZX";  // '`' is placeholder for marker codes
+	const char *ACTION_CODES = "~.,[)I`PCCCEEEEEMKOYYYFBT(<LLLLLLDDDW*`VVVSSSS`UUUU`RGARGAHZX";  // '`' is placeholder for marker codes
 	// note that E is for rEcord since R should represent Red
 	// only first instance of action code is found, others are placeholders as dealt with below
 	
@@ -347,7 +347,7 @@ static BOOL parseCreateAction (char *line, Action *action, int *actionCount, cha
 		}					
 		if (actionCode == DELETE || actionCode == DELETE_MESSAGES || actionCode == COPY || actionCode == TRIM || 
 				actionCode == SURVEY_TAKEN || actionCode == SURVEY_APPLY || actionCode == SURVEY_USELESS || 
-				actionCode == POSITION_TO_TOP || actionCode == MAKE_FAVORITE || actionCode == RECORD_FEEDBACK) {
+				actionCode == TOGGLE_LOCK || actionCode == POSITION_TO_TOP || actionCode == MAKE_FAVORITE || actionCode == RECORD_FEEDBACK) {
 			strAction++;
 			if (actionCode == SURVEY_TAKEN || actionCode == SURVEY_APPLY || 
 				actionCode == SURVEY_USELESS || actionCode == DELETE_MESSAGES || actionCode == RECORD_FEEDBACK)
