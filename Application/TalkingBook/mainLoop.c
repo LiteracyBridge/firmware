@@ -543,6 +543,7 @@ processAlarm(unsigned long alarm) {
 void mainLoop (void) {
 	void processAlarm();
 	extern unsigned long rtc_fired;
+	unsigned int compressedTime;
 	unsigned int getCurVoltageSample();
 	CtnrBlock *insertBlock;
 	ListItem *list;
@@ -577,9 +578,11 @@ void mainLoop (void) {
 		
 		// check for start or end event
 		// todo: do we have to check SACM_Status() to see if stopped or can that be moved into the start/end event processing?
-		if (SACM_Status() && !context.isPaused && 
-			compressTime(Snd_A1800_GetCurrentTime(),context.package->timePrecision) >= context.timeNextTimeframe)
+		if (SACM_Status() && !context.isPaused) {
+			compressedTime = compressTime(Snd_A1800_GetCurrentTime(),context.package->timePrecision);
+			if (compressedTime >= context.timeNextTimeframe)
 				endOfTimeframe(context.idxTimeframe, FALSE);
+		}
 		else if (!context.isStopped && !SACM_Status()) { // just stopped playing
 			// this assume that stopped means end of audio file
 			// todo: this should be checking end action for CtnrFile (doesn't exist yet)
@@ -1399,24 +1402,23 @@ static void takeAction (Action *action, EnumAction actionCode) {
 
 		case TOGGLE_LOCK:
 			stop();
-			tempList = &pkgSystem.lists[destination];
-			if(tempList->isLocked) {
+			list = &pkgSystem.lists[destination];
+			cursor = getCurrentList(list);		
+			if(list->isLocked) {
 				// must unlock current list
-				setLockCat(getCurrentList(tempList), 0);
+				setLockCat(cursor, 0);
 				insertSound(&pkgSystem.files[SUBJECT_NOW_UNLOCKED_IDX],NULL,TRUE);
 			} else {
 				// must lock current list
-				setLockCat(getCurrentList(tempList), 1);
+				setLockCat(cursor, 1);
 				insertSound(&pkgSystem.files[SUBJECT_NOW_LOCKED_IDX],NULL,TRUE);
 			}
-			tempList = &context.package->lists[aux];
-			cursor = getCurrentList(tempList);		
-			context.idxActiveList = aux;
+			context.idxActiveList = destination;
 			newFile = getTempFileFromName(cursor,0);
 			if (LONG_LIST_NAMES) {
-				insertSound(newFile,NULL,FALSE);
+				insertSound(newFile,NULL,TRUE);
 				newFile = getTempFileFromName(cursor,1);
-			}
+			}	
 			newTime = 0;
 			reposition = TRUE;			
 			break;

@@ -461,7 +461,7 @@ void
 setLockCat(char *cat, int newlock_value) {
 	char buffer[READ_LENGTH+1];
 	char filepath[PATH_LENGTH];
-	char *line, tempLine[80];
+	char *lineStart, *lineCat, tempLine[80];
 	int handle, wHandle, i, locked, bytesToWrite, ret;
 	char wFilepath[PATH_LENGTH];
 	ListItem *list; 
@@ -480,13 +480,13 @@ setLockCat(char *cat, int newlock_value) {
 	wHandle = tbOpen((LPSTR)wFilepath,O_CREAT|O_TRUNC|O_WRONLY);
 
 	getLine(-1,0);  // reset in case at end from prior use
-	for(;line = getLine(handle,buffer);) {
+	for(;(lineStart = lineCat = getLine(handle,buffer));) {
 		locked = 0;
-		if(*line == '!') {
-			line++;
+		if(*lineStart == '!') {
+			lineCat++;
 			locked = 1;
 		}
-		if(!strcmp(line, cat)) {	// the category we want
+		if(!strcmp(lineCat, cat)) {	// the category we want
 			if(locked == newlock_value) { // nothing to do
 				close(handle);
 				close(wHandle);
@@ -496,9 +496,12 @@ setLockCat(char *cat, int newlock_value) {
 			if(newlock_value) {
 				bytesToWrite = convertDoubleToSingleChar(tempLine,"!",FALSE);
 				ret = write(wHandle,(unsigned long)tempLine<<1,1);		
+			} else {
+				// need to unlock this category
+				lineStart = lineCat; // skips the '!' 	
 			}
 		}
-		bytesToWrite = convertDoubleToSingleChar(tempLine,line,TRUE);
+		bytesToWrite = convertDoubleToSingleChar(tempLine,lineStart,TRUE);
 		ret = write(wHandle,(unsigned long)tempLine<<1,bytesToWrite);		
 	}
 	close(handle);
