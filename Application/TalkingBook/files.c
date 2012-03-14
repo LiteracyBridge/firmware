@@ -446,6 +446,10 @@ INT16 tbOpen(LPSTR path, INT16 open_flag) {
 	const int RETRIES = 2;
 	int i;
 	INT16 handle;
+
+	if (SACM_Status())
+		Snd_Stop(); // DO NOT use stop() here because that calls flushLog(), which eventually calls this fct.
+	
 	//todo: move number of attempts into config file, but have fall back number in define (since config has to be open)
 	for (i = 0; i < RETRIES; i++) { 
 		handle = open(path, open_flag);

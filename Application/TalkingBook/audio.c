@@ -368,8 +368,10 @@ void insertSound(CtnrFile *file, CtnrBlock *block, BOOL wait) {
 				} else if (keystroke == KEY_PLAY && context.isPaused) {
 					resume();
 					context.isPaused = FALSE;
-				} else
+				} else {
 					context.keystroke = keystroke;
+					stop();
+				}
 			}
 		} 
 		context.file = lastFilePlayed;
@@ -394,8 +396,10 @@ void insertSound(CtnrFile *file, CtnrBlock *block, BOOL wait) {
 				} else if (keystroke == KEY_PLAY && context.isPaused) {
 					resume();
 					context.isPaused = FALSE;
-				} else
+				} else {
 					context.keystroke = keystroke;
+					stop();
+				}
 			}
 		}
 		context.file = lastFilePlayed;
