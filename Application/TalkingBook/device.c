@@ -687,8 +687,6 @@ setRTCalarmHours(unsigned int hours) {
 
 void
 setRTCalarm(unsigned int hour, unsigned int minute, unsigned int second) {
-	// temporarily disabling RTC alarm until we can give it further testing
-	return;
 	
 	*P_Alarm_Second = second;
 	*P_Alarm_Minute = minute;
