@@ -315,6 +315,7 @@ int setUSBHost(BOOL enter) {
 			*P_USBH_Config = 0;
 			*P_USBH_INTEN  = 0;	
 			SetSystemClockRate(CLOCK_RATE);  //set clock to non usb host value
+			setLED(LED_RED,FALSE);
 	}
 
 	return 0;
