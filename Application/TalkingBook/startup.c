@@ -339,7 +339,7 @@ void startUp(unsigned int bootType) {
 	{
 		int ret, bytesToWrite;
 		char line[80];
-		ret = open((LPSTR)(STAT_DIR SNCSV), O_RDWR|O_CREAT);
+		ret = tbOpen((LPSTR)(STAT_DIR SNCSV), O_RDWR|O_CREAT);
 		if (ret >= 0) {
 			bytesToWrite = convertDoubleToSingleChar(line,buffer,TRUE);
 			write(ret, (unsigned long)line<<1, bytesToWrite);

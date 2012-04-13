@@ -849,7 +849,7 @@ static void loadDraftTranslation(void) {
 	strcpy(filepath,LANGUAGES_PATH);
 	temp=strlen(filepath);
 	strcat(filepath,TRANSLATE_FILENAME_BIN);
-	handle = open((LPSTR)(filepath),O_RDONLY);
+	handle = tbOpen((LPSTR)(filepath),O_RDONLY);
 	//Also check that translate temp directory exists before re-loading
 	draftExists = 0;
 	if (handle != -1) {
@@ -1993,7 +1993,7 @@ void loadPackage(int pkgType, const char * pkgName) {
 			//Force to re-load control
 			handle = -1;
 		} else
-			handle = open((LPSTR)(filePath),O_RDONLY);
+			handle = tbOpen((LPSTR)(filePath),O_RDONLY);
 		if (handle == -1) {
 			strcpy(temp,PKG_CONTROL_FILENAME_TXT);
 			flagParse = fileExists((LPSTR)filePath);
@@ -2003,7 +2003,7 @@ void loadPackage(int pkgType, const char * pkgName) {
 			strcpy(filePath,LANGUAGES_PATH);
 			temp = filePath + strlen(filePath);
 			strcpy(temp,PKG_CONTROL_FILENAME_BIN);
-			handle = open((LPSTR)(filePath),O_RDONLY);
+			handle = tbOpen((LPSTR)(filePath),O_RDONLY);
 			if (handle == -1) {
 				strcpy(temp,PKG_CONTROL_FILENAME_TXT);
 				flagParse = fileExists((LPSTR)filePath);

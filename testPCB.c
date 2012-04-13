@@ -159,7 +159,7 @@ int audioTests(void) {
 			*P_HQADC_MIC_PGA &= 0xFFE0; // only first 5 bits for mic pre-gain; others reserved
 			*P_HQADC_MIC_PGA |= MIC_GAIN_NORMAL;
 		}
-		handle = open((LPSTR)TEST_AUDIO_FILENAME,O_CREAT|O_RDWR);
+		handle = tbOpen((LPSTR)TEST_AUDIO_FILENAME,O_CREAT|O_RDWR);
 		if (handle != -1) {
 			setLED(LED_RED,TRUE);
 			playBip();
@@ -184,7 +184,7 @@ int audioTests(void) {
 		}
 		if (key || (key=keyCheck(1)))
 			break;		
-		handle = open((LPSTR)TEST_AUDIO_FILENAME,O_RDONLY);
+		handle = tbOpen((LPSTR)TEST_AUDIO_FILENAME,O_RDONLY);
 		if (handle >= 0) { 
 			SACMGet_A1800FAT_Mode(handle,0);
 			Snd_SACM_PlayFAT(handle, C_CODEC_AUDIO1800);
@@ -316,7 +316,7 @@ int createTestFile(unsigned int kbSize) {
 	for (lCount=0; lCount < LONG_SIZE; lCount++)
 		testLong[lCount] = lCount; 
 	//create new file
-	handle = open((LPSTR)LOCAL_TEST_FILENAME,O_CREAT|O_TRUNC|O_WRONLY);
+	handle = tbOpen((LPSTR)LOCAL_TEST_FILENAME,O_CREAT|O_TRUNC|O_WRONLY);
 	for (lCount=0; lCount < cycles; lCount++) {
 		wCount = write(handle,(unsigned long)&testLong<<1,LONG_SIZE<<2);	
 		if (wCount == -1) {
@@ -336,7 +336,7 @@ int readTestFile(void) {
 	
 	bytesToRead = LONG_SIZE<<2;
 	longsToCount = LONG_SIZE;
-	handle = open((LPSTR)LOCAL_TEST_FILENAME,O_RDONLY);
+	handle = tbOpen((LPSTR)LOCAL_TEST_FILENAME,O_RDONLY);
 	if (handle < 0)
 		ret = -1;
 	else {

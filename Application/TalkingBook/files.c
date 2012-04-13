@@ -321,10 +321,10 @@ void trimFile(char * filePath, unsigned long frameStart, unsigned long frameEnd)
 	wordsNewSize = wordsFromFrames(frameEnd-frameStart+1);
 	*pSize = (long)((wordsNewSize<<1) + 2);
 	*(pHeader+2) = sacm_mode;
-	rHandle = open((LPSTR)filePath,O_RDONLY);	
+	rHandle = tbOpen((LPSTR)filePath,O_RDONLY);	
 	lseek(rHandle,wordStart<<1,SEEK_SET);
 	
-	wHandle = open((LPSTR)tempFilename,O_CREAT|O_RDWR|O_TRUNC);	
+	wHandle = tbOpen((LPSTR)tempFilename,O_CREAT|O_RDWR|O_TRUNC);	
 	ret = write(wHandle,(unsigned long)pHeader<<1,6);
 	
 	for(wordsRemaining=wordsNewSize;wordsRemaining > bigBufferSize;wordsRemaining -= bigBufferSize) {
@@ -514,8 +514,8 @@ int fileCopy(char * from, char * to) {
 	unsigned int loopCount;
 	
 	ret = 0;	
-	rHandle = open((LPSTR)from,O_RDONLY);
-	wHandle = open((LPSTR)to,O_CREAT|O_TRUNC|O_WRONLY);
+	rHandle = tbOpen((LPSTR)from,O_RDONLY);
+	wHandle = tbOpen((LPSTR)to,O_CREAT|O_TRUNC|O_WRONLY);
 //	*P_WatchDog_Ctrl &= ~0x4007; // clear bits 0-2 for 2 sec and bit 14 to select system reset
 //	*P_WatchDog_Ctrl |= 0x8000; // set bit 15 to enable watchdog
 
@@ -1046,7 +1046,7 @@ buildExchgOstats() {
 		}
 	}
 
-	myexchgfd = open((LPSTR)to, O_CREAT|O_RDWR|O_TRUNC);
+	myexchgfd = tbOpen((LPSTR)to, O_CREAT|O_RDWR|O_TRUNC);
 	if(myexchgfd < 0) {   // can't open exchange file
 		strcpy(strLog, "buildExchgOstats can't open ");
 		strcat(strLog, to);

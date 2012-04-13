@@ -153,7 +153,7 @@ int gotoMsec(unsigned long msec) {
 	return ret;
 }
 
-unsigned long setFileHeader(char *filePath, unsigned long frames) {
+/*unsigned long setFileHeader(char *filePath, unsigned long frames) {
 	//input: frames; return: bytes
 	unsigned long bytes;
 	char *header;
@@ -167,7 +167,7 @@ unsigned long setFileHeader(char *filePath, unsigned long frames) {
 	write(handle,(unsigned long)header<<1,4);
 	close(handle);
 	return bytes;
-}
+}*/
 
 void playActionSound(EnumAction action) {
 	switch (action) {

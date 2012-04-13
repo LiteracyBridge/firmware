@@ -67,7 +67,7 @@ static void getAudioFeedback(void) {
 			strcat(path,profiles.heapMessageLists[i]);
 			strcat(path,"/" FEEDBACK_CATEGORY ".txt");
 			logString(path,BUFFER);
-			handle = open((LPSTR)path,O_RDONLY);
+			handle = tbOpen((LPSTR)path,O_RDONLY);
 			if (handle == -1) {
 				strcpy(buffer,(char *)"could not access ");
 				strcat(buffer,path);	
@@ -385,7 +385,7 @@ buildMyStatsCSV() {
 	strcat(to, ".csv");
 	cp = strrchr(to, '/') + 1;
 
-	mystats = open((LPSTR)to, O_CREAT|O_RDWR|O_TRUNC);
+	mystats = tbOpen((LPSTR)to, O_CREAT|O_RDWR|O_TRUNC);
 	if(mystats < 0) {
 		return;
 	}
@@ -415,7 +415,7 @@ buildMyStatsCSV() {
 		strcpy(filename,STAT_DIR); 
 		strcat(filename,file_info.f_name);
 				
-		rHandle = open((LPSTR)filename,O_RDONLY);	
+		rHandle = tbOpen((LPSTR)filename,O_RDONLY);	
 		if(rHandle >= 0) {
 			retCopy = read(rHandle, (UINT32)&tmpstats << 1, sizeof(tmpstats) << 1);
 			close(rHandle);
@@ -494,7 +494,7 @@ getStats(void) {
 	cp1 = from + strlen(from);  // save this position	
 	strcat(from, SNCSV);	
 	
-	f = open((LPSTR)from, O_RDONLY); 
+	f = tbOpen((LPSTR)from, O_RDONLY); 
 	if(f < 0) {
 		return;
 	}
