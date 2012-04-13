@@ -13,6 +13,7 @@
 #include "./component/include/component_head.h"
 #include "./Application/TalkingBook/Include/talkingbook.h"
 #include "./Application/TalkingBook/Include/startup.h"
+#include "./Application/TalkingBook/Include/files.h"
 #include "./Application/TalkingBook/Include/device.h"
 #include "./Reprog/USB_Flash_reprog.h"
 
@@ -30,12 +31,13 @@ extern unsigned int MEM_TYPE;
 APP_IRAM char systemHeap [SYSTEM_HEAP_SIZE];
 APP_IRAM char *cursorSystemHeap = systemHeap;
 extern int statINIT;
-//unsigned int sav_Int_status1;
-//unsigned int sav_Int_status2;
+
+static void backfromRTC(void);
+static void fixRegs(void);
 
 // rtc alarm testing unsigned int rtc_pending;
 
-int main (unsigned int bootType) {
+int main (int bootType) {
 //	int wrk;
 //	wrk = bootType;
 // rtc alarm testing	rtc_pending = 0;
@@ -74,7 +76,7 @@ int main (unsigned int bootType) {
 	return 0;
 }
 
-void
+static void
 backfromRTC()
 {
 	char buf[64];
@@ -116,7 +118,7 @@ backfromRTC()
 		Fake_Keypress();	// initialize memory, fake a key press wakeup
 	}
 }
-void fixRegs() {
+static void fixRegs() {
 	*P_MINT_Ctrl = 0x8;
 	*P_Clock_Ctrl = 0x8618;		
 	
