@@ -22,7 +22,7 @@ struct newContent {
 	// LENGTH + 1 allows for LENGTH chars + '/0'
 	char newAudioCategory  [FILE_LENGTH+1];
 	char newAudioName [FILE_LENGTH+1];
-	char newAudioLanguage [LANG_CODE_LENGTH+1];
+	char newAudioLanguage [MAX_LANGUAGE_CODE_LENGTH+1];
 	int isNew;
 };
 
@@ -34,7 +34,6 @@ extern int setUSBHost(BOOL);
 static int processA18(struct f_info *, struct newContent *);
 static int processDir(char *, struct newContent *);
 //static int copyCWD(char *);
-static int updateCategory(char *, char *, char);
 static int newUpdateCategory(struct newContent *, int);
 static void processSystemFiles(void);
 static void processNewPackages(struct newContent *);
@@ -42,7 +41,7 @@ static void queueNewPackage(struct newContent *);
 static int checkRevisions(int, int);
 static int getMetaCat(char *, char *);
 
-char Lang[LANG_CODE_LENGTH] = {0};
+char Lang[MAX_LANGUAGE_CODE_LENGTH] = {0};
 char *MLp = (unsigned int *) 0;
 int  nMLp = 0;
 
@@ -286,7 +285,7 @@ processA18(struct f_info *fip, struct newContent *pNC) {
 		if (pkgSystem.idxLanguageCode)
 			strcpy(lang,&pkgSystem.strHeapStack[pkgSystem.idxLanguageCode]);
 		else 
-			strcpy(lang,currentSystem()); // use default language from languages.txt file when processing inbox before system start
+			strcpy(lang,currentProfileLanguage()); // TODO: use first language in profiles.txt file when processing inbox before system start
 	} 		
 	strcpy(pNC->newAudioCategory, category);
 	strcpy(pNC->newAudioLanguage,lang);
@@ -479,136 +478,103 @@ matchCategory(MLENTRY *mlp, MLENTRY *filecat) {
 static int 
 newUpdateCategory(struct newContent *pNC, int isDir) {
 	char buffer[80], tmpbuf[80], path[PATH_LENGTH], catwrk[20], *cp, *lang;
-	int ret;
+	int i, ret;
 	MLENTRY filecat, mlret;
 
 	lang = pNC->newAudioLanguage;
-	strcpy(path,LISTS_PATH);
-	strcat(path,lang);
-	strcat(path, "/");
-	strcat(path,LIST_MASTER);
-	strcat(path,".txt");
-
-	if(strcmp(lang, &Lang)) {
-		ret = loadLanglisttoMemory(path,  MLp, MAX_ML_ENTRIES);
-		nMLp = ret;
-	}
-
-	if (!strcmp((char *)FEEDBACK_CATEGORY,(char *)pNC->newAudioCategory))
-		// Feedback messages stay in the feedback category -- add the category if needed
-		addCategoryToActiveLists((char *)FEEDBACK_CATEGORY,lang);
-	else {
-		categoryStringtoLong(pNC->newAudioCategory, &filecat);
-		if (DEBUG_MODE) {
-			logString((char *)"Metadata category is:",BUFFER);
-			logString(pNC->newAudioCategory,ASAP);
-		}
-		mlret = matchCategory(MLp, &filecat);		
-		categoryLongtoString(&catwrk[0], &mlret);
-		strcpy(pNC->newAudioCategory, catwrk);
-		if (DEBUG_MODE) {
-			logString((char *)"Assigned list is:",BUFFER);
-			logString(pNC->newAudioCategory,ASAP);
-		}
-	}	
-//	cpyListPath(path,&catwrk[0]);
-	if (pNC->newAudioCategory[0] == SYS_MSG_CHAR)
-		strcpy(path,LANGUAGES_PATH);
-	else
+	if (DEBUG_MODE)
+		logString((char *)"newUpdateCategory",BUFFER);	
+	// rotate through all profiles and update categories with matching language
+	i = currentProfile(); 
+	do {
+		if (strcmp(lang,currentProfileLanguage()))
+				continue; // skip profile if profile language doesn't match content languge				
 		strcpy(path,LISTS_PATH);
-	strcat(path, lang);
-	strcat(path, "/");
+		strcat(path,currentProfileMessageList());
+		strcat(path, "/");
+		strcat(path,LIST_MASTER);
+		strcat(path,".txt");
+		if (DEBUG_MODE)
+			logString(path,ASAP);
+		if(strcmp(lang, &Lang)) {
+			ret = loadLanglisttoMemory(path,  MLp, MAX_ML_ENTRIES);
+			nMLp = ret;
+		}
 	
-	strcpy(buffer, path);
-	strcat(buffer, pNC->newAudioCategory);
-	strcat(buffer,".txt");
-
-/*	
-	if(!fileExists((LPSTR)buffer)) {  // if category does not exist, put file in OTHER - 0.txt
-		strcpy(buffer, path);
-		strcat(buffer,"0.txt");
-	}
-*/	
-    if(isDir) {
-		tmpbuf[0] = APP_PKG_CHAR;
-		strcpy(tmpbuf+1, pNC->newAudioName);
-	} else {
-		strcpy(tmpbuf,pNC->newAudioName);
-	}
-	if (DEBUG_MODE) {
-		logString(buffer, BUFFER);
-		logString(tmpbuf, BUFFER);
-	}
-// This checks if entry already exists and adds a new line only if it does not.
-	ret = findDeleteStringFromFile((char *)NULL, buffer, tmpbuf, 0);
+		if (!strcmp((char *)FEEDBACK_CATEGORY,(char *)pNC->newAudioCategory)) {
+			// Feedback messages stay in the feedback category -- add the category if needed
+			addCategoryToActiveLists((char *)FEEDBACK_CATEGORY,currentProfileMessageList());
+			if (DEBUG_MODE) {
+				logString((char *)"Assigned to feedback category: list "FEEDBACK_CATEGORY,ASAP);
+			}			
+		}
+		else {
+			categoryStringtoLong(pNC->newAudioCategory, &filecat);
+			if (DEBUG_MODE) {
+				logString((char *)"Metadata category is:",BUFFER);
+				logString(pNC->newAudioCategory,ASAP);
+			}
+			mlret = matchCategory(MLp, &filecat);		
+			categoryLongtoString(&catwrk[0], &mlret);
+			strcpy(pNC->newAudioCategory, catwrk);
+			if (DEBUG_MODE) {
+				logString((char *)"Assigned list is:",BUFFER);
+				logString(pNC->newAudioCategory,ASAP);
+			}
+		}	
+	//	cpyListPath(path,&catwrk[0]);
+		if (pNC->newAudioCategory[0] == SYS_MSG_CHAR)
+			strcpy(path,LANGUAGES_PATH);
+		else
+			strcpy(path,LISTS_PATH);
+		strcat(path, currentProfileMessageList());
+		strcat(path, "/");
 		
-//  append the basename to the proper .txt file in lists
-	if (ret == -1)
-		ret = insertStringInFile(buffer,tmpbuf,0);
-
-/*
-	// FOR TESTING ONLY: To test lots of writes to a list file
-	for(ret = 0;ret < MAX_VOLUME; ret++) {
-		tmpbuf[0]='0'+ret%65;
-		insertStringInFile(buffer,tmpbuf,0);	
-		setLED(LED_RED,FALSE);
-		wait(200);
-		setLED(LED_RED,TRUE);			
-	} 
-
-*/
-	// if categorized as other, ensure other is on the activeList
-	if((cp = strrchr(buffer, '/')) && (!strcmp(cp+1, OTHER_CATEGORY ".txt")))
-		addCategoryToActiveLists((char *)OTHER_CATEGORY,lang);
+		strcpy(buffer, path);
+		strcat(buffer, pNC->newAudioCategory);
+		strcat(buffer,".txt");
+	
+	/*	
+		if(!fileExists((LPSTR)buffer)) {  // if category does not exist, put file in OTHER - 0.txt
+			strcpy(buffer, path);
+			strcat(buffer,"0.txt");
+		}
+	*/	
+	    if(isDir) {
+			tmpbuf[0] = APP_PKG_CHAR;
+			strcpy(tmpbuf+1, pNC->newAudioName);
+		} else {
+			strcpy(tmpbuf,pNC->newAudioName);
+		}
+		if (DEBUG_MODE) {
+			logString(buffer, BUFFER);
+			logString(tmpbuf, BUFFER);
+		}
+	// This checks if entry already exists and adds a new line only if it does not.
+		ret = findDeleteStringFromFile((char *)NULL, buffer, tmpbuf, 0);
+			
+	//  append the basename to the proper .txt file in lists
+		if (ret == -1)
+			ret = insertStringInFile(buffer,tmpbuf,0);
+	
+	/*
+		// FOR TESTING ONLY: To test lots of writes to a list file
+		for(ret = 0;ret < MAX_VOLUME; ret++) {
+			tmpbuf[0]='0'+ret%65;
+			insertStringInFile(buffer,tmpbuf,0);	
+			setLED(LED_RED,FALSE);
+			wait(200);
+			setLED(LED_RED,TRUE);			
+		} 
+	
+	*/
+		// if categorized as other, ensure other is on the activeList
+		if((cp = strrchr(buffer, '/')) && (!strcmp(cp+1, OTHER_CATEGORY ".txt")))
+			addCategoryToActiveLists((char *)OTHER_CATEGORY,currentProfileMessageList());
+	} while (i != nextProfile());
 	return(ret);
 
 }
-
-static int 
-updateCategory(char *category, char *fnbase, char prefix) {
-	char buffer[80], tmpbuf[80], path[PATH_LENGTH];
-	int ret;
-	
-// be sure category is in master-list.txt
-	cpyListPath(path,LIST_MASTER);
-	strcpy(buffer,path);
-	strcat(buffer,(char *)LIST_MASTER);
-	strcat(buffer,(char *)".txt");
-	strcpy(tmpbuf,category);
-	// Only add category entry if doesn't already exist.
-	// Checking for existence without deleting and appending preserves category order.
-	ret = findDeleteStringFromFile((char *)NULL, buffer, tmpbuf, 0);
-	if (ret == -1) // not found in file
-		ret = appendStringToFile(buffer, tmpbuf); 
-
-// delete new file name or dir name from {category}.txt, 
-// then add it (only want it to appear once)	
-//   int findDeleteStringFromFile(char *path, char *filename, char* string, BOOL shouldDelete)
-	cpyListPath(path,category);
-	strcpy(buffer, path);
-	strcat(buffer, category);
-	strcat(buffer,".txt");
-	
-	if(!fileExists((LPSTR)buffer)) {  // if category.txt does not exist create it
-		ret = open((LPSTR)buffer,O_CREAT|O_RDWR);
-		close(ret);
-	}
-	
-	if(prefix) {
-		tmpbuf[0] = APP_PKG_CHAR;
-		strcpy(tmpbuf+1, fnbase);
-	} else {
-		strcpy(tmpbuf,fnbase);
-	}
-// This checks if entry already exists and adds a new line only if it does not.
-	ret = findDeleteStringFromFile((char *)NULL, buffer, tmpbuf, 0);
-		
-//  append the basename to the proper .txt file in lists
-	if (ret == -1)
-		ret = insertStringInFile(buffer,tmpbuf,0);
-	return ret;
-}
-
 
 static int 
 getMetaCat(char *filename, char *category)
@@ -622,7 +588,7 @@ getMetaCat(char *filename, char *category)
 	unsigned char buf[128];
 	int i, j;
 
-	fd = open((char *)filename, 0);
+	fd = tbOpen((LPSTR)filename, 0);
 	if(fd < 0) {
 		return(ret);
 	}

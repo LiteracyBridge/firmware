@@ -6,16 +6,11 @@
 
 #include "lists.h"
 
-#define PKG_NONE		0
-#define PKG_SYS			1
-#define PKG_APP			2
-#define PKG_MSG			3
-#define PKG_VARIABLE	4
-#define SYS_MSG			5
-
-#define APP_CUSTOM		0
-#define APP_QUIZ_PLAY   1
-#define APP_QUIZ_REC 	2
+#define MAX_PROFILES	10
+#define MAX_LANGUAGES 	5
+#define MAX_MESSAGE_LISTS	5
+#define MAX_LANGUAGE_CODE_LENGTH 12	// long enough to support current new language naming convention in wrap_translation()
+#define MAX_MESSAGE_LIST_CODE_LENGTH 8
 
 #define MAX_FILES		112
 #define MAX_BLOCKS		112
@@ -27,6 +22,17 @@
 #define PKG_STACK_SIZE	80   // only stores one item and is erased by next item stored (used for list item filenames)
 // PKG_STACK_SIZE is used so that list filenames can be relative to the heap without being accumulated and hogging memory
 
+#define PKG_NONE		0
+#define PKG_SYS			1
+#define PKG_APP			2
+#define PKG_MSG			3
+#define PKG_VARIABLE	4
+#define SYS_MSG			5
+
+#define APP_CUSTOM		0
+#define APP_QUIZ_PLAY   1
+#define APP_QUIZ_REC 	2
+
 typedef enum EnumEvent EnumEvent;
 typedef enum EnumAction EnumAction;
 typedef enum EnumBorderCrossing EnumBorderCrossing;
@@ -35,7 +41,7 @@ typedef struct CtnrBlock CtnrBlock;
 typedef struct CtnrPackage CtnrPackage;
 typedef struct Action Action;
 typedef struct Context Context;
-
+typedef struct ProfileData ProfileData;
 
 //WARNING: if the order of these enumerations change, there must also be a change to getEventEnumFromChar and getActionEnumFromChar (char *c)
 #define HELD_KEY		0x10
@@ -45,7 +51,7 @@ enum EnumEvent {
 	LEFT_HOLD = HELD_KEY, RIGHT_HOLD, UP_HOLD, DOWN_HOLD, SELECT_HOLD, HOME_HOLD, PLAY_HOLD, STAR_HOLD, PLUS_HOLD, MINUS_HOLD
 };
 enum EnumAction {NOP = 0, STOP, PAUSE, JUMP_BLOCK, RETURN, INSERT_SOUND, START_END_MARKER,			
-				PLAY_PAUSE, COPY, CLONE, COPY_LANGUAGE, RECORD_TITLE, RECORD_MSG, PACKAGE_RECORDING, RECORD_FEEDBACK, RECORD_TRANSLATION, TRIM,
+				PLAY_PAUSE, COPY, CLONE, COPY_PROFILE, RECORD_TITLE, RECORD_MSG, PACKAGE_RECORDING, RECORD_FEEDBACK, RECORD_TRANSLATION, TRIM,
 				TOGGLE_LOCK, POSITION_TO_TOP, SURVEY_TAKEN, SURVEY_APPLY, SURVEY_USELESS, FWD, BACK, JUMP_TIME, CALL_BLOCK, JUMP_PACKAGE, 
 				JUMP_LIST, TRANSLATED_LIST, NOT_TRANSLATED_LIST, TRANSLATE_DELETE_FINISH, 
 				TRANSLATE_NEW, TRANSLATE_OVERWRITE,DELETE, DELETE_MESSAGES, DELETE_TRANSLATION, WRAP_TRANSLATION,
@@ -202,6 +208,17 @@ struct Context {
     long packageStartTime;
 };
 
+struct ProfileData {
+	char heapLanguages[MAX_LANGUAGES][MAX_LANGUAGE_CODE_LENGTH + 1]; // max language code +1 for /0
+	char heapMessageLists[MAX_MESSAGE_LISTS][MAX_MESSAGE_LIST_CODE_LENGTH + 1]; // max message list code length +1 for /0
+	char *ptrProfileLanguages[MAX_PROFILES];
+	char *ptrProfileMessageLists[MAX_PROFILES];
+	int intTotalProfiles;
+	int intTotalLanguages;
+	int intTotalMessageLists;
+	int intCurrentProfile;
+};
+
 extern Context context;
 extern CtnrPackage pkgSystem, pkgUser; 
 
@@ -244,5 +261,13 @@ extern int replaceStack (char *, CtnrPackage *);
 extern CtnrFile *getTempFileFromName(char *, int); 
 extern void resetPackage(CtnrPackage *);
 extern void loadDefaultUserPackage(const char *);
+extern void logProfile(void);
+extern int initializeProfiles(void);
+extern int loadProfileNames(char *, ProfileData *);
+extern char *currentProfileMessageList(void);
+extern char *currentProfileLanguage(void);
+extern int currentProfile(void);
+extern int nextProfile(void);
+extern int prevProfile(void);	
 
 #endif

@@ -11,7 +11,6 @@
 #define OTHER_CATEGORY		"0"
 #define FAVORITES_CATEGORY	"0-2"
 #define FEEDBACK_CATEGORY	"9"
-#define TEMPLATE_LISTS_DIR	"copy-for-new-language"
 typedef struct ListItem ListItem;
 typedef struct TranslationList TranslationList;
 typedef enum EnumListType EnumListType;

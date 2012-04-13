@@ -5,6 +5,7 @@
 #include "Include/talkingbook.h"
 #include "Include/files.h"
 #include "Include/device.h"
+#include "Include/containers.h"
 #include "Include/parsing.h"
 #include "Include/macro.h"
 #include "Include/sys_counters.h"
@@ -15,6 +16,7 @@
 #include "Include/filestats.h"
 #include "Include/d2d_copy.h"
 #include "Include/startup.h"
+#include "Include/mainLoop.h"
 #include <ctype.h>
 
 extern int testPCB(void);
@@ -24,7 +26,6 @@ extern INT16 SD_Initial(void);
 
 static char * addTextToSystemHeap (char *);
 static int loadConfigFile (void);
-//static void loadSystemNames(void);
 static void flagConfigFile(void);
 static int resetConfigFile(void);
 static int restore_config_bin();
@@ -37,7 +38,7 @@ APP_IRAM int ADMIN_COMBO_KEYS;
 APP_IRAM int LED_GREEN, LED_RED, LED_ALL;
 APP_IRAM int MAX_SPEED, NORMAL_SPEED, SPEED_INCREMENT;
 APP_IRAM int NORMAL_VOLUME, MAX_VOLUME, VOLUME_INCREMENT;
-APP_IRAM char *SYSTEM_ORDER_FILE, *SYSTEM_PATH, *LANGUAGES_PATH, *UI_SUBDIR, *TOPICS_SUBDIR, *USER_PATH, *LISTS_PATH;
+APP_IRAM char *PROFILE_ORDER_FILE, *SYSTEM_PATH, *LANGUAGES_PATH, *UI_SUBDIR, *TOPICS_SUBDIR, *USER_PATH, *LISTS_PATH;
 APP_IRAM char *INBOX_PATH, *OUTBOX_PATH,*NEW_PKG_SUBDIR, *SYS_UPDATE_SUBDIR;
 APP_IRAM int MAX_PWR_CYCLES_IN_LOG;
 APP_IRAM char *SYSTEM_VARIABLE_FILE, *LOG_FILE;
@@ -71,10 +72,6 @@ APP_IRAM unsigned int V_FAST_VOLTAGE_DROP_TIME_SEC, V_VOLTAGE_DROP_CHECK_INTERVA
 APP_IRAM unsigned int vCur_1;
 APP_IRAM int vThresh_1;
 APP_IRAM unsigned int MEM_TYPE;   // sst or mx
-
-APP_IRAM static char *pSystemNames[MAX_SYSTEMS];
-APP_IRAM static int intCurrentSystem;
-APP_IRAM static int totalSystems;
 
 void setDefaults(void) {
 	// This function sets variables that are usually set in config file, 
@@ -235,13 +232,13 @@ void startUp(unsigned int bootType) {
 		SystemIntoUDisk(1);	
 		SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
 		loadConfigFile();
-		loadSystemNames(); 
+		initializeProfiles(); 
 		processInbox();
 		resetSystem();
 	} else if (key == KEY_PLUS) {
 		// copy outbox files to connecting device, get stats and audio feedback
 		loadConfigFile();
-		loadSystemNames(); 
+		initializeProfiles(); 
 		pushContentGetFeedback();
 		resetSystem();
 	}	
@@ -281,7 +278,7 @@ void startUp(unsigned int bootType) {
 		disaster_config_strings();
 	}
 
-	if (loadSystemNames()) { 
+	if (initializeProfiles()) { 
 		processInbox();
 	} else
 		testPCB();
@@ -350,7 +347,7 @@ void startUp(unsigned int bootType) {
 		}
 	}
 	SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
-	loadPackage(PKG_SYS,currentSystem());
+	loadPackage(PKG_SYS,currentProfileLanguage());
 
 	setNextAlarm();	// be sure at least midnight alarm is set
 	
@@ -468,7 +465,7 @@ int loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"NORMAL_VOLUME")) NORMAL_VOLUME=strToInt(value);
 				else if (!strcmp(name,(char *)"SPEED_INCREMENT")) SPEED_INCREMENT=strToInt(value);
 				else if (!strcmp(name,(char *)"VOLUME_INCREMENT")) VOLUME_INCREMENT=strToInt(value);
-				else if (!strcmp(name,(char *)"SYSTEM_ORDER_FILE")) SYSTEM_ORDER_FILE=addTextToSystemHeap(value);
+				else if (!strcmp(name,(char *)"PROFILE_ORDER_FILE")) PROFILE_ORDER_FILE=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"SYSTEM_PATH")) SYSTEM_PATH=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"LANGUAGES_PATH")) LANGUAGES_PATH=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"UI_SUBDIR")) UI_SUBDIR=addTextToSystemHeap(value);
@@ -598,56 +595,6 @@ unsigned int GetMemManufacturer()
 
 }
 
-
-extern int loadSystemNames() {
-	int handle, ret = 0;
-	char *cursorRead;
-	char systemOrderFile[PATH_LENGTH];
-	char buffer[READ_LENGTH+1];
-	
-	strcpy(systemOrderFile,LANGUAGES_PATH);
-	strcat(systemOrderFile,SYSTEM_ORDER_FILE);	
-	strcat(systemOrderFile,".txt"); //todo: move to config file	
-	handle = tbOpen((LPSTR)systemOrderFile,O_RDONLY);
-	if (handle == -1) {
-		return(ret);
-//		logException(33,systemOrderFile,USB_MODE);
-	}
-	getLine(-1,0);  // reset in case at end from prior use
-	while ((cursorRead = getLine(handle,buffer)) && (intCurrentSystem < MAX_SYSTEMS))	
-		pSystemNames[intCurrentSystem++] = addTextToSystemHeap(cursorRead);
-	totalSystems = intCurrentSystem;
-	intCurrentSystem = 0;
-	if(totalSystems > 0) ret = 1;  // at least one language found
-	close(handle);
-	return(ret);
-}
-
-extern char *currentSystem() {
-	char * ret;
-	
-	ret = pSystemNames[intCurrentSystem];
-	return ret;
-}
-
-char *nextSystem() {
-	char * ret;
-	
-	if (++intCurrentSystem == totalSystems)
-		intCurrentSystem = 0;
-	ret = pSystemNames[intCurrentSystem];
-	return ret;
-}
-
-char *prevSystem() {
-	char * ret;
-	
-	if (--intCurrentSystem == -1)
-		intCurrentSystem = totalSystems - 1;
-	ret = pSystemNames[intCurrentSystem];
-	return ret;
-}
-
 void cleanUpOldRevs() {
 	int ret;
 	struct f_info file_info;
@@ -699,7 +646,7 @@ int write_config_bin () {
 		SAV_CONFIG_INT (NORMAL_VOLUME);
 		SAV_CONFIG_INT (SPEED_INCREMENT);
 		SAV_CONFIG_INT (VOLUME_INCREMENT);		
-		SAV_CONFIG_STRING (SYSTEM_ORDER_FILE);
+		SAV_CONFIG_STRING (PROFILE_ORDER_FILE);
 		SAV_CONFIG_STRING (SYSTEM_PATH);
 		SAV_CONFIG_STRING (LANGUAGES_PATH);
 		SAV_CONFIG_STRING (UI_SUBDIR);
@@ -890,7 +837,7 @@ static int restore_config_bin () {
 #define SET_CONFIG_STRING(str) if(cfg_string_buf[cfg.offset_ ## str]) \
 	str = addTextToSystemHeap(cfg_string_buf + cfg.offset_ ## str)
 				
-		SET_CONFIG_STRING(SYSTEM_ORDER_FILE);
+		SET_CONFIG_STRING(PROFILE_ORDER_FILE);
 		SET_CONFIG_STRING(SYSTEM_PATH);
 		SET_CONFIG_STRING(LANGUAGES_PATH);
 		SET_CONFIG_STRING(UI_SUBDIR);
@@ -922,7 +869,7 @@ static int restore_config_bin () {
 }
 
 static int disaster_config_strings() {
-		SYSTEM_ORDER_FILE     = addTextToSystemHeap(DEFAULT_SYSTEM_ORDER_FILE);
+		PROFILE_ORDER_FILE    = addTextToSystemHeap(DEFAULT_PROFILE_ORDER_FILE);
 		SYSTEM_PATH           = addTextToSystemHeap(DEFAULT_SYSTEM_PATH);
 		LANGUAGES_PATH        = addTextToSystemHeap(DEFAULT_LANGUAGES_PATH);
 		UI_SUBDIR             = addTextToSystemHeap(DEFAULT_UI_SUBDIR);
@@ -946,7 +893,7 @@ static int disaster_config_strings() {
 
 #define FIXNULL(string) if(string == 0) string = addTextToSystemHeap(DEFAULT_ ## string)
 static void fixnull_config_strings() {
-		FIXNULL(SYSTEM_ORDER_FILE);
+		FIXNULL(PROFILE_ORDER_FILE);
 		FIXNULL(SYSTEM_PATH);
 		FIXNULL(LANGUAGES_PATH);
 		FIXNULL(UI_SUBDIR);
@@ -1047,7 +994,7 @@ chkconfig_debug(CONFIG_BIN *cfg, int handle)
 #define CHKSTRING(str) if(cfg_string_buf[cfg->offset_ ## str]) \
 	if(strcmp(str, cfg_string_buf + cfg->offset_ ## str)) err++
 	
-	CHKSTRING(SYSTEM_ORDER_FILE);
+	CHKSTRING(PROFILE_ORDER_FILE);
 	CHKSTRING(SYSTEM_PATH);
 	CHKSTRING(LANGUAGES_PATH);
 	CHKSTRING(UI_SUBDIR);

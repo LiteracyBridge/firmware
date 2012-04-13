@@ -28,36 +28,27 @@ static int copyfilesFiltered(char *fromdir, char *todir);
 static void getStats(void);
 
 static void getAudioFeedback(void) {
-	char languages[MAX_LANGUAGES][MAX_LANGUAGE_LENGTH];
+	ProfileData profiles;
 	char path[PATH_LENGTH];
 	char pathAudioFile[PATH_LENGTH];	
 	char buffer[READ_LENGTH+1];
 	int i, j, linesRead, gotFeedback, ret, handle;
 	char *cursor, *markAudioFile;
 
-	longToDecimalString((long)sizeof(buffer),buffer,5);
-	logString(buffer,ASAP);
 	if (DEBUG_MODE)
 		logString((char *)"getting other device's audio feedback",ASAP);
-	strcpy(buffer,LANGUAGES_PATH);
-	buffer[0] = 'b';
-	strcat(buffer,SYSTEM_ORDER_FILE);
-	strcat(buffer,".txt");
-
-	handle = open((LPSTR)buffer,O_RDONLY);
-	if (handle == -1) {
-		logString((char *)"no language file",BUFFER);
-		logString(buffer,ASAP);
+	strcpy(path,SYSTEM_PATH);
+	path[0] = 'b';
+	strcat(path,PROFILE_ORDER_FILE);
+	strcat(path,".txt");
+	
+	ret = loadProfileNames(path,&profiles);
+	if (!ret) {
+		logString((char *)"no profiles found",BUFFER);
+		logString(path,ASAP);
 		return;
-	}
-	getLine(-1,0);  // reset in case at end from prior use
-	i = 0;
-	while(i < MAX_LANGUAGES && (cursor = getLine(handle,buffer))) {
-		LBstrncpy(languages[i],cursor,MAX_LANGUAGE_LENGTH);	
-		logString(languages[i],BUFFER);
-		i++;
-	}
-	close(handle);
+	} else
+		i = profiles.intTotalMessageLists;
 
 	strcpy(pathAudioFile,USER_PATH);
 	pathAudioFile[0] = 'b';
@@ -73,7 +64,7 @@ static void getAudioFeedback(void) {
 		do {			
 			strcpy(path,LISTS_PATH);
 			path[0] = 'b';
-			strcat(path,languages[i]);
+			strcat(path,profiles.heapMessageLists[i]);
 			strcat(path,"/" FEEDBACK_CATEGORY ".txt");
 			logString(path,BUFFER);
 			handle = open((LPSTR)path,O_RDONLY);
@@ -107,11 +98,11 @@ static void getAudioFeedback(void) {
 		} while (1);
 		if (gotFeedback) {
 			if (DEBUG_MODE)
-				logString((char *)"ensuring 'feedback' is added to the other device's list for this language",ASAP);
-			// If there's at least one feedback msg for this language, 
-			// ensure the feedback category is added to _activeLists.txt for this device, for this language.
+				logString((char *)"ensuring 'feedback' is added to the other device's list for this profile",ASAP);
+			// If there's at least one feedback msg for this profile, 
+			// ensure the feedback category is added to _activeLists.txt for this device, for this profile.
 			strcpy(path,LISTS_PATH);
-			strcat(path, languages[i]);
+			strcat(path,profiles.heapMessageLists[i]);
 			strcat(path, "/");
 			strcat(path,(char *)LIST_MASTER);
 			strcat(path,(char *)".txt");
@@ -613,34 +604,50 @@ void buildCSVline(char *to, char *filename, struct ondisk_filestats *tmpstats)
 	zstrout = longToDecimalStringZ((long) tmpstats->stat_num_useless, strout, 6);
 	strcat(to, zstrout);			
 }
+
 int
-copyLanguage(char *language) {
+copyProfile(void) {
 	char from[PATH_LENGTH], to[PATH_LENGTH];
 	int ret;
 	
-	cpyTopicPath(from);
+	// copy language 
+	strcpy(from,LANGUAGES_PATH);
+	strcat(from,currentProfileLanguage()); // just language portion
+	strcat(from,"/");	
 	strcpy(to,from);
 	to[0] = 'b';
 	ret = cloneDir(from,to);
-	
-	//don't add language to languages.txt if there was an error in cloneDir (or if it's already listed)	
-	if (ret >= 0) { 
-		strcpy(to,LANGUAGES_PATH);
-		to[0] = 'b';
-		strcat(to,SYSTEM_ORDER_FILE);
-		strcat(to,".txt");	
-		strcpy(from,language);
-		ret = appendStringToFile(to,from);
-	
-		//TODO: move this to openList() if the directory isn't there the first time
-		strcpy(from,LISTS_PATH);
-		from[0] = 'b';
-		strcat(from,TEMPLATE_LISTS_DIR);
-		strcpy(to,LISTS_PATH);
-		to[0] = 'b';
-		strcat(to,language);
-		ret += cloneDir(from,to);
+
+	// create new message list folder and copy _activeLists file
+	strcpy(from,LISTS_PATH);
+	strcat(from,currentProfileMessageList()); // just message list portion
+	strcat(from,"/");	
+	strcpy(to,from);
+	to[0] = 'b';
+	mkdir((LPSTR)to);
+	if (DEBUG_MODE) 
+		logString((char *)"copy activelist",BUFFER);
+	strcat(from,LIST_MASTER);
+	strcat(from,(char *)".txt");
+	strcpy(to,from);
+	to[0] = 'b';
+	if (DEBUG_MODE) {
+		logString(from,BUFFER);
+		logString(to,ASAP);
 	}
+	ret = _copy((LPSTR)from, (LPSTR)to);
+	
+		strcpy(to,SYSTEM_PATH);
+		to[0] = 'b';
+		strcat(to,PROFILE_ORDER_FILE);
+		strcat(to,".txt");	
+		strcpy(from,currentProfileLanguage());
+		strcat(from,",");
+		strcat(from,currentProfileMessageList());
+		ret = findDeleteStringFromFile((char *)NULL, to, from, 0);
+		if (ret == -1)
+			ret = appendStringToFile(to,from);		
+
 	return ret;
 }
 

@@ -567,10 +567,14 @@ void mainLoop (void) {
 						loadPackage(context.queuedPackageType, NULL);
 						break;
 					case PREV_SYSTEM:
-						loadPackage(context.queuedPackageType,prevSystem());
+						prevProfile();
+						logProfile();
+						loadPackage(context.queuedPackageType,currentProfileLanguage());
 						break;
 					case NEXT_SYSTEM:
-						loadPackage(context.queuedPackageType,nextSystem());
+						nextProfile();
+						logProfile();
+						loadPackage(context.queuedPackageType,currentProfileLanguage());
 						break;
 				}
 			}
@@ -701,27 +705,30 @@ static void wrapTranslation() {
 		dirCopy(filepath,tempPath,0);
 		strcat(tempPath,(char *)"/" PKG_CONTROL_FILENAME_BIN);
 		unlink((LPSTR)tempPath);
-		
+
+// 	New device profiles no longer requires a new message list for each language. Just use current language's message list.		
 		//Copy over messages/lists
-		strcpy(filepath,LISTS_PATH);
-		strcat(filepath,pkgSystem.strHeapStack + pkgSystem.idxName);
-		strcat(filepath,"/");
+//		strcpy(filepath,LISTS_PATH);
+//		strcat(filepath,pkgSystem.strHeapStack + pkgSystem.idxName);
+//		strcat(filepath,"/");
 		
-		strcpy(tempPath,LISTS_PATH);
-		strcat(tempPath,getDeviceSN(0));
+//		strcpy(tempPath,LISTS_PATH);
+		strcpy(tempPath,getDeviceSN(0));
 		strcat(tempPath,"_");
 		len = strlen(tempPath);
 		longToDecimalString(i,tempPath+len,2);	
+		strcat(tempPath,",");	// profile entry is {language}","{msg list}
+		strcat(tempPath,currentProfileMessageList());
+//		dirCopy(filepath,tempPath,0);
 		
-		dirCopy(filepath,tempPath,0);
-		
-		//Append string to system names file
-		strcpy(filepath,LANGUAGES_PATH);
-		strcat(filepath,SYSTEM_ORDER_FILE);
+		//Append string to profiles list
+		strcpy(filepath,SYSTEM_PATH);
+		strcat(filepath,PROFILE_ORDER_FILE);
 		strcat(filepath,".txt");
-		appendStringToFile(filepath, tempPath + strlen(LISTS_PATH));
+
+		appendStringToFile(filepath, tempPath);
 	
-		loadSystemNames();
+		initializeProfiles();
 	}
 	else {   // update only
  		//Get destination folder then temp folder paths
@@ -1158,10 +1165,6 @@ static void takeAction (Action *action, EnumAction actionCode) {
 					    strcpy(filename,getPreviousList(list));
 						break;
 				}
-				if (DEBUG_MODE) {
-					logString((char *)"new list item:",BUFFER);
-					logString(filename,ASAP);
-				}
 				if (!filename[0]) { 
 					// empty list
 					insertSound(&pkgSystem.files[EMPTY_LIST_FILE_IDX],NULL,FALSE);
@@ -1195,6 +1198,11 @@ static void takeAction (Action *action, EnumAction actionCode) {
 						}
 						context.queuedPackageNameIndex = destination;
 					} else { // list->listType != LIST_OF_PACKAGES
+						if (DEBUG_MODE) {
+							strcpy(tempBuffer,(char *)"Category: ");
+							strcat(tempBuffer,filename);
+							logString(tempBuffer,ASAP);
+						}
 						// play sound of subject
 						newFile = getTempFileFromName(filename,0);
 						if (LONG_LIST_NAMES) {
@@ -1252,13 +1260,13 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			checkInactivity(TRUE); // stop from sleeping after long time out of the mainLoop
 			break;
 
-		case COPY_LANGUAGE:
+		case COPY_PROFILE:
 			stop();
 			if (PRE_COPY_FILE_IDX)
 				insertSound(&pkgSystem.files[PRE_COPY_FILE_IDX],NULL,TRUE);  
 			ret = setUSBHost(TRUE);
 			if (ret == 0) {
-				ret = copyLanguage(pkgSystem.strHeapStack + pkgSystem.idxName);
+				ret = copyProfile();
 				setUSBHost(FALSE);
 				if (POST_COPY_FILE_IDX) 
 					insertSound(&pkgSystem.files[POST_COPY_FILE_IDX],NULL,TRUE); 
@@ -1429,13 +1437,15 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			if (destination == -1) {
 				// move LANGUAGE to top position
 				//Append string to system names file
-				cursor = pkgSystem.strHeapStack + pkgSystem.idxName;
-				strcpy(filepath,LANGUAGES_PATH);
+				strcpy(tempBuffer,currentProfileLanguage());
+				strcat(tempBuffer,",");
+				strcat(tempBuffer,currentProfileMessageList());
+				strcpy(filepath,SYSTEM_PATH);
 				cursor2 = filepath + strlen(filepath);
-				strcat(filepath,SYSTEM_ORDER_FILE);
+				strcat(filepath,PROFILE_ORDER_FILE);
 				strcat(filepath,".txt");
-				findDeleteStringFromFile(LANGUAGES_PATH,cursor2,cursor,TRUE);
-				insertStringInFile(filepath,cursor,0);
+				findDeleteStringFromFile(SYSTEM_PATH,cursor2,tempBuffer,TRUE);
+				insertStringInFile(filepath,tempBuffer,0);
 				resetSystem();					
 			} else { 
 				tempList = &context.package->lists[destination];

@@ -59,7 +59,7 @@ void logException(unsigned int errorCode, const char * pStrError, int takeAction
 
 		// delete compiled version of current control file to force recompilation
 		strcpy(filePath,LANGUAGES_PATH);
-		strcat(filePath,currentSystem());
+		strcat(filePath,currentProfileLanguage());
 		strcat(filePath,"/");
 		strcat(filePath,UI_SUBDIR);
 		strcat(filePath,PKG_CONTROL_FILENAME_BIN);

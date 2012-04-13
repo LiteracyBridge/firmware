@@ -125,7 +125,7 @@ static int getActionEnumFromChar (char *c) {
 	else if (ret == COPY) {
 		if (*(c+1) == 'd')  //clone
 			ret += 1;
-		if (*(c+1) == 'l')  //COPY_LANGUAGE
+		if (*(c+1) == 'l')  //COPY_PROFILE
 			ret += 2;
 	}
 	else if (ret == SURVEY_TAKEN) {
@@ -385,7 +385,7 @@ static BOOL parseCreateAction (char *line, Action *action, int *actionCount, cha
 					action[*actionCount].aux = index; 		
 			}	
 		}
-		if (actionCode == JUMP_BLOCK || actionCode == CALL_BLOCK || actionCode == CLONE || actionCode == COPY_LANGUAGE ||
+		if (actionCode == JUMP_BLOCK || actionCode == CALL_BLOCK || actionCode == CLONE || actionCode == COPY_PROFILE ||
 			actionCode == RECORD_TITLE || actionCode == RECORD_MSG || actionCode == PACKAGE_RECORDING || 
 			actionCode == USB_DEVICE_ON || actionCode == USB_HOST_ON) {
 			if (actionCode == RECORD_TITLE || actionCode == RECORD_MSG) {

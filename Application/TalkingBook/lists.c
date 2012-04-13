@@ -15,16 +15,19 @@ extern void refuse_lowvoltage(int);
 static int openList(ListItem *, char *);
 
 void catLangDir(char * strOut) {
-	strcat(strOut,pkgSystem.strHeapStack + pkgSystem.idxName);
+	strcat(strOut,currentProfileLanguage());
 	strcat(strOut,"/");	
 }
 
 void cpyListPath(char *strOut, char *strListName) {
-	if (*strListName == SYS_MSG_CHAR)
+	if (*strListName == SYS_MSG_CHAR) {
 		strcpy(strOut,LANGUAGES_PATH);
-	else
+		catLangDir(strOut);	
+	} else {
 		strcpy(strOut,LISTS_PATH);
-	catLangDir(strOut);	
+		strcat(strOut,currentProfileMessageList());
+		strcat(strOut,"/");	
+	}
 }
 
 void cpyTopicPath(char * strOut) {
@@ -398,15 +401,15 @@ int insertIntoList(ListItem *list, long posInsert, char * string) {
 }
 */
 
-int addCategoryToActiveLists(char * strCategoryCode, char * strLanguage) {
+int addCategoryToActiveLists(char * strCategoryCode, char * strMessageList) {
 	char filepath[PATH_LENGTH];
 	char tempCategoryCode[LIST_ITEM_LENGTH];
 	int ret;
 	
 	// be sure category is in master-list.txt
-	if (strLanguage) {
+	if (strMessageList) {
 		strcpy(filepath,LISTS_PATH);
-		strcat(filepath,strLanguage);
+		strcat(filepath,strMessageList);
 		strcat(filepath,"/");
 	} else 
 		cpyListPath(filepath,LIST_MASTER);

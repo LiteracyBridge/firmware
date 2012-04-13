@@ -4,12 +4,14 @@
 #include "Include/talkingbook.h"
 #include "Include/parsing.h"
 #include "Include/containers.h"
+#include "Include/files.h"
 #include ".\Component\Include\FS\vfs.h"
 #include <ctype.h>
 
 static const int REWIND[] = {0,500,1000,1500,2000,3000,5000,10000};
 APP_IRAM Context context;
 APP_IRAM CtnrPackage pkgSystem, pkgUser;
+APP_IRAM static ProfileData profiles; 
 
 typedef struct StackFrame StackFrame;
 struct StackFrame {
@@ -252,6 +254,7 @@ CtnrBlock* getEndBlockFromFile(CtnrFile *file) {
 
 CtnrPackage* getPackageFromFile (CtnrFile *file) {
 	CtnrPackage *ret;
+	int i;
 	char path[PATH_LENGTH];
 	
 	if (file >= pkgSystem.files && file < (pkgSystem.files + pkgSystem.countFiles))
@@ -267,8 +270,8 @@ CtnrPackage* getPackageFromFile (CtnrFile *file) {
 		strcpy(path,LANGUAGES_PATH);
 		catLangDir(path);
 		strcat(path,PKG_CONTROL_FILENAME_BIN);
-		ret = unlink((LPSTR)path);	
-		if (ret)
+		i = unlink((LPSTR)path);	
+		if (i)
 			strcat(path,(char *)": tried to delete this binary control");
 		else
 			strcpy(path,(char *)"deleted binary control to force re-parse");
@@ -631,3 +634,128 @@ void loadDefaultUserPackage(const char *strPkgName) {
 	}
 	pkgUser.idxName = pkgUser.files[0].idxFilename;
 }
+
+extern void logProfile() {
+	char strLog[40];
+	
+	strcpy(strLog,(char *)"PROFILE: ");
+	strcat(strLog,currentProfileLanguage());
+	strcat(strLog,",");
+	strcat(strLog,currentProfileMessageList());
+	logString(strLog,BUFFER);	
+}
+
+extern int initializeProfiles() {
+	char profileOrderFile[PATH_LENGTH];
+	int ret;
+	
+	strcpy(profileOrderFile,SYSTEM_PATH);
+	strcat(profileOrderFile,PROFILE_ORDER_FILE);	
+	strcat(profileOrderFile,".txt"); //todo: move to config file	
+	ret = loadProfileNames(profileOrderFile,&profiles);
+	logProfile();
+	return ret;
+}
+
+extern int loadProfileNames(char *path, ProfileData *pd) {
+	// This function will load any profile file into any ProfileData struct.
+	// It can be used during startup (see initalizeProfiles()) or when inspecting another device's profiles.
+
+	int ret, i, handle;
+	char *ptrLanguage, *ptrMessageList;
+	char buffer[READ_LENGTH+1];
+	char strLog[80];
+	
+	handle = tbOpen((LPSTR)path,O_RDONLY);
+	if (handle == -1)
+		logException(33,path,USB_MODE);
+	pd->intTotalProfiles = pd->intTotalLanguages = pd->intTotalMessageLists = 0;
+	getLine(-1,0);  // reset in case at end from prior use
+	while (nextNameValuePair(handle,buffer,',',&ptrLanguage,&ptrMessageList))	{
+		if (strlen(ptrLanguage) > MAX_LANGUAGE_CODE_LENGTH) {
+			strcpy(strLog,(char *)"Language code too long:");
+			strcat(strLog,ptrLanguage);
+			logException(33,strLog,USB_MODE);			
+		} else if (!ptrMessageList) {
+			strcpy(strLog,(char *)"No comma in profile entry. Language:");
+			strcat(strLog,ptrLanguage);
+			logException(33,strLog,USB_MODE);			
+		} else if (strlen(ptrMessageList) > MAX_MESSAGE_LIST_CODE_LENGTH) {
+			strcpy(strLog,(char *)"MessageList code too long:");
+			strcat(strLog,ptrMessageList);
+			logException(33,strLog,USB_MODE);			
+		} else if (pd->intTotalProfiles == MAX_PROFILES) {
+			strcpy(strLog,(char *)"Too many profiles:  >");
+			longToDecimalString((long)MAX_PROFILES,strLog+strlen(strLog),2);
+			logException(33,strLog,USB_MODE);
+		}	
+
+		//check that language is new
+		i = pd->intTotalLanguages;
+		while (--i >=0) {
+			if (!strcmp(ptrLanguage,pd->heapLanguages[i]))
+				break; // language already exists
+		}
+		if (i < 0) 	{ // no matching language; add as new entry 
+			i = pd->intTotalLanguages++; // assign to latest language and increment total
+			if (pd->intTotalLanguages > MAX_LANGUAGES) {
+				logException(33,ptrLanguage,USB_MODE);
+			}	
+			LBstrncpy(pd->heapLanguages[i],ptrLanguage,MAX_LANGUAGE_CODE_LENGTH);
+		}
+		pd->ptrProfileLanguages[pd->intTotalProfiles] = pd->heapLanguages[i];
+
+		//check that messsage list is new
+		i = pd->intTotalMessageLists;
+		while (--i >=0)
+			if (!strcmp(ptrMessageList,pd->heapMessageLists[i]))
+				break; // language already exists
+		if (i < 0) {	// no matching message list; add as new entry 
+			i = pd->intTotalMessageLists++; // assign to latest message list and increment total
+			if (pd->intTotalMessageLists > MAX_MESSAGE_LISTS) {
+				logException(33,ptrMessageList,USB_MODE);
+			}	
+			LBstrncpy(pd->heapMessageLists[i],ptrMessageList,MAX_MESSAGE_LIST_CODE_LENGTH);
+		}
+		pd->ptrProfileMessageLists[pd->intTotalProfiles] = pd->heapMessageLists[i];
+
+		pd->intTotalProfiles++;
+	} 
+	close(handle);
+	
+	ret = pd->intTotalProfiles?1:0;  // at least one language found
+	pd->intCurrentProfile = 0;
+
+	return(ret);
+}
+
+extern char *currentProfileMessageList() {
+	char * ret;
+	
+	ret = profiles.ptrProfileMessageLists[profiles.intCurrentProfile];
+	return ret;
+}
+
+extern char *currentProfileLanguage() {
+	char * ret;
+	
+	ret = profiles.ptrProfileLanguages[profiles.intCurrentProfile];
+	return ret;
+}
+
+extern int currentProfile() {
+	return profiles.intCurrentProfile;
+}
+
+extern int nextProfile() {
+	if (++profiles.intCurrentProfile == profiles.intTotalProfiles)
+		profiles.intCurrentProfile = 0;
+	return profiles.intCurrentProfile;
+}
+
+extern int prevProfile() {	
+	if (--profiles.intCurrentProfile == -1)
+		profiles.intCurrentProfile = profiles.intTotalProfiles - 1;
+	return profiles.intCurrentProfile;
+}
+

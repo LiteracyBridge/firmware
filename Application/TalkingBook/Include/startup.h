@@ -4,8 +4,7 @@
 #ifndef	__STARTUP_h__
 #define	__STARTUP_h__
 
-#define MAX_SYSTEMS			20
-#define SYSTEM_HEAP_SIZE 300	//config file values
+#define SYSTEM_HEAP_SIZE 256	//config file values
 #define CONFIG_FILE		"a://system/config.txt"
 #define CONFIG_BIN_FILE     "a://system/config.bin"
 #define ALT_CONFIG_FILE		"a://config.txt"
@@ -20,12 +19,8 @@
 
 extern void startUp(unsigned int);
 extern void setDefaults(void);
-extern char *nextSystem(void);
-extern char *prevSystem(void); 
-extern char *currentSystem(void);
 extern unsigned int GetMemManufacturer(void);
 extern void cleanUpOldRevs(void);
-extern int loadSystemNames(void);
 
 #ifndef OLD_MEMBRANE_SW 
 
@@ -130,7 +125,7 @@ extern int loadSystemNames(void);
 #define DEFAULT_LONG_LIST_NAMES 1
 
 
-#define CONFIG_BUFLEN strlen (SYSTEM_ORDER_FILE) + 1 + \
+#define CONFIG_BUFLEN strlen (PROFILE_ORDER_FILE) + 1 + \
 				strlen (SYSTEM_PATH) + 1 + \
 				strlen (LANGUAGES_PATH) + 1 + \
 				strlen (UI_SUBDIR) + 1 + \
@@ -170,7 +165,7 @@ typedef struct config_bin {
 				int NORMAL_VOLUME;
 				int SPEED_INCREMENT;
 				int VOLUME_INCREMENT;
-				int offset_SYSTEM_ORDER_FILE;
+				int offset_PROFILE_ORDER_FILE;
 				int offset_SYSTEM_PATH;
 				int offset_LANGUAGES_PATH;
 				int offset_UI_SUBDIR;
@@ -236,7 +231,7 @@ typedef struct config_bin {
 				int len_string_buf;
 } CONFIG_BIN;
 
-#define DEFAULT_SYSTEM_ORDER_FILE "languages"
+#define DEFAULT_PROFILE_ORDER_FILE "profiles"
 #define DEFAULT_SYSTEM_PATH       "a:/system/"
 #define DEFAULT_LANGUAGES_PATH    "a:/languages/"
 #define DEFAULT_UI_SUBDIR         ""
