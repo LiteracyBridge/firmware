@@ -759,3 +759,6 @@ extern int prevProfile() {
 	return profiles.intCurrentProfile;
 }
 
+extern ProfileData *getProfiles(void) {
+	return &profiles;	
+}

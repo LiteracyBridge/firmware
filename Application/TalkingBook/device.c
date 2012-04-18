@@ -11,6 +11,8 @@
 #include "Include/startup.h"
 #include "Include/sys_counters.h"
 #include "Include/SD_reprog.h"
+#include "Include/d2d_copy.h"
+#include "Include/pkg_ops.h"
 
 extern int write_config_bin();
 extern void _SystemOnOff(void);
@@ -453,8 +455,12 @@ void setOperationalMode(int newmode) {
     // when leaving wait mode, next instruction is executed, so we return here
     return;
   } else {
+		// give visual and aural feedback to 
+		playBip();
+  		setLED(LED_ALL,TRUE);
   		buildMyStatsCSV();
 		buildExchgOstats();
+ 		clearDeleteQueue();
   		write_config_bin();  // build a config.bin
 		writeVersionToDisk();  // make sure the version file is correct
   		confirmSNonDisk(); // make sure the serial number file is correct 

@@ -1327,10 +1327,16 @@ static void takeAction (Action *action, EnumAction actionCode) {
 				cpyListPath(filepath,filename);	
 				ret = findDeleteStringFromFile(filepath,filename,cursor,TRUE);
 				tempList->currentFilePosition = -1; // forces next list action to reload
-				if (ret != -1)
+				// Add to file delete queue.  	During shutdown process, check for any other references in other lists.  
+				//								If none, then actually delete file.  In either case, remove from delete queue.
+				/*if (ret != -1)
 					ret = deletePackage(cursor);
 				else
-					logException(29,cursor,0);
+					logException(29,cursor,0);*/
+				strcpy(filepath,SYSTEM_PATH);
+				strcat(filepath,DELETE_QUEUE_FILENAME);
+				strcpy(tempPath,cursor); //protect string that cursor points to since next fct call will clobber its argument
+				appendStringToFile((const char *)filepath,tempPath);
 				tempList = &context.package->lists[aux];
 				cursor = getCurrentList(tempList);		
 				context.idxActiveList = aux;
@@ -1837,16 +1843,10 @@ static void takeAction (Action *action, EnumAction actionCode) {
 		case SLEEP:
 			// call sleep function
 			stop();
-		  	// give visual and aural feedback to 
-		  	playBip();
-			setLED(LED_RED,TRUE);
 			setOperationalMode((int)P_SLEEP); 
 			break;
 		case HALT:
 			stop();
-		  	// give visual and aural feedback to 
-		  	playBip();
-			setLED(LED_RED,TRUE);
 			// call sleep function
 			setOperationalMode((int)P_HALT); 
 			break;

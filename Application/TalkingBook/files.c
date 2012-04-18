@@ -765,6 +765,8 @@ loadLanglisttoMemory(char *masterlist,  MLENTRY mla[], unsigned int mla_size)
 	getLine(-1,0); // reset
 	for(i=0, mlp=mla; i<mla_size; i++, mlp++) {
 		line = getLine(mlfd, buffer);
+		while (*line == '!' || *line == '$') // skip lock symbol and system symbol
+			line++;
 		if(line == 0)
 			break;
 		categoryStringtoLong(line, mlp);
@@ -783,12 +785,15 @@ categoryStringtoLong(char *cat, MLENTRY *mlp)
 	for(i=24, base=cat; i>=0; i-=8) {
 		cp = strchr(base, '-');
 		if (cp) {
-			*cp++ = 0;			
+			*cp = 0;			
 		}
 		l |= (unsigned long) (((unsigned long)(strToInt(base))) << i);
-		if(!cp)
+		if (cp) {
+			*cp = '-'; //restore the string
+		} else {
 			break;
-		base = cp;
+		}
+		base = cp + 1;
 	}
 	
 	*mlp = l;		

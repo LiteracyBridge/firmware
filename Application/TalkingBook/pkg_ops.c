@@ -29,6 +29,79 @@ void packageRecording(char * pkgName, char *listName) {
 	}
 }
 
+int clearDeleteQueue(void) {
+	char strQueuePath[PATH_LENGTH];
+	char strMsgProfilePath[PATH_LENGTH],strMsgListPath[PATH_LENGTH];
+	struct f_info fileInfo;
+	int handle,ret;
+	int found,i,lineCount,linesCounted;
+	char buffer[READ_LENGTH+1],*packageName, *cursor;
+	ProfileData *pd;
+	
+	// For each string in DELETE_QUEUE_FILENAME, look for references in all message list files.  If none found, delete.
+	// When finished, delete DELETE_QUEUE_FILENAME.
+	// Look at all message files, not just the ones in current profile or even only the ones that are active lists, 
+	// because a category that lists the message could later be activated.
+
+	strcpy(strQueuePath,SYSTEM_PATH);
+	strcat(strQueuePath,(char *)DELETE_QUEUE_FILENAME);
+	pd = getProfiles();
+	linesCounted = 0;
+	handle=tbOpen((LPSTR)strQueuePath,O_RDONLY);
+	if (handle < 0) {
+		if (DEBUG_MODE)
+			logString(strQueuePath,ASAP);
+		return -1; //no queue
+	}
+	do {
+		getLine(-1,0);  // reset from prior use
+		lineCount = 0;
+		while ((packageName = getLine(handle,buffer)) && ++lineCount <= linesCounted) {}
+			// This lineCount and linesCounted skips previously processed lines in this loop.
+			// This is necessary because findDeleteStringFromFile() also calls getLine and resets everything. (TODO:not optimal)
+		if (!*packageName)
+			break;  // blank line at end of file
+		getLine(handle,0); //reset file cursor to beginning of file
+		linesCounted++;
+		found = 0; 
+		if (DEBUG_MODE) {
+			logString((char *)"DELETE QUEUE: Looking for references to ",BUFFER);
+			logString(packageName,ASAP);
+		}
+		for (i=0;i<pd->intTotalMessageLists;i++) {
+			strcpy(strMsgProfilePath,LISTS_PATH);
+			strcat(strMsgProfilePath,pd->ptrProfileMessageLists[i]);
+			strcat(strMsgProfilePath,"/*");
+			ret = _findfirst((LPSTR)strMsgProfilePath, &fileInfo,D_FILE);
+			strcpy(strMsgListPath,strMsgProfilePath);
+			while (ret >=0) {
+				if (!strstr(fileInfo.f_name,LIST_MASTER)) {  // don't search _activeLists.txt
+					cursor = strrchr(strMsgListPath, '/') + 1;
+					*cursor = 0;  //remove *.* or previous filename 
+					strcat(strMsgListPath,fileInfo.f_name);
+					if (DEBUG_MODE)
+						logString(strMsgListPath,BUFFER);
+					if (-1 != findDeleteStringFromFile(NULL,strMsgListPath,packageName,FALSE)) {
+						found = 1;
+						if (DEBUG_MODE)
+							logString((char *)"Found another reference - will not delete package.",BUFFER);
+						break;
+					}
+				}
+				ret = _findnext(&fileInfo);
+			}
+			if (found) 
+				break;
+		}
+		if (!found) 
+			deletePackage(packageName);
+	} while (packageName);
+	close(handle);
+	unlink((LPSTR)strQueuePath);
+}
+
+
+
 int deletePackage(char * packageName) {
 	// check master list; iterate through each list; if packageName not found in any list, delete package files
 	// return 0 if not found in any list and package deleted; return -1 otherwise (usually that it was found in another list)
@@ -41,23 +114,7 @@ int deletePackage(char * packageName) {
 	BOOL shouldDelete = TRUE;
 	const int MAX_RETRIES = 3;
 	long timeNow;
-/*
-	// This code checks if the last list reference to the file has been removed
-	
-	charCursor = getCurrentList(&context.package->lists[context.package->idxMasterList],context.package);			
-	idxList = context.package->lists[context.package->idxMasterList].currentFilePosition;
-	idxStartingList = idxList;
-	do {
-		strcpy(filename,charCursor);
-		strcat(filename,".txt"); //todo: move to config file
-		if (!findDeleteStringFromFile(LIST_PATH,filename,packageName,FALSE)) {
-			shouldDelete = FALSE;
-			break;
-		}
-		charCursor = getPreviousList(&context.package->lists[context.package->idxMasterList],context.package);
-		idxList = context.package->lists[context.package->idxMasterList].currentFilePosition;
-	} while (charCursor && idxList != idxStartingList);
-*/
+
 	if (shouldDelete) {
 		if (context.packageStartTime) {
 			timeNow = getRTCinSeconds();

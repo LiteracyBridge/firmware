@@ -6,5 +6,6 @@
 
 extern void packageRecording(char *, char *);
 extern int deletePackage (char *);
+extern int clearDeleteQueue(void);
 
 #endif

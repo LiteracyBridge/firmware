@@ -4,7 +4,7 @@
 #define	__TALKINGBOOK_h__
 
 #define MAJOR_VERSION	"v1.60"
-#define SVN_REVISION	"r842"
+#define SVN_REVISION	"r849"
 #define VERSION			MAJOR_VERSION SVN_REVISION
 #define TB_CAN_WAKE  // hardware that allows wake from sleep/halt
 //IMPORTANT: changes to TB_CAN_WAKE must also be made to system_head.inc!!!
@@ -65,6 +65,7 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 #define PKG_CONTROL_FILENAME_TXT	"control.txt"
 #define TRANSLATE_FILENAME_BIN      "translate.bin"
 #define APP_DATA_FILENAME		"data.bin"
+#define DELETE_QUEUE_FILENAME	"deleteQueue.txt"
 #define SYS_PKG_CHAR		'%'
 #define SYS_MSG_CHAR		'$'
 #define APP_PKG_CHAR		'^'

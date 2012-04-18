@@ -269,5 +269,6 @@ extern char *currentProfileLanguage(void);
 extern int currentProfile(void);
 extern int nextProfile(void);
 extern int prevProfile(void);	
+extern ProfileData *getProfiles(void);
 
 #endif

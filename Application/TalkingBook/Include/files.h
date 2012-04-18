@@ -52,5 +52,6 @@ extern void moveAudioFiles(char *, char *);
 extern void categoryStringtoLong(char *, MLENTRY *);
 extern void categoryLongtoString(char *, MLENTRY *);
 extern unsigned int loadLanglisttoMemory(char *,  MLENTRY[], unsigned int);
+extern int buildExchgOstats(void);
 
 #endif
