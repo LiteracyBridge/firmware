@@ -209,7 +209,7 @@ int nextMacroKey (int keystroke) {
  				}
 				strcat(buffer,"/T");   // log system time in seconds
 				longToDecimalString(secNow,buffer+strlen(buffer),5);
-				logString(buffer,ASAP);
+				logString(buffer,ASAP,LOG_NORMAL);
  			}	 				
 			if (!countLoop && (loop[idxLoop].begin == idxMacro))
 				countLoop = loop[idxLoop].times;

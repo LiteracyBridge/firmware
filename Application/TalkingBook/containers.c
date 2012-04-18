@@ -642,7 +642,7 @@ extern void logProfile() {
 	strcat(strLog,currentProfileLanguage());
 	strcat(strLog,",");
 	strcat(strLog,currentProfileMessageList());
-	logString(strLog,BUFFER);	
+	logString(strLog,BUFFER,LOG_NORMAL);	
 }
 
 extern int initializeProfiles() {

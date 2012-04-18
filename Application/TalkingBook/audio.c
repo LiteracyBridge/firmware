@@ -242,10 +242,10 @@ static int getFileHandle (CtnrFile *newFile) {
 	if (ret == -1 && pkg->pkg_type == PKG_SYS)
 		logException(35,sTemp,RESET);
 	if (DEBUG_MODE) {
-		logString(sTemp,BUFFER);
+		logString(sTemp,BUFFER,LOG_DETAIL);
 		if (ret == -1) {
 			strcpy(sTemp,"last file not found");
-			logString(sTemp,ASAP);
+			logString(sTemp,LOG_NORMAL,LOG_DETAIL);
 		}
 	}
 	
@@ -263,7 +263,7 @@ static int getFileHandle (CtnrFile *newFile) {
 				ret = -2;
 				strcpy(msg,"Audio file too small ");
 				strcat(msg, sTemp);
-				logString(msg, BUFFER);
+				logString(msg, BUFFER, LOG_ALWAYS);
 			}
 		}
 		
@@ -477,7 +477,7 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 		LBstrncat(temp,pkgName,60);
 		LBstrncat(temp," -> ",60);
 		LBstrncat(temp,cursor,60);	
-		logString(temp,BUFFER);
+		logString(temp,BUFFER,LOG_NORMAL);
 		// play record prompt message unless running translation app or if a button was just pressed 
 		if (!context.keystroke && strcmp(cursor,TRANSLATE_TEMP_DIR) != 0) {
 			insertSound(&pkgSystem.files[SPEAK_SOUND_FILE_IDX],NULL,FALSE);
@@ -657,7 +657,7 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 		strcpy(temp,"TIME RECORDED (secs): ");
 		longToDecimalString((long)end-start,temp+strlen(temp),4);
 		strcat(temp,"\x0d\x0a");
-		logString(temp,BUFFER);
+		logString(temp,BUFFER,LOG_NORMAL);
 		//logString(temp,ASAP);
 
 		ret = 0;  // used to set this based on fileExists() check, but too slow
@@ -726,7 +726,7 @@ void markEndPlay(long timeNow) {
 			strcat(log," sec at VOL=");
 			longToDecimalString((long)getVolume(),log+strlen(log),2);
 			strcat(log,"\x0d\x0a");
-			logString(log,BUFFER);
+			logString(log,BUFFER,LOG_NORMAL);
 		}
 	}
 }
@@ -742,7 +742,7 @@ void markStartPlay(long timeNow, const char * name) {
 	strcat((char *)log,(const char *)": PLAY ");
 	if (LBstrncat((char *)log,name,LOG_LENGTH) == LOG_LENGTH-1)
 		log[LOG_LENGTH-2] = '~';
-	logString(log,BUFFER);	
+	logString(log,BUFFER,LOG_NORMAL);	
 }
 
 int writeLE32(int handle, long value, long offset) {

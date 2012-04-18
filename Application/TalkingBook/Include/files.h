@@ -12,6 +12,11 @@
 #define ASAP				0
 #define BUFFER				1
 
+#define LOG_ALWAYS	0
+#define	LOG_NORMAL 	1
+#define LOG_DETAIL	2
+
+
 // states in expandOstatFile, processing a csv from some other device
 #define FIND_SRN      0
 #define PROCESS_STATS 1
@@ -24,7 +29,7 @@
 #define OSTATS_EXCHG_EXT    ".txt"
 
 
-extern void logString(char *, int);
+extern void logString(char *, int, int);
 extern char *getLine (int, char *);
 extern BOOL readBuffer(int, char *, int);
 extern BOOL nextNameValuePair (int, char *, char, char **, char **);

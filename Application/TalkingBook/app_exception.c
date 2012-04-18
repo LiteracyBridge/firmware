@@ -35,10 +35,10 @@ void logException(unsigned int errorCode, const char * pStrError, int takeAction
 			strcat(errorString,"-warning");
 
 		if (LOG_FILE) {
-			logString(errorString,ASAP);
+			logString(errorString,ASAP,LOG_ALWAYS);
 			if (pStrError) {
 				LBstrncpy(errorString,pStrError,80);
-				logString(errorString,ASAP);
+				logString(errorString,ASAP,LOG_ALWAYS);
 			}
 		}
 		else {

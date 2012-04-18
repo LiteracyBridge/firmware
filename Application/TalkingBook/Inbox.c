@@ -88,10 +88,9 @@ queueNewPackage(struct newContent *ncp) {
 		strcpy(fbuf,ncp->newAudioCategory);
 	else
 		fbuf[0] = 0;
-	if (DEBUG_MODE) {
-		logString((char *)"queued category:",BUFFER);
-		logString(ncp->newAudioCategory,BUFFER);
-	}
+	logString((char *)"queued category:",BUFFER,LOG_DETAIL);
+	logString(ncp->newAudioCategory,BUFFER,LOG_DETAIL);
+
 	//flushLog();
 	if (fbuf[0]) {
 		context.package = &pkgSystem; // in case paused on content
@@ -139,7 +138,7 @@ processNewPackages(struct newContent *ncp) {
 		if(ret == 0) {
 			mkdir((LPSTR)strNewPkgPath);
 			strcpy(strLog, "no new packages");	
-			logString(strLog, ASAP);
+			logString(strLog, ASAP,LOG_DETAIL);
 			return;
 		} 
 		ret = getcwd((LPSTR)savecwd , sizeof(savecwd) - 1 );
@@ -277,10 +276,8 @@ processA18(struct f_info *fip, struct newContent *pNC) {
 			close(handle);
 		}
 	}
-	if (DEBUG_MODE) {
-		logString((char *)"category is",BUFFER);
-		logString(category,BUFFER);
-	}
+	logString((char *)"category is",BUFFER,LOG_DETAIL);
+	logString(category,BUFFER,LOG_DETAIL);
 	if (!lang[0]) {
 		if (pkgSystem.idxLanguageCode)
 			strcpy(lang,&pkgSystem.strHeapStack[pkgSystem.idxLanguageCode]);
@@ -307,11 +304,9 @@ processA18(struct f_info *fip, struct newContent *pNC) {
 	strcat(toPath, newFileName);
 	strcat(toPath, AUDIO_FILE_EXT);
 	ret = rename((LPSTR)fromPath, (LPSTR)toPath);
-	logString((char *)fromPath,BUFFER);
-	if (DEBUG_MODE) {
-		logString((char *)toPath,BUFFER);
-		logString((char *)pNC->newAudioLanguage,ASAP);
-	}
+	logString((char *)fromPath,BUFFER,LOG_DETAIL);
+	logString((char *)toPath,BUFFER,LOG_DETAIL);
+	logString((char *)pNC->newAudioLanguage,ASAP,LOG_DETAIL);
 	
 	if(ret) {   // rename failed, probably already exists
 		int fdinbox, fdcard;
@@ -324,7 +319,7 @@ processA18(struct f_info *fip, struct newContent *pNC) {
 		}
 		if(ret) {
 			pNC->isNew = 0;
-			logString((char *)"inbox message already exists on device",ASAP);
+			logString((char *)"inbox message already exists on device",ASAP,LOG_DETAIL);
 			unlink((LPSTR)fromPath);	// rename failed, remove from inbox anyway
 		} else {
 			pNC->isNew = 1;
@@ -369,10 +364,8 @@ processDir(char *dirname, struct newContent *pNC) {
 	strcat(metadataFilePath,AUDIO_FILE_EXT);	
 	
 	if(getMetaCat(metadataFilePath, category))  {				
-		if (DEBUG_MODE) {
-			logString((char *)"category is",BUFFER);
-			logString(category,ASAP);
-		}
+		logString((char *)"category is",BUFFER,LOG_DETAIL);
+		logString(category,ASAP,LOG_DETAIL);
 		handle = open((LPSTR)metadataFilePath, O_RDONLY);
 		if(handle >= 0) {
 			ret = metaRead(handle, DC_LANGUAGE, (unsigned int*)&lang);
@@ -405,11 +398,9 @@ processDir(char *dirname, struct newContent *pNC) {
 	strcat(toPath,newDirName);
 	
 	ret = rename((LPSTR)fromPath,(LPSTR)toPath);
-	logString((char *)fromPath,BUFFER);
-	if (DEBUG_MODE) {
-		logString((char *)toPath,BUFFER);
-		logString((char *)pNC->newAudioLanguage,ASAP);
-	}
+	logString((char *)fromPath,BUFFER,LOG_DETAIL);
+	logString((char *)toPath,BUFFER,LOG_DETAIL);
+	logString((char *)pNC->newAudioLanguage,ASAP,LOG_DETAIL);
 	if(ret) {   // rename failed, probably already exists
 		int fdinbox, fdcard;
 		endOfPath = toPath + strlen(toPath);
@@ -427,7 +418,7 @@ processDir(char *dirname, struct newContent *pNC) {
 		}
 		if(ret) {
 			pNC->isNew = 0;
-			logString((char *)"inbox message already exists on device",ASAP);
+			logString((char *)"inbox message already exists on device",ASAP,LOG_DETAIL);
 			deleteAllFiles(fromPath);
 			rmdir((LPSTR)fromPath);			
 		} else {
@@ -482,8 +473,7 @@ newUpdateCategory(struct newContent *pNC, int isDir) {
 	MLENTRY filecat, mlret;
 
 	lang = pNC->newAudioLanguage;
-	if (DEBUG_MODE)
-		logString((char *)"newUpdateCategory",BUFFER);	
+	logString((char *)"newUpdateCategory",BUFFER,LOG_DETAIL);	
 	// rotate through all profiles and update categories with matching language
 	i = currentProfile(); 
 	do {
@@ -494,8 +484,7 @@ newUpdateCategory(struct newContent *pNC, int isDir) {
 		strcat(path, "/");
 		strcat(path,LIST_MASTER);
 		strcat(path,".txt");
-		if (DEBUG_MODE)
-			logString(path,ASAP);
+		logString(path,ASAP,LOG_DETAIL);
 		if(strcmp(lang, &Lang)) {
 			ret = loadLanglisttoMemory(path,  MLp, MAX_ML_ENTRIES);
 			nMLp = ret;
@@ -505,21 +494,21 @@ newUpdateCategory(struct newContent *pNC, int isDir) {
 			// Feedback messages stay in the feedback category -- add the category if needed
 			addCategoryToActiveLists((char *)FEEDBACK_CATEGORY,currentProfileMessageList());
 			if (DEBUG_MODE) {
-				logString((char *)"Assigned to feedback category: list "FEEDBACK_CATEGORY,ASAP);
+				logString((char *)"Assigned to feedback category: list "FEEDBACK_CATEGORY,ASAP,LOG_NORMAL);
 			}			
 		}
 		else {
 			categoryStringtoLong(pNC->newAudioCategory, &filecat);
 			if (DEBUG_MODE) {
-				logString((char *)"Metadata category is:",BUFFER);
-				logString(pNC->newAudioCategory,ASAP);
+				logString((char *)"Metadata category is:",BUFFER,LOG_NORMAL);
+				logString(pNC->newAudioCategory,ASAP,LOG_NORMAL);
 			}
 			mlret = matchCategory(MLp, &filecat);		
 			categoryLongtoString(&catwrk[0], &mlret);
 			strcpy(pNC->newAudioCategory, catwrk);
 			if (DEBUG_MODE) {
-				logString((char *)"Assigned list is:",BUFFER);
-				logString(pNC->newAudioCategory,ASAP);
+				logString((char *)"Assigned list is:",BUFFER,LOG_NORMAL);
+				logString(pNC->newAudioCategory,ASAP,LOG_NORMAL);
 			}
 		}	
 	//	cpyListPath(path,&catwrk[0]);
@@ -546,10 +535,8 @@ newUpdateCategory(struct newContent *pNC, int isDir) {
 		} else {
 			strcpy(tmpbuf,pNC->newAudioName);
 		}
-		if (DEBUG_MODE) {
-			logString(buffer, BUFFER);
-			logString(tmpbuf, BUFFER);
-		}
+		logString(buffer, BUFFER,LOG_DETAIL);
+		logString(tmpbuf, BUFFER,LOG_DETAIL);
 	// This checks if entry already exists and adds a new line only if it does not.
 		ret = findDeleteStringFromFile((char *)NULL, buffer, tmpbuf, 0);
 			

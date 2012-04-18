@@ -62,9 +62,11 @@ void clearStaleLog() {
 	}
 }
 
-void logString(char *string, int whenToWrite) {
+void logString(char *string, int whenToWrite, int logPriority) {
 	int len, available;
-	
+
+	if (logPriority > DEBUG_MODE)
+		return; // not worth logging, according to config file
 	if (LOG_FILE) {
 		if (idxLogBuffer && (idxLogBuffer <= (LOG_BUFFER_SIZE - 3))) {
 			// already one entry, separate with CRLF
@@ -664,8 +666,8 @@ void deleteAllFiles(char *fromdir)
 	struct f_info fi;
 	
 	
-	logString("deleteAllFiles",BUFFER);
-	logString(fromdir, BUFFER);
+	logString("deleteAllFiles",BUFFER,LOG_NORMAL);
+	logString(fromdir, BUFFER,LOG_NORMAL);
 	
 	strcpy(from, fromdir);
 	len_from = strlen(from);
@@ -685,8 +687,7 @@ void deleteAllFiles(char *fromdir)
 			setLED(LED_GREEN,FALSE);
 			setLED(LED_RED,TRUE);
 			unlink((LPSTR)from);
-			if (DEBUG_MODE)
-				logString(from,ASAP);
+			logString(from,ASAP,LOG_DETAIL);
 //			wait (500);
 //			setLED(LED_RED,FALSE);
 //			if (r1 != -1) {
@@ -980,7 +981,7 @@ int concatFiles(int tofd, LPSTR fromname) {
 	if(fromfd < 0) {
 		strcpy(strLog, "concatFiles cannot open ");
 		strcat(strLog, (char *)fromname);
-		logString(strLog, BUFFER);
+		logString(strLog, BUFFER,LOG_NORMAL);
 		return(-1);
 	}
 	while((wrk = read(fromfd,(unsigned long)&buf<<1,sizeof(buf)<<1)) > 0) {
@@ -998,7 +999,7 @@ int concatFiles(int tofd, LPSTR fromname) {
 		if(wrk <= 0) {
 			strcpy(strLog, "concatFiles write failed to ");
 			strcat(strLog, (char *)fromname);
-			logString(strLog, BUFFER);
+			logString(strLog, BUFFER,LOG_NORMAL);
 		} else {
 			ret += wrk;
 		}
@@ -1040,13 +1041,13 @@ buildExchgOstats() {
 		have_new++;
 		strcpy(strLog, "buildExchgOstats processed ");
 		strcat(strLog, (char *) filename);
-		logString(strLog, BUFFER);
+		logString(strLog, BUFFER,LOG_NORMAL);
 	}
 	
 	if(have_new == 0) {
 		if(fileExists(to)) {
 			strcpy(strLog, "buildExchgOstats returns, no new ostat data");
-			logString(strLog, BUFFER);
+			logString(strLog, BUFFER,LOG_NORMAL);
 			return(0);
 		}
 	}
@@ -1055,7 +1056,7 @@ buildExchgOstats() {
 	if(myexchgfd < 0) {   // can't open exchange file
 		strcpy(strLog, "buildExchgOstats can't open ");
 		strcat(strLog, to);
-		logString(strLog, BUFFER);
+		logString(strLog, BUFFER,LOG_ALWAYS);
 		return(-1);
 	}
 //
@@ -1078,12 +1079,12 @@ buildExchgOstats() {
 		}
 		strcpy(strLog, "buildExchgOstats processed ");
 		strcat(strLog, (char *) filename);
-		logString(strLog, BUFFER);
+		logString(strLog, BUFFER,LOG_DETAIL);
 	}
 	
 	strcpy(strLog, "buildExchgOstats created new ostat data file ");
 	strcat(strLog, to);
-	logString(strLog, BUFFER);
+	logString(strLog, BUFFER,LOG_DETAIL);
 
 	close(myexchgfd);
 }
@@ -1109,11 +1110,11 @@ expandOstatFile(char *filename) {
 	if(fromfd < 0) {
 		strcpy(strLog,"expandOstatFile can't open ");
 		strcat(strLog, filename);
-		logString(strLog, BUFFER);
+		logString(strLog, BUFFER,LOG_DETAIL);
 	} else {
 		strcpy(strLog, "expandOstatFile processing ");
 		strcat(strLog, filename);
-		logString(strLog, BUFFER);
+		logString(strLog, BUFFER,LOG_DETAIL);
 	}
 	getLine(-1,0); // reset
 	
@@ -1159,7 +1160,7 @@ expandOstatFile(char *filename) {
 			if(diskver < newver) {
 				strcpy(strLog, to);
 				strcat(strLog, " newer from other device");
-				logString(strLog,BUFFER);  
+				logString(strLog,BUFFER,LOG_DETAIL);  
 				checkfd = tbOpen(to, O_WRONLY|O_CREAT|O_TRUNC);
 				if(checkfd >= 0) {
 					state = PROCESS_STATS;
@@ -1170,7 +1171,7 @@ expandOstatFile(char *filename) {
 			} else {
 				strcpy(strLog, to);
 				strcat(strLog, " my stats are newer");
-				logString(strLog,BUFFER);  
+				logString(strLog,BUFFER,LOG_DETAIL);  
 			}
 			break;
 			
@@ -1202,7 +1203,7 @@ expandOstatFile(char *filename) {
 	
 	strcpy(strLog, "expandOstatFile deleting ");
 	strcat(strLog, filename);
-	logString(strLog, BUFFER);
+	logString(strLog, BUFFER,LOG_DETAIL);
 	
 	return(0);
 }

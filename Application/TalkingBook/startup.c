@@ -315,12 +315,12 @@ void startUp(unsigned int bootType) {
 	strcat(buffer,(const char *)" - version " VERSION);
 	if (DEBUG_MODE)
 		strcat(buffer,"\x0d\x0a" "*DEBUG MODE*");
-	logString(buffer,BUFFER);
+	logString(buffer,BUFFER,LOG_ALWAYS);
 		
 	if(normal_shutdown) {
-		logString((char *)"Restored configuration from config.bin successfully" ,BUFFER);
+		logString((char *)"Restored configuration from config.bin successfully" ,BUFFER,LOG_DETAIL);
 	} else {
-		logString((char *)"Apparently ABNORMAL shutdown (no or corrupt config.bin)", BUFFER);
+		logString((char *)"Apparently ABNORMAL shutdown (no or corrupt config.bin)", BUFFER,LOG_ALWAYS);
 	}
 	
 //#ifdef TB_CAN_WAKE
@@ -371,7 +371,7 @@ static char * addTextToSystemHeap (char *line) {
 	startingHeap = cursorSystemHeap;
 	cursorSystemHeap = startingHeap + length;
 	if (cursorSystemHeap-systemHeap >= SYSTEM_HEAP_SIZE) {
-		logString(line,ASAP);
+		logString(line,ASAP,LOG_ALWAYS);
 		logException(15,0,USB_MODE); //todo:system heap is full
 	}
 	strcpy(startingHeap,line);
@@ -534,7 +534,7 @@ int loadConfigFile(void) {
 	}
 	if (!goodPass) {
 		ret = -1;
-		logString((char *)"CONFIG_FILE NOT READ CORRECTLY",BUFFER);	  //logException(14,0,USB_MODE); 		
+		logString((char *)"CONFIG_FILE NOT READ CORRECTLY",BUFFER,LOG_ALWAYS);	  //logException(14,0,USB_MODE); 		
 	}
 	close(handle);
 	LED_ALL = LED_GREEN | LED_RED;
@@ -722,7 +722,7 @@ int write_config_bin () {
 			ret = byteswritten;
 		} else {
 			ret = -1;
-			logString((char *)"CANNOT OPEN CONFIG_BIN_FILE" ,ASAP);
+			logString((char *)"CANNOT OPEN CONFIG_BIN_FILE" ,ASAP,LOG_ALWAYS);
 		}
 		
 	return(ret);	
@@ -736,12 +736,12 @@ static int restore_config_bin () {
 		
 	handle = tbOpen((unsigned long)(CONFIG_BIN_FILE),O_RDONLY);
 	if(handle < 0) {
-		logString((char *)"Binary config not present" ,BUFFER);
+		logString((char *)"Binary config not present" ,BUFFER,LOG_ALWAYS);
 		return(ret);
 	}
 	bytesread = read(handle, (unsigned long)&cfg<< 1, sizeof(cfg)<< 1);
 	if(bytesread != (sizeof(cfg)<< 1)) {
-		logString((char *)"config.bin too short" ,BUFFER);
+		logString((char *)"config.bin too short" ,BUFFER,LOG_ALWAYS);
 		close(handle);
 		unlink((LPSTR)CONFIG_BIN_FILE);
 		return(ret);
@@ -752,9 +752,9 @@ static int restore_config_bin () {
 		ret = chkconfig_debug(&cfg, handle);
 		close(handle);
 		if(ret == 0) {
-			logString((char *)"config.bin good" ,BUFFER);
+			logString((char *)"config.bin good" ,BUFFER,LOG_ALWAYS);
 		}else {
-			logString((char *)"config.bin has errors" ,BUFFER);
+			logString((char *)"config.bin has errors" ,BUFFER,LOG_ALWAYS);
 		}
 		return(ret);
 	}
@@ -831,7 +831,7 @@ static int restore_config_bin () {
 		close(handle);
 		unlink((LPSTR)CONFIG_BIN_FILE);
 		if(stringsread != (stringbuf_size<< 1)) {
-			logString((char *)"config.bin stringtable too short" ,BUFFER);
+			logString((char *)"config.bin stringtable too short" ,BUFFER,LOG_ALWAYS);
 			return(ret);
 		}
 #define SET_CONFIG_STRING(str) if(cfg_string_buf[cfg.offset_ ## str]) \

@@ -35,7 +35,7 @@ void saveSystemCounts() {
 		ret = write(handle, (unsigned long)&systemCounts<<1, sizeof(SystemCounts)<<1);
 	else {
 		if (ret)
-			logString((char *)"failed unlink of system var file",BUFFER);
+			logString((char *)"failed unlink of system var file",BUFFER,LOG_ALWAYS);
 		close(handle);
 		logException(17,SYSTEM_VARIABLE_FILE,RESET); //can't save SYSTEM_VARIABLE_FILE;
 	}

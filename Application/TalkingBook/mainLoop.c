@@ -498,7 +498,7 @@ extern int checkInactivity(BOOL resetTimer) {
 	// log time every minute to track power-on time
 	if (!justLogged && !(currentTime % 60) && (context.isStopped || context.isPaused)) {
 		longToDecimalString(currentTime,stringLog,5);
-		logString(stringLog,ASAP);
+		logString(stringLog,ASAP,LOG_NORMAL);
 		justLogged = 1;	
 	} else if (justLogged  && (currentTime % 60))
 		justLogged = 0;		
@@ -527,7 +527,7 @@ processAlarm(unsigned long alarm) {
 	strcpy(buffer,"mainloop: RTC alarm has fired ");
 	longToHexString((long)alarm, (char *)alm, 1);
  	strcat(buffer, alm);
-	logString(buffer,BUFFER);
+	logString(buffer,BUFFER,LOG_DETAIL);
 	
 /*   test
 
@@ -1201,7 +1201,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 						if (DEBUG_MODE) {
 							strcpy(tempBuffer,(char *)"Category: ");
 							strcat(tempBuffer,filename);
-							logString(tempBuffer,ASAP);
+							logString(tempBuffer,ASAP,LOG_NORMAL);
 						}
 						// play sound of subject
 						newFile = getTempFileFromName(filename,0);
@@ -1247,6 +1247,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 
 		case CLONE:
 			stop();
+			logString((char *)"Cloning device",BUFFER,LOG_ALWAYS);
 			if (PRE_COPY_FILE_IDX)
 				insertSound(&pkgSystem.files[PRE_COPY_FILE_IDX],NULL,TRUE);  
 			ret = setUSBHost(TRUE);
@@ -1262,6 +1263,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 
 		case COPY_PROFILE:
 			stop();
+			logString((char *)"Copying profile",BUFFER,LOG_ALWAYS);
 			if (PRE_COPY_FILE_IDX)
 				insertSound(&pkgSystem.files[PRE_COPY_FILE_IDX],NULL,TRUE);  
 			ret = setUSBHost(TRUE);
@@ -1277,6 +1279,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 								
 		case COPY:
+			logString((char *)"Copying (msg or category)",BUFFER,LOG_ALWAYS);
 			stop();
 			tempList = &context.package->lists[destination];
 			getListFilename(filename,destination,FALSE);
@@ -1301,6 +1304,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 
 		case DELETE:
 			stop();
+			logString((char *)"Deletion",BUFFER,LOG_ALWAYS);
 			list = &pkgSystem.lists[context.package->idxMasterList];
 			if(list->isLocked) {
 				insertSound(&pkgSystem.files[SORRY_LOCKED_SUBJECT_IDX],NULL,TRUE);
@@ -1356,6 +1360,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 
 		case DELETE_MESSAGES:
+			logString((char *)"Deletoing Messages",BUFFER,LOG_ALWAYS);
 			// delete all messages in a subject/category
 			if (destination == 0) {
 				stop();
@@ -1376,6 +1381,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 
 		case TRIM:
+			logString((char *)"Trim a rcording",BUFFER,LOG_ALWAYS);
 			stop();
 			tempList = &context.package->lists[destination];
 			cursor = getCurrentList(tempList);
@@ -1415,6 +1421,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 
 		case TOGGLE_LOCK:
+			logString((char *)"Toggle Lock/Unlock of Category List",BUFFER,LOG_ALWAYS);
 			stop();
 			list = &pkgSystem.lists[destination];
 			cursor = getCurrentList(list);		
@@ -1438,6 +1445,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 			
 		case POSITION_TO_TOP:
+			logString((char *)"Position Message to the top",BUFFER,LOG_ALWAYS);
 			stop();
 			longToDecimalString(destination,filename,3);
 			if (destination == -1) {
@@ -1489,6 +1497,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 
 		case MAKE_FAVORITE:
+			logString((char *)"Make Favorite",BUFFER,LOG_ALWAYS);
 			stop();
 			tempList = &context.package->lists[destination];
 		    cursor = getCurrentList(tempList);
@@ -1504,10 +1513,12 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;					
 
 		case SPEED_UP:
+			logString((char *)"Faster",BUFFER,LOG_ALWAYS);
 			adjustSpeed(SPEED_INCREMENT,TRUE);
 			break;
 
 		case SPEED_DOWN:
+			logString((char *)"Slower",BUFFER,LOG_ALWAYS);
 			adjustSpeed(-SPEED_INCREMENT,TRUE);
 			break;
 
@@ -1531,10 +1542,12 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 
 		case VOLUME_UP:
+			logString((char *)"Louder",BUFFER,LOG_ALWAYS);
 			adjustVolume(VOLUME_INCREMENT,TRUE,FALSE);
 			break;
 
 		case VOLUME_DOWN:
+			logString((char *)"Quieter",BUFFER,LOG_ALWAYS);
 			adjustVolume(-VOLUME_INCREMENT,TRUE,FALSE);
 			break;
 
@@ -1624,6 +1637,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			
 		case RECORD_TITLE: // deprecated
 		case RECORD_MSG:
+			logString((char *)"Record",BUFFER,LOG_ALWAYS);
 			stop();
 /*			// Not currently allowing sound inserts before record commands since aux is used for recording from another headphone jack
 			// Although the SPINS part of the headphone jack thing isn't currently working.
@@ -1675,6 +1689,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;	
 
 		case RECORD_FEEDBACK:
+			logString((char *)"Record Feedback",BUFFER,LOG_ALWAYS);
 			//this code is mostly a copy of case RECORD.  todo: move reusable part into a fct
 			stop();
 /*			// Not currently allowing sound inserts before record commands since aux is used for recording from another headphone jack

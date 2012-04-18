@@ -67,7 +67,7 @@ void logRTC(void) {
 	longToDecimalString(s,time+8,2);
 	time[10] = 's';
 	time[11] = 0;
-	logString(time,ASAP);
+	logString(time,ASAP,LOG_ALWAYS);
 }
 
 
@@ -210,7 +210,7 @@ void logVoltage() {
 		buffer[i] = buffer[i-1];
 		buffer[i-1] = buffer[i-2];
 		buffer[i-2] = '.'; 
-		logString(buffer,ASAP);				
+		logString(buffer,ASAP,LOG_DETAIL);				
 	 	voltage = sample;			 		
 		timeLastSample = time;
 	}
@@ -258,7 +258,7 @@ getCurVoltageSample() {
 					strcat(log,(char *) "v in ");
 					longToDecimalString((long)voltageDropTime,log+strlen(log),4);
 					strcat(log, (char *) " sec");
-					logString(log,BUFFER);
+					logString(log,BUFFER,LOG_NORMAL);
 					if (voltageDropTime < V_FAST_VOLTAGE_DROP_TIME_SEC && vCur_1 < V_MIN_VOL_VOLTAGE) {
 						// Maybe try an adjustment like the one below, but that might be too aggressive
 						// vFast_Voltage_Drop_Time_Sec = voltageDropTime;
@@ -273,14 +273,14 @@ getCurVoltageSample() {
 				longToDecimalString(currentTimeInSec,log,5);
 				strcat(log,(char *)": v");
 				longToDecimalString(vCur_1, log+strlen(log), 3);
-				logString(log,BUFFER);
+				logString(log,BUFFER,LOG_NORMAL);
 			}
 			if(vCur_1 < V_MIN_RUN_VOLTAGE) {
 				refuse_lowvoltage(1);
 			} else if (vCur_1 == V_MIN_SDWRITE_VOLTAGE) {
 				stop(); // in case running audio causes a problem with logging
 				strcpy(log,(char *)"Low voltage->Logging terminated.");
-				logString(log,ASAP);
+				logString(log,ASAP,LOG_ALWAYS);
 			} 
 		}
 	}
@@ -406,7 +406,7 @@ void resetSystem(void) {
 	// set watchdog timer to reset device; 0x780A (Watchdog Reset Control Register)
 	// see GPL Programmer's Manual (V1.0 Dec 20,2006), Section 3.5, page 18
 	stop(); 
-	logString((char *)"Reset",BUFFER);
+	logString((char *)"* RESET *",BUFFER,LOG_ALWAYS);
 	logRTC();
 	fs_safexit(); // should close all open files
 	*P_WatchDog_Ctrl &= ~0x4001; // clear bits 14 and 0 for resetting system and time=0.125 sec 	
@@ -442,7 +442,7 @@ static void logKeystroke(int intKey) {
 			else if (intKey == KEY_STAR) str[i] = TEXT_EVENT_STAR;
 			else if (intKey == KEY_PLUS) str[i] = TEXT_EVENT_PLUS;
 			else if (intKey == KEY_MINUS) str[i] = TEXT_EVENT_MINUS;
-		logString(str,ASAP);	
+		logString(str,ASAP,LOG_ALWAYS);	
 	}
 }
 
@@ -468,9 +468,9 @@ void setOperationalMode(int newmode) {
     	// assume calling for sleep or halt
 		*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
 		if (newmode == (int)P_HALT)
-			logString((char *)"Halting",BUFFER);
+			logString((char *)"Halting",BUFFER,LOG_NORMAL);
 		else // newmode == (int)P_SLEEP
-			logString((char *)"Sleeping",BUFFER);			
+			logString((char *)"Sleeping",BUFFER,LOG_NORMAL);			
 		logRTC();
 	  	stop();
 		setLED(LED_ALL,FALSE);
@@ -579,7 +579,7 @@ set_voltmaxvolume(BOOL forceLower)
 				longToDecimalString((long)MAX_VOLUME,log+7,2);
 				log[9] = ',';
 				longToDecimalString((long)volume,log+11,2);
-				logString(log,BUFFER);
+				logString(log,BUFFER,LOG_NORMAL);
 			}		
 		}
 	}
@@ -642,7 +642,7 @@ void writeVersionToDisk() {
 	strcpy(fileVersion,DEFAULT_SYSTEM_PATH  SVN_REVISION  FILE_REVISION_EXT);
 	
 	if (!fileExists((LPSTR)fileVersion)) {
-		logString(fileVersion,ASAP);
+		logString(fileVersion,ASAP,LOG_DETAIL);
 		mkdir((LPSTR)DEFAULT_SYSTEM_PATH); 
 		tbChdir((LPSTR)DEFAULT_SYSTEM_PATH);
 		ret =_findfirst((LPSTR)"*" FILE_REVISION_EXT, &file_info, D_FILE);
@@ -736,7 +736,7 @@ void rtcAlarmFired() {
 		saveSystemCounts();
 		strcpy(buffer,"poweredDays=");
 		longToDecimalString(systemCounts.poweredDays, buffer+12, 4);
-		logString(buffer,ASAP);
+		logString(buffer,ASAP,LOG_NORMAL);
 		resetRTC();
 //		resetRTC23();  // test, really set rtc to 0,0,1sec
 //		setRTCalarm(0, 0, 0);
@@ -794,7 +794,7 @@ addAlarm(unsigned int hour, unsigned int minute, unsigned int second) {
 	strcat(buf," alarm time ");
 	longToHexString((long)newAlarm, (char *)strbuf, 1);
 	strcat(buf, strbuf);
-	logString(buf,BUFFER); 
+	logString(buf,BUFFER,LOG_NORMAL); 
 	
 	setNextAlarm();
 	

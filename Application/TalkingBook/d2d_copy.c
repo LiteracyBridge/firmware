@@ -35,8 +35,7 @@ static void getAudioFeedback(void) {
 	int i, j, linesRead, gotFeedback, ret, handle;
 	char *cursor, *markAudioFile;
 
-	if (DEBUG_MODE)
-		logString((char *)"getting other device's audio feedback",ASAP);
+	logString((char *)"getting other device's audio feedback",ASAP,LOG_NORMAL);
 	strcpy(path,SYSTEM_PATH);
 	path[0] = 'b';
 	strcat(path,PROFILE_ORDER_FILE);
@@ -44,8 +43,8 @@ static void getAudioFeedback(void) {
 	
 	ret = loadProfileNames(path,&profiles);
 	if (!ret) {
-		logString((char *)"no profiles found",BUFFER);
-		logString(path,ASAP);
+		logString((char *)"no profiles found",BUFFER,LOG_ALWAYS);
+		logString(path,ASAP,LOG_ALWAYS);
 		return;
 	} else
 		i = profiles.intTotalMessageLists;
@@ -57,7 +56,7 @@ static void getAudioFeedback(void) {
 		i--;		
 		strcpy(path,"0");
 		path[0] += i;
-		logString(path,BUFFER);
+		logString(path,BUFFER,LOG_DETAIL);
 		
 		linesRead = 0;
 		gotFeedback = 0;
@@ -66,12 +65,11 @@ static void getAudioFeedback(void) {
 			path[0] = 'b';
 			strcat(path,profiles.heapMessageLists[i]);
 			strcat(path,"/" FEEDBACK_CATEGORY ".txt");
-			logString(path,BUFFER);
 			handle = tbOpen((LPSTR)path,O_RDONLY);
 			if (handle == -1) {
 				strcpy(buffer,(char *)"could not access ");
 				strcat(buffer,path);	
-				logString(buffer,ASAP);
+				logString(buffer,ASAP,LOG_ALWAYS);
 				break;
 			}
 			getLine(-1,0);  // reset in case at end from prior use			
@@ -85,20 +83,19 @@ static void getAudioFeedback(void) {
 			if (strlen(cursor) < FILE_LENGTH) {
 				strcpy(markAudioFile,cursor);
 				strcat(markAudioFile,AUDIO_FILE_EXT);
-				logString((char *)"_copy",BUFFER);
-				logString(pathAudioFile,BUFFER);
+				logString((char *)"_copy",BUFFER,LOG_NORMAL);
+				logString(pathAudioFile,BUFFER,LOG_NORMAL);
 				strcpy(path,INBOX_PATH);
 				strcat(path,NEW_PKG_SUBDIR);
 				strcat(path,markAudioFile);
-				logString(path,ASAP);
+				logString(path,ASAP,LOG_NORMAL);
 				ret = _copy((LPSTR)pathAudioFile,(LPSTR)path);
 				if (!gotFeedback && !ret)
 					gotFeedback = 1;
 			}
 		} while (1);
 		if (gotFeedback) {
-			if (DEBUG_MODE)
-				logString((char *)"ensuring 'feedback' is added to the other device's list for this profile",ASAP);
+			logString((char *)"ensuring 'feedback' is added to the other device's list for this profile",ASAP,LOG_DETAIL);
 			// If there's at least one feedback msg for this profile, 
 			// ensure the feedback category is added to _activeLists.txt for this device, for this profile.
 			strcpy(path,LISTS_PATH);
@@ -144,8 +141,8 @@ int d2dCopy(const char * packageName,const char * filenameList) {
 			list->currentFilePosition = -1;
 			localPackageName = getCurrentList(list);
 			do {
-				logString((char *)"catcopy",BUFFER);
-				logString(localPackageName,BUFFER);
+				logString((char *)"catcopy",BUFFER,LOG_NORMAL);
+				logString(localPackageName,BUFFER,LOG_NORMAL);
 				retCopy = copyApplicationOrMessage(localPackageName,newPkgPath);				
 				if (retCopy == -1)
 					break;
@@ -195,7 +192,7 @@ static int copyApplication(char * packageName, char *newPkgPath) {
 	strcat(path,packageName);
 	strcat(path,"/");
 	strcpy(strLog,packageName);
-	logString(strLog,ASAP);
+	logString(strLog,ASAP,LOG_NORMAL);
 	strcpy(filename,path);
 	strcat(filename,"*.*");
 	ret =_findfirst((LPSTR)filename, &file_info, D_FILE);
@@ -218,7 +215,7 @@ static int copyApplication(char * packageName, char *newPkgPath) {
 			strcpy(strLog,filename);
 			ret = _findnext(&file_info);
 		}
-		logString(strLog,BUFFER);
+		logString(strLog,BUFFER,LOG_DETAIL);
 	}
 	// remove partially copied applications
 	if (retCopy == -1) {
@@ -251,7 +248,7 @@ static int copyMessage(char * packageName, char *newPkgPath) {
 	cursor = (char *)packageName;
 	if (LBstrncat((char *)strLog,cursor,PATH_LENGTH) == PATH_LENGTH-1)
 		strLog[PATH_LENGTH-2] = '~';
-	logString(strLog,BUFFER);
+	logString(strLog,BUFFER,LOG_NORMAL);
 	strcpy(filename,USER_PATH);
 	strcat(filename,cursor);
 	strcat(filename,AUDIO_FILE_EXT);
@@ -266,7 +263,7 @@ static int copyMessage(char * packageName, char *newPkgPath) {
 		recordStats(filename, 0L, STAT_COPIED, PKG_SYS+1);
 		strcpy(strLog,filename);
 	}
-	logString(strLog,BUFFER);
+	logString(strLog,BUFFER,LOG_DETAIL);
 	return retCopy;
 }
 
@@ -301,7 +298,7 @@ static void copyListAudio(const char * listName) {
 			strcpy(strLog,file_info.f_name);
 			recordStats(file_info.f_name, 0L, STAT_COPIED, PKG_SYS+1);
 		}
-		logString(strLog,BUFFER);
+		logString(strLog,BUFFER,LOG_NORMAL);
 		ret = _findnext(&file_info);
 	}
 	return;
@@ -339,7 +336,7 @@ static void exchangeStats() {
 		} else
 			strcpy(strLog,filename);
 			
-		logString(strLog,BUFFER);
+		logString(strLog,BUFFER,LOG_DETAIL);
 		ret = _findnext(&file_info);
 	}
 
@@ -362,7 +359,7 @@ static void exchangeStats() {
 		} else
 			strcpy(strLog,filename);
 			
-		logString(strLog,BUFFER);
+		logString(strLog,BUFFER,LOG_DETAIL);
 		ret = _findnext(&file_info);
 	}
 //	
@@ -485,8 +482,7 @@ getStats(void) {
 	char cli_serial_number[PATH_LENGTH], strLog[PATH_LENGTH];
 	int ret, i, j, f;
 	
-	if (DEBUG_MODE)
-		logString((char *)"getting connected device's stats",ASAP);
+	logString((char *)"getting connected device's stats",ASAP,LOG_DETAIL);
 	
 	strcpy(from, CLI_STAT_DIR);
 //	strcpy(from, "a:/b/system/stats/");  // remove after testing with a b folder on a:
@@ -526,8 +522,8 @@ getStats(void) {
 	strcpy((char *)cp1, (char *)cp2);
 
 	
-	logString(from,BUFFER);
-	logString(to,ASAP);
+	logString(from,BUFFER,LOG_DETAIL);
+	logString(to,ASAP,LOG_DETAIL);
 	
 	// from b: to a:
 	ret = fileCopy((char *)from, (char *)to);
@@ -549,11 +545,11 @@ getStats(void) {
 	
 	strcpy(strLog, "getStats ostats copy from ");
 	strcat(strLog, from);
-	logString(strLog, BUFFER);
+	logString(strLog, BUFFER,LOG_DETAIL);
 	
 	strcpy(strLog, "getStats ostats copy  to  ");
 	strcat(strLog, to);
-	logString(strLog, BUFFER); 
+	logString(strLog, BUFFER,LOG_DETAIL); 
 
 }
 
@@ -625,16 +621,13 @@ copyProfile(void) {
 	strcpy(to,from);
 	to[0] = 'b';
 	mkdir((LPSTR)to);
-	if (DEBUG_MODE) 
-		logString((char *)"copy activelist",BUFFER);
+	logString((char *)"copy activelist",BUFFER,LOG_DETAIL);
 	strcat(from,LIST_MASTER);
 	strcat(from,(char *)".txt");
 	strcpy(to,from);
 	to[0] = 'b';
-	if (DEBUG_MODE) {
-		logString(from,BUFFER);
-		logString(to,ASAP);
-	}
+	logString(from,BUFFER,LOG_DETAIL);
+	logString(to,ASAP,LOG_DETAIL);
 	ret = _copy((LPSTR)from, (LPSTR)to);
 	
 		strcpy(to,SYSTEM_PATH);
@@ -866,8 +859,7 @@ static int copyfilesFiltered(char *fromdir, char *todir)
 //	 		logString(dbgbuf,ASAP);
 
 			setLED(LED_RED,FALSE);
-			if (DEBUG_MODE)
-				logString(from,ASAP);
+			logString(from,ASAP,LOG_DETAIL);
 			r1 = _copy((LPSTR)from, (LPSTR)to);
 			playBip();
 			setLED(LED_RED,TRUE);
@@ -894,7 +886,7 @@ pushContentGetFeedback() {
 			bInbox[0] = 'b'; // changes a: to b:
 			copyMovedir(OUTBOX_PATH, bInbox);
 		} else
-			logString((char *)"no outbox folder",ASAP);
+			logString((char *)"no outbox folder",ASAP,LOG_ALWAYS);
 		getStats();  //grab all connected device's stats
 		playBip();
 		getAudioFeedback();  //grab all connected device's messages in User Feedback category

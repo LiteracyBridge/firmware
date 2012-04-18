@@ -440,8 +440,8 @@ isCategoryLocked(char *cat)
 	
 	handle = tbOpen(filepath, O_RDONLY);
 	if(handle < 0) {
-		logString("isCategoryLocked: unable to open following path:",BUFFER);
-		logString(filepath, BUFFER);
+		logString("isCategoryLocked: unable to open following path:",BUFFER,LOG_DETAIL);
+		logString(filepath, BUFFER,LOG_DETAIL);
 		return(FALSE);
 	}
 
@@ -475,8 +475,8 @@ setLockCat(char *cat, int newlock_value) {
 	
 	handle = tbOpen(filepath, O_RDONLY);
 	if(handle < 0) {
-		logString("lockCat: unable to open following path:",BUFFER);
-		logString(filepath, BUFFER);
+		logString("lockCat: unable to open following path:",LOG_NORMAL,LOG_DETAIL);
+		logString(filepath, BUFFER,LOG_DETAIL);
 		return(FALSE);
 	}
 	strcpy(wFilepath,"temp.txt");

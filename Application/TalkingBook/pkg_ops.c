@@ -49,8 +49,7 @@ int clearDeleteQueue(void) {
 	linesCounted = 0;
 	handle=tbOpen((LPSTR)strQueuePath,O_RDONLY);
 	if (handle < 0) {
-		if (DEBUG_MODE)
-			logString(strQueuePath,ASAP);
+		logString(strQueuePath,ASAP,LOG_DETAIL);
 		return -1; //no queue
 	}
 	do {
@@ -65,8 +64,8 @@ int clearDeleteQueue(void) {
 		linesCounted++;
 		found = 0; 
 		if (DEBUG_MODE) {
-			logString((char *)"DELETE QUEUE: Looking for references to ",BUFFER);
-			logString(packageName,ASAP);
+			logString((char *)"DELETE QUEUE: Looking for references to ",BUFFER,LOG_DETAIL);
+			logString(packageName,ASAP,LOG_DETAIL);
 		}
 		for (i=0;i<pd->intTotalMessageLists;i++) {
 			strcpy(strMsgProfilePath,LISTS_PATH);
@@ -79,12 +78,11 @@ int clearDeleteQueue(void) {
 					cursor = strrchr(strMsgListPath, '/') + 1;
 					*cursor = 0;  //remove *.* or previous filename 
 					strcat(strMsgListPath,fileInfo.f_name);
-					if (DEBUG_MODE)
-						logString(strMsgListPath,BUFFER);
+					logString(strMsgListPath,BUFFER,LOG_DETAIL);
 					if (-1 != findDeleteStringFromFile(NULL,strMsgListPath,packageName,FALSE)) {
 						found = 1;
 						if (DEBUG_MODE)
-							logString((char *)"Found another reference - will not delete package.",BUFFER);
+							logString((char *)"Found another reference - will not delete package.",BUFFER,LOG_NORMAL);
 						break;
 					}
 				}
@@ -134,7 +132,7 @@ int deletePackage(char * packageName) {
 			strcat(path,cursor);
 			strcat(path,"/");
 			strcat(strLog,cursor);
-			logString(strLog,ASAP);
+			logString(strLog,ASAP,LOG_NORMAL);
 			strcpy(filename,path);
 			strcat(filename,"*.*");
 			ret =_findfirst((LPSTR)filename, &file_info, D_FILE);
@@ -143,7 +141,7 @@ int deletePackage(char * packageName) {
 				strcat(filename,file_info.f_name);
 				ret = unlink((LPSTR)filename);
 				if (ret != -1) 
-					logString(file_info.f_name,BUFFER);
+					logString(file_info.f_name,BUFFER,LOG_NORMAL);
 				ret = _findnext(&file_info);
 			}
 			ret = rmdir((LPSTR)path);
@@ -152,7 +150,7 @@ int deletePackage(char * packageName) {
 			cursor = packageName;
 			if (LBstrncat((char *)strLog,cursor,LOG_LENGTH) == LOG_LENGTH-1)
 				strLog[LOG_LENGTH-2] = '~';
-			logString(strLog,BUFFER);
+			logString(strLog,BUFFER,LOG_NORMAL);
 			strcpy(filename,USER_PATH);
 			strcat(filename,cursor);
 			strcat(filename,AUDIO_FILE_EXT);

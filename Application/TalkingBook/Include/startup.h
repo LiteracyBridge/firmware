@@ -124,7 +124,6 @@ extern void cleanUpOldRevs(void);
 #define DEFAULT_LOG_KEYS 0
 #define DEFAULT_LONG_LIST_NAMES 1
 
-
 #define CONFIG_BUFLEN strlen (PROFILE_ORDER_FILE) + 1 + \
 				strlen (SYSTEM_PATH) + 1 + \
 				strlen (LANGUAGES_PATH) + 1 + \
