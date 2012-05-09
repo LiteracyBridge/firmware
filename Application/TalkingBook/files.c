@@ -6,6 +6,7 @@
 #include "Include/audio.h"
 #include "Include/files.h"
 #include "Include/filestats.h"
+#include "Include/sys_counters.h"
 
 APP_IRAM static long filePosition;
 APP_IRAM char logBuffer[LOG_BUFFER_SIZE];
@@ -14,6 +15,7 @@ APP_IRAM int idxLogBuffer;
 extern APP_IRAM unsigned int vCur_1;
 extern void refuse_lowvoltage(int);
 static int copyfiles(char *, char *);
+extern 	int convertTwoByteToSingleChar(unsigned int *, const unsigned int *, int);
 
 BOOL nextNameValuePair (int handle, char *buffer, char delimiter, char **name, char **value) {
 	BOOL ret;
@@ -97,6 +99,37 @@ void flushLog(void) {
 		idxLogBuffer = 0;
 	}
 }
+void forceflushLog(void) {
+	if(SACM_Status()) {
+		Snd_Stop();
+		while(SACM_Status())
+			;
+	}
+	flushLog();
+}
+void
+saveLogFile() {
+	char newlogname[128], *cp, strwrk[8];
+	int i;
+
+	extern SystemCounts systemCounts;
+	
+	mkdir((LPSTR)"a:/archive");
+	
+	strcpy(newlogname, "a:/archive/");
+	cp = strrchr(LOG_FILE, '/') + 1;
+	longToDecimalString(systemCounts.powerUpNumber, strwrk, 4);
+	strcat(newlogname, strwrk);
+	strcat(newlogname,"_");
+	strcat(newlogname, cp);
+	
+//	logString(newlogname,BUFFER,LOG_ALWAYS);
+	forceflushLog();
+	
+	i = unlink((LPSTR)newlogname);
+	i = rename((LPSTR)LOG_FILE, (LPSTR)newlogname);
+}
+
 
 
 int insertStringInFile(const char * filename, char * strText, long posInsert) {
@@ -1013,6 +1046,8 @@ buildExchgOstats() {
 	char strLog[PATH_LENGTH * 2], to[PATH_LENGTH], filename[PATH_LENGTH], delim[20];
 	int myexchgfd, ret, delim_len, have_new = 0, ends_with_lf;
 	struct f_info file_info;
+	int expandOstatFile(char *);
+
 	
 	strcpy(delim,DELIM);
 	delim_len = convertDoubleToSingleChar(delim,delim,FALSE);
@@ -1045,7 +1080,7 @@ buildExchgOstats() {
 	}
 	
 	if(have_new == 0) {
-		if(fileExists(to)) {
+		if(fileExists((LPSTR)to)) {
 			strcpy(strLog, "buildExchgOstats returns, no new ostat data");
 			logString(strLog, BUFFER,LOG_NORMAL);
 			return(0);
@@ -1071,7 +1106,7 @@ buildExchgOstats() {
 		strcpy(filename,OSTAT_DIR); 
 		strcat(filename,file_info.f_name);
 		
-		ends_with_lf = concatFiles(myexchgfd, (char *)filename);
+		ends_with_lf = concatFiles(myexchgfd, (LPSTR)filename);
 		if(ends_with_lf) {
 			ret = write(myexchgfd, (unsigned long)(&delim[1])<<1, delim_len-2);
 		} else {
@@ -1100,13 +1135,13 @@ int
 expandOstatFile(char *filename) {
 	char strLog[PATH_LENGTH * 2], to[PATH_LENGTH], from[PATH_LENGTH], buffer[READ_LENGTH+1];
 	char *line, *cp, *cp1, verbuf[PATH_LENGTH+1];
-	int fromfd, tofd, ret, checkfd, len, state = FIND_SRN, bytestowrite;
+	int fromfd, ret, checkfd, len, state = FIND_SRN, bytestowrite;
 	unsigned long newver, diskver;
 	
 	buffer[READ_LENGTH] = '\0';
 	strcpy(from, filename);
 	
-	fromfd = tbOpen(filename, O_RDONLY);
+	fromfd = tbOpen((LPSTR)filename, O_RDONLY);
 	if(fromfd < 0) {
 		strcpy(strLog,"expandOstatFile can't open ");
 		strcat(strLog, filename);
@@ -1118,7 +1153,7 @@ expandOstatFile(char *filename) {
 	}
 	getLine(-1,0); // reset
 	
-	while(line = getLine(fromfd, buffer)) {   
+	while((line = getLine(fromfd, buffer))) {   
 		len = strlen(line);
 		if(len <= 1)
 			continue;
@@ -1142,7 +1177,7 @@ expandOstatFile(char *filename) {
 			strcpy(to,OSTAT_DIR);
 			strcat(to, from);
 			strcat(to,".csv");
-			checkfd = tbOpen(to, O_RDONLY);
+			checkfd = tbOpen((LPSTR)to, O_RDONLY);
 			if(checkfd >= 0) {   //a csv from this third device exists on this device
 				ret = read(checkfd,(unsigned long)&verbuf<<1,PATH_LENGTH);
 				verbuf[PATH_LENGTH] = 0;
@@ -1161,7 +1196,7 @@ expandOstatFile(char *filename) {
 				strcpy(strLog, to);
 				strcat(strLog, " newer from other device");
 				logString(strLog,BUFFER,LOG_DETAIL);  
-				checkfd = tbOpen(to, O_WRONLY|O_CREAT|O_TRUNC);
+				checkfd = tbOpen((LPSTR)to, O_WRONLY|O_CREAT|O_TRUNC);
 				if(checkfd >= 0) {
 					state = PROCESS_STATS;
 					*cp = ',';
@@ -1199,7 +1234,7 @@ expandOstatFile(char *filename) {
 	}
 	
 	close(fromfd);
-	unlink(filename);
+	unlink((LPSTR)filename);
 	
 	strcpy(strLog, "expandOstatFile deleting ");
 	strcat(strLog, filename);

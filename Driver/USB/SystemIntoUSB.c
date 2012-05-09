@@ -244,7 +244,7 @@ xxx:
 	RHM_FlashPtr = 0;
 	
 	strcpy(strLog, "returned from USB Device Mode");	
-	logString(strLog, ASAP);
+	logString(strLog, ASAP, LOG_NORMAL);
 	
 	if (LED_RED)
 		setLED(LED_RED,FALSE);

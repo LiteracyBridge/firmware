@@ -448,6 +448,7 @@ static void logKeystroke(int intKey) {
 
 void setOperationalMode(int newmode) {
 	extern void buildMyStatsCSV();
+	extern void saveLogFile();
 	
   if(newmode == (int)P_WAIT) {
   	// stop();  --- should we see if we can WAIT while paused in an audio file?
@@ -472,6 +473,9 @@ void setOperationalMode(int newmode) {
 		else // newmode == (int)P_SLEEP
 			logString((char *)"Sleeping",BUFFER,LOG_NORMAL);			
 		logRTC();
+		
+		saveLogFile();	
+		
 	  	stop();
 		setLED(LED_ALL,FALSE);
 	
