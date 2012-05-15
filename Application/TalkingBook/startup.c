@@ -182,6 +182,8 @@ void startUp(unsigned int bootType) {
 	setLED(LED_RED,FALSE);  // red light can be left on after reprog restart
 	setLED(LED_GREEN,TRUE);  // red light can be left on after reprog restart
 	
+	mkdir("a:/log");  // remove after this folder is in all content
+	
 	if(bootType == BOOT_TYPE_COLD_RESET) {
 		extern unsigned long rtcAlarm[];
 		extern unsigned long curAlarmSet;    
@@ -195,6 +197,10 @@ void startUp(unsigned int bootType) {
 		systemCounts.month = 1;
 		systemCounts.monthday = 1;
 		systemCounts.poweredDays = 1;
+		
+		LOG_FILE = "a:/log/log.txt"; // chicken & egg - we haven't read config.txt or config.bin to set LOG_FILE
+		logString("BOOT_TYPE_COLD_RESET -- NEW BATTERIES???", ASAP, LOG_ALWAYS);
+		forceflushLog();
 
 		//setOperationalMode((int)P_SLEEP);  //DEVICE-90 - does too much fs activity
 		*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
