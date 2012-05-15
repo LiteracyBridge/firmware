@@ -89,6 +89,8 @@ void logString(char *string, int whenToWrite, int logPriority) {
 		}
 		if (whenToWrite==ASAP && !SACM_Status())
 			flushLog();
+		if (available < (LOG_BUFFER_SIZE - 72))
+			flushLog();
 	}
 }
 
