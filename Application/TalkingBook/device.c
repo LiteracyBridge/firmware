@@ -247,18 +247,36 @@ getCurVoltageSample() {
 		if(ret < vCur_1)	// if voltage < vCur_1 set a bit in vThresh_1, all ones in vThresh means 16 samples in a row below 
 			vThresh_1 |= 1;
 		if(vThresh_1 == 0xffff) {
-			--vCur_1;	// drop current nominal voltage
+			unsigned int delta_voltage = vCur_1 - ret;
+//			--vCur_1;	// drop current nominal voltage
+			vCur_1 = ret;
 			vThresh_1 = 0;	// reset threshold bits
 			currentTimeInSec = getRTCinSeconds();
-			if (!(vCur_1 % V_VOLTAGE_DROP_CHECK_INTERVAL)) {
+			if(delta_voltage >= V_VOLTAGE_DROP_CHECK_INTERVAL) {
+//			if (!(vCur_1 % V_VOLTAGE_DROP_CHECK_INTERVAL)) {
 				if (timeLastVoltageMilestone) {
+					unsigned int voltageDropRate;
 					voltageDropTime = currentTimeInSec - timeLastVoltageMilestone; 
 					strcpy(log, (char *) "VOLTAGE DROP RATE: 0."); 
-					longToDecimalString((long)V_VOLTAGE_DROP_CHECK_INTERVAL,log+strlen(log),2);
+					longToDecimalString((long)delta_voltage,log+strlen(log),2);
 					strcat(log,(char *) "v in ");
 					longToDecimalString((long)voltageDropTime,log+strlen(log),4);
 					strcat(log, (char *) " sec");
-					logString(log,BUFFER,LOG_NORMAL);
+					logString(log,BUFFER, LOG_ALWAYS);
+					
+					if(voltageDropTime > 0) {  // don't divide by 0
+						voltageDropRate = (delta_voltage * 10) / voltageDropTime;
+						strcpy(log, (char *) "VOLTAGE DROP RATE: "); 
+						longToDecimalString((long)voltageDropRate, log+strlen(log), 3);
+						logString(log,BUFFER, LOG_ALWAYS);
+					
+						if((voltageDropRate > 25) && (vCur_1 < 250)) {  //heuristic constants, may need to change
+							logString("VOLTAGE DROPPING FAST - NEED NEW BATTERIES" , ASAP, LOG_ALWAYS);
+							flushLog();
+							refuse_lowvoltage(1);
+						}
+					}
+				
 					if (voltageDropTime < V_FAST_VOLTAGE_DROP_TIME_SEC && vCur_1 < V_MIN_VOL_VOLTAGE) {
 						// Maybe try an adjustment like the one below, but that might be too aggressive
 						// vFast_Voltage_Drop_Time_Sec = voltageDropTime;
@@ -277,10 +295,10 @@ getCurVoltageSample() {
 			}
 			if(vCur_1 < V_MIN_RUN_VOLTAGE) {
 				refuse_lowvoltage(1);
-			} else if (vCur_1 == V_MIN_SDWRITE_VOLTAGE) {
-				stop(); // in case running audio causes a problem with logging
+			} else if (vCur_1 <= V_MIN_SDWRITE_VOLTAGE) {
+				Snd_Stop(); // in case running audio causes a problem with logging
 				strcpy(log,(char *)"Low voltage->Logging terminated.");
-				logString(log,ASAP,LOG_ALWAYS);
+				logString(log,ASAP, LOG_ALWAYS);
 			} 
 		}
 	}
@@ -476,10 +494,17 @@ void setOperationalMode(int newmode) {
 		
 		saveLogFile();	
 		
-	  	stop();
+	  	Snd_Stop();    // no logging
 		setLED(LED_ALL,FALSE);
 	
 		turnAmpOff();
+
+		disk_safe_exit(0);
+// try to get the sd card in a safe state - reversw what we do on startup		
+		_deviceunmount(0);
+		fs_uninit();
+		SD_Uninitial();		
+
 		turnSDoff();
 		turnNORoff();
 	  	
@@ -792,11 +817,11 @@ addAlarm(unsigned int hour, unsigned int minute, unsigned int second) {
 	}
 	rtcAlarm[insertpos] = newAlarm;
 	
-	strcpy(buf,"add alarm position ");
-	longToDecimalString(insertpos, (char *)strbuf, 1); 
+	strcpy(buf,"add new alarm at position ");
+	longToDecimalString(insertpos, (char *)strbuf, 2); 
 	strcat(buf, strbuf);
 	strcat(buf," alarm time ");
-	longToHexString((long)newAlarm, (char *)strbuf, 1);
+	unsignedlongToHexString((unsigned long)newAlarm, (char *)strbuf);
 	strcat(buf, strbuf);
 	logString(buf,BUFFER,LOG_NORMAL); 
 	
