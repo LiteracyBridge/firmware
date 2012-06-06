@@ -247,8 +247,8 @@ void startUp(unsigned int bootType) {
 		initializeProfiles(); 
 		pushContentGetFeedback();
 		resetSystem();
-	}	
-
+	}
+	
 	if (!SNexists()) {
 		// This will update the version when the device has just been programmed with probe,
 		// which wipes out the serial number.
@@ -335,6 +335,13 @@ void startUp(unsigned int bootType) {
 	}
 //#endif
 	SetSystemClockRate(CLOCK_RATE); // either set in config file or the default 48 MHz set at beginning of startUp()
+
+	// backward compatibility - remove when sure contents of sd card kav stats in the tsatistics directory
+	mkdir((LPSTR) "a:/statistics");
+	rename((LPSTR) "a:/system/stats", (LPSTR) STAT_DIR);
+	rename((LPSTR) "a:/system/ostats", (LPSTR) OSTAT_DIR);
+	mkdir((LPSTR) "a:/statistics/stats");
+	mkdir((LPSTR) "a:/statistics/ostats");
 
 	unlink ((LPSTR) (STAT_DIR SNCSV));
 	strcpy(buffer,getDeviceSN(1));

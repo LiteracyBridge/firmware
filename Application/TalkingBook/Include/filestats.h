@@ -6,11 +6,11 @@
 #define STAT_APPLY		5
 #define STAT_USELESS	6
 
-#define STAT_DIR  "a:/system/stats/" 
-#define OSTAT_DIR "a:/system/ostats/"
+#define STAT_DIR  "a:/statistics/stats/" 
+#define OSTAT_DIR "a:/statistics/ostats/"
 
-#define CLI_STAT_DIR "b:/system/stats/" 
-#define CLI_OSTAT_DIR "b:/system/ostats/"
+#define CLI_STAT_DIR "b:/statistics/stats/" 
+#define CLI_OSTAT_DIR "b:/statistics/ostats/"
 
 #define SNCSV "SN.csv"
 

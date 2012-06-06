@@ -318,6 +318,7 @@ static void exchangeStats() {
 	int ret, retCopy;
 	struct f_info file_info;
 
+	mkdir((LPSTR) "a:/statistics");
 	mkdir((LPSTR)OSTAT_DIR);
 	strcpy(filename,STAT_DIR); 
 	strcat(filename,"*.*");
@@ -441,6 +442,7 @@ void exchangeStatsCSV() {
 	char from[PATH_LENGTH], to[PATH_LENGTH];
 	int ret;
 
+	mkdir((LPSTR) "b:/statistics");
 	mkdir((LPSTR)CLI_OSTAT_DIR);	
 	
 	strcpy(to, CLI_OSTAT_DIR);
