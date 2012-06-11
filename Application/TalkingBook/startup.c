@@ -429,6 +429,10 @@ int loadConfigFile(void) {
 					handle = tbOpen((unsigned long)(CONFIG_FILE),O_RDONLY);
 				}
 			}
+			if(handle == -1) {
+				replaceFromBackup("a:/system/config.txt");
+				handle = tbOpen((unsigned long)(CONFIG_FILE),O_RDONLY);
+			}
 		}
 		if (handle == -1) {
 			ret = -1;

@@ -28,6 +28,9 @@
 // extension of ostats exchage file
 #define OSTATS_EXCHG_EXT    ".txt"
 
+#define BKPATH "a:/backup/"
+#define LOST "a:/LOST"
+
 
 extern void logString(char *, int, int);
 extern char *getLine (int, char *);

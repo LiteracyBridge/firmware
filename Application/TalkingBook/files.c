@@ -1244,3 +1244,71 @@ expandOstatFile(char *filename) {
 	
 	return(0);
 }
+
+int 
+replaceFromBackup(char *path)
+{
+	int ret = 0, srcexists = 0;
+	struct stat_t statbuf, bkstatbuf;
+	char temp[12];
+	char bkPath[PATH_LENGTH], mypath[PATH_LENGTH];
+	char * wrkpath;
+	char msg[128];
+	
+//	strcpy(msg, "REP 1 ");
+//	strcat(msg, path);
+//	logString(msg, BUFFER, LOG_ALWAYS);
+	
+	ret = stat((LPSTR)path, &statbuf);
+	if(ret == 0) {  // doesn't exist
+		srcexists = 1;
+	}
+	
+	strcpy(bkPath, BKPATH);
+	strcat(bkPath, strrchr(path, '/') + 1);
+	
+//	strcpy(msg, "REP 2 ");
+//	strcat(msg, bkPath);
+//	logString(msg, BUFFER, LOG_ALWAYS);
+	
+	ret = stat((LPSTR)bkPath, &bkstatbuf);
+	if(ret != 0) {  // doesn't exist, we don't have a backup
+		return(ret);
+	}
+	
+	if(srcexists == 1) {
+		mkdir((LPSTR) LOST);
+		strcpy(mypath, LOST);
+		wrkpath = path;
+		if(path[0] == 'a' && path[1] == ':') {
+			wrkpath += 2;
+		}
+		if(bkstatbuf.st_mode & 0x10) {  // a directory		
+			strcat(mypath, wrkpath);
+		} else {
+			strcat(mypath, strrchr(path, '/'));
+		}
+		strcat(mypath, "_");
+		
+		longToDecimalString(systemCounts.powerUpNumber,(char *)temp,4);
+		temp[4] = 0;
+		strcat(mypath, temp);
+		
+		rename((LPSTR) path , (LPSTR) mypath);
+			
+//		strcpy(msg, "REP 3 ");
+//		strcat(msg, mypath);
+//		logString(msg, BUFFER, LOG_ALWAYS);
+	}
+	
+	if(!(bkstatbuf.st_mode & 0x10))  {  //exists and not a dir
+//		logString("REP 4 _copy", BUFFER, LOG_ALWAYS);
+//		logString(path, BUFFER, LOG_ALWAYS);
+//		logString(bkPath, BUFFER, LOG_ALWAYS);
+///		_copy((LPSTR)bkPath, (LPSTR)path);  // src, dest
+		fileCopy((LPSTR)bkPath, (LPSTR)path);  // from, to
+	} else {
+		mkdir((LPSTR) path);
+		dirCopy((char *) bkPath, (char *)path, 1);  // from, to
+	}
+}
