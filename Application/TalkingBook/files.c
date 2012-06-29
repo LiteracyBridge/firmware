@@ -116,9 +116,9 @@ saveLogFile() {
 
 	extern SystemCounts systemCounts;
 	
-	mkdir((LPSTR)"a:/archive");
+	mkdir((LPSTR)LOG_ARCHIVE);
 	
-	strcpy(newlogname, "a:/archive/");
+	strcpy(newlogname, LOG_ARCHIVE);
 	cp = strrchr(LOG_FILE, '/') + 1;
 	longToDecimalString(systemCounts.powerUpNumber, strwrk, 4);
 	strcat(newlogname, strwrk);

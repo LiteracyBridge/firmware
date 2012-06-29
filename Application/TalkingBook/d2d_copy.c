@@ -783,6 +783,9 @@ cloneDir(char *fromdir, char *todir) {
 		if(!strcmp(from, OSTAT_DIR)) {
 			continue;
 		}
+		if(!strcmp(from, LOG_ARCHIVE)) {
+			continue;
+		}
 		
 		strcpy(dirname, fi.f_name);
 		fret += cloneDir (from, to);

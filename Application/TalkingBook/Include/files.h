@@ -30,6 +30,7 @@
 
 #define BKPATH "a:/backup/"
 #define LOST "a:/LOST"
+#define LOG_ARCHIVE "a:/archive/"
 
 
 extern void logString(char *, int, int);
