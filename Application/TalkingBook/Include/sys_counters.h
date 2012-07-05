@@ -16,6 +16,7 @@ struct SystemCounts {
     unsigned char monthday , month;
    	unsigned long recordingNumber;
    	unsigned short poweredDays;
+   	char location[40];
 };
 
 extern SystemCounts systemCounts;

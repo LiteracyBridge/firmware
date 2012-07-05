@@ -249,6 +249,7 @@ processSystemFiles(void) {
 			insertSound(&pkgSystem.files[PLEASE_WAIT_IDX],NULL,TRUE); 
 		}
 		playBip();
+		setLED(LED_ALL,FALSE);  
 		resetSystem(); // reset to begin new firmware reprogramming or to reload new config/system control
 	}
 }
@@ -263,7 +264,7 @@ processA18(struct f_info *fip, struct newContent *pNC) {
 
 	category[0] = lang[0] = 0;
 	if(getMetaCat(fip->f_name, category))  {				
-		handle = open((LPSTR)fip->f_name, O_RDONLY);
+		handle = tbOpen((LPSTR)fip->f_name, O_RDONLY);
 		if(handle >= 0) {
 			ret = metaRead(handle, DC_LANGUAGE, (unsigned int*)&lang);
 			close(handle);

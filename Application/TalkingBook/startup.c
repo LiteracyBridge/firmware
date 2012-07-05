@@ -24,6 +24,7 @@ extern unsigned int SetSystemClockRate(unsigned int);
 extern int SystemIntoUDisk(unsigned int);
 extern INT16 SD_Initial(void);
 
+static int setLocation(char *);
 static char * addTextToSystemHeap (char *);
 static int loadConfigFile (void);
 static void flagConfigFile(void);
@@ -169,21 +170,89 @@ void setDefaults(void) {
 
 }
 
+static int setLocation(char *location) {
+	char *cp;
+	int ret;
+	struct f_info file_info;
+	
+	ret =_findfirst((LPSTR)LOCATION_FILE_PATTERN, &file_info, D_FILE);
+	if (ret >=0) {
+		strcpy(location,file_info.f_name);
+		cp = strrchr(location,'.');
+		*cp = 0;	
+	} 
+	return ret;
+}
+
+// The following three functions were just experiments with vfs.h functions:
+//  UpdataDir(), FileRepair(), and _deleteall().
+//  The first two fucntions don't seem useful. deleteall() works fine in non-corrupted directories:
+/*
+static void dumpSystemDir(void) {
+	int fd;
+	int ret;
+	
+	ret = 0; //chdir((LPSTR)"a:\\system");
+	if (ret >= 0) {
+//		playDing();
+		fd = open((LPSTR)"a:\\sysdirdump.txt", O_CREAT);
+	 	if (fd >=0) {
+//	 		playDing();
+		 	UpdataDir(fd);
+			close(fd);
+	 	} else {
+//	 		playBip();
+	 	}
+	} else {
+//		playBip();
+	}
+}
+
+static void repairSystemDir(void) {
+	int fd;
+	int ret;
+	
+	fd = open((LPSTR)"a:\\system", O_RDONLY);
+	if (fd >=0) {
+		playDing();
+	 	ret = FileRepair(fd);
+		close(fd);
+		if (ret == 0)
+			playDing();
+		else if (ret == -1)
+			playBip();
+	} else 
+		playBip();
+}
+
+static void clearDir(char* dir) {
+	int hd,ret;
+	
+	ret = _deleteall((LPSTR)dir);
+	if (ret == 0)
+		playDing();
+	else if (ret == -1) {
+		playBip();
+		ret = _getfserrcode();
+		hd=open((LPSTR)"a:\\err.bin",O_CREAT);
+		write(hd,(LPDATA)&ret<<1,4);
+		close(hd);
+	}
+}
+*/
+
 void startUp(unsigned int bootType) {
 	char buffer[200];
 	char strCounts[32];
 	char filename[FILE_LENGTH];
-	int key;
+	int key, ret;
 	int configExists = 0, normal_shutdown=1;
 	
 	SetSystemClockRate(MAX_CLOCK_SPEED); // to speed up initial startup -- set CLOCK_RATE later
 
 	setDefaults();
-	setLED(LED_RED,FALSE);  // red light can be left on after reprog restart
-	setLED(LED_GREEN,TRUE);  // red light can be left on after reprog restart
-	
-	mkdir("a:/log");  // remove after this folder is in all content
-	
+	// start with both lights on to indicate that the user should wait during startup until the device is ready 
+		
 	if(bootType == BOOT_TYPE_COLD_RESET) {
 		extern unsigned long rtcAlarm[];
 		extern unsigned long curAlarmSet;    
@@ -197,14 +266,14 @@ void startUp(unsigned int bootType) {
 		systemCounts.month = 1;
 		systemCounts.monthday = 1;
 		systemCounts.poweredDays = 1;
-		
-		LOG_FILE = "a:/log/log.txt"; // chicken & egg - we haven't read config.txt or config.bin to set LOG_FILE
+		systemCounts.year = 2000 + systemCounts.powerUpNumber;
+				
+		LOG_FILE = DEFAULT_LOG_FILE; // chicken & egg - we haven't read config.txt or config.bin to set LOG_FILE
 		logString("BOOT_TYPE_COLD_RESET -- NEW BATTERIES???", ASAP, LOG_ALWAYS);
 		forceflushLog();
 
 		//setOperationalMode((int)P_SLEEP);  //DEVICE-90 - does too much fs activity
 		*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
-		setLED(LED_ALL,FALSE);	
 		turnAmpOff();
 		
 		//disable SD card
@@ -218,12 +287,27 @@ void startUp(unsigned int bootType) {
 		//_SystemOnOff();  // go to P_SLEEP mode, does not return
 		SysIntoHaltMode();
 	}
+
+	setLED(LED_ALL,TRUE);  
+
 // for really low batteries the playDing() below will cause a low voltage reset
 // handling that will go into Halt mode above
 // pressing play or black circle will get back here and the cycle will repeat
 // the user will see a long green flash then a short green flash and perhaps hear a partial ding
+	
 
+
+	/*
+	adjustVolume(1,0,0);
+	dumpSystemDir();
+	// repairSystemDir();
+	rename((LPSTR)"a:\\inbox",(LPSTR)"a:\\_inbox1");
+	rename((LPSTR)"a:\\languages",(LPSTR)"a:\\_languages1");
+	rename((LPSTR)"a:\\messages",(LPSTR)"a:\\_1messages");
+	rename((LPSTR)"a:\\system",(LPSTR)"a:\\_1system");
+	
 	//to stop user from wondering if power is on and possibly cycling too quickly,
+	*/
 	playDing();  // it is important to play a sound immediately 
 
 //	cleanUpOldRevs();	
@@ -234,7 +318,7 @@ void startUp(unsigned int bootType) {
 	if (key == KEY_STAR || key == KEY_MINUS) {
 		// allows USB device mode no matter what is on memory card
 		Snd_Stop();
-		cleanUpOldRevs(); // cleanup any old revs before someone sees the file system
+		//cleanUpOldRevs(); // cleanup any old revs before someone sees the file system
 		SystemIntoUDisk(1);	
 		SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
 		loadConfigFile();
@@ -247,8 +331,8 @@ void startUp(unsigned int bootType) {
 		initializeProfiles(); 
 		pushContentGetFeedback();
 		resetSystem();
-	}
-	
+	}	
+
 	if (!SNexists()) {
 		// This will update the version when the device has just been programmed with probe,
 		// which wipes out the serial number.
@@ -258,7 +342,7 @@ void startUp(unsigned int bootType) {
 
 // try to load a saved config.bin if present
 	configExists = (restore_config_bin() == -1?0:1);
-		
+	
 	if(!configExists) {
 		//config.bin does not exist or is corrupted so not a normal shutdown
 		normal_shutdown = 0;
@@ -288,38 +372,39 @@ void startUp(unsigned int bootType) {
 		processInbox();
 	} else
 		testPCB();
+	setLED(LED_ALL,TRUE);
 
 	if (!SNexists()) {
 		logException(32,(const char *)"no serial number",LOG_ONLY);
 		testPCB();	
 	}
+	
 	//loadDefaultUserPackage(); --moved this to load dynamically into pkgUser so that we could save the memory of pkgDefault
 	if (MACRO_FILE)	
 		loadMacro();
-	loadSystemCounts();
+	ret = loadSystemCounts();
 	systemCounts.powerUpNumber++;
 	if (systemCounts.powerUpNumber - systemCounts.lastLogErase > MAX_PWR_CYCLES_IN_LOG) {
 		systemCounts.lastLogErase = systemCounts.powerUpNumber;
 		clearStaleLog();	
 	}
-	
+	if (ret == -1 || fileExists((LPSTR)RESET_TRIGGER_FILE)) {
+		setLocation(systemCounts.location);
+		unlink((LPSTR)RESET_TRIGGER_FILE);
+	}
+			
 	saveSystemCounts();
 	
 	strcpy(buffer,"\x0d\x0a" "---------------------------------------------------\x0d\x0a");
 	strcat(buffer,getDeviceSN(1));
-	strcpy(strCounts,(char *)" counts:S");
-	longToDecimalString(systemCounts.powerUpNumber, strCounts+9, 4); 
-	strcat(strCounts,(char *)"P");
-	longToDecimalString(systemCounts.packageNumber, strCounts+14, 4); 
-	strcat(strCounts,(char *)"R");
-	longToDecimalString(systemCounts.revdPkgNumber, strCounts+19, 4);
-	strcat(strCounts,(char *)"PD");
-	longToDecimalString(systemCounts.poweredDays, strCounts+25, 4);
-	strcat(buffer,strCounts); 
-	strcat(buffer,"\x0d\x0a" "CYCLE "); //cycle number
+	strcat(buffer,"  Location: ");
+	strcat(buffer,systemCounts.location);
+	strcat(buffer,(const char *)"\x0d\x0a" "Version: " VERSION);
+	strcat(buffer,(char *)"\x0d\x0a" "Cycle: ");
 	longToDecimalString(systemCounts.powerUpNumber,(char *)(buffer+strlen(buffer)),4);
-	strcat(buffer,(const char *)" - version " VERSION);
-	if (DEBUG_MODE)
+	strcat(buffer,(char *)"  Powered Days: ");
+	longToDecimalString(systemCounts.poweredDays, (char *)(buffer+strlen(buffer)), 4);
+	if (DEBUG_MODE == LOG_DETAIL)
 		strcat(buffer,"\x0d\x0a" "*DEBUG MODE*");
 	logString(buffer,BUFFER,LOG_ALWAYS);
 		
@@ -329,19 +414,7 @@ void startUp(unsigned int bootType) {
 		logString((char *)"Apparently ABNORMAL shutdown (no or corrupt config.bin)", BUFFER,LOG_ALWAYS);
 	}
 	
-//#ifdef TB_CAN_WAKE
-	if(MEM_TYPE == MX_MID) {
-		logRTC();  
-	}
-//#endif
 	SetSystemClockRate(CLOCK_RATE); // either set in config file or the default 48 MHz set at beginning of startUp()
-
-	// backward compatibility - remove when sure contents of sd card kav stats in the tsatistics directory
-	mkdir((LPSTR) "a:/statistics");
-	rename((LPSTR) "a:/system/stats", (LPSTR) STAT_DIR);
-	rename((LPSTR) "a:/system/ostats", (LPSTR) OSTAT_DIR);
-	mkdir((LPSTR) "a:/statistics/stats");
-	mkdir((LPSTR) "a:/statistics/ostats");
 
 	unlink ((LPSTR) (STAT_DIR SNCSV));
 	strcpy(buffer,getDeviceSN(1));
@@ -363,7 +436,6 @@ void startUp(unsigned int bootType) {
 	loadPackage(PKG_SYS,currentProfileLanguage());
 
 	setNextAlarm();	// be sure at least midnight alarm is set
-	logRTC(); 
 	logString("call mainLoop",BUFFER,LOG_ALWAYS);
 	
 	mainLoop();
@@ -616,21 +688,6 @@ unsigned int GetMemManufacturer()
 
 }
 
-void cleanUpOldRevs() {
-	int ret;
-	struct f_info file_info;
-			
-	if (dirExists((LPSTR)"a://Firmware")) {
-		tbChdir((LPSTR)"a://Firmware");
-		ret =_findfirst((LPSTR)"*.*", &file_info, D_FILE);
-		while (ret >= 0) {
-			ret = unlink((LPSTR)file_info.f_name);
-			ret = _findnext(&file_info);	
-		}	
-		tbChdir((LPSTR)"a://");
-		rmdir((LPSTR)"a://Firmware");
-	}
-}
 
 #define SAV_CONFIG_INT(arg) cfg. ## arg = arg
 #define SAV_CONFIG_STRING(string) \

@@ -119,9 +119,7 @@ int deletePackage(char * packageName) {
 			markEndPlay(timeNow);
 		}
 		stop();
-		strcpy(strLog,"\x0d\x0a");
-		longToDecimalString(timeNow,strLog+2,5);
-		strcat((char *)strLog,(const char *)": DELETE ");
+		strcpy(strLog,(char *)"DELETE ");
 		
 		prefixCursor = NULL;
 		if (0 == strncmp(packageName,CUSTOM_PKG_PREFIX,strlen(CUSTOM_PKG_PREFIX)))

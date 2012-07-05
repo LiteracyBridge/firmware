@@ -52,6 +52,29 @@ void resetRTC(void) {
 	*P_Hour = 0;	
 }
 
+extern void getRTC(char * str) {
+	unsigned long d,h,m,s;
+	char time[15];
+	
+	d = (unsigned long)systemCounts.poweredDays;
+	h = (unsigned long) *P_Hour;	
+	m = (unsigned long) *P_Minute;
+	s = (unsigned long) *P_Second;
+
+	longToDecimalString(d,time,3);
+	time[3] = 'd';
+	longToDecimalString(h,time+4,2);
+	time[6] = 'h';
+	longToDecimalString(m,time+7,2);
+	time[9] = 'm';
+	longToDecimalString(s,time+10,2);
+	time[12] = 's';
+	time[13] = ':';
+	time[14] = 0;
+	strcpy(str,time);
+}
+	
+/* NO LONGER USED SINCE RTC IS PRE-PENDED TO EVERY LOGSTRING
 void logRTC(void) {
 	unsigned long h,m,s;
 	char time[12];
@@ -68,8 +91,7 @@ void logRTC(void) {
 	time[10] = 's';
 	time[11] = 0;
 	logString(time,ASAP,LOG_ALWAYS);
-}
-
+}*/
 
 long getRTCinSeconds(void) {
 	unsigned long ret, secH;
@@ -177,7 +199,7 @@ void setUSBDevice (BOOL set) {
 	if (set) {
 		Snd_Stop();
 		flushLog();
-		cleanUpOldRevs(); // cleanup any old revs
+		//cleanUpOldRevs(); // cleanup any old revs
 		SystemIntoUDisk(USB_CLIENT_SVC_LOOP_CONTINUOUS);	
 		SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
 		processInbox();
@@ -318,7 +340,6 @@ int keyCheck(int longCheck) {
 		if(curkey != keydown) {		// the key is up - return it
 			*P_TimeBaseB_Ctrl = 0;    // stop timer
 //			logKeystroke(keydown | 0x8000);
-//			logRTC();
 			curkey = keydown;
 			keydown = 0;
 			return curkey;
@@ -327,7 +348,6 @@ int keyCheck(int longCheck) {
 			curkey = keydown | LONG_KEY_STROKE;
 			keydown = 0;
 //			logKeystroke(curkey | 0xc000);
-//			logRTC();
 			logKeystroke(curkey);
 			return (curkey);  // return long key stroke
 		}
@@ -363,7 +383,6 @@ int keyCheck(int longCheck) {
 		__asm__("irq on");
 		__asm__("fiq on");
 		
-//		logRTC();
 		keydown = keystroke;
 	}
 	if(longCheck && keydown) {
@@ -424,8 +443,8 @@ void resetSystem(void) {
 	// set watchdog timer to reset device; 0x780A (Watchdog Reset Control Register)
 	// see GPL Programmer's Manual (V1.0 Dec 20,2006), Section 3.5, page 18
 	stop(); 
+	setLED(LED_ALL,FALSE);  
 	logString((char *)"* RESET *",BUFFER,LOG_ALWAYS);
-	logRTC();
 	fs_safexit(); // should close all open files
 	*P_WatchDog_Ctrl &= ~0x4001; // clear bits 14 and 0 for resetting system and time=0.125 sec 	
 	*P_WatchDog_Ctrl |= 0x8004; // set bits 2 and 15 for 0.125 sec, system reset, and enable watchdog
@@ -466,7 +485,7 @@ static void logKeystroke(int intKey) {
 
 void setOperationalMode(int newmode) {
 	extern void buildMyStatsCSV();
-	extern void saveLogFile();
+	extern void saveLogFile(int);
 	
   if(newmode == (int)P_WAIT) {
   	// stop();  --- should we see if we can WAIT while paused in an audio file?
@@ -483,16 +502,15 @@ void setOperationalMode(int newmode) {
   		write_config_bin();  // build a config.bin
 		writeVersionToDisk();  // make sure the version file is correct
   		confirmSNonDisk(); // make sure the serial number file is correct 
- 		cleanUpOldRevs(); // cleanup any old revs 
+ 		//cleanUpOldRevs(); // cleanup any old revs 
     	// assume calling for sleep or halt
 		*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
 		if (newmode == (int)P_HALT)
 			logString((char *)"Halting",BUFFER,LOG_NORMAL);
 		else // newmode == (int)P_SLEEP
 			logString((char *)"Sleeping",BUFFER,LOG_NORMAL);			
-		logRTC();
 		
-		saveLogFile();	
+		saveLogFile(0);	
 		
 	  	Snd_Stop();    // no logging
 		setLED(LED_ALL,FALSE);
@@ -764,7 +782,6 @@ void rtcAlarmFired() {
 	
 	strcpy(buffer,"rtcAlarmFired rtc =");
 	logString(buffer,ASAP,LOG_ALWAYS);
-	logRTC();
 	
 //  any rtc alarm not on hour 0 minute 0 will not reset an alarm 
 	if(curAlarmSet) {
@@ -781,7 +798,6 @@ void rtcAlarmFired() {
 		longToDecimalString(systemCounts.poweredDays, buffer+12, 4);
 		logString(buffer,ASAP,LOG_ALWAYS);
 		lastActivity = 0;  // if up when rollover prevent shutdown
-//		logRTC(); // remove
 //		resetRTC();
 //		resetRTC23();  // test, really set rtc to 0,0,1sec
 //		setRTCalarm(0, 0, 0);

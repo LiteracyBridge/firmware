@@ -66,10 +66,13 @@ void clearStaleLog() {
 
 void logString(char *string, int whenToWrite, int logPriority) {
 	int len, available;
-
+	char newString[256];
+	
 	if (logPriority > DEBUG_MODE)
 		return; // not worth logging, according to config file
 	if (LOG_FILE) {
+		getRTC(newString);
+		LBstrncat((char *)newString,string,255);
 		if (idxLogBuffer && (idxLogBuffer <= (LOG_BUFFER_SIZE - 3))) {
 			// already one entry, separate with CRLF
 			logBuffer[idxLogBuffer++] = 0x0d;
@@ -77,13 +80,13 @@ void logString(char *string, int whenToWrite, int logPriority) {
 			logBuffer[idxLogBuffer] = '\0';			 
 		}
 		available = LOG_BUFFER_SIZE - idxLogBuffer - 1;	
-		len = strlen(string);		
+		len = strlen(newString);		
 		if ((available > 0) && (len > available)) {
-			memcpy(&logBuffer[idxLogBuffer],string,available);
+			memcpy(&logBuffer[idxLogBuffer],newString,available);
 			idxLogBuffer = LOG_BUFFER_SIZE;
 			logBuffer[LOG_BUFFER_SIZE - 1] = '\0';
 		} else if (available >= len) {
-			strcpy(&logBuffer[idxLogBuffer],string);
+			strcpy(&logBuffer[idxLogBuffer],newString);
 			idxLogBuffer += len;
 			logBuffer[idxLogBuffer] = '\0';			 
 		}
@@ -110,20 +113,24 @@ void forceflushLog(void) {
 	flushLog();
 }
 void
-saveLogFile() {
+saveLogFile(int noteCorruption) {
 	char newlogname[128], *cp, strwrk[8];
 	int i;
 
 	extern SystemCounts systemCounts;
 	
-	mkdir((LPSTR)LOG_ARCHIVE);
+	mkdir((LPSTR)LOG_ARCHIVE_PATH);
 	
-	strcpy(newlogname, LOG_ARCHIVE);
+	strcpy(newlogname, LOG_ARCHIVE_PATH);
 	cp = strrchr(LOG_FILE, '/') + 1;
 	longToDecimalString(systemCounts.powerUpNumber, strwrk, 4);
-	strcat(newlogname, strwrk);
-	strcat(newlogname,"_");
-	strcat(newlogname, cp);
+	strcat(newlogname,(char *)"log_");
+	strcat(newlogname, getDeviceSN(0)); 
+	strcat(newlogname,(char *)"_");
+	strcat(newlogname, (char *)strwrk);
+	if (noteCorruption)
+		strcat(newlogname,(char *)"-CORRUPTION");
+	strcat(newlogname, (char *)LOG_EXTENSION);
 	
 //	logString(newlogname,BUFFER,LOG_ALWAYS);
 	forceflushLog();
@@ -483,7 +490,11 @@ INT16 tbOpen(LPSTR path, INT16 open_flag) {
 	const int RETRIES = 2;
 	int i;
 	INT16 handle;
-
+	char dirPath[PATH_LENGTH];
+	char logMsg[PATH_LENGTH + 20];
+	char *ptr, *pPath;
+	
+	pPath = (char *)path;
 	if (SACM_Status())
 		Snd_Stop(); // DO NOT use stop() here because that calls flushLog(), which eventually calls this fct.
 	
@@ -494,6 +505,31 @@ INT16 tbOpen(LPSTR path, INT16 open_flag) {
 			break;
 		wait(100);
 	}
+	if (handle == -1) {
+		// log potential memory corruption
+		if ((*pPath == '/') || (*(pPath+1) == ':')) {
+			// absolute path
+			strcpy(dirPath,pPath);
+		} else {
+			//relative path, so get current working directory
+			getcwd((LPSTR)dirPath,PATH_LENGTH);
+		}
+		ptr = strrchr(dirPath,'/');
+		if (ptr)
+			*ptr = 0;
+		if (isCorrupted(dirPath)) {
+			if (strcmp((char *)path,LOG_FILE)) { // error didn't occur trying to open log file
+				strcpy(logMsg,(char *)"CORRUPTED: ");
+				strcat(logMsg,dirPath);
+				logString(logMsg,BUFFER,LOG_ALWAYS);
+				saveLogFile(1);
+			} else {
+				handle = open((LPSTR)"a:/log/CORRUPTED-LOG.txt",O_CREAT|O_RDWR|O_TRUNC);
+				close(handle);
+			}
+		}			
+	}
+
 	return handle;
 }
 
@@ -940,6 +976,9 @@ static int copyfiles(char *fromdir, char *todir)
 
 int 
 copyMovedir(char *fromdir, char *todir) {
+	//WARNING: This function may have a bug.  It seems to get stuck in the file dir recursion,
+	//         which may be related to having too many handles open, including _findfirst().
+	//INSTEAD: check out cloneDir() or dirCopy().
 // 	copy directory tree below fromdir (all subdirectories and files at all levels)
 	int ret, r1, len_from, len_to, len, fret;
 	char from[PATH_LENGTH], fromfind[PATH_LENGTH], to[PATH_LENGTH], lastdir[FILE_LENGTH];
@@ -1138,7 +1177,7 @@ expandOstatFile(char *filename) {
 	char strLog[PATH_LENGTH * 2], to[PATH_LENGTH], from[PATH_LENGTH], buffer[READ_LENGTH+1];
 	char *line, *cp, *cp1, verbuf[PATH_LENGTH+1];
 	int fromfd, ret, checkfd, len, state = FIND_SRN, bytestowrite;
-	unsigned long newver, diskver;
+	signed long newver, diskver;
 	
 	buffer[READ_LENGTH] = '\0';
 	strcpy(from, filename);
@@ -1311,4 +1350,48 @@ replaceFromBackup(char *path)
 		mkdir((LPSTR) path);
 		dirCopy((char *) bkPath, (char *)path, 1);  // from, to
 	}
+}
+
+extern void logStat(char * filePath) {
+
+	int handle;
+	int ret;
+	char logPath[PATH_LENGTH];
+	
+	struct stat_t dirStat;
+	
+	ret = stat((LPSTR)filePath,&dirStat);
+	
+	strcpy(logPath,filePath);
+	strcat(logPath,(char *)"-stat.bin");
+	
+	handle = tbOpen((LPSTR)logPath,O_CREAT |O_RDWR|O_TRUNC);
+	write(handle, (unsigned long)&dirStat<<1, sizeof(struct stat_t)<<1);
+	write(handle, (unsigned long)&ret<<1,sizeof(int)<<1);
+	close(handle);	
+}
+
+
+extern int isCorrupted(char * filePath) {
+	struct f_info fi;
+	char filter[PATH_LENGTH];
+	int ret;
+	int foundCorruption = 0;
+	
+	if (!dirExists((LPSTR)filePath))
+		return -1;
+
+	LBstrncpy(filter,filePath,PATH_LENGTH-1);
+	if (filter[strlen(filter)-1] != '/')
+		strcat(filter,(char *)"/");
+	strcat(filter,(char *)"*.*");
+	ret = _findfirst((LPSTR)filter,&fi,D_DIR);
+	while (ret == 0) {
+		if (fi.f_size) {
+			foundCorruption = 1;
+			break;
+		} 
+		ret = _findnext(&fi);		
+	}
+	return foundCorruption;		
 }

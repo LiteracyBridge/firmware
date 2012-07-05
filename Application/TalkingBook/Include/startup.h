@@ -9,11 +9,11 @@
 #define CONFIG_BIN_FILE     "a://system/config.bin"
 #define ALT_CONFIG_FILE		"a://config.txt"
 #define FLAGGED_CONFIG_FILE	"a://system/config-VERSION-CHANGED.txt"
-
 #define BOOT_TYPE_COLD_RESET 0
 #define BOOT_TYPE_KEY_PRESS  1
 #define BOOT_TYPE_RTC_ALARM  2
-
+#define RESET_TRIGGER_FILE	"a://reset"
+#define LOCATION_FILE_PATTERN	"a:/system/*.loc"
 // set BAD_MEMBRANE_SW for the old membrane switch that A-Tech has
 //#define OLD_MEMBRANE_SW 
 
@@ -120,7 +120,7 @@ extern void cleanUpOldRevs(void);
 #define DEFAULT_BLOCK_END_LEADER  5000
 #define DEFAULT_GREEN_LED_WHEN_PLAYING  1
 #define DEFAULT_VOLTAGE_SAMPLE_FREQ_SEC 120
-#define DEFAULT_DEBUG_MODE 1
+#define DEFAULT_DEBUG_MODE 2
 #define DEFAULT_LOG_KEYS 0
 #define DEFAULT_LONG_LIST_NAMES 1
 
@@ -241,7 +241,7 @@ typedef struct config_bin {
 #define DEFAULT_OUTBOX_PATH       "a:/outbox/"
 #define DEFAULT_NEW_PKG_SUBDIR    "messages/"
 #define DEFAULT_SYS_UPDATE_SUBDIR "sys-updates/"
-#define DEFAULT_LOG_FILE          "a:/system/log.txt"
+#define DEFAULT_LOG_FILE          "a:/log/log.txt"
 #define DEFAULT_LIST_MASTER       "activeLists"
 #define DEFAULT_SYSTEM_VARIABLE_FILE "a:/system/system-vars"
 #define DEFAULT_PKG_NUM_PREFIX    "P"
@@ -250,6 +250,5 @@ typedef struct config_bin {
 #define DEFAULT_AUDIO_FILE_EXT    ".a18"
 #define DEFAULT_USER_CONTROL_TEMPLATE ""  // "package-template"
 #define DEFAULT_MACRO_FILE        ""  // "a:/system/macro.txt"
-
 #endif
 

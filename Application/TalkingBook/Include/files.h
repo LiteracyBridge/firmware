@@ -27,6 +27,9 @@
 #define DELIM "\r\n" OSTATS_DELIM "\r\n"
 // extension of ostats exchage file
 #define OSTATS_EXCHG_EXT    ".txt"
+#define LOG_ARCHIVE_PATH	"a:/log-archive/"
+#define LOG_ARCHIVE_OTHERS_PATH		LOG_ARCHIVE_PATH "others/"
+#define LOG_EXTENSION		".txt"
 
 #define BKPATH "a:/backup/"
 #define LOST "a:/LOST"
@@ -62,5 +65,8 @@ extern void categoryStringtoLong(char *, MLENTRY *);
 extern void categoryLongtoString(char *, MLENTRY *);
 extern unsigned int loadLanglisttoMemory(char *,  MLENTRY[], unsigned int);
 extern int buildExchgOstats(void);
-
+extern void forceflushLog(void);
+extern void logStat(char *);
+extern int isCorrupted(char *);
+extern int replaceFromBackup(char *);
 #endif

@@ -60,9 +60,11 @@ int loopClip(void) {
 			if (wasStopped) {
 				close(handle);
 				handle = tbOpen((LPSTR)(filePath),O_RDONLY);
-				SACMGet_A1800FAT_Mode(handle,0);
-				Snd_SACM_PlayFAT(handle, C_CODEC_AUDIO1800);
-				justStarted = 1;
+				if (handle >= 0) {
+					SACMGet_A1800FAT_Mode(handle,0);
+					Snd_SACM_PlayFAT(handle, C_CODEC_AUDIO1800);
+					justStarted = 1;
+				}
 			}
 			if (loopEnding) {
 				tempFrame = clipEndFrame - loopTimeFrames;

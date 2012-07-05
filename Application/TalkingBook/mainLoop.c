@@ -1364,7 +1364,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 
 		case DELETE_MESSAGES:
-			logString((char *)"Deletoing Messages",BUFFER,LOG_ALWAYS);
+			logString((char *)"Deleting Messages",BUFFER,LOG_ALWAYS);
 			// delete all messages in a subject/category
 			if (destination == 0) {
 				stop();
@@ -1385,7 +1385,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 
 		case TRIM:
-			logString((char *)"Trim a rcording",BUFFER,LOG_ALWAYS);
+			logString((char *)"Trim a recording",BUFFER,LOG_ALWAYS);
 			stop();
 			tempList = &context.package->lists[destination];
 			cursor = getCurrentList(tempList);
@@ -1399,6 +1399,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 		
 		case SURVEY_TAKEN:
+			logString((char *)"SURVEY:taken",BUFFER,LOG_ALWAYS);
 			tempList = &context.package->lists[destination];
 			cursor = getCurrentList(tempList);		
 			recordStats(cursor, 0L, STAT_SURVEY1, PKG_SYS+1);
@@ -1408,6 +1409,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 			
 		case SURVEY_APPLY:
+			logString((char *)"SURVEY:apply",BUFFER,LOG_ALWAYS);
 			tempList = &context.package->lists[destination];
 			cursor = getCurrentList(tempList);		
 			recordStats(cursor, 0L, STAT_APPLY, PKG_SYS+1);
@@ -1416,6 +1418,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			reposition = TRUE;
 			break;
 		case SURVEY_USELESS:
+			logString((char *)"SURVEY:useless",BUFFER,LOG_ALWAYS);
 			tempList = &context.package->lists[destination];
 			cursor = getCurrentList(tempList);		
 			recordStats(cursor, 0L, STAT_USELESS, PKG_SYS+1);		
@@ -1622,6 +1625,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 					if (context.isPaused) {
 						context.isPaused = FALSE;
 						resume();	
+						logString((char *)"UNPAUSED",BUFFER,LOG_ALWAYS);
 					} else if (context.isScanning) {
 						context.isScanning = FALSE;
 						playBip();
@@ -1629,6 +1633,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 					} else {
 						context.isPaused = TRUE;
 						pause();
+						logString((char *)"PAUSED",BUFFER,LOG_ALWAYS);
 					}		
 					break;
 			}
@@ -1637,12 +1642,13 @@ static void takeAction (Action *action, EnumAction actionCode) {
 		case PAUSE:
 			pause();
 			context.isPaused = TRUE;
+			logString((char *)"PAUSED",BUFFER,LOG_ALWAYS);
 			break;
 			
 		case RECORD_TITLE: // deprecated
 		case RECORD_MSG:
-			logString((char *)"Record",BUFFER,LOG_ALWAYS);
 			stop();
+			logString((char *)"Record",BUFFER,LOG_ALWAYS);
 /*			// Not currently allowing sound inserts before record commands since aux is used for recording from another headphone jack
 			// Although the SPINS part of the headphone jack thing isn't currently working.
 			if (action && hasSoundInsert(action)) {
@@ -1693,9 +1699,9 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;	
 
 		case RECORD_FEEDBACK:
-			logString((char *)"Record Feedback",BUFFER,LOG_ALWAYS);
 			//this code is mostly a copy of case RECORD.  todo: move reusable part into a fct
 			stop();
+			logString((char *)"Record Feedback",BUFFER,LOG_ALWAYS);
 /*			// Not currently allowing sound inserts before record commands since aux is used for recording from another headphone jack
 			// Although the SPINS part of the headphone jack thing isn't currently working.
 			if (action && hasSoundInsert(action)) {
@@ -1758,6 +1764,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 
 		case FWD:
+			logString((char *)"Scan forward",BUFFER,LOG_ALWAYS);
 			newActionCode = getStartEndCodeFromTimeframe(context.idxTimeframe,FORWARD_JUMPING, &newTime, &newIdxAction);
 			switch (newActionCode) {
 				case NOP:
@@ -1783,6 +1790,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 			
 		case BACK:
+			logString((char *)"Scan backward",BUFFER,LOG_ALWAYS);
 			// test whether within the start leader to determine whether to go to last start or to previous start before that
 			if ((oldTime - getCurrentTimeframeStart()) > compressTime(BLOCK_START_LEADER, context.package->timePrecision)) {
 				// just move to start time of same timeframe 
@@ -1815,6 +1823,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			// observe block boundary when they exist, but leap beyond them
 			// todo:do not leap over newFile boundaries
 			// if system package action, reset context to user package for this action
+			logString((char *)"JUMP_TIME",BUFFER,LOG_ALWAYS);
 			if (context.returnPackage)
 				context.package = context.returnPackage;
 			if (context.package != &pkgSystem) {
@@ -1861,10 +1870,12 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 		case SLEEP:
 			// call sleep function
+			logString((char *)"USER SLEEP",BUFFER,LOG_ALWAYS);
 			stop();
 			setOperationalMode((int)P_SLEEP); 
 			break;
 		case HALT:
+			logString((char *)"USER HALT",BUFFER,LOG_ALWAYS);
 			stop();
 			// call sleep function
 			setOperationalMode((int)P_HALT); 

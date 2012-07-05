@@ -96,8 +96,6 @@ backfromRTC()
 	IOKey_Initial();	
 	SD_Initial();
 			
-	logRTC();
-	
 	__asm__("irq on");
 	__asm__("fiq on");
 	

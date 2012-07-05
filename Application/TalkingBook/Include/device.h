@@ -49,7 +49,7 @@ extern int NORMAL_VOLUME, MAX_VOLUME, VOLUME_INCREMENT;
 
 extern void KeyScan_ServiceLoop(void);
 
-extern void logRTC(void);
+extern void getRTC(char *);
 extern void resetRTC(void);
 extern long getRTCinSeconds(void);
 extern void setLED(unsigned int, BOOL);

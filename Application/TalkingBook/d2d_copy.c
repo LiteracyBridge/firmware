@@ -15,6 +15,9 @@
 #include "Include/d2d_copy.h"
 
 extern APP_IRAM SystemCounts systemCounts;
+static APP_IRAM char connectedSN[16];
+static APP_IRAM char connectedCycleNumber[8];
+
 static char * longToDecimalStringZ(long l, char * string, int numberOfDigits);
 
 extern int setUSBHost(BOOL enter);
@@ -26,7 +29,9 @@ static void copyListAudio(const char * listName);
 static void exchangeStatsCSV(void);
 static int copyfilesFiltered(char *fromdir, char *todir);
 static void getStats(void);
-
+static int getOtherSNandCycle(char *, char *);
+static void getLogs(void);
+ 
 static void getAudioFeedback(void) {
 	ProfileData profiles;
 	char path[PATH_LENGTH];
@@ -312,13 +317,12 @@ static void exchangeStats() {
 //         a device keeps stats from other devics in a OSTAT_DIR directory
 // the code a to b and stats to ostats & vice versa
 //
-//  copy a:/system/stats/*.* to b:/system/ostats/ 
+//  copy a:/statistics/stats/*.* to b:/statistics/ostats/ 
 
 	char strLog[PATH_LENGTH], filename[PATH_LENGTH], to[PATH_LENGTH];
 	int ret, retCopy;
 	struct f_info file_info;
 
-	mkdir((LPSTR) "a:/statistics");
 	mkdir((LPSTR)OSTAT_DIR);
 	strcpy(filename,STAT_DIR); 
 	strcat(filename,"*.*");
@@ -342,7 +346,7 @@ static void exchangeStats() {
 	}
 
 	
-//  copy b:/system/stats/*.* to a:/system/ostats
+//  copy b:/statistics/stats/*.* to a:/statistics/ostats
 	strcpy(filename,STAT_DIR);
 	filename[0] = 'b'; 
 	strcat(filename,"*.*");
@@ -442,7 +446,6 @@ void exchangeStatsCSV() {
 	char from[PATH_LENGTH], to[PATH_LENGTH];
 	int ret;
 
-	mkdir((LPSTR) "b:/statistics");
 	mkdir((LPSTR)CLI_OSTAT_DIR);	
 	
 	strcpy(to, CLI_OSTAT_DIR);
@@ -478,51 +481,73 @@ void exchangeStatsCSV() {
 
 }
 
-static void
-getStats(void) {
-	char linein[PATH_LENGTH], from[PATH_LENGTH], to[PATH_LENGTH], *cp1, *cp2;
-	char cli_serial_number[PATH_LENGTH], strLog[PATH_LENGTH];
-	int ret, i, j, f;
-	
-	logString((char *)"getting connected device's stats",ASAP,LOG_DETAIL);
+static int 
+getOtherSNandCycle(char *sn, char *cycle) {
+	char linein[PATH_LENGTH], from[PATH_LENGTH],*cp;
+	int j,f,ret;
 	
 	strcpy(from, CLI_STAT_DIR);
-//	strcpy(from, "a:/b/system/stats/");  // remove after testing with a b folder on a:
-
-	cp1 = from + strlen(from);  // save this position	
 	strcat(from, SNCSV);	
-	
+
+	logString(from,ASAP,LOG_DETAIL);	
 	f = tbOpen((LPSTR)from, O_RDONLY); 
 	if(f < 0) {
-		return;
+		return -1;
 	}
 	ret = read(f, (unsigned long)&linein << 1, 128);
 	close(f);
 	if(ret <= 0) {
-		return;
+		return -1;
 	}
+	logString((char *)"read SN file",ASAP,LOG_DETAIL);	
+	
+	for(cp=sn,j=0; j<ret; j++) {
+		*cp = linein[j] & 0xff;
+		if(*cp == ',') {
+			*cp = 0;
+			cp = cycle;
+		} else if(*cp == 0) 
+			break;
+		else if (*cp == 0x0a || *cp == 0x0d) {
+			*cp = 0;
+			break;
+		} else
+			cp++;
+		*cp = linein[j] >> 8;
+		if(*cp == ',') {
+			*cp = 0;
+			cp = cycle;
+		} else if(*cp == 0)
+			break;
+		else if (*cp == 0x0a || *cp == 0x0d) {
+			*cp = 0;
+			break;
+		} else
+			cp++;
+	}
+	strcpy(linein,(char *)"SN:");
+	strcat(linein,sn);
+	strcat(linein,(char *)"  Cycle:");
+	strcat(linein,cycle);
+	logString(linein,ASAP,LOG_DETAIL);
+	return 0;
+}
+
+static void
+getStats(void) {
+	char from[PATH_LENGTH], to[PATH_LENGTH];
+	char strLog[PATH_LENGTH];
+	int ret;
+	
+	logString((char *)"getting connected device's stats",ASAP,LOG_DETAIL);
 	
 	strcpy(to, OSTAT_DIR);
-	i = strlen(to);
-	cp2 = to + i;
-	
-	for(j=0; j<ret; j++) {
-		to[i] = linein[j] & 0xff;
-		if(to[i] == ',') 
-			to[i] = 0;
-		if(to[i++] == 0)
-			break;
-		to[i] = linein[j] >> 8;
-		if(to[i] == ',') 
-			to[i] = 0;
-		if(to[i++] == 0)
-			break;
-	}
-	strcpy(cli_serial_number, (char *)cp2);
-
+	strcat(to,connectedSN);
 	strcat(to, ".csv");
-	strcpy((char *)cp1, (char *)cp2);
 
+	strcpy(from,CLI_STAT_DIR);	
+	strcat(from,connectedSN);
+	strcat(from, ".csv");
 	
 	logString(from,BUFFER,LOG_DETAIL);
 	logString(to,ASAP,LOG_DETAIL);
@@ -535,11 +560,11 @@ getStats(void) {
 //
 
 	strcpy(from, CLI_OSTAT_DIR);
-	strcat(from, cli_serial_number);
+	strcat(from, connectedSN);
 	strcat(from, OSTATS_EXCHG_EXT);
 	
 	strcpy(to, OSTAT_DIR);
-	strcat(to, cli_serial_number);
+	strcat(to, connectedSN);
 	strcat(to, OSTATS_EXCHG_EXT);
 	
 	// from b: to a:
@@ -878,6 +903,33 @@ static int copyfilesFiltered(char *fromdir, char *todir)
 	return(fret);
 }
 
+static void
+getLogs() {
+	char myPath[PATH_LENGTH], theirPath[PATH_LENGTH];
+
+	// get other devices's Other-Device logs
+	strcpy(myPath,LOG_ARCHIVE_OTHERS_PATH);
+	strcpy(theirPath,LOG_ARCHIVE_OTHERS_PATH);
+	theirPath[0] = 'b';
+	logString(theirPath,ASAP,LOG_DETAIL);
+	logString(myPath,ASAP,LOG_DETAIL);
+	cloneDir(theirPath,myPath);
+
+	// get other device's logs
+	strcat(myPath,connectedSN);
+	logString(myPath,ASAP,LOG_DETAIL);
+	mkdir((LPSTR)myPath);
+	strcat(myPath,"/");
+	strcat(myPath,connectedCycleNumber);
+	logString(myPath,ASAP,LOG_DETAIL);
+	mkdir((LPSTR)myPath);
+	strcat(myPath,"/");
+	strcpy(theirPath,LOG_ARCHIVE_PATH);
+	theirPath[0] = 'b';
+	logString(theirPath,ASAP,LOG_DETAIL);
+	copyAllFiles((LPSTR)theirPath,(LPSTR)myPath,FALSE);
+}
+
 void 
 pushContentGetFeedback() {
 	char bInbox[PATH_LENGTH];
@@ -892,7 +944,12 @@ pushContentGetFeedback() {
 			copyMovedir(OUTBOX_PATH, bInbox);
 		} else
 			logString((char *)"no outbox folder",ASAP,LOG_ALWAYS);
-		getStats();  //grab all connected device's stats
+		if (getOtherSNandCycle(connectedSN,connectedCycleNumber) != -1) {
+			logString(connectedSN,ASAP,LOG_DETAIL);
+			logString(connectedCycleNumber,ASAP,LOG_DETAIL);
+			getLogs();
+			exchangeStatsCSV();  //grab all connected device's stats
+		}
 		playBip();
 		getAudioFeedback();  //grab all connected device's messages in User Feedback category
 		playDing();

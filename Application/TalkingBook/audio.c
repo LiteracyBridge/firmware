@@ -471,9 +471,7 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 		ret = 1; // signals no audio recorded but not necessary to throw exception
 	} else {
 		start = getRTCinSeconds();
-		strcpy(temp,"\x0d\x0a");
-		longToDecimalString(start,temp+2,8);
-		strcat(temp,(const char *)": RECORD ");
+		strcpy(temp,"RECORD ");
 		LBstrncat(temp,pkgName,60);
 		LBstrncat(temp," -> ",60);
 		LBstrncat(temp,cursor,60);	
@@ -545,99 +543,104 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
         saveSystemCounts();
         
        	handle = tbOpen((LPSTR)filepath,O_RDWR);
-       	
-       	metadata_start = lseek(handle, 0L, SEEK_END);  // offset to start of metadata
-        metadata_numfields = 0L; // init num fields
-       
-		wrk1 = METADATA_VERSION;
-        writeLE32(handle, wrk1, CURRENT_POS);  //meta data version = 1
-        writeLE32(handle, metadata_numfields, CURRENT_POS); // 4 byte for num fields
-        
-        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
-        strcat(unique_id, "_");    
-       	strcat(unique_id, digits);
-            
-        addField(handle, DC_IDENTIFIER, unique_id, 1);       
-        metadata_numfields += 1;
-        
-        addField(handle, DTB_REVISION, (char *)"0", 1);       
-        metadata_numfields += 1;
-        
-        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
+       	if (handle >= 0) {
+	       	metadata_start = lseek(handle, 0L, SEEK_END);  // offset to start of metadata
+	        metadata_numfields = 0L; // init num fields
+	       
+			wrk1 = METADATA_VERSION;
+	        writeLE32(handle, wrk1, CURRENT_POS);  //meta data version = 1
+	        writeLE32(handle, metadata_numfields, CURRENT_POS); // 4 byte for num fields
+	        
+	        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
+	        strcat(unique_id, "_");    
+	       	strcat(unique_id, digits);
+	            
+	        addField(handle, DC_IDENTIFIER, unique_id, 1);       
+	        metadata_numfields += 1;
+	        
+	        addField(handle, DTB_REVISION, (char *)"0", 1);       
+	        metadata_numfields += 1;
+	        
+	        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
+	
+	
+	        strcat(unique_id, "_");    
+	        longToDecimalString(systemCounts.powerUpNumber,(char *)temp,4);
+	        strcat(unique_id, temp);
+	        strcat(unique_id, "_"); 
+	        longToDecimalString(systemCounts.recordingNumber,(char *)temp,4);
+	        strcat(unique_id, temp);
+	        strcat(unique_id, "_"); 
+	        strncat(unique_id, digits, 8);
+	        addField(handle, DC_TITLE, unique_id, 1);       
+	        metadata_numfields += 1;
+	
+	//        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
+	//        strcat(unique_id, "_");       
+	//		strcat(unique_id, digits);		
+	//        addField(handle, DC_AUDIO_ITEM_ID, unique_id, 1);       
+	//        metadata_numfields += 1;
+	
+	        if (pkgSystem.idxLanguageCode != -1) {
+				strcpy(unique_id,&pkgSystem.strHeapStack[pkgSystem.idxLanguageCode]);
+				addField(handle, DC_LANGUAGE, unique_id, 1);
+				metadata_numfields += 1;   
+	        }
+	         
+	        cp = cursor;
+	        if(cp != NULL) {
+				if(*cp >= '0' && *cp <= '9') {
+		        	strcpy(category, cursor);
+				} else if(!strncmp(cp, "AGR", 3))
+		        	strcpy(category, CAT_AGRICULTURE);
+	        	else if(!strncmp(cp, "HEA", 3))
+	        		strcpy(category, CAT_HEALTH);
+	        	else if(!strncmp(cp, "EDU", 3))
+	        		strcpy(category, CAT_EDUCATION);
+	        	else if(!strncmp(cp, "STO", 3))
+	        		strcpy(category, CAT_STORIES);
+	        	else if(!strncmp(cp, "BUS", 3))
+	        		strcpy(category, CAT_BUSINESS);
+	        	else if(!strncmp(cp, "GOV", 3))
+	        		strcpy(category, CAT_GOVERNANCE);
+	        	else if(!strncmp(cp, "MUS", 3))
+	        		strcpy(category, CAT_MUSIC);
+	        	else if(!strncmp(cp, "DIA", 3))
+	        		strcpy(category, CAT_DIARY);
+	        	else
+	        		strcpy(category, CAT_OTHER);
+			}
+	        
+	       	addField(handle, DC_CATEGORY, category, 1);
+	    	metadata_numfields += 1;
+	        	       
+	        if(relatedToLastPlayed) {
+	        	strcpy(unique_id, STAT_FN); // DC_IDENTIFIER read at open
+	        	if(strlen(unique_id)) {
+	        		addField(handle,DC_RELATION,unique_id,1);
+	        		metadata_numfields += 1;
+	        	}
+	        }
+	
+	        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
+	 		addField(handle,DC_PUBLISHER,unique_id,1);       
+	        metadata_numfields += 1;
+	
+	        strcpy(unique_id, systemCounts.location); // skip serial number prefix
+	 		addField(handle,DC_SOURCE,unique_id,1);       
+	        metadata_numfields += 1;
 
-
-        strcat(unique_id, "_");    
-        longToDecimalString(systemCounts.powerUpNumber,(char *)temp,4);
-        strcat(unique_id, temp);
-        strcat(unique_id, "_"); 
-        longToDecimalString(systemCounts.recordingNumber,(char *)temp,4);
-        strcat(unique_id, temp);
-        strcat(unique_id, "_"); 
-        strncat(unique_id, digits, 8);
-        addField(handle, DC_TITLE, unique_id, 1);       
-        metadata_numfields += 1;
-
-//        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
-//        strcat(unique_id, "_");       
-//		strcat(unique_id, digits);		
-//        addField(handle, DC_AUDIO_ITEM_ID, unique_id, 1);       
-//        metadata_numfields += 1;
-
-        if (pkgSystem.idxLanguageCode != -1) {
-			strcpy(unique_id,&pkgSystem.strHeapStack[pkgSystem.idxLanguageCode]);
-			addField(handle, DC_LANGUAGE, unique_id, 1);
-			metadata_numfields += 1;   
-        }
-         
-        cp = cursor;
-        if(cp != NULL) {
-			if(*cp >= '0' && *cp <= '9') {
-	        	strcpy(category, cursor);
-			} else if(!strncmp(cp, "AGR", 3))
-	        	strcpy(category, CAT_AGRICULTURE);
-        	else if(!strncmp(cp, "HEA", 3))
-        		strcpy(category, CAT_HEALTH);
-        	else if(!strncmp(cp, "EDU", 3))
-        		strcpy(category, CAT_EDUCATION);
-        	else if(!strncmp(cp, "STO", 3))
-        		strcpy(category, CAT_STORIES);
-        	else if(!strncmp(cp, "BUS", 3))
-        		strcpy(category, CAT_BUSINESS);
-        	else if(!strncmp(cp, "GOV", 3))
-        		strcpy(category, CAT_GOVERNANCE);
-        	else if(!strncmp(cp, "MUS", 3))
-        		strcpy(category, CAT_MUSIC);
-        	else if(!strncmp(cp, "DIA", 3))
-        		strcpy(category, CAT_DIARY);
-        	else
-        		strcpy(category, CAT_OTHER);
-		}
-        
-       	addField(handle, DC_CATEGORY, category, 1);
-    	metadata_numfields += 1;
-        	       
-        if(relatedToLastPlayed) {
-        	strcpy(unique_id, STAT_FN); // DC_IDENTIFIER read at open
-        	if(strlen(unique_id)) {
-        		addField(handle,DC_RELATION,unique_id,1);
-        		metadata_numfields += 1;
-        	}
-        }
-
-        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
- 		addField(handle,DC_SOURCE,unique_id,1);       
-        metadata_numfields += 1;
-
-		longToDecimalString(systemCounts.powerUpNumber,(char *)temp,4);
-		addField(handle,DC_DATE,temp,1);
-        metadata_numfields += 1;
-        
-        // add other fields here
-        
-        writeLE32(handle, metadata_numfields, metadata_start + 4); // write correct num meta data fields
-        
-		close(handle);
-// done with meta data
+			longToDecimalString(systemCounts.powerUpNumber,(char *)temp,4);
+			addField(handle,DC_DATE,temp,1);
+	        metadata_numfields += 1;
+	        
+	        // add other fields here
+	        
+	        writeLE32(handle, metadata_numfields, metadata_start + 4); // write correct num meta data fields
+	        
+			close(handle);
+       	}
+		// done with meta data
 		//asm("INT FIQ, IRQ"); -- see INT OFF above used once to prevent corrupted recordings (now possibly handled by SD_Initial() after USB Device mode
         
 //		*P_WatchDog_Ctrl &= ~0x8000; // clear bit 15 to disable
@@ -694,11 +697,13 @@ int createRecording(char *pkgName, int fromHeadphone, char *listName, BOOL relat
 	}
 	
 //	device-58		
-	list = &pkgSystem.lists[context.package->idxMasterList];
-	if(list->isLocked) {
-		return(ERR_CATEGORY_LOCKED);
+	if (!relatedToLastPlayed) {
+		list = &pkgSystem.lists[context.package->idxMasterList];
+		if(list->isLocked) {
+			logString((char *)"Attempted to record into locked category",BUFFER,LOG_NORMAL);
+			return(ERR_CATEGORY_LOCKED);
+		}
 	}
-//	device-58
 
 	ret = recordAudio(pkgName,listName,relatedToLastPlayed);
 	if (SPINS)
@@ -738,8 +743,7 @@ void markStartPlay(long timeNow, const char * name) {
 	context.packageStartTime = timeNow;
 //	strcpy(log,"\x0d\x0a");
 //	longToDecimalString(timeNow,log+2,8);
-	longToDecimalString(timeNow,log,8);
-	strcat((char *)log,(const char *)": PLAY ");
+	strcpy((char *)log,(const char *)"PLAY ");
 	if (LBstrncat((char *)log,name,LOG_LENGTH) == LOG_LENGTH-1)
 		log[LOG_LENGTH-2] = '~';
 	logString(log,BUFFER,LOG_NORMAL);	
