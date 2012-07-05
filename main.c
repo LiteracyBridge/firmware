@@ -105,7 +105,7 @@ backfromRTC()
 //		*P_RTC_INT_Status |= 0x50f;	//clear all possible RTC interrupts
 	strcpy(buf, "back from Halt - RTC Alarm fired\n");
 	logString(buf, ASAP, LOG_NORMAL);
-	RTC_Alarm_Fired();			// do isr work, will ste next alarm
+//	RTC_Alarm_Fired();			// do isr work, will ste next alarm
 	
 //	setLED(LED_GREEN,TRUE);
 //	wait(1000);

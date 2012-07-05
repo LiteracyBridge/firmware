@@ -193,7 +193,7 @@ void startUp(unsigned int bootType) {
 		}
 		curAlarmSet = 0;
 		rtc_fired = 0;
-		resetRTC();  //  reset before saving anything to disk and running macros
+//		resetRTC();  //  reset before saving anything to disk and running macros
 		systemCounts.month = 1;
 		systemCounts.monthday = 1;
 		systemCounts.poweredDays = 1;
@@ -363,6 +363,8 @@ void startUp(unsigned int bootType) {
 	loadPackage(PKG_SYS,currentProfileLanguage());
 
 	setNextAlarm();	// be sure at least midnight alarm is set
+	logRTC(); 
+	logString("call mainLoop",BUFFER,LOG_ALWAYS);
 	
 	mainLoop();
 }
@@ -420,7 +422,9 @@ int loadConfigFile(void) {
 		LOG_FILE = 0; //default in case no logging location in config file (turns logging off)
 		MACRO_FILE = 0; // default case if no MACRO_FILE listed
 		handle = tbOpen((unsigned long)(CONFIG_FILE),O_RDONLY);
+		logString(CONFIG_FILE, BUFFER, LOG_ALWAYS);
 		if (handle == -1) {
+			logString(ALT_CONFIG_FILE, BUFFER, LOG_ALWAYS);
 			handle = tbOpen((unsigned long)(ALT_CONFIG_FILE),O_RDONLY);
 			if (handle == -1) {
 				// check if config file was renamed to indicate reprogramming was recently started

@@ -722,6 +722,7 @@ setRTCalarmHours(unsigned int hours) {
 
 void
 setRTCalarm(unsigned int hour, unsigned int minute, unsigned int second) {
+	char msg[32] = "set ALM ";
 	
 	*P_Alarm_Second = second;
 	*P_Alarm_Minute = minute;
@@ -729,6 +730,15 @@ setRTCalarm(unsigned int hour, unsigned int minute, unsigned int second) {
 	
 	*P_RTC_INT_Ctrl |= RTC_ALARM_INTERRUPT_ENABLE;
 	*P_RTC_Ctrl     |= RTC_ALARM_FUNCTION_ENABLE;
+	
+	longToDecimalString(hour,msg+8,4);
+	msg[12] = 'h';
+	longToDecimalString(minute,msg+13,2);
+	msg[15] = 'm';
+	longToDecimalString(second,msg+16,2);
+	msg[18] = 's';
+	msg[19] = 0;
+	logString(msg,ASAP,LOG_ALWAYS);
 }
 
 /*  called from isr.asm when RTC alarm has fired
@@ -750,9 +760,11 @@ void rtcAlarmFired() {
 	char buffer[32];
 	void setNextAlarm();
 	void removeAlarm(unsigned long);
-//	strcpy(buffer,"rtcAlarmFired rtc =");
-//	logString(buffer,BUFFER);
-//	logRTC();
+	APP_IRAM static unsigned long lastActivity;
+	
+	strcpy(buffer,"rtcAlarmFired rtc =");
+	logString(buffer,ASAP,LOG_ALWAYS);
+	logRTC();
 	
 //  any rtc alarm not on hour 0 minute 0 will not reset an alarm 
 	if(curAlarmSet) {
@@ -763,10 +775,14 @@ void rtcAlarmFired() {
 		loadSystemCounts();
 		systemCounts.poweredDays += 1;
 		saveSystemCounts();
+//		logRTC(); // remove
+		while(*P_Second == 0) wait(100);
 		strcpy(buffer,"poweredDays=");
 		longToDecimalString(systemCounts.poweredDays, buffer+12, 4);
-		logString(buffer,ASAP,LOG_NORMAL);
-		resetRTC();
+		logString(buffer,ASAP,LOG_ALWAYS);
+		lastActivity = 0;  // if up when rollover prevent shutdown
+//		logRTC(); // remove
+//		resetRTC();
 //		resetRTC23();  // test, really set rtc to 0,0,1sec
 //		setRTCalarm(0, 0, 0);
 	}
@@ -835,30 +851,57 @@ void setNextAlarm() {
 	unsigned long curRTC   = getRTCinSeconds();
 	
 	curAlarmSet = 0;
-	for(i=0; i<N_RTC_ALARMS; i++) {
+/* for now disable all alarma except the one at 0:0:0 */
+/*	for(i=0; i<N_RTC_ALARMS; i++) {
 		if(rtcAlarm[i] > curRTC) {
 			newAlarm = rtcAlarm[i];
 			hour   = newAlarm / 3600;
 			minute = (newAlarm % 3600) / 60;
 			second = (newAlarm % 3600) % 60;
 			setRTCalarm(hour, minute, second);
+			logString("setRTCalarm(non-zero)",BUFFER,LOG_NORMAL); 
 			curAlarmSet = newAlarm;
 			break;	
 		}
 	}
+*/
 	if(curAlarmSet == 0 ) {
-		setRTCalarm(0, 0, 0);	
+		logString("setRTCalarm(0,0,0)",BUFFER,LOG_NORMAL); 
+		while(*P_Hour == 0 && *P_Minute == 0 && *P_Second == 0);
+		setRTCalarm(0, 0, 0);
+// test		setPlus10();	
 	}
 }
-/*
+
 void resetRTC23(void) {
 #define		P_RTC_HMSBusy                 (volatile unsigned int*)(P_RTC_Ctrl_Base+0x17)
 	while (*P_RTC_HMSBusy) ; // wait till RTC is not busy 
-	*P_Second = 30;
+	*P_Second = 10;
 	while (*P_RTC_HMSBusy) ; // wait till RTC is not busy 
-	*P_Minute = 59;
+	*P_Minute = 50;
 	while (*P_RTC_HMSBusy) ; // wait till RTC is not busy 
-	*P_Hour = 23;	
+	*P_Hour = 23;
+}
+/*
+void
+setPlus10() {
+	unsigned int sec, min, hr;
+	
+	sec = *P_Second;
+	min = *P_Minute;
+	hr  = *P_Hour;
+	min += 10;
+	if(min >= 60) {
+		min = min - 60;
+		hr++;
+	}
+	if(hr >= 24) {
+		hr = 0;
+		min = 0;
+		sec = 0;
+	}
+	setRTCalarm(hr, min, sec);
+
 }
 */
 void

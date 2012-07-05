@@ -465,6 +465,10 @@ extern int checkInactivity(BOOL resetTimer) {
 		
 	currentTime = getRTCinSeconds();	
 
+	if(currentTime <= INACTIVITY_SECONDS) {  // when time rolls over do not HALT if up and running
+		resetTimer = TRUE;
+	}
+	
 	if (resetTimer) {
 		lastUSBCheck = lastActivity = currentTime;
 		warnedUser = FALSE;
