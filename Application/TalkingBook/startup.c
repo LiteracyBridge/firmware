@@ -1,4 +1,4 @@
-#DEFINE HALT_ON_COLD_START
+#define HALT_ON_COLD_START
 // Copyright 2009 Literacy Bridge
 // CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
 // Contact: info@literacybridge.org
@@ -273,7 +273,7 @@ void startUp(unsigned int bootType) {
 		logString("BOOT_TYPE_COLD_RESET -- NEW BATTERIES???", ASAP, LOG_ALWAYS);
 		forceflushLog();
 
-#IFDEF HALT_ON_COLD_START
+#ifdef HALT_ON_COLD_START
 		//setOperationalMode((int)P_SLEEP);  //DEVICE-90 - does too much fs activity
 		*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
 		turnAmpOff();
@@ -288,7 +288,7 @@ void startUp(unsigned int bootType) {
 	    *P_IOD_Buffer  |= 0x0001;	
 		//_SystemOnOff();  // go to P_SLEEP mode, does not return
 		SysIntoHaltMode();
-#ENDIF
+#endif
 	}
 
 	setLED(LED_ALL,TRUE);  
