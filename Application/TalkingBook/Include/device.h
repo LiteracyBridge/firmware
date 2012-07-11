@@ -5,8 +5,6 @@
 
 #include ".\Component\Include\component_head.h"
 
-#define MIN_VOLUME	1
-
 //refuse to go into usb mode if voltage below this value
 #define V_MIN_USB_VOLTAGE 190
 
@@ -45,7 +43,7 @@ extern unsigned int LONG_KEYPRESS_COUNTER;
 extern int KEY_PLAY, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_SELECT, KEY_STAR, KEY_HOME, KEY_PLUS, KEY_MINUS;	
 extern int LED_GREEN, LED_RED, LED_ALL;
 extern int MAX_SPEED, NORMAL_SPEED, SPEED_INCREMENT;
-extern int NORMAL_VOLUME, MAX_VOLUME, VOLUME_INCREMENT;
+extern int NORMAL_VOLUME, MAX_VOLUME, MIN_VOLUME, VOLUME_INCREMENT;
 
 extern void KeyScan_ServiceLoop(void);
 

@@ -79,6 +79,7 @@ extern void cleanUpOldRevs(void);
 #define DEFAULT_NORMAL_VOLUME	2
 #define DEFAULT_NORMAL_SPEED	12
 #define DEFAULT_MAX_VOLUME 		15
+#define DEFAULT_MIN_VOLUME		1
 #define DEFAULT_MAX_SPEED		24
 #define DEFAULT_VOLUME_INCREMENT	1
 #define DEFAULT_SPEED_INCREMENT 	3
@@ -161,6 +162,7 @@ typedef struct config_bin {
 				int MAX_SPEED;
 				int NORMAL_SPEED;
 				int MAX_VOLUME;
+				int MIN_VOLUME;
 				int NORMAL_VOLUME;
 				int SPEED_INCREMENT;
 				int VOLUME_INCREMENT;
