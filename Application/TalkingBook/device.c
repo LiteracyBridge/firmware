@@ -53,24 +53,27 @@ void resetRTC(void) {
 }
 
 extern void getRTC(char * str) {
-	unsigned long d,h,m,s;
-	char time[15];
+	unsigned long c,d,h,m,s;
+	char time[20];
 	
+	c = (unsigned long)systemCounts.powerUpNumber;
 	d = (unsigned long)systemCounts.poweredDays;
 	h = (unsigned long) *P_Hour;	
 	m = (unsigned long) *P_Minute;
 	s = (unsigned long) *P_Second;
 
-	longToDecimalString(d,time,3);
-	time[3] = 'd';
-	longToDecimalString(h,time+4,2);
-	time[6] = 'h';
-	longToDecimalString(m,time+7,2);
-	time[9] = 'm';
-	longToDecimalString(s,time+10,2);
-	time[12] = 's';
-	time[13] = ':';
-	time[14] = 0;
+	longToDecimalString(c,time,4);
+	time[4] = 'c';
+	longToDecimalString(d,time+5,3);
+	time[8] = 'd';
+	longToDecimalString(h,time+9,2);
+	time[11] = 'h';
+	longToDecimalString(m,time+12,2);
+	time[14] = 'm';
+	longToDecimalString(s,time+15,2);
+	time[17] = 's';
+	time[18] = ':';
+	time[19] = 0;
 	strcpy(str,time);
 }
 	
@@ -444,7 +447,7 @@ void resetSystem(void) {
 	// see GPL Programmer's Manual (V1.0 Dec 20,2006), Section 3.5, page 18
 	stop(); 
 	setLED(LED_ALL,FALSE);  
-	logString((char *)"* RESET *",BUFFER,LOG_ALWAYS);
+	logString((char *)"* RESET *",ASAP,LOG_ALWAYS);
 	fs_safexit(); // should close all open files
 	*P_WatchDog_Ctrl &= ~0x4001; // clear bits 14 and 0 for resetting system and time=0.125 sec 	
 	*P_WatchDog_Ctrl |= 0x8004; // set bits 2 and 15 for 0.125 sec, system reset, and enable watchdog
