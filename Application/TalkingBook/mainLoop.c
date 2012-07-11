@@ -529,9 +529,11 @@ processAlarm(unsigned long alarm) {
 	char buffer[48], alm[12];
 	
 	strcpy(buffer,"mainloop: RTC alarm has fired ");
-	longToHexString((long)alarm, (char *)alm, 1);
+	unsignedlongToHexString((long)alarm, (char *)alm);
  	strcat(buffer, alm);
-	logString(buffer,BUFFER,LOG_DETAIL);
+	logString(buffer,ASAP,LOG_DETAIL);
+	
+	rtcAlarmFired(alarm);
 	
 /*   test
 
@@ -633,6 +635,11 @@ void mainLoop (void) {
 			inactivityCheckCounter = 0;
 		}
 		keyResponse();
+		
+		if(rtc_fired) {		
+			processAlarm(rtc_fired);
+			rtc_fired = 0;
+		}
 	} // end of while(1) loop
 }
 

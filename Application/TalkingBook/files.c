@@ -128,6 +128,9 @@ saveLogFile(int noteCorruption) {
 	strcat(newlogname, getDeviceSN(0)); 
 	strcat(newlogname,(char *)"_");
 	strcat(newlogname, (char *)strwrk);
+	longToDecimalString(systemCounts.poweredDays, strwrk, 4);
+	strcat(newlogname,(char *)"_");
+	strcat(newlogname, (char *)strwrk);
 	if (noteCorruption)
 		strcat(newlogname,(char *)"-CORRUPTION");
 	strcat(newlogname, (char *)LOG_EXTENSION);

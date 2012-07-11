@@ -46,9 +46,9 @@ int main (int bootType) {
 
 	MEM_TYPE = GetMemManufacturer();
 	
-	if(bootType == BOOT_TYPE_RTC_ALARM) {
-		backfromRTC();
-	}
+//	if(bootType == BOOT_TYPE_RTC_ALARM) {
+//		backfromRTC();
+//	}
 	
 	initVoltage();	// get initial voltage before SACM_Init in BodyInit - may never run BodyInit()
 	
@@ -63,6 +63,9 @@ int main (int bootType) {
 	fs_init();
 	_devicemount(0); // should include call to IOKey_Initial() within BodyInit.c 
 	 				// to flip on a transistor early enough to power the microSD card
+	 				
+	 LOG_FILE = DEFAULT_LOG_FILE; // chicken & egg - we haven't read config.txt or config.bin to set LOG_FILE
+
 
 	ChangeCodePage(UNI_ENGLISH);
 	
@@ -71,6 +74,11 @@ int main (int bootType) {
 	}
 	
 	initRandomNG();  // enable 32 bit counter 
+	
+	
+	if(bootType == BOOT_TYPE_RTC_ALARM) {
+		backfromRTC();
+	}
 
 	startUp(bootType);
 	return 0;
@@ -110,6 +118,9 @@ backfromRTC()
 //	setLED(LED_GREEN,FALSE);
 
 	if(hr == 0 && min == 0) {
+		int wrk = *P_RTC_INT_Status;
+		*P_RTC_INT_Status |= wrk;	// clear all interrupt flags
+		rtcAlarmFired(0L);
 		setOperationalMode((int)P_HALT);    //go back to HALT, does not return
 	} else {
 		disk_safe_exit(0); // close all open files - we are reiniting

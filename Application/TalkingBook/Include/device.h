@@ -75,8 +75,9 @@ extern void writeVersionToDisk(void);
 
 #define RTC_ALARM_INTERRUPT_ENABLE 0x0400
 #define RTC_ALARM_FUNCTION_ENABLE  0x0400
+#define RTC_MODULE_ENABLE          0x8000
 
-extern void rtcAlarmFired(void);
+extern void rtcAlarmFired(unsigned long);
 extern unsigned long setRTCalarmSeconds(unsigned long);
 extern unsigned long setRTCalarmMinutes(unsigned int);
 extern unsigned long setRTCalarmHours(unsigned);

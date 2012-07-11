@@ -750,7 +750,7 @@ setRTCalarm(unsigned int hour, unsigned int minute, unsigned int second) {
 	*P_Alarm_Hour   = hour;
 	
 	*P_RTC_INT_Ctrl |= RTC_ALARM_INTERRUPT_ENABLE;
-	*P_RTC_Ctrl     |= RTC_ALARM_FUNCTION_ENABLE;
+	*P_RTC_Ctrl     |= (RTC_MODULE_ENABLE | RTC_ALARM_FUNCTION_ENABLE);
 	
 	longToDecimalString(hour,msg+8,4);
 	msg[12] = 'h';
@@ -771,19 +771,21 @@ RTC_Alarm_Fired() {
 	int wrk = *P_RTC_INT_Status;
 	
 	if(rtc_fired == 0) {
-		rtc_fired = curAlarmSet;
+		rtc_fired = 0xff000000;
 	}
 	*P_RTC_INT_Status |= wrk;	// clear all interrupt flags
-	rtcAlarmFired();
+//	rtcAlarmFired();
 	
 }
-void rtcAlarmFired() {
-	char buffer[32];
+void rtcAlarmFired(unsigned long alarm) {
+	char buffer[48], wrk[12];
 	void setNextAlarm();
 	void removeAlarm(unsigned long);
 	APP_IRAM static unsigned long lastActivity;
 	
-	strcpy(buffer,"rtcAlarmFired rtc =");
+	strcpy(buffer,"rtcAlarmFired alarm=");
+	unsignedlongToHexString((long)alarm, (char *)wrk);
+	strcat(buffer, wrk);
 	logString(buffer,ASAP,LOG_ALWAYS);
 	
 //  any rtc alarm not on hour 0 minute 0 will not reset an alarm 
@@ -791,7 +793,8 @@ void rtcAlarmFired() {
 		removeAlarm(curAlarmSet);
 		curAlarmSet = 0;
 	}
-	if(*P_Hour == 0 && *P_Minute == 0) { // bump systemcounters 
+	if((alarm & 0xffff) == 0) {
+//	if(*P_Hour == 0 && *P_Minute == 0) { // bump systemcounters 
 		loadSystemCounts();
 		systemCounts.poweredDays += 1;
 		saveSystemCounts();
@@ -891,16 +894,26 @@ void setNextAlarm() {
 // test		setPlus10();	
 	}
 }
-
+/*
 void resetRTC23(void) {
+	APP_IRAM static unsigned long lastActivity;
+	int wrk;
 #define		P_RTC_HMSBusy                 (volatile unsigned int*)(P_RTC_Ctrl_Base+0x17)
+	wrk = *P_RTC_INT_Status;
+	*P_RTC_INT_Status |= wrk;	// clear all interrupt flags
+	
 	while (*P_RTC_HMSBusy) ; // wait till RTC is not busy 
 	*P_Second = 10;
 	while (*P_RTC_HMSBusy) ; // wait till RTC is not busy 
-	*P_Minute = 50;
+	*P_Minute = 57;
 	while (*P_RTC_HMSBusy) ; // wait till RTC is not busy 
 	*P_Hour = 23;
+	lastActivity = getRTCinSeconds();
+	
+	setRTCalarm(0,0,0);
+
 }
+*/
 /*
 void
 setPlus10() {

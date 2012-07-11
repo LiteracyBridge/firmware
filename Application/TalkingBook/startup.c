@@ -442,6 +442,9 @@ void startUp(unsigned int bootType) {
 	setNextAlarm();	// be sure at least midnight alarm is set
 	logString("call mainLoop",BUFFER,LOG_ALWAYS);
 	
+	ret = *P_RTC_INT_Status;	
+	*P_RTC_INT_Status |= ret;	// clear all interrupt flags
+	
 	mainLoop();
 }
 
