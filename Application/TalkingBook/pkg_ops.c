@@ -114,10 +114,6 @@ int deletePackage(char * packageName) {
 	long timeNow;
 
 	if (shouldDelete) {
-		if (context.packageStartTime) {
-			timeNow = getRTCinSeconds();
-			markEndPlay(timeNow);
-		}
 		stop();
 		strcpy(strLog,(char *)"DELETE ");
 		
