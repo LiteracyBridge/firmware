@@ -36,7 +36,7 @@
 
 // if change clock in TIMEBASE_B_16HZ need to think about changing KEY_LONG_DOWN_THRESH as well
 #define TIMEBASE_B_16HZ       0xe001
-#define KEY_LONG_DOWN_THRESH  18
+#define KEY_LONG_DOWN_THRESH  24
 #define LONG_KEY_STROKE       0x4000
 extern unsigned int LONG_KEYPRESS_COUNTER;
 
