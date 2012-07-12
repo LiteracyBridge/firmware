@@ -40,6 +40,13 @@ void FS_LoadDriver(void)
 //	bUSB_Init = -1;
 }
 
+// 2010-02-08 Tom add for Hook NewFs
+void FsCloseHook(void)
+{
+#ifdef NAND_EN	
+	// NandFlushAllBlk();
+#endif
+}
 
 
 

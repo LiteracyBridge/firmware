@@ -26,9 +26,9 @@ Count=8
 LIB0=CMacro1232.lib
 LIB1=.\System\Lib\ucBSBudocc0.0.9.lib
 LIB2=CLib1232.lib
-LIB3=.\Component\Lib\GPL162002_NewFS_Far_V0.3.8_V3.0.2.lib
-LIB4=.\Driver\Lib\GPL162002SDDrv_far_V0_2.4.6.lib
-LIB5=.\Driver\Lib\GPL162002NandDrv_V1.2.lib
+LIB3=.\Component\Lib\GLB_GP-FS_02030405L_FS_3.0.1.lib
+LIB4=.\Driver\Lib\GLB_GP-F_0203L_SD_0.0.2_test.lib
+LIB5=.\Driver\Lib\GLB_GP-F_23L_NAND_NANDROM_1.0.0.lib
 LIB6=.\Component\Lib\GPL162002_RecordPen_v001.lib
 LIB7=.\Driver\USB_Host_MSDC\2002_USBH_NOS_FAR_V6_11.lib
 
