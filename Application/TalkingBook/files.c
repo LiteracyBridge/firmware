@@ -64,6 +64,13 @@ void clearStaleLog() {
 	}
 }
 
+void logNumber(long l, int digits, int whenToWrite, int logPriority) {
+	char strLong[12];
+	
+	longToDecimalString(l,strLong,digits);
+	logString(strLong,whenToWrite,logPriority);	
+}
+
 void logString(char *string, int whenToWrite, int logPriority) {
 	int len, available;
 	char newString[256];
