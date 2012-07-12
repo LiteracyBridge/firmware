@@ -14,11 +14,13 @@
 #include "Include/filestats.h"
 #include "Include/startup.h"
 
-APP_IRAM unsigned long stat_audio_length;
 APP_IRAM unsigned int  stat_pkg_type;
 APP_IRAM int statINIT = 0;
 APP_IRAM unsigned long SACM_A1800_Bytes;
 APP_IRAM unsigned long SACM_A1800_Msec;		 
+APP_IRAM unsigned int msgNotPlayedSec;
+APP_IRAM int pauseStarted;
+APP_IRAM char msgName[FILE_LENGTH];
 
 static char STAT_FN[FILE_LENGTH];
 
@@ -183,11 +185,16 @@ void playActionSound(EnumAction action) {
 void pause(void) {
 	SACM_Pause();
 	turnAmpOff();
+	pauseStarted = getRTCinSeconds();
 }	
 
 void resume(void) {
 	turnAmpOn();
 	SACM_Resume();
+	if (pauseStarted != -1) {
+		msgNotPlayedSec += getRTCinSeconds() - pauseStarted;
+		pauseStarted = -1;
+	}
 }
 
 void stop(void) {
@@ -201,7 +208,7 @@ void stop(void) {
 }
 
 static int getFileHandle (CtnrFile *newFile) {
-	int ret = 0; 
+	int handle, ret = 0; 
 	char sTemp[PATH_LENGTH];
 	CtnrPackage *pkg;
 		
@@ -238,39 +245,41 @@ static int getFileHandle (CtnrFile *newFile) {
 	strcat(sTemp,pkg->strHeapStack + newFile->idxFilename);
 	strcat(sTemp,AUDIO_FILE_EXT);
 
-	ret = tbOpen((LPSTR)sTemp,O_RDONLY);
-	if (ret == -1 && pkg->pkg_type == PKG_SYS)
+	handle = tbOpen((LPSTR)sTemp,O_RDONLY);
+	if (handle == -1 && pkg->pkg_type == PKG_SYS)
 		logException(35,sTemp,RESET);
-	if (DEBUG_MODE) {
-		logString(sTemp,BUFFER,LOG_DETAIL);
-		if (ret == -1) {
-			strcpy(sTemp,"last file not found");
-			logString(sTemp,LOG_NORMAL,LOG_DETAIL);
-		}
+	logString(sTemp,BUFFER,LOG_DETAIL);
+	if (handle == -1) {
+		strcpy(sTemp,"last file not found");
+		logString(sTemp,LOG_NORMAL,LOG_DETAIL);
 	}
-	
-	if ((ret >= 0)) {  /* && (pkg->pkg_type > PKG_SYS)*/
-		struct stat_t stat;
-		int ret1;
-		
-		recordStats(sTemp, (long)ret, STAT_OPEN, pkg->pkg_type);
-		
-		ret1 = fstat(ret , &stat);  // check file size
-		if(ret1 >= 0) {
-			if(stat.st_size <= MIN_AUDIO_FILE_SIZE) {
-				char msg[100];
-				close(ret);
-				ret = -2;
-				strcpy(msg,"Audio file too small ");
-				strcat(msg, sTemp);
-				logString(msg, BUFFER, LOG_ALWAYS);
+	SACM_A1800_Bytes = 0;	
+	if ((handle >= 0)) {  /* && (pkg->pkg_type > PKG_SYS)*/
+		ret = read(handle, (unsigned long)&SACM_A1800_Bytes << 1, 4);
+		if (ret == 4) {
+			ret = read(handle, (unsigned long)&SACM_A1800_Mode << 1, 2);
+			if (ret == 2) {
+				SACM_A1800_Msec = msecFromFrames(framesFromBytes(SACM_A1800_Bytes));
+				if (pkg->pkg_type == PKG_MSG || pkg->pkg_type == PKG_APP) {	
+					context.msgLengthMsec = SACM_A1800_Msec;
+					logNumber(SACM_A1800_Msec,8,BUFFER,LOG_DETAIL);
+				}
 			}
-		}
+			lseek(handle, 0, SEEK_SET );			//Seek to the start of the file input when get over
 		
-	}
-	
+			recordStats(sTemp, (long)handle, STAT_OPEN, pkg->pkg_type);
+		}	
+		if(SACM_A1800_Bytes <= MIN_AUDIO_FILE_SIZE) {
+			char msg[100];
+			close(handle);
+			handle = -2;
+			strcpy(msg,"Audio file too small ");
+			strcat(msg, sTemp);
+			logString(msg, BUFFER, LOG_ALWAYS);
+		}
+	}	
 //	logString(sTemp,ASAP);
-	return ret;
+	return handle;
 }
 
 void play(CtnrFile *file, unsigned int startingPoint) {
@@ -288,9 +297,11 @@ static void playLongInt(CtnrFile *file, unsigned long lTimeNew) {
 	unsigned long lTimeCurrent;
 	long lDifference;
 	unsigned long ulDifference;
-	
+
+	// TODO: The code below will not get used when scanning forward in the same track because
+	//       the playBip() is called to represent the scan move, and that causes SACM_Status()==0 as the bip ends.
+	//       The other problem is that getCurrentMsec appears to also be affected by playBip() even though it is in NOR flash.
 	if (context.lastFile && (context.lastFile->idxFilename == file->idxFilename && SACM_Status())) {
-		lTimeCurrent = Snd_A1800_GetCurrentTime();
 		lTimeCurrent = getCurrentMsec();
 		lDifference = lTimeNew - lTimeCurrent;
 		if (lDifference >= 0)
@@ -321,7 +332,6 @@ static void playLongInt(CtnrFile *file, unsigned long lTimeNew) {
 			context.lastFile = NULL; // to force to assume new file when going back to non-list file
 		iFileHandle = getFileHandle(file);
 		if (iFileHandle >= 0) {  //allows mistakes or dummy files to pass without problem
-			SACMGet_A1800FAT_Mode(iFileHandle,0);
 			Snd_SACM_PlayFAT(iFileHandle, C_CODEC_AUDIO1800);	
 			if (lTimeNew)
 				SACM_A1800FAT_SeekTime(lTimeNew,FORWARD_SKIP);
@@ -354,6 +364,7 @@ void insertSound(CtnrFile *file, CtnrBlock *block, BOOL wait) {
 		else
 			lastPlayedPoint -= INSERT_SOUND_REWIND_MS;
 		//context.file should not be changed until we need them again in a few lines	
+		msgNotPlayedSec += ((INSERT_SOUND_REWIND_MS + 500)/1000);
 		play(context.file,block?block->startTime:0);
 		context.isPaused = FALSE;
 		while (SACM_Status() && !keystroke) {
@@ -717,19 +728,25 @@ int createRecording(char *pkgName, int fromHeadphone, char *listName, BOOL relat
 
 void markEndPlay(long timeNow) {
 	long timeDiff;
-	char log[40];
-	
+	char log[80];
+		
 	if (context.packageStartTime) {
-		timeDiff = timeNow - context.packageStartTime;
+		timeDiff = timeNow - context.packageStartTime - msgNotPlayedSec;
 		if (context.package->pkg_type > PKG_SYS) {
 			recordStats(NULL, 0xffffffff, STAT_TIMEPLAYED, timeDiff);
 		}
 		context.packageStartTime = 0;
 		if (timeDiff > 0 /*RHM MINIMUM_PLAY_SEC_TO_LOG*/) {
-			strcpy (log,"TIME PLAYED: ");
+			strcpy (log,"PLAYED ");
+			strcat (log,msgName);
+			strcat (log," ");
 			longToDecimalString(timeDiff,log+strlen(log),4);
-			strcat(log," sec at VOL=");
+			strcat(log,"/");
+			longToDecimalString(SACM_A1800_Msec/1000,log+strlen(log),4);
+			strcat(log,"sec @VOL=");
 			longToDecimalString((long)getVolume(),log+strlen(log),2);
+			if (context.msgAtEnd)
+				strcat(log, "-Ended");
 			strcat(log,"\x0d\x0a");
 			logString(log,BUFFER,LOG_NORMAL);
 		}
@@ -741,12 +758,18 @@ void markStartPlay(long timeNow, const char * name) {
 	char log[LOG_LENGTH];
 	
 	context.packageStartTime = timeNow;
+	context.msgAtEnd = FALSE;
+	context.msgLengthMsec = 0;
 //	strcpy(log,"\x0d\x0a");
 //	longToDecimalString(timeNow,log+2,8);
 	strcpy((char *)log,(const char *)"PLAY ");
 	if (LBstrncat((char *)log,name,LOG_LENGTH) == LOG_LENGTH-1)
 		log[LOG_LENGTH-2] = '~';
-	logString(log,BUFFER,LOG_NORMAL);	
+	strcat(log," @VOL=");
+	longToDecimalString((long)getVolume(),log+strlen(log),2);
+	logString(log,BUFFER,LOG_NORMAL);
+	strcpy(msgName,name);
+	msgNotPlayedSec = 0;	
 }
 
 int writeLE32(int handle, long value, long offset) {
@@ -814,8 +837,6 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 	case STAT_OPEN:
 		if(misc > PKG_SYS) {
 			statINIT = 1;
-			read(handle, (unsigned long)&stat_audio_length << 1, 4);
-			lseek(handle, 0L, SEEK_SET);
 			stat_pkg_type = misc;
 			
 			statpath[0] = 0;
@@ -858,7 +879,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 				if(stathandle >= 0) {
 					ret = read(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
 					lseek(stathandle, 0L, SEEK_SET);
-					if(wrk >= stat_audio_length) {
+					if(wrk >= SACM_A1800_Bytes) {
 						tmp_file_stats.stat_num_opens += 1; 
 						tmp_file_stats.stat_num_completions += 1;
 					} else if (msgTime > 10000)
@@ -1015,17 +1036,14 @@ int readLE16(int handle, long value, long offset) {
 }
 int metaRead(int fd, unsigned int field_id, unsigned int *buf) {
 	int convertTwoByteToSingleChar(unsigned int *, const unsigned int *, int);
-	unsigned long audio_bytes, mdversion, numfields, fieldlen, wrk, savpos;
+	unsigned long mdversion, numfields, fieldlen, wrk, savpos;
 	unsigned int fid, nfv=0, i, j, ret, ret1 = 0;
 	unsigned char tmpbuf[128];
 //	char msg[128], digits[16];;
 
 	savpos = lseek(fd, 0, SEEK_CUR);  // save current position
 	
-	wrk = lseek(fd, 0, SEEK_SET);
-	ret = readLE32(fd, (long)&audio_bytes, CURRENT_POS);
-//	printf("%s has %ld audio bytes\n",argv[n], wrk);
-	wrk = lseek(fd, audio_bytes + 4, SEEK_SET);
+	wrk = lseek(fd, SACM_A1800_Bytes + 4, SEEK_SET);
 	ret = readLE32(fd, (long)&mdversion, CURRENT_POS);
 	if((mdversion == 0) || (mdversion > META_CURRENT_VERSION)) {
 		goto failed;

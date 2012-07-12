@@ -598,6 +598,7 @@ void mainLoop (void) {
 			// todo: this should be checking end action for CtnrFile (doesn't exist yet)
 			context.isStopped = TRUE;
 			turnAmpOff();
+			context.msgAtEnd = TRUE;
 			markEndPlay(getRTCinSeconds());
 			flushLog();			
 			if (GREEN_LED_WHEN_PLAYING) {
@@ -903,7 +904,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 	char filename[PATH_LENGTH],filepath[PATH_LENGTH],tempPath[PATH_LENGTH];
 	char *cursor, *cursor2;
 	CtnrFile *replayFile;
-	char tempBuffer[20];
+	char tempBuffer[30];
 		
 	replayFile = NULL;
 	list = NULL;
@@ -1120,6 +1121,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 		case JUMP_LIST:
 			stop();
+			markEndPlay(getRTCinSeconds());
 			//strcpy(tempBuffer,"Diag-destination");
 			//longToDecimalString((long)destination,tempBuffer+strlen(tempBuffer),2);
 			//logException(99,tempBuffer,(context.package == &pkgSystem)?USB_MODE:RESET); 
@@ -1233,6 +1235,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 		
 		case JUMP_PACKAGE:
 			stop();
+			markEndPlay(getRTCinSeconds());
 			if (aux == PKG_VARIABLE) {
 				strcpy(filename,getCurrentList(&pkgSystem.lists[destination]));
 				switch (filename[0]) {
@@ -1830,23 +1833,38 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			// observe block boundary when they exist, but leap beyond them
 			// todo:do not leap over newFile boundaries
 			// if system package action, reset context to user package for this action
-			logString((char *)"JUMP_TIME",BUFFER,LOG_ALWAYS);
 			if (context.returnPackage)
 				context.package = context.returnPackage;
 			if (context.package != &pkgSystem) {
-				longOldTime = Snd_A1800_GetCurrentTime();
-				longOldTime = getCurrentMsec();
+				if (context.msgAtEnd)
+					longOldTime = context.msgLengthMsec;
+				else 
+					longOldTime = getCurrentMsec();
 				l = (signed long)extractSignedTime(destination,context.package->timePrecision); // hoping this brings back an originally negative number
-				longNewTime = longOldTime + l;
-				if (l >= 0) {
-					direction = FORWARD_JUMPING;
-					if (longNewTime >= SACM_A1800_Msec)
-						longNewTime = (SACM_A1800_Msec > DEFAULT_REWIND)?(SACM_A1800_Msec - DEFAULT_REWIND):0;
-				} else {
+				logNumber(DEFAULT_REWIND,8,BUFFER,LOG_DETAIL);
+				logNumber(context.msgLengthMsec,8,BUFFER,LOG_DETAIL);
+				if (l < 0) {
 					direction = BACKWARD_JUMPING;
-					if (abs(l) > longOldTime)
+					 if (abs(l) > longOldTime)
 						longNewTime = 0;
+					 else
+					 	longNewTime = longOldTime + l;
+				} else {
+					direction = FORWARD_JUMPING;
+					longNewTime = longOldTime + l;
+					logNumber(longNewTime,8,BUFFER,LOG_DETAIL);
+					if (context.msgLengthMsec < DEFAULT_REWIND) {
+						if (longNewTime > context.msgLengthMsec)
+							longNewTime = 0;
+					} else if (longNewTime > (context.msgLengthMsec - DEFAULT_REWIND))
+						longNewTime = context.msgLengthMsec - DEFAULT_REWIND;
+					logNumber(longNewTime,8,BUFFER,LOG_DETAIL);			
 				}
+				strcpy(tempBuffer,(char *)"JUMP_TIME:");				
+				longToDecimalString(longOldTime/1000,tempBuffer+strlen(tempBuffer),4);
+				strcat(tempBuffer,(char *)"->");
+				longToDecimalString(longNewTime/1000,tempBuffer+strlen(tempBuffer),4);
+				logString(tempBuffer,BUFFER,LOG_ALWAYS);
 				newTime = compressTime(longNewTime,context.package->timePrecision);
 	
 				// check for interfering block events

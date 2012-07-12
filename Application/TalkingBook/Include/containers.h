@@ -206,6 +206,8 @@ struct Context {
 	CtnrPackage *returnPackage;
     CtnrFile *lastFile;
     long packageStartTime;
+    unsigned long msgLengthMsec;
+    BOOL msgAtEnd;
 };
 
 struct ProfileData {
