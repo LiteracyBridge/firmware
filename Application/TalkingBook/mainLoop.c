@@ -547,8 +547,9 @@ processAlarm(unsigned long alarm) {
 }
 
 void mainLoop (void) {
-	void processAlarm();
 	extern unsigned long rtc_fired;
+	APP_IRAM static unsigned long lastActivity;
+	void processAlarm();
 	unsigned int compressedTime;
 	unsigned int getCurVoltageSample();
 	CtnrBlock *insertBlock;
@@ -557,12 +558,7 @@ void mainLoop (void) {
 	int inactivityCheckCounter = 0;
 	
 	while(1) {
-		
-		if(rtc_fired) {		
-			processAlarm(rtc_fired);
-			rtc_fired = 0;
-		}
-		
+				
 		// check if need to load in a new package
 		if (context.queuedPackageType > PKG_NONE) {
 			if (context.queuedPackageNameIndex >= 0)
@@ -637,9 +633,10 @@ void mainLoop (void) {
 		}
 		keyResponse();
 		
-		if(rtc_fired) {		
+		if(rtc_fired && !SACM_Status()) {		
 			processAlarm(rtc_fired);
 			rtc_fired = 0;
+			lastActivity = 0;
 		}
 	} // end of while(1) loop
 }
