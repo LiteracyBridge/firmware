@@ -8,7 +8,13 @@
 
 INT16 SD_Initial(void)
 {
-	return DrvSDCInitial();	
+	int i, ret;
+	for(i=0;i<5;i++) {
+		ret = DrvSDCInitial();
+		if(ret == 0)
+			break;
+	}
+	return(ret);
 }
 
 INT16 SD_Uninitial(void)
