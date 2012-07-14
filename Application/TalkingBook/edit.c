@@ -56,7 +56,9 @@ int loopClip(void) {
 			if (loopTimeFrames > clipEndFrame-clipStartFrame)
 					loopTimeFrames = clipEndFrame-clipStartFrame;
 			justStarted = 0;
-			wasStopped = (SACM_Status() == 0);
+			// Forcing wasStopped to = 1 because it causes file to be re-opened each time, and
+			// there's a bug in the gotoFrame when the file wasn't just opened.
+			wasStopped = 1; //(SACM_Status() == 0);
 			if (wasStopped) {
 				close(handle);
 				handle = tbOpen((LPSTR)(filePath),O_RDONLY);

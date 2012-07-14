@@ -116,43 +116,34 @@ unsigned long getCurrentMsec(void) {
 }
 
 int gotoFrame(unsigned long frameDest) {
-	//const int bytesHeaderSize = 6;
-	unsigned long wordsPerFrame = SACM_A1800_Mode / 800;
-	unsigned long byteCurrent;
-	unsigned long wordDiff;  ///, timeDiff;
-	unsigned long wordCurrent, wordDest, frames; 
-//	unsigned long timeNow, timeDest;
-	
-/*	timeNow = Snd_A1800_GetCurrentTime();	
-	timeDest = frameDest * 20;
-	timeDiff = timeDest - timeNow;
-	if (timeDiff > 0)
-		SACM_A1800FAT_SeekTime(timeDiff,0);
-	else if (timeDiff < 0)
-		SACM_A1800FAT_SeekTime(timeDiff,1);
-*/	
+	unsigned long wordsPerFrame, bytesPerFrame;
+	unsigned long byteCurrent, byteDiff, frameCurrent, frameDiff;
+	unsigned long decodeLength; 
+
+	// The function was rewritten, but it still seems to have a bug that shows up
+	// unless the .a18 file was just opened.  It may have to do with going backwards.
+	// The previous version of this function (r874) seemed to work better with backwards when file already open
+	// but this one works fine when re-opening file (as done now in loopClip()).
 	pause();
+	wordsPerFrame = SACM_A1800_Mode / 800;
+	bytesPerFrame = wordsPerFrame<<1;
 	byteCurrent = lseek(SACMFileHandle,0,SEEK_CUR);
-	wordCurrent = ( unsigned long )User_GetCurDecodeLength();
-	frames = wordCurrent / wordsPerFrame;
-	wordCurrent = frames * wordsPerFrame;
-	wordDest = frameDest * wordsPerFrame;
-	if (wordDest > wordCurrent) {
-		wordDiff = wordDest - wordCurrent;	
-		byteCurrent = lseek(SACMFileHandle,wordDiff<<1,SEEK_CUR);
+	frameCurrent = (byteCurrent / bytesPerFrame);
+	decodeLength = User_GetCurDecodeLength();
+	if (frameDest >= frameCurrent) {
+		frameDiff = frameDest - frameCurrent;
+		byteDiff = frameDiff * bytesPerFrame;	
+		byteCurrent = lseek(SACMFileHandle,byteDiff,SEEK_CUR);
+		decodeLength += (byteDiff>>1);
 	} else {
-		wordDiff = wordCurrent - wordDest;	
-		byteCurrent = lseek(SACMFileHandle,-wordDiff<<1,SEEK_CUR);
+		frameDiff = frameCurrent - frameDest;
+		byteDiff = frameDiff * bytesPerFrame;	
+		byteCurrent = lseek(SACMFileHandle,-byteDiff,SEEK_CUR);
+		decodeLength -= (byteDiff>>1);
 	}
-	User_SetDecodeLength(wordDest);
+	User_SetDecodeLength(decodeLength);
 	resume();	
 	return 0;
-}
-
-int gotoMsec(unsigned long msec) {
-	int ret;
-	ret = gotoFrame(framesFromMSec(msec));
-	return ret;
 }
 
 /*unsigned long setFileHeader(char *filePath, unsigned long frames) {

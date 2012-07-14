@@ -354,49 +354,62 @@ long getFilePosition() {
 }
 
 void trimFile(char * filePath, unsigned long frameStart, unsigned long frameEnd) {
-	const char tempFilename[15] = "a:/trimmed.tmp";
-	const int wordsHeaderSize = 3;
-	const int wordsPerFrame = 40;
-	const int bigBufferSize = wordsPerFrame * 10;
-	const int sacm_mode = 0x7d00;
 	int wHandle,rHandle;
-	int bufferBig[bigBufferSize];
-	int *pBuffer;
-	unsigned long wordStart, wordsNewSize,wordsRemaining;
-	char header[3];
-	char *pHeader;
-	long *pSize;
-	int ret;
+	const char tempFilename[15] = "a:/trimmed.a18";
+	const int wordsHeaderSize = 3;
+	const int bigBufferSize = 400;  // 10x a 32bps frame
+	unsigned int header[wordsHeaderSize];
+	unsigned int bufferBig[bigBufferSize];
+	unsigned int *pBuffer;
+	unsigned long *pSize;
+	unsigned int *pBitRate;
+	unsigned int wordsPerFrame;
+	unsigned long wordStart, wordsNewSize,wordsRemaining, origLengthBytes;
+	int ret, loop, ledStatus;
 		
-	pBuffer = (int *)&bufferBig;
-	pHeader = (char *)&header;
-	pSize = (long *)&header;
-	wordStart = wordsFromFrames(frameStart) + wordsHeaderSize;
-	wordsNewSize = wordsFromFrames(frameEnd-frameStart+1);
-	*pSize = (long)((wordsNewSize<<1) + 2);
-	*(pHeader+2) = sacm_mode;
+	pBuffer = bufferBig;
+	pSize = (unsigned long *)&header;
+	pBitRate = header + 2;
 	rHandle = tbOpen((LPSTR)filePath,O_RDONLY);	
+	ret = read(rHandle,(LPDATA)&header<<1,6);
+	wordsPerFrame = *pBitRate / 800;
+	wordStart = (frameStart*wordsPerFrame) + wordsHeaderSize;
+	wordsNewSize = (frameEnd-frameStart+1)*wordsPerFrame;
+	*pSize = (long)((wordsNewSize<<1) + 2);
+	
 	lseek(rHandle,wordStart<<1,SEEK_SET);
-	
+		
 	wHandle = tbOpen((LPSTR)tempFilename,O_CREAT|O_RDWR|O_TRUNC);	
-	ret = write(wHandle,(unsigned long)pHeader<<1,6);
-	
+	ret = write(wHandle,(LPDATA)header<<1,6);
 	for(wordsRemaining=wordsNewSize;wordsRemaining > bigBufferSize;wordsRemaining -= bigBufferSize) {
 		ret = read(rHandle,(unsigned long)pBuffer<<1,bigBufferSize<<1);
 		ret = write(wHandle,(unsigned long)pBuffer<<1,bigBufferSize<<1);
+		if (!((loop++) % 10)) {
+			if (ledStatus) {
+				if (ledStatus == 2)
+					ledStatus = 0;
+				setLED(LED_GREEN,FALSE);
+			} else {
+				ledStatus = 1;
+				setLED(LED_GREEN,TRUE);
+			}
+		}
 	}
 	for(;wordsRemaining > 0; wordsRemaining -= wordsPerFrame) {
-		ret = read(rHandle,(unsigned long)pBuffer<<1,wordsPerFrame<<1);
-		ret = write(wHandle,(unsigned long)pBuffer<<1,wordsPerFrame<<1);
+		ret = read(rHandle,(LPDATA)pBuffer<<1,wordsPerFrame<<1);
+		ret = write(wHandle,(LPDATA)pBuffer<<1,wordsPerFrame<<1);
 	}
+	lseek(rHandle, origLengthBytes + 4, SEEK_SET);
+	do {
+		ret = read(rHandle,(LPDATA)pBuffer<<1,bigBufferSize<<1);
+		write(wHandle,(LPDATA)pBuffer<<1,ret);
+	} while (ret==bigBufferSize);
 	ret = close(rHandle);
 	ret = close(wHandle);
 	ret = unlink((LPSTR)filePath);
-	wait(100);
-	ret = unlink((LPSTR)filePath);
-	ret = chdir((LPSTR)USER_PATH);
-	pHeader = filePath + strlen(USER_PATH);
-	ret = unlink((LPSTR)pHeader);
+//	ret = chdir((LPSTR)USER_PATH);
+//	pHeader = filePath + strlen(USER_PATH);
+//	ret = unlink((LPSTR)pHeader);
 	ret = rename((LPSTR)tempFilename,(LPSTR)filePath);	
 }
 

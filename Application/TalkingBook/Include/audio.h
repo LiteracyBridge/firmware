@@ -22,7 +22,6 @@ extern unsigned long framesFromMSec(unsigned long);
 extern unsigned long getCurrentFrame(void);
 extern unsigned long getCurrentMsec(void);
 extern int gotoFrame(unsigned long frameDest);
-extern int gotoMsec(unsigned long msec);
 //extern unsigned long setFileHeader(char *, unsigned long);
 extern void playActionSound(EnumAction); 
 extern void pause(void);
