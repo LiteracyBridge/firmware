@@ -26,10 +26,9 @@ extern int SystemIntoUDisk(unsigned int);
 extern INT16 SD_Initial(void);
 
 static int setLocation(char *);
+static int checkRTCFile(char *);	
 static char * addTextToSystemHeap (char *);
 static int loadConfigFile (void);
-static void flagConfigFile(void);
-static int resetConfigFile(void);
 static int restore_config_bin();
 static int disaster_config_strings();
 static void fixnull_config_strings();
@@ -172,6 +171,21 @@ void setDefaults(void) {
 
 }
 
+static int checkRTCFile(char *time) {	
+	char *cp;
+	int ret;
+	struct f_info file_info;
+	
+	ret =_findfirst((LPSTR)SET_RTC_FILE_PATTERN, &file_info, D_FILE);
+	if (ret >=0) {
+		strcpy(time,file_info.f_name);
+		cp = strrchr(time,'.');
+		*cp = 0;
+		unlink((LPSTR)file_info.f_name);	
+	} 
+	return ret;
+}
+
 static int setLocation(char *location) {
 	char *cp;
 	int ret;
@@ -244,16 +258,22 @@ static void clearDir(char* dir) {
 */
 
 void startUp(unsigned int bootType) {
-	char buffer[200];
+	char buffer[400];
 	char strCounts[32];
 	char filename[FILE_LENGTH];
 	int key, ret;
 	int configExists = 0, normal_shutdown=1;
-	
+	int inspect;
+		
 	SetSystemClockRate(MAX_CLOCK_SPEED); // to speed up initial startup -- set CLOCK_RATE later
 
 	setDefaults();
 	// start with both lights on to indicate that the user should wait during startup until the device is ready 
+	strcpy(buffer,"\x0d\x0a" "---------------------------------------------------\x0d\x0a" "Serial#:");		
+	strcat(buffer,getDeviceSN(0));
+	strcat(buffer,"\x0d\x0a" "Clock:");
+	getRTC(buffer+strlen(buffer));
+	logStringRTCOptional(buffer, ASAP, LOG_ALWAYS,0);
 		
 	if(bootType == BOOT_TYPE_COLD_RESET) {
 		extern unsigned long rtcAlarm[];
@@ -264,14 +284,18 @@ void startUp(unsigned int bootType) {
 		}
 		curAlarmSet = 0;
 		rtc_fired = 0;
-//		resetRTC();  //  reset before saving anything to disk and running macros
 		systemCounts.month = 1;
 		systemCounts.monthday = 1;
 		systemCounts.poweredDays = 1;
 		systemCounts.year = 2000 + systemCounts.powerUpNumber;
 				
 		LOG_FILE = DEFAULT_LOG_FILE; // chicken & egg - we haven't read config.txt or config.bin to set LOG_FILE
-		logString("BOOT_TYPE_COLD_RESET -- NEW BATTERIES???", ASAP, LOG_ALWAYS);
+		strcpy(buffer,"BOOT_TYPE_COLD_RESET -- NEW BATTERIES???");
+		if (*P_Hour >= 24) {
+			setRTC(0,2,0);  //  reset before saving anything to disk and running macros
+			strcat(buffer,"\x0d\x0a" "Clock:Reset due to h>=24");
+		}
+		logStringRTCOptional(buffer, ASAP, LOG_ALWAYS,0);
 		forceflushLog();
 
 #ifdef HALT_ON_COLD_START
@@ -314,10 +338,11 @@ void startUp(unsigned int bootType) {
 	*/
 	playDing();  // it is important to play a sound immediately 
 
-//	cleanUpOldRevs();	
+	if (fileExists((LPSTR)INSPECT_TRIGGER_FILE))
+		inspect = 1;  // used to check for .loc file and other changes that don't normally occur
 	key = keyCheck(1);  // long keycheck 
 	key &= ~LONG_KEY_STROKE;
-	
+
 	// voltage checks in SystemIntoUSB.c
 	if (key == KEY_STAR || key == KEY_MINUS) {
 		// allows USB device mode no matter what is on memory card
@@ -327,7 +352,8 @@ void startUp(unsigned int bootType) {
 		SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
 		loadConfigFile();
 		initializeProfiles(); 
-		processInbox();
+		if (inspect)
+			processInbox();
 		resetSystem();
 	} else if (key == KEY_PLUS) {
 		// copy outbox files to connecting device, get stats and audio feedback
@@ -340,7 +366,11 @@ void startUp(unsigned int bootType) {
 	if (!SNexists()) {
 		// This will update the version when the device has just been programmed with probe,
 		// which wipes out the serial number.
+		updateSN(DEFAULT_SYSTEM_PATH);  // use the srn file that might be left from pre-firmware update
 		writeVersionToDisk();	
+		strcpy(buffer,"Firmware Update:");
+		strcat(buffer,VERSION);
+		logStringRTCOptional(buffer,ASAP,LOG_NORMAL,0);
 	}
 	SysDisableWaitMode(WAITMODE_CHANNEL_A);
 
@@ -357,11 +387,16 @@ void startUp(unsigned int bootType) {
 			
 	adjustVolume(NORMAL_VOLUME,FALSE,FALSE);
 	adjustSpeed(NORMAL_SPEED,FALSE);
-	// check for new firmware first, but don't flash if voltage is low
-	if(V_MIN_SDWRITE_VOLTAGE <= vCur_1) {
-		updateSN();
+	// if inspect file was present, check for new firmware, but don't flash if voltage is low
+	// Any .img file in the root will be found if inspect is set, but system.img can be found without needing the inspect file
+	if((inspect || fileExists((LPSTR)"a:/system.img") )&& V_MIN_SDWRITE_VOLTAGE <= vCur_1) {
+		inspect = 1;  
+		updateSN(UPDATE_FP);
 		if (check_new_sd_flash(filename)) {
-			flagConfigFile();  //change config file name to indicate about to be reprogrammed
+			ret = tbOpen((LPSTR)FIRMWARE_UPDATE_NOTIF_FILE,O_CREAT|O_RDWR|O_TRUNC);
+			close(ret);
+			// inspect file will still be there since fw update will prevent this function from reaching the end.
+			// where the unlink is.
 			startUpdate(filename);
 		}
 	}
@@ -372,10 +407,6 @@ void startUp(unsigned int bootType) {
 		disaster_config_strings();
 	}
 
-	if (initializeProfiles()) { 
-		processInbox();
-	} else
-		testPCB();
 	setLED(LED_ALL,TRUE);
 
 	if (!SNexists()) {
@@ -388,36 +419,58 @@ void startUp(unsigned int bootType) {
 		loadMacro();
 	ret = loadSystemCounts();
 	systemCounts.powerUpNumber++;
-	if (systemCounts.powerUpNumber - systemCounts.lastLogErase > MAX_PWR_CYCLES_IN_LOG) {
-		systemCounts.lastLogErase = systemCounts.powerUpNumber;
-		clearStaleLog();	
-	}
-	if (ret == -1 || fileExists((LPSTR)RESET_TRIGGER_FILE)) {
+	if (ret == -1 || inspect)
 		setLocation(systemCounts.location);
-		unlink((LPSTR)RESET_TRIGGER_FILE);
+	saveSystemCounts();	
+	if (inspect) {
+		ret = checkRTCFile(buffer);
+		if (ret >= 0) {
+			setRTCFromText(buffer);
+			strcpy(buffer,"Clock:");
+			getRTC(buffer+strlen(buffer));
+			strcat(buffer," (hms reset by *.rtc file)");
+			logStringRTCOptional(buffer,BUFFER,LOG_ALWAYS,0);	
+		}
 	}
-			
-	saveSystemCounts();
-	
-	strcpy(buffer,"\x0d\x0a" "---------------------------------------------------\x0d\x0a");
-	strcat(buffer,getDeviceSN(1));
-	strcat(buffer,"  Location: ");
+	if (!systemCounts.location[0] || !strncmp(systemCounts.location,(char *)"Non-",4))
+		playBips(3);
+	strcpy(buffer,"Location:");
 	strcat(buffer,systemCounts.location);
-	strcat(buffer,(const char *)"\x0d\x0a" "Version: " VERSION);
-	strcat(buffer,(char *)"\x0d\x0a" "Cycle: ");
-	longToDecimalString(systemCounts.powerUpNumber,(char *)(buffer+strlen(buffer)),4);
-	strcat(buffer,(char *)"  Powered Days: ");
-	longToDecimalString(systemCounts.poweredDays, (char *)(buffer+strlen(buffer)), 4);
-	if (DEBUG_MODE == LOG_DETAIL)
-		strcat(buffer,"\x0d\x0a" "*DEBUG MODE*");
-	logString(buffer,BUFFER,LOG_ALWAYS);
-		
-	if(normal_shutdown) {
-		logString((char *)"Restored configuration from config.bin successfully" ,BUFFER,LOG_DETAIL);
-	} else {
-		logString((char *)"Apparently ABNORMAL shutdown (no or corrupt config.bin)", BUFFER,LOG_ALWAYS);
+	strcat(buffer,(const char *)"\x0d\x0a" "Version:" VERSION);
+	if (inspect && fileExists((LPSTR)FIRMWARE_UPDATE_NOTIF_FILE)) {
+		strcat(buffer," (New firmware)");
+		unlink((LPSTR)FIRMWARE_UPDATE_NOTIF_FILE);
 	}
-	
+	strcat(buffer,(char *)"\x0d\x0a" "Cycle:");
+	longToDecimalString(systemCounts.powerUpNumber,(char *)(buffer+strlen(buffer)),4);
+	strcat(buffer,(char *)"  Powered Days:");
+	longToDecimalString(systemCounts.poweredDays, (char *)(buffer+strlen(buffer)), 4);
+	strcat(buffer,"\x0d\x0a" "Debug:");
+	switch (DEBUG_MODE) {
+		case 0:
+			strcat(buffer,"Minimal"); 
+			break;
+		case 1:
+			strcat(buffer,"Normal"); 
+			break;
+		case 2:
+			strcat(buffer,"Detail"); 
+			break;
+	}
+	if(normal_shutdown) {
+		if (DEBUG_MODE == LOG_DETAIL) {
+			strcat(buffer,(char *)"\x0d\x0a" "Restored configuration from config.bin successfully");
+		}
+	} else {
+		strcat(buffer,(char *)"\x0d\x0a" "Apparently ABNORMAL shutdown (no or corrupt config.bin)");
+	}
+	logStringRTCOptional(buffer,BUFFER,LOG_ALWAYS,0);
+		
+	if (initializeProfiles()) { 
+		if (inspect)
+			processInbox();
+	} else
+		testPCB();	
 	SetSystemClockRate(CLOCK_RATE); // either set in config file or the default 48 MHz set at beginning of startUp()
 
 	unlink ((LPSTR) (STAT_DIR SNCSV));
@@ -440,14 +493,14 @@ void startUp(unsigned int bootType) {
 	loadPackage(PKG_SYS,currentProfileLanguage());
 
 	setNextAlarm();	// be sure at least midnight alarm is set
-	logString("call mainLoop",BUFFER,LOG_ALWAYS);
+	logString("call mainLoop",BUFFER,LOG_DETAIL);
 	
 	ret = *P_RTC_INT_Status;	
 	*P_RTC_INT_Status |= ret;	// clear all interrupt flags
-	
+	if (inspect)
+		unlink((LPSTR)INSPECT_TRIGGER_FILE);	
 	mainLoop();
 }
-
 static char * addTextToSystemHeap (char *line) {
 	extern char systemHeap [SYSTEM_HEAP_SIZE];
 	extern char *cursorSystemHeap;
@@ -472,20 +525,6 @@ static char * addTextToSystemHeap (char *line) {
 	return startingHeap;
 }
 
-static void flagConfigFile(void) {
-	// This fct is used to cause a read error on control file open only when reprogramming has recently happened
-	// This means that there is no time-costly check to disk to see if reprogramming has happened;
-	// instead we know only when the config file isn't there.
-	rename((LPSTR)CONFIG_FILE,(LPSTR)FLAGGED_CONFIG_FILE);
-}
-
-static int resetConfigFile(void) {
-	// see flagConfigFile()
-	int ret;
-	ret = rename((LPSTR)FLAGGED_CONFIG_FILE,(LPSTR)CONFIG_FILE);
-	return ret;	
-}	
-
 int loadConfigFile(void) {
 	int ret, handle;
 	char *name, *value;
@@ -503,19 +542,8 @@ int loadConfigFile(void) {
 		handle = tbOpen((unsigned long)(CONFIG_FILE),O_RDONLY);
 		logString(CONFIG_FILE, BUFFER, LOG_ALWAYS);
 		if (handle == -1) {
-			logString(ALT_CONFIG_FILE, BUFFER, LOG_ALWAYS);
-			handle = tbOpen((unsigned long)(ALT_CONFIG_FILE),O_RDONLY);
-			if (handle == -1) {
-				// check if config file was renamed to indicate reprogramming was recently started
-				if (resetConfigFile() >= 0) {
-					writeVersionToDisk();
-					handle = tbOpen((unsigned long)(CONFIG_FILE),O_RDONLY);
-				}
-			}
-			if(handle == -1) {
-				replaceFromBackup("a:/system/config.txt");
-				handle = tbOpen((unsigned long)(CONFIG_FILE),O_RDONLY);
-			}
+			replaceFromBackup((char *)CONFIG_FILE);
+			handle = tbOpen((unsigned long)(CONFIG_FILE),O_RDONLY);
 		}
 		if (handle == -1) {
 			ret = -1;
@@ -809,7 +837,7 @@ int write_config_bin () {
 			ret = byteswritten;
 		} else {
 			ret = -1;
-			logString((char *)"CANNOT OPEN CONFIG_BIN_FILE" ,ASAP,LOG_ALWAYS);
+			logStringRTCOptional((char *)"CANNOT OPEN CONFIG_BIN_FILE" ,ASAP,LOG_ALWAYS,0);
 		}
 		
 	return(ret);	
@@ -823,12 +851,13 @@ static int restore_config_bin () {
 		
 	handle = tbOpen((unsigned long)(CONFIG_BIN_FILE),O_RDONLY);
 	if(handle < 0) {
-		logString((char *)"Binary config not present" ,BUFFER,LOG_ALWAYS);
+		//The "Apparently ABNORMAL shutdown" log message covers the status listed below.
+		//logStringRTCOptional((char *)"Binary config not present" ,BUFFER,LOG_DETAIL,0);
 		return(ret);
 	}
 	bytesread = read(handle, (unsigned long)&cfg<< 1, sizeof(cfg)<< 1);
 	if(bytesread != (sizeof(cfg)<< 1)) {
-		logString((char *)"config.bin too short" ,BUFFER,LOG_ALWAYS);
+		logStringRTCOptional((char *)"config.bin too short" ,BUFFER,LOG_ALWAYS,0);
 		close(handle);
 		unlink((LPSTR)CONFIG_BIN_FILE);
 		return(ret);
@@ -839,7 +868,7 @@ static int restore_config_bin () {
 		ret = chkconfig_debug(&cfg, handle);
 		close(handle);
 		if(ret == 0) {
-			logString((char *)"config.bin good" ,BUFFER,LOG_ALWAYS);
+			logStringRTCOptional((char *)"config.bin good" ,BUFFER,LOG_ALWAYS,0);
 		}else {
 			logString((char *)"config.bin has errors" ,BUFFER,LOG_ALWAYS);
 		}

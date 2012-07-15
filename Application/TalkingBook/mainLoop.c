@@ -2075,7 +2075,7 @@ void loadPackage(int pkgType, const char * pkgName) {
 				pkg->idxName = ret;
 			}
 			else {
-				logException(11,pkgName,USB_MODE);
+				logException(11,pkgName,SHUT_DOWN);
 			}		
 			parseControlFile(filePath, pkg);
 			if (pkgType == PKG_SYS) {
@@ -2090,7 +2090,7 @@ void loadPackage(int pkgType, const char * pkgName) {
 				close(handle);
 			}
 		} else {
-			logException(99,"no control track binary or text",USB_MODE);
+			logException(99,"no control track binary or text",SHUT_DOWN);
 		}
 
 //		if (context.package->pkg_type == PKG_QUIZ) {

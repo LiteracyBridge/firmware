@@ -43,13 +43,35 @@ __attribute__((section(".APP_RTCALARM"))) unsigned long curAlarmSet;
 __attribute__((section(".APP_RTCALARM"))) unsigned long rtc_fired;
 
 void resetRTC(void) {
+	setRTC(0,0,1);
+}
+
+void setRTCFromText(char *time) {
+	unsigned int s, m, h;
+	char *ptr;
+	
+	h = strToInt(time);
+	if ((ptr = strchr(time,'h')))
+		m = strToInt(ptr+1);
+	if ((ptr = strchr(time,'m')))
+		s = strToInt(ptr+1);
+	setRTC(h,m,s);	
+}
+
+void setRTC(unsigned int h, unsigned int m, unsigned int s) {
 #define		P_RTC_HMSBusy                 (volatile unsigned int*)(P_RTC_Ctrl_Base+0x17)
-	while (*P_RTC_HMSBusy) ; // wait till RTC is not busy 
-	*P_Second = 1;
-	while (*P_RTC_HMSBusy) ; // wait till RTC is not busy 
-	*P_Minute = 0;
-	while (*P_RTC_HMSBusy) ; // wait till RTC is not busy 
-	*P_Hour = 0;	
+	if (s < 60) {
+		while (*P_RTC_HMSBusy) ; // wait till RTC is not busy 
+		*P_Second = s;
+	}
+	if (m < 60) {
+		while (*P_RTC_HMSBusy) ; // wait till RTC is not busy 
+		*P_Minute = m;
+	}
+	if (h < 24) {
+		while (*P_RTC_HMSBusy) ; // wait till RTC is not busy 
+		*P_Hour = h;	
+	}
 }
 
 extern void getRTC(char * str) {
@@ -62,18 +84,20 @@ extern void getRTC(char * str) {
 	m = (unsigned long) *P_Minute;
 	s = (unsigned long) *P_Second;
 
-	longToDecimalString(c,time,4);
-	time[4] = 'c';
-	longToDecimalString(d,time+5,3);
-	time[8] = 'd';
+	if (c) {
+		longToDecimalString(c,time,4);
+		time[4] = 'c';
+		longToDecimalString(d,time+5,3);
+		time[8] = 'd';
+	} else 
+		strcpy(time,"----c---d");	// if cold-start and sys-vars has not been loaded yet
 	longToDecimalString(h,time+9,2);
 	time[11] = 'h';
 	longToDecimalString(m,time+12,2);
 	time[14] = 'm';
 	longToDecimalString(s,time+15,2);
 	time[17] = 's';
-	time[18] = ':';
-	time[19] = 0;
+	time[18] = 0;
 	strcpy(str,time);
 }
 	
@@ -690,9 +714,8 @@ void writeVersionToDisk() {
 	struct f_info file_info;
 		
 	strcpy(fileVersion,DEFAULT_SYSTEM_PATH  SVN_REVISION  FILE_REVISION_EXT);
-	
 	if (!fileExists((LPSTR)fileVersion)) {
-		logString(fileVersion,ASAP,LOG_DETAIL);
+		logString((char *)"Replacing missing version file.",ASAP,LOG_NORMAL); 
 		mkdir((LPSTR)DEFAULT_SYSTEM_PATH); 
 		tbChdir((LPSTR)DEFAULT_SYSTEM_PATH);
 		ret =_findfirst((LPSTR)"*" FILE_REVISION_EXT, &file_info, D_FILE);
@@ -759,7 +782,7 @@ setRTCalarm(unsigned int hour, unsigned int minute, unsigned int second) {
 	longToDecimalString(second,msg+16,2);
 	msg[18] = 's';
 	msg[19] = 0;
-	logString(msg,ASAP,LOG_ALWAYS);
+	logString(msg,ASAP,LOG_DETAIL);
 }
 
 /*  called from isr.asm when RTC alarm has fired
@@ -888,7 +911,7 @@ void setNextAlarm() {
 	}
 */
 	if(curAlarmSet == 0 ) {
-		logString("setRTCalarm(0,0,0)",BUFFER,LOG_NORMAL); 
+		logString("setRTCalarm(0,0,0)",BUFFER,LOG_DETAIL); 
 		while(*P_Hour == 0 && *P_Minute == 0 && *P_Second == 0);
 		setRTCalarm(0, 0, 0);
 // test		setPlus10();	

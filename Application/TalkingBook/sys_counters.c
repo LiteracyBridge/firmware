@@ -48,8 +48,15 @@ int loadSystemCounts() {
 	handle = tbOpen((LPSTR)(SYSTEM_VARIABLE_FILE),O_RDONLY);
 	if (handle != -1)
 		ret = read(handle,(unsigned long)&systemCounts<<1,sizeof(SystemCounts)<<1);
-	else
+	else {
 		ret = -1;
+		systemCounts.location[0] = 0;;
+		systemCounts.powerUpNumber = 0;
+		systemCounts.poweredDays = 0;
+		systemCounts.year = 2000;
+		systemCounts.month = 1;
+		systemCounts.monthday = 1;
+	}
 	close(handle);
 	return ret;
 }

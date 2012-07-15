@@ -8,12 +8,14 @@
 #define CONFIG_FILE		"a://system/config.txt"
 #define CONFIG_BIN_FILE     "a://system/config.bin"
 #define ALT_CONFIG_FILE		"a://config.txt"
-#define FLAGGED_CONFIG_FILE	"a://system/config-VERSION-CHANGED.txt"
 #define BOOT_TYPE_COLD_RESET 0
 #define BOOT_TYPE_KEY_PRESS  1
 #define BOOT_TYPE_RTC_ALARM  2
-#define RESET_TRIGGER_FILE	"a://reset"
+#define INSPECT_TRIGGER_FILE	"a:/inspect"
+#define FIRMWARE_UPDATE_NOTIF_FILE	"a:/fwupdate"
 #define LOCATION_FILE_PATTERN	"a:/system/*.loc"
+#define SET_RTC_FILE_PATTERN	"a:/*.rtc"
+
 // set BAD_MEMBRANE_SW for the old membrane switch that A-Tech has
 //#define OLD_MEMBRANE_SW 
 

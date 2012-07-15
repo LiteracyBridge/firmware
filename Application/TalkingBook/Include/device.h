@@ -47,6 +47,8 @@ extern int NORMAL_VOLUME, MAX_VOLUME, MIN_VOLUME, VOLUME_INCREMENT;
 
 extern void KeyScan_ServiceLoop(void);
 
+extern void setRTCFromText(char *);
+extern void setRTC(unsigned int, unsigned int, unsigned int);
 extern void getRTC(char *);
 extern void resetRTC(void);
 extern long getRTCinSeconds(void);

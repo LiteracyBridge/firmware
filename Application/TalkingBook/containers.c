@@ -668,26 +668,26 @@ extern int loadProfileNames(char *path, ProfileData *pd) {
 	
 	handle = tbOpen((LPSTR)path,O_RDONLY);
 	if (handle == -1)
-		logException(33,path,USB_MODE);
+		logException(33,path,SHUT_DOWN);
 	pd->intTotalProfiles = pd->intTotalLanguages = pd->intTotalMessageLists = 0;
 	getLine(-1,0);  // reset in case at end from prior use
 	while (nextNameValuePair(handle,buffer,',',&ptrLanguage,&ptrMessageList))	{
 		if (strlen(ptrLanguage) > MAX_LANGUAGE_CODE_LENGTH) {
 			strcpy(strLog,(char *)"Language code too long:");
 			strcat(strLog,ptrLanguage);
-			logException(33,strLog,USB_MODE);			
+			logException(33,strLog,SHUT_DOWN);			
 		} else if (!ptrMessageList) {
 			strcpy(strLog,(char *)"No comma in profile entry. Language:");
 			strcat(strLog,ptrLanguage);
-			logException(33,strLog,USB_MODE);			
+			logException(33,strLog,SHUT_DOWN);			
 		} else if (strlen(ptrMessageList) > MAX_MESSAGE_LIST_CODE_LENGTH) {
 			strcpy(strLog,(char *)"MessageList code too long:");
 			strcat(strLog,ptrMessageList);
-			logException(33,strLog,USB_MODE);			
+			logException(33,strLog,SHUT_DOWN);			
 		} else if (pd->intTotalProfiles == MAX_PROFILES) {
 			strcpy(strLog,(char *)"Too many profiles:  >");
 			longToDecimalString((long)MAX_PROFILES,strLog+strlen(strLog),2);
-			logException(33,strLog,USB_MODE);
+			logException(33,strLog,SHUT_DOWN);
 		}	
 
 		//check that language is new
@@ -699,7 +699,7 @@ extern int loadProfileNames(char *path, ProfileData *pd) {
 		if (i < 0) 	{ // no matching language; add as new entry 
 			i = pd->intTotalLanguages++; // assign to latest language and increment total
 			if (pd->intTotalLanguages > MAX_LANGUAGES) {
-				logException(33,ptrLanguage,USB_MODE);
+				logException(33,ptrLanguage,SHUT_DOWN);
 			}	
 			LBstrncpy(pd->heapLanguages[i],ptrLanguage,MAX_LANGUAGE_CODE_LENGTH);
 		}
@@ -713,7 +713,7 @@ extern int loadProfileNames(char *path, ProfileData *pd) {
 		if (i < 0) {	// no matching message list; add as new entry 
 			i = pd->intTotalMessageLists++; // assign to latest message list and increment total
 			if (pd->intTotalMessageLists > MAX_MESSAGE_LISTS) {
-				logException(33,ptrMessageList,USB_MODE);
+				logException(33,ptrMessageList,SHUT_DOWN);
 			}	
 			LBstrncpy(pd->heapMessageLists[i],ptrMessageList,MAX_MESSAGE_LIST_CODE_LENGTH);
 		}

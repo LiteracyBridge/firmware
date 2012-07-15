@@ -37,6 +37,7 @@
 
 
 extern void logNumber(long, int, int, int);
+extern void logStringRTCOptional(char *, int, int,int);
 extern void logString(char *, int, int);
 extern char *getLine (int, char *);
 extern BOOL readBuffer(int, char *, int);

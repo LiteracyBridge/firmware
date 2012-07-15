@@ -71,14 +71,19 @@ void logNumber(long l, int digits, int whenToWrite, int logPriority) {
 	logString(strLong,whenToWrite,logPriority);	
 }
 
-void logString(char *string, int whenToWrite, int logPriority) {
+extern void logStringRTCOptional(char *string, int whenToWrite, int logPriority, int shouldRTC) { 
 	int len, available;
 	char newString[256];
 	
 	if (logPriority > DEBUG_MODE)
 		return; // not worth logging, according to config file
 	if (LOG_FILE) {
-		getRTC(newString);
+		if (shouldRTC) {
+			getRTC(newString);
+			strcat(newString,":");
+		}
+		else
+			newString[0] = 0;
 		LBstrncat((char *)newString,string,255);
 		if (idxLogBuffer && (idxLogBuffer <= (LOG_BUFFER_SIZE - 3))) {
 			// already one entry, separate with CRLF
@@ -102,6 +107,10 @@ void logString(char *string, int whenToWrite, int logPriority) {
 		if (available < (LOG_BUFFER_SIZE - 72))
 			flushLog();
 	}
+}
+
+void logString(char *string, int whenToWrite, int logPriority) {
+	logStringRTCOptional(string, whenToWrite,logPriority,1);
 }
 
 void flushLog(void) {
@@ -591,10 +600,7 @@ int fileExists(LPSTR name) {
 int dirExists(LPSTR name) {
 	int ret;
 	struct stat_t statbuf;
-//	struct f_info f_info; 
-	
-//	ret = _findfirst(name, &f_info, D_DIR);
-//	if (ret >= 0)
+
 	ret = stat(name, &statbuf);
 	if((ret == 0) && (statbuf.st_mode & 0x10)) // exists and is a directory
 		ret = 1;
