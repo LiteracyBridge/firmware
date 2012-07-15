@@ -1315,7 +1315,6 @@ static void takeAction (Action *action, EnumAction actionCode) {
 
 		case DELETE:
 			stop();
-			logString((char *)"Deletion",BUFFER,LOG_ALWAYS);
 			list = &pkgSystem.lists[context.package->idxMasterList];
 			if(list->isLocked) {
 				insertSound(&pkgSystem.files[SORRY_LOCKED_SUBJECT_IDX],NULL,TRUE);
@@ -1324,12 +1323,18 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			tempList = &context.package->lists[destination];
 			if (destination == 0) {
 				// delete subject/category from master list	
+				logString((char *)"Deleting subject from active list",BUFFER,LOG_ALWAYS);
 			    cursor = getCurrentList(tempList);
+				if (tempList->isLocked) {
+					strcpy(tempBuffer,"!");
+					strcat(tempBuffer,cursor);
+				} else
+					strcpy(tempBuffer,cursor);
 				getListFilename(filename,destination,FALSE); 
 				cpyListPath(filepath,filename);  // e.g. a:/messages/lists/EN/
 				strcpy(tempPath,LIST_MASTER);
 				strcat(tempPath,".txt");
-				findDeleteStringFromFile(filepath,tempPath,cursor,TRUE);
+				findDeleteStringFromFile(filepath,tempPath,tempBuffer,TRUE);
 				// todo: actually delete audio file if it's not in any other list (including other languages)				
 				insertSound(&pkgSystem.files[DELETED_FILE_IDX],NULL,TRUE);
 				context.queuedPackageNameIndex = SAME_SYSTEM;
@@ -1337,6 +1342,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 				reposition = TRUE;
 			} else {
 				// delete a message
+				logString((char *)"Deleting message",BUFFER,LOG_ALWAYS);
 				getListFilename(filename,destination,TRUE);
 				cursor = getCurrentList(tempList);		
 				cpyListPath(filepath,filename);	
@@ -1371,12 +1377,16 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 
 		case DELETE_MESSAGES:
-			logString((char *)"Deleting Messages",BUFFER,LOG_ALWAYS);
 			// delete all messages in a subject/category
 			if (destination == 0) {
 				stop();
 				tempList = &context.package->lists[destination];
 					// delete subject/category from master list	
+				if(tempList->isLocked) {
+					insertSound(&pkgSystem.files[SORRY_LOCKED_SUBJECT_IDX],NULL,TRUE);
+					break;
+				}
+				logString((char *)"Deleting all messages in category",BUFFER,LOG_ALWAYS);
 				cursor = getCurrentList(tempList);
 				cpyListPath(filepath,cursor);
 				strcat(filepath,cursor);
@@ -1392,9 +1402,13 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 
 		case TRIM:
-			logString((char *)"Trim a recording",BUFFER,LOG_ALWAYS);
 			stop();
 			tempList = &context.package->lists[destination];
+			if(tempList->isLocked) {
+				insertSound(&pkgSystem.files[SORRY_LOCKED_SUBJECT_IDX],NULL,TRUE);
+				break;
+			}
+			logString((char *)"Trim a recording",BUFFER,LOG_ALWAYS);
 			cursor = getCurrentList(tempList);
 			strcpy(filename,USER_PATH);
 			strcat(filename,cursor);  //todo: address application packages
@@ -1459,10 +1473,10 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 			
 		case POSITION_TO_TOP:
-			logString((char *)"Position Message to the top",BUFFER,LOG_ALWAYS);
 			stop();
 			longToDecimalString(destination,filename,3);
 			if (destination == -1) {
+				logString((char *)"Position Language/Profile to the top",BUFFER,LOG_ALWAYS);
 				// move LANGUAGE to top position
 				//Append string to system names file
 				strcpy(tempBuffer,currentProfileLanguage());
@@ -1477,23 +1491,34 @@ static void takeAction (Action *action, EnumAction actionCode) {
 				resetSystem();					
 			} else { 
 				tempList = &context.package->lists[destination];
+				if(tempList->isLocked) {
+					insertSound(&pkgSystem.files[SORRY_LOCKED_SUBJECT_IDX],NULL,TRUE);
+					break;
+				}
 				longToDecimalString(tempList->currentFilePosition,filename,3);
 				if (destination == 0) {
 					 // reposition the whole category
+					logString((char *)"Position Category to the top",BUFFER,LOG_ALWAYS);
 				    cursor = getCurrentList(tempList);
+					if (tempList->isLocked) {
+						strcpy(tempBuffer,"!");
+						strcat(tempBuffer,cursor);
+					} else
+						strcpy(tempBuffer,cursor);
 					getListFilename(filename,destination,FALSE);  // e.g. HEALTH
 					cpyListPath(filepath,filename);  // e.g. a:/messages/lists/EN/
 					strcpy(tempPath,LIST_MASTER);
 					strcat(tempPath,".txt");
-					findDeleteStringFromFile(filepath,tempPath,cursor,TRUE);
+					findDeleteStringFromFile(filepath,tempPath,tempBuffer,TRUE);
 					strcat(filepath,tempPath);
-					insertStringInFile(filepath,cursor,0);
+					insertStringInFile(filepath,tempBuffer,0);
 					context.queuedPackageNameIndex = SAME_SYSTEM;
 					context.queuedPackageType = PKG_SYS;
 					reposition = TRUE;
 				}
 				else {
 					// reposition the message
+					logString((char *)"Position Message to the top",BUFFER,LOG_ALWAYS);
 				    cursor = getCurrentList(tempList);
 					cursor2 = getCurrentList(&pkgSystem.lists[context.package->idxMasterList]);
 					cpyListPath(filepath,filename);
