@@ -8,7 +8,7 @@
 #define RESET					1
 #define USB_MODE				2
 #define SHUT_DOWN				3
-#define LOG_ONLY				4
+#define LOG_ONLY				0
 
 #define ERROR_LOG_FILE			DEFAULT_SYSTEM_PATH "log.txt"
 
