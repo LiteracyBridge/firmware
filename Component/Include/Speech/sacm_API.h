@@ -69,11 +69,6 @@
 #define MS02_DAC_24K		5
 #define MS02_DAC_32K		6
 #define MS02_DAC_44K		7
-
-#define C_SACM_PLAY  	0x0001
-#define C_SACM_RECORD	0x0002
-#define C_SACM_PAUSE  	0x0004
-
 //ETTS Tone Voice Select Table
 #define PERS_MALE			0					// default male voice
 #define PERS_FEMALE			1					// default female voice
@@ -99,6 +94,22 @@
 //The definition of return Value for Error:
 #define 			RTN_NOERROR					0x0000	//No Error
 #define				RTN_FILEERROR				0xffff	//ÎÄ¼þ³ö´í
+//
+//#define _Snd_Debug_ 			 				//for Debug used
+/////////////SACM Flag///////////////////////////////////////////////////////////
+#define C_SACM_PLAY         		0x0001
+#define C_SACM_RECORD  	      	 	0x0002
+#define C_SACM_PAUSE          	 	0x0004
+#define C_SACM_CODEC_MODE			0x0800
+#define C_SACM_STOP			        0x8000
+//
+////////////////Snd Status///////////////////////////////////////////////////////
+//IS return by Snd_GetStatus()---->	define by user
+#define	C_Snd_Stop				0		//Snd_GetStatus() return  C_Snd_Stop   while Sound is Stop
+#define	C_Snd_Playing			1		//Snd_GetStatus() return  C_Snd_Playing  while Sound is Playing
+#define	C_Snd_Pause				2		//Snd_GetStatus() return  C_Snd_Pause  while Sound is Pause
+#define	C_Snd_DVRing			3		//Snd_GetStatus() return  C_Snd_DVRing while Sound is Recording
+//
 //*****************************************************************************
 //*****************************************************************************
 // Function Call (API) Declaration for C language
