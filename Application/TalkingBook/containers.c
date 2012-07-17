@@ -653,7 +653,14 @@ extern int initializeProfiles() {
 	strcat(profileOrderFile,PROFILE_ORDER_FILE);	
 	strcat(profileOrderFile,".txt"); //todo: move to config file	
 	ret = loadProfileNames(profileOrderFile,&profiles);
-	logProfile();
+	if (ret == -1) {
+		replaceFromBackup(profileOrderFile);
+		ret = loadProfileNames(profileOrderFile,&profiles);
+	}	
+	if (ret >=0)
+		logProfile();
+	else
+		logException(33,(char *)"backup didn't work",SHUT_DOWN);			
 	return ret;
 }
 
@@ -667,19 +674,27 @@ extern int loadProfileNames(char *path, ProfileData *pd) {
 	char strLog[80];
 	
 	handle = tbOpen((LPSTR)path,O_RDONLY);
-	if (handle == -1)
-		logException(33,path,SHUT_DOWN);
+	if (handle == -1) {
+		logException(33,path,LOG_ONLY);
+		strcpy(strLog,(char *)"Missing profiles file:");
+		strcat(strLog,path);
+		logException(33,strLog,LOG_ONLY);			
+		ret = -1;
+		return ret;
+	}
 	pd->intTotalProfiles = pd->intTotalLanguages = pd->intTotalMessageLists = pd->intTotalControlTracks = 0;
 	getLine(-1,0);  // reset in case at end from prior use
 	while (nextNameValuePair(handle,buffer,',',&ptrLanguage,&ptrMessageList))	{
 		if (strlen(ptrLanguage) > MAX_LANGUAGE_CODE_LENGTH) {
 			strcpy(strLog,(char *)"Language code too long:");
 			strcat(strLog,ptrLanguage);
-			logException(33,strLog,SHUT_DOWN);			
+			logException(33,strLog,LOG_ONLY);			
+			ret = -1;
 		} else if (!ptrMessageList) {
 			strcpy(strLog,(char *)"No comma in profile entry. Language:");
 			strcat(strLog,ptrLanguage);
-			logException(33,strLog,SHUT_DOWN);	
+			logException(33,strLog,LOG_ONLY);			
+			ret = -1;
 		}
 		
 		ptrControlTrack = strchr(ptrMessageList, ',');
@@ -690,13 +705,16 @@ extern int loadProfileNames(char *path, ProfileData *pd) {
 		if (strlen(ptrMessageList) > MAX_MESSAGE_LIST_CODE_LENGTH) {
 			strcpy(strLog,(char *)"MessageList code too long:");
 			strcat(strLog,ptrMessageList);
-			logException(33,strLog,SHUT_DOWN);			
+			logException(33,strLog,LOG_ONLY);			
+			ret = -1;
 		} else if (pd->intTotalProfiles == MAX_PROFILES) {
 			strcpy(strLog,(char *)"Too many profiles:  >");
 			longToDecimalString((long)MAX_PROFILES,strLog+strlen(strLog),2);
-			logException(33,strLog,SHUT_DOWN);
+			logException(33,strLog,LOG_ONLY);
+			ret = -1;
 		}	
-
+		if (ret == -1)
+			break;
 		//check that language is new
 		i = pd->intTotalLanguages;
 		while (--i >=0) {
@@ -745,7 +763,8 @@ extern int loadProfileNames(char *path, ProfileData *pd) {
 	} 
 	close(handle);
 	
-	ret = pd->intTotalProfiles?1:0;  // at least one language found
+	if (ret != -1)
+		ret = pd->intTotalProfiles?1:0;  // at least one language found
 	pd->intCurrentProfile = 0;
 
 	return(ret);
