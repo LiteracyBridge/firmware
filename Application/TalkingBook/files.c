@@ -547,14 +547,22 @@ INT16 tbOpen(LPSTR path, INT16 open_flag) {
 			getcwd((LPSTR)dirPath,PATH_LENGTH);
 		}
 		ptr = strrchr(dirPath,'/');
+		if (ptr == NULL)
+			ptr = strrchr(dirPath,'\\');		
 		if (ptr)
 			*ptr = 0;
 		if (isCorrupted(dirPath)) {
 			if (strcmp((char *)path,LOG_FILE)) { // error didn't occur trying to open log file
 				strcpy(logMsg,(char *)"CORRUPTED: ");
 				strcat(logMsg,dirPath);
+				if (ptr) {
+					strcat(logMsg,(char *)" (attempted open: ");
+					strcat(logMsg,ptr+1);
+					strcat(logMsg,(char *)")");
+				}	
 				logString(logMsg,BUFFER,LOG_ALWAYS);
 				saveLogFile(1);
+				replaceFromBackup(dirPath);
 			} else {
 				handle = open((LPSTR)"a:/log/CORRUPTED-LOG.txt",O_CREAT|O_RDWR|O_TRUNC);
 				close(handle);
@@ -1323,9 +1331,10 @@ replaceFromBackup(char *path)
 	char * wrkpath;
 	char msg[128];
 	
-//	strcpy(msg, "REP 1 ");
-//	strcat(msg, path);
-//	logString(msg, BUFFER, LOG_ALWAYS);
+	strcpy(msg,"Attempting replace ");
+	strcat(msg,path);
+	strcat(msg," from backup.");
+	logString(msg, ASAP, LOG_ALWAYS);
 	
 	ret = stat((LPSTR)path, &statbuf);
 	if(ret == 0) {  // doesn't exist
@@ -1333,7 +1342,12 @@ replaceFromBackup(char *path)
 	}
 	
 	strcpy(bkPath, BKPATH);
-	strcat(bkPath, strrchr(path, '/') + 1);
+	wrkpath = strrchr(path, '/');
+	if (wrkpath) // checks that file to be backed up inclued a path
+		strcat(bkPath, wrkpath + 1);
+	else 
+		strcat(bkPath, path);
+	
 	
 //	strcpy(msg, "REP 2 ");
 //	strcat(msg, bkPath);
@@ -1341,7 +1355,10 @@ replaceFromBackup(char *path)
 	
 	ret = stat((LPSTR)bkPath, &bkstatbuf);
 	if(ret != 0) {  // doesn't exist, we don't have a backup
-		return(ret);
+		strcpy(msg,(char *)"No backup exists:");
+		strcat(msg,bkPath);
+		logString(msg,ASAP,LOG_ALWAYS);
+		return(-1);
 	}
 	
 	if(srcexists == 1) {
@@ -1374,11 +1391,12 @@ replaceFromBackup(char *path)
 //		logString(path, BUFFER, LOG_ALWAYS);
 //		logString(bkPath, BUFFER, LOG_ALWAYS);
 ///		_copy((LPSTR)bkPath, (LPSTR)path);  // src, dest
-		fileCopy((LPSTR)bkPath, (LPSTR)path);  // from, to
+		fileCopy((char *)bkPath, (char *)path);  // from, to
 	} else {
 		mkdir((LPSTR) path);
 		dirCopy((char *) bkPath, (char *)path, 1);  // from, to
 	}
+	logString("Completed backup replacement",ASAP,LOG_ALWAYS);
 }
 
 extern void logStat(char * filePath) {
