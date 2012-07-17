@@ -662,14 +662,14 @@ extern int loadProfileNames(char *path, ProfileData *pd) {
 	// It can be used during startup (see initalizeProfiles()) or when inspecting another device's profiles.
 
 	int ret, i, handle;
-	char *ptrLanguage, *ptrMessageList;
+	char *ptrLanguage, *ptrMessageList, *ptrControlTrack;
 	char buffer[READ_LENGTH+1];
 	char strLog[80];
 	
 	handle = tbOpen((LPSTR)path,O_RDONLY);
 	if (handle == -1)
 		logException(33,path,SHUT_DOWN);
-	pd->intTotalProfiles = pd->intTotalLanguages = pd->intTotalMessageLists = 0;
+	pd->intTotalProfiles = pd->intTotalLanguages = pd->intTotalMessageLists = pd->intTotalControlTracks = 0;
 	getLine(-1,0);  // reset in case at end from prior use
 	while (nextNameValuePair(handle,buffer,',',&ptrLanguage,&ptrMessageList))	{
 		if (strlen(ptrLanguage) > MAX_LANGUAGE_CODE_LENGTH) {
@@ -679,8 +679,15 @@ extern int loadProfileNames(char *path, ProfileData *pd) {
 		} else if (!ptrMessageList) {
 			strcpy(strLog,(char *)"No comma in profile entry. Language:");
 			strcat(strLog,ptrLanguage);
-			logException(33,strLog,SHUT_DOWN);			
-		} else if (strlen(ptrMessageList) > MAX_MESSAGE_LIST_CODE_LENGTH) {
+			logException(33,strLog,SHUT_DOWN);	
+		}
+		
+		ptrControlTrack = strchr(ptrMessageList, ',');
+		if(ptrControlTrack) {
+			*ptrControlTrack++ = 0;
+		}
+					
+		if (strlen(ptrMessageList) > MAX_MESSAGE_LIST_CODE_LENGTH) {
 			strcpy(strLog,(char *)"MessageList code too long:");
 			strcat(strLog,ptrMessageList);
 			logException(33,strLog,SHUT_DOWN);			
@@ -718,7 +725,22 @@ extern int loadProfileNames(char *path, ProfileData *pd) {
 			LBstrncpy(pd->heapMessageLists[i],ptrMessageList,MAX_MESSAGE_LIST_CODE_LENGTH);
 		}
 		pd->ptrProfileMessageLists[pd->intTotalProfiles] = pd->heapMessageLists[i];
-
+		
+		if(ptrControlTrack) {
+				//check that control track is new
+			i = pd->intTotalControlTracks;
+			while (--i >=0)
+				if (!strcmp(ptrControlTrack,pd->heapControlTracks[i]))
+					break; // control track already exists
+			if (i < 0) {	// no matching control track; add as new entry 
+				i = pd->intTotalControlTracks++; // assign to latest control track and increment total
+				if (pd->intTotalMessageLists > MAX_CONTROL_TRACKS) {
+					logException(33,ptrControlTrack,SHUT_DOWN);
+				}	
+				LBstrncpy(pd->heapControlTracks[i],ptrControlTrack,MAX_CONTROL_TRACK_CODE_LENGTH);
+			}
+			pd->ptrProfileControlTracks[pd->intTotalProfiles] = pd->heapControlTracks[i];
+			}
 		pd->intTotalProfiles++;
 	} 
 	close(handle);
@@ -742,6 +764,13 @@ extern char *currentProfileLanguage() {
 	ret = profiles.ptrProfileLanguages[profiles.intCurrentProfile];
 	return ret;
 }
+extern char *currentProfileControlTrack() {
+	char * ret;
+	
+	ret = profiles.ptrProfileControlTracks[profiles.intCurrentProfile];
+	return ret;
+}
+
 
 extern int currentProfile() {
 	return profiles.intCurrentProfile;

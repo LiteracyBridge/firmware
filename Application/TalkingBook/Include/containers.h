@@ -9,8 +9,10 @@
 #define MAX_PROFILES	10
 #define MAX_LANGUAGES 	5
 #define MAX_MESSAGE_LISTS	5
+#define MAX_CONTROL_TRACKS 3
 #define MAX_LANGUAGE_CODE_LENGTH 12	// long enough to support current new language naming convention in wrap_translation()
 #define MAX_MESSAGE_LIST_CODE_LENGTH 8
+#define MAX_CONTROL_TRACK_CODE_LENGTH 8
 
 #define MAX_FILES		112
 #define MAX_BLOCKS		112
@@ -213,11 +215,14 @@ struct Context {
 struct ProfileData {
 	char heapLanguages[MAX_LANGUAGES][MAX_LANGUAGE_CODE_LENGTH + 1]; // max language code +1 for /0
 	char heapMessageLists[MAX_MESSAGE_LISTS][MAX_MESSAGE_LIST_CODE_LENGTH + 1]; // max message list code length +1 for /0
+	char heapControlTracks[MAX_CONTROL_TRACKS][MAX_CONTROL_TRACK_CODE_LENGTH + 1]; // max control track list code length + 1 for /0
 	char *ptrProfileLanguages[MAX_PROFILES];
 	char *ptrProfileMessageLists[MAX_PROFILES];
+	char *ptrProfileControlTracks[MAX_PROFILES];
 	int intTotalProfiles;
 	int intTotalLanguages;
 	int intTotalMessageLists;
+	int intTotalControlTracks;
 	int intCurrentProfile;
 };
 
@@ -268,6 +273,7 @@ extern int initializeProfiles(void);
 extern int loadProfileNames(char *, ProfileData *);
 extern char *currentProfileMessageList(void);
 extern char *currentProfileLanguage(void);
+extern char *currentProfileControlTrack(void);
 extern int currentProfile(void);
 extern int nextProfile(void);
 extern int prevProfile(void);	
