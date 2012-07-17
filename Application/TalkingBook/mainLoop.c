@@ -1177,6 +1177,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 				}
 				if (!filename[0]) { 
 					// empty list
+					logString((char *)"Empty category",BUFFER,LOG_NORMAL);
 					insertSound(&pkgSystem.files[EMPTY_LIST_FILE_IDX],NULL,FALSE);
 					// empty list of packages; redirect to current point in list of lists
 					list = &context.package->lists[0];

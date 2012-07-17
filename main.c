@@ -63,11 +63,10 @@ int main (int bootType) {
 	fs_init();
 	_devicemount(0); // should include call to IOKey_Initial() within BodyInit.c 
 	 				// to flip on a transistor early enough to power the microSD card
-	 				
-	 LOG_FILE = DEFAULT_LOG_FILE; // chicken & egg - we haven't read config.txt or config.bin to set LOG_FILE
-
 
 	ChangeCodePage(UNI_ENGLISH);
+	SetSystemClockRate(MAX_CLOCK_SPEED); // to speed up initial startup -- set CLOCK_RATE later
+	setDefaults();
 	
 	if(bootType != BOOT_TYPE_COLD_RESET) {
 		fixRegs();

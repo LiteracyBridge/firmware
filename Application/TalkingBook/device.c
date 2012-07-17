@@ -527,7 +527,7 @@ void setOperationalMode(int newmode) {
 		buildExchgOstats();
  		clearDeleteQueue();
   		write_config_bin();  // build a config.bin
-		writeVersionToDisk();  // make sure the version file is correct
+		writeVersionToDisk(SYSTEM_PATH);  // make sure the version file is correct
   		confirmSNonDisk(); // make sure the serial number file is correct 
  		//cleanUpOldRevs(); // cleanup any old revs 
     	// assume calling for sleep or halt
@@ -702,26 +702,30 @@ SNexists(void) {
 
 char *
 getDeviceSN(int includePrefix) {
+	if (strncmp(CONST_TB_SERIAL_PREFIX,P_TB_SERIAL_PREFIX,strlen(CONST_TB_SERIAL_PREFIX)))
+		return (char *)0;
 	if (includePrefix)
 		return P_TB_SERIAL_PREFIX;
 	else
 		return P_TB_SERIAL_NUMBER;	
 }
 
-void writeVersionToDisk() {
+void writeVersionToDisk(char *path) {
 	char fileVersion [PATH_LENGTH];
 	int handle, ret;
 	struct f_info file_info;
 		
-	strcpy(fileVersion,DEFAULT_SYSTEM_PATH  SVN_REVISION  FILE_REVISION_EXT);
+	strcpy(fileVersion,path);
+	strcat(fileVersion,SVN_REVISION  FILE_REVISION_EXT);
 	if (!fileExists((LPSTR)fileVersion)) {
-		logString((char *)"Replacing missing version file.",ASAP,LOG_NORMAL); 
-		mkdir((LPSTR)DEFAULT_SYSTEM_PATH); 
-		tbChdir((LPSTR)DEFAULT_SYSTEM_PATH);
+		logStringRTCOptional((char *)"Replacing missing version file.",ASAP,LOG_NORMAL,0); 
+		tbChdir((LPSTR)path);
 		ret =_findfirst((LPSTR)"*" FILE_REVISION_EXT, &file_info, D_FILE);
-		if (ret >= 0) {
+		while (ret >= 0) {
 			ret = unlink((LPSTR)file_info.f_name);		
+			ret = _findnext(&file_info);
 		}	
+		mkdir((LPSTR)path); 
 		handle = tbOpen((LPSTR)fileVersion,O_CREAT|O_RDWR|O_TRUNC);
 		close(handle);	
 	}
@@ -968,14 +972,23 @@ KEY_TimeBase_B_isr() {	//TimerBase B fired
 }
 
 static void confirmSNonDisk(void) {
-	int exists, handle;
-	char fileSN[PATH_LENGTH];
+	int exists, handle, ret;
+	char fileSN[PATH_LENGTH],filePattern[PATH_LENGTH];
+	struct f_info file_info;
 		
 	strcpy(fileSN,SYSTEM_PATH);
 	strcat(fileSN, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN);
 	strcat(fileSN, (char *)SERIAL_EXT);
 	exists = fileExists((LPSTR) fileSN);
 	if (!exists) {
+		tbChdir((LPSTR)SYSTEM_PATH);
+		strcpy(filePattern,(char *)"*" SERIAL_EXT);
+		ret =_findfirst((LPSTR)filePattern, &file_info, D_FILE);
+		while (ret >= 0) { 			
+			ret = unlink((LPSTR)file_info.f_name);
+			ret = _findnext(&file_info);
+		}
+		mkdir((LPSTR)SYSTEM_PATH); 
 		handle = tbOpen((LPSTR)fileSN,O_CREAT|O_RDWR|O_TRUNC);
 		close(handle);
 	}

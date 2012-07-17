@@ -159,15 +159,18 @@ ReprogFailed(flash *fp)
 }
 */
 
-void updateSN() {
+void updateSN(char* path) {
 	extern void write_app_flash(int *, int, unsigned int);
 	struct f_info file_info;
 	char *newSN;
 	char pathFrom[PATH_LENGTH], pathTo[PATH_LENGTH];
 	int ret, goodSN, sameSN;
-	
+	int reuseSystemSRNfile;
+		
 	// see if a .srn file is present
-	ret =_findfirst((LPSTR)UPDATE_FP SERIAL_FN, &file_info, D_FILE);
+	strcpy(pathFrom,path);
+	strcat(pathFrom,SERIAL_FN);
+	ret =_findfirst((LPSTR)pathFrom, &file_info, D_FILE);
 	if(ret >= 0) {
 		char *dot;
 		int lenEraseCode = strlen((char *)ERASE_SN_CODE);
@@ -182,18 +185,19 @@ void updateSN() {
 			newSN += lenEraseCode;
 		}
 	 	// check that sn begins with "srn."
-	 	goodSN = !strncmp(newSN,CONST_TB_SERIAL_PREFIX,CONST_TB_SERIAL_PREFIX_LEN);
-	 	
-		// move srn. file to system directory to allow file-based inspection of device SN
-		strcpy(pathFrom,(char *)UPDATE_FP);
-		strcat(pathFrom,file_info.f_name);
-		strcpy(pathTo,(char *)DEFAULT_SYSTEM_PATH);
-		ret = mkdir((LPSTR)pathTo);
-		strcat(pathTo,newSN + CONST_TB_SERIAL_PREFIX_LEN);
-		ret = rename((LPSTR)pathFrom,(LPSTR)pathTo);
-		if (ret == -1) {
-			unlink((LPSTR)pathFrom);
-		}
+	 	if (strcmp(path,DEFAULT_SYSTEM_PATH)) {
+		 	goodSN = !strncmp(newSN,CONST_TB_SERIAL_PREFIX,CONST_TB_SERIAL_PREFIX_LEN);
+			// move srn. file to system directory to allow file-based inspection of device SN
+			strcpy(pathFrom,(char *)UPDATE_FP);
+			strcat(pathFrom,file_info.f_name);
+			strcpy(pathTo,(char *)DEFAULT_SYSTEM_PATH);
+			ret = mkdir((LPSTR)pathTo);
+			strcat(pathTo,newSN + CONST_TB_SERIAL_PREFIX_LEN);
+			ret = rename((LPSTR)pathFrom,(LPSTR)pathTo);
+			if (ret == -1) 
+				unlink((LPSTR)pathFrom);
+	 	} else
+			reuseSystemSRNfile = goodSN = 1; // "srn." won't be at the beginning of the file in /system	
 
 	 	//check that new sn is not the same as old - force goodSN to 0 if it is the same
 		if (*(char *)TB_SERIAL_NUMBER_ADDR) // otherwise 0-length string will look equal
@@ -217,11 +221,22 @@ void updateSN() {
 					vlen = 0;
 				else
 					*dot = 0;
-				write_app_flash((int *)newSN, vlen, (unsigned int)0xffff);
+				if (reuseSystemSRNfile) {
+					// if reusing the /system *.srn file, then we must manually add the srn prefix
+					strcpy(pathFrom,CONST_TB_SERIAL_PREFIX);
+					strcat(pathFrom,newSN);
+					vlen = strlen(pathFrom);
+
+					write_app_flash((int *)pathFrom, vlen, (unsigned int)0x0000);
+				} else
+					write_app_flash((int *)newSN, vlen, (unsigned int)0x0000);
 			}
 			if (flagErase) {
 				unlink((LPSTR)pathTo);
 			}
+	 	} else if (flagErase) {
+	 		// no SN - just erase
+	 		write_app_flash((int *)"", 0, (unsigned int)0x0000);
 	 	}
 	}
 }

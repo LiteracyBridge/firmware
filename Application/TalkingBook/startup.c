@@ -168,6 +168,7 @@ void setDefaults(void) {
 	context.package = 0; // prevents trying to insert this sound before config & control files are loaded.
 	
 	ADMIN_COMBO_KEYS   = KEY_UP | KEY_DOWN;
+	LOG_FILE = DEFAULT_LOG_FILE; // chicken & egg - we haven't read config.txt or config.bin to set LOG_FILE
 
 }
 
@@ -263,12 +264,10 @@ void startUp(unsigned int bootType) {
 	char filename[FILE_LENGTH];
 	int key, ret;
 	int configExists = 0, normal_shutdown=1;
-	int inspect;
+	int inspect = 0;
 		
-	SetSystemClockRate(MAX_CLOCK_SPEED); // to speed up initial startup -- set CLOCK_RATE later
+	setLED(LED_ALL,TRUE);  // start lights to indicate user should wait during startup until the device is ready
 
-	setDefaults();
-	// start with both lights on to indicate that the user should wait during startup until the device is ready 
 	strcpy(buffer,"\x0d\x0a" "---------------------------------------------------\x0d\x0a" "Serial#:");		
 	strcat(buffer,getDeviceSN(0));
 	strcat(buffer,"\x0d\x0a" "Clock:");
@@ -289,7 +288,6 @@ void startUp(unsigned int bootType) {
 		systemCounts.poweredDays = 1;
 		systemCounts.year = 2000 + systemCounts.powerUpNumber;
 				
-		LOG_FILE = DEFAULT_LOG_FILE; // chicken & egg - we haven't read config.txt or config.bin to set LOG_FILE
 		strcpy(buffer,"BOOT_TYPE_COLD_RESET -- NEW BATTERIES???");
 		if (*P_Hour >= 24) {
 			setRTC(0,2,0);  //  reset before saving anything to disk and running macros
@@ -299,6 +297,7 @@ void startUp(unsigned int bootType) {
 		forceflushLog();
 
 #ifdef HALT_ON_COLD_START
+		setLED(LED_ALL,FALSE);  
 		//setOperationalMode((int)P_SLEEP);  //DEVICE-90 - does too much fs activity
 		*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
 		turnAmpOff();
@@ -316,8 +315,6 @@ void startUp(unsigned int bootType) {
 #endif
 	}
 
-	setLED(LED_ALL,TRUE);  
-
 // for really low batteries the playDing() below will cause a low voltage reset
 // handling that will go into Halt mode above
 // pressing play or black circle will get back here and the cycle will repeat
@@ -334,10 +331,9 @@ void startUp(unsigned int bootType) {
 	rename((LPSTR)"a:\\messages",(LPSTR)"a:\\_1messages");
 	rename((LPSTR)"a:\\system",(LPSTR)"a:\\_1system");
 	
-	//to stop user from wondering if power is on and possibly cycling too quickly,
 	*/
-	playDing();  // it is important to play a sound immediately 
-
+		
+	playDing();  // it is important to play a sound immediately to stop user from wondering if power is on
 	if (fileExists((LPSTR)INSPECT_TRIGGER_FILE))
 		inspect = 1;  // used to check for .loc file and other changes that don't normally occur
 	key = keyCheck(1);  // long keycheck 
@@ -352,8 +348,7 @@ void startUp(unsigned int bootType) {
 		SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
 		loadConfigFile();
 		initializeProfiles(); 
-		if (inspect)
-			processInbox();
+		processInbox();
 		resetSystem();
 	} else if (key == KEY_PLUS) {
 		// copy outbox files to connecting device, get stats and audio feedback
@@ -367,8 +362,8 @@ void startUp(unsigned int bootType) {
 		// This will update the version when the device has just been programmed with probe,
 		// which wipes out the serial number.
 		updateSN(DEFAULT_SYSTEM_PATH);  // use the srn file that might be left from pre-firmware update
-		writeVersionToDisk();	
-		strcpy(buffer,"Firmware Update:");
+		writeVersionToDisk(DEFAULT_SYSTEM_PATH);	
+		strcpy(buffer,"Probe Firmware Update:");
 		strcat(buffer,VERSION);
 		logStringRTCOptional(buffer,ASAP,LOG_NORMAL,0);
 	}
@@ -393,6 +388,8 @@ void startUp(unsigned int bootType) {
 		inspect = 1;  
 		updateSN(UPDATE_FP);
 		if (check_new_sd_flash(filename)) {
+			ret = tbOpen((LPSTR)INSPECT_TRIGGER_FILE,O_CREAT|O_RDWR|O_TRUNC);
+			close(ret);
 			ret = tbOpen((LPSTR)FIRMWARE_UPDATE_NOTIF_FILE,O_CREAT|O_RDWR|O_TRUNC);
 			close(ret);
 			// inspect file will still be there since fw update will prevent this function from reaching the end.
@@ -404,6 +401,7 @@ void startUp(unsigned int bootType) {
 	if (configExists) {
 		fixnull_config_strings();
 	} else {
+		logStringRTCOptional((char *)"No config file bin,txt,or backup. Using defaults.",BUFFER,LOG_ALWAYS,0);
 		disaster_config_strings();
 	}
 
@@ -537,13 +535,13 @@ int loadConfigFile(void) {
 	
 	for (attempt = 0,goodPass = 0;attempt < MAX_RETRIES && !goodPass;attempt++) {
 		goodPass = 1;
-		LOG_FILE = 0; //default in case no logging location in config file (turns logging off)
 		MACRO_FILE = 0; // default case if no MACRO_FILE listed
 		handle = tbOpen((unsigned long)(CONFIG_FILE),O_RDONLY);
-		logString(CONFIG_FILE, BUFFER, LOG_ALWAYS);
 		if (handle == -1) {
 			replaceFromBackup((char *)CONFIG_FILE);
 			handle = tbOpen((unsigned long)(CONFIG_FILE),O_RDONLY);
+			if (handle >= 0)
+				logStringRTCOptional((char *)"Recovered config.txt from backup folder",BUFFER,LOG_ALWAYS,0);
 		}
 		if (handle == -1) {
 			ret = -1;

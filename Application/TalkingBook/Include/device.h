@@ -73,7 +73,7 @@ extern void turnAmpOff(void);
 extern void turnAmpOn(void);
 extern char* getDeviceSN(int);
 extern int SNexists(void);
-extern void writeVersionToDisk(void);
+extern void writeVersionToDisk(char *);
 
 #define RTC_ALARM_INTERRUPT_ENABLE 0x0400
 #define RTC_ALARM_FUNCTION_ENABLE  0x0400
