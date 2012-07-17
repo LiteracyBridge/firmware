@@ -57,9 +57,11 @@ static int openList(ListItem *list, char *outFilename) {
 		strcpy(outFilename,filename);
 	ret = tbOpen((LPSTR)(filename),O_RDONLY);
 	if (ret == -1) {
-		ret = tbOpen((LPSTR)(filename), O_CREAT|O_RDWR);
+		ret = replaceFromBackup(filename);
+		if (ret != -1)
+			ret = tbOpen((LPSTR)(filename),O_RDONLY);
 		if (ret == -1)
-			close(ret);
+			ret = tbOpen((LPSTR)(filename), O_CREAT|O_RDWR);
 		// logException(5,filename,RESET); //todo: package name or path does not exist
 	}
 	return ret;	
