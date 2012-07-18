@@ -525,7 +525,17 @@ INT16 tbOpen(LPSTR path, INT16 open_flag) {
 	char dirPath[PATH_LENGTH];
 	char logMsg[PATH_LENGTH + 20];
 	char *ptr, *pPath;
-	
+	static int openLogStack = 0;
+
+	// prevent infinite recursion of log calling open calling log...	
+	if (!strcmp((char *)path,(char *)LOG_FILE)) {
+		openLogStack++;
+		 if (openLogStack == 2) {
+		 	openLogStack = 1;
+		 	return -1;
+		 }
+	}
+		 
 	pPath = (char *)path;
 	if (SACM_Status())
 		Snd_Stop(); // DO NOT use stop() here because that calls flushLog(), which eventually calls this fct.
@@ -538,6 +548,11 @@ INT16 tbOpen(LPSTR path, INT16 open_flag) {
 		wait(100);
 	}
 	if (handle == -1) {
+		if (strcmp((char *)path,LOG_FILE)) { // error didn't occur trying to open log file
+			strcpy(logMsg,(char *)"Cannot open ");
+			strcat(logMsg,(char *)path);
+			logString(logMsg,BUFFER,LOG_NORMAL);
+		}
 		// log potential memory corruption
 		if ((*pPath == '/') || (*(pPath+1) == ':')) {
 			// absolute path
@@ -551,7 +566,7 @@ INT16 tbOpen(LPSTR path, INT16 open_flag) {
 			ptr = strrchr(dirPath,'\\');		
 		if (ptr)
 			*ptr = 0;
-		if (isCorrupted(dirPath)) {
+		if ((strlen(dirPath) > 2) && isCorrupted(dirPath)) {  // exclude root, "a:"
 			if (strcmp((char *)path,LOG_FILE)) { // error didn't occur trying to open log file
 				strcpy(logMsg,(char *)"CORRUPTED: ");
 				strcat(logMsg,dirPath);
@@ -566,9 +581,12 @@ INT16 tbOpen(LPSTR path, INT16 open_flag) {
 			} else {
 				handle = open((LPSTR)"a:/log/CORRUPTED-LOG.txt",O_CREAT|O_RDWR|O_TRUNC);
 				close(handle);
+				replaceFromBackup((char *)"a:/log");
 			}
 		}			
 	}
+	if (openLogStack)
+		openLogStack = 0;
 
 	return handle;
 }
