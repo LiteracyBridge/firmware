@@ -168,8 +168,8 @@ void setDefaults(void) {
 	context.package = 0; // prevents trying to insert this sound before config & control files are loaded.
 	
 	ADMIN_COMBO_KEYS   = KEY_UP | KEY_DOWN;
-	LOG_FILE = DEFAULT_LOG_FILE; // chicken & egg - we haven't read config.txt or config.bin to set LOG_FILE
-
+	LOG_FILE = (char *)DEFAULT_LOG_FILE; // chicken & egg - we haven't read config.txt or config.bin to set LOG_FILE
+	SYSTEM_VARIABLE_FILE = (char *)DEFAULT_SYSTEM_VARIABLE_FILE;
 }
 
 static int checkRTCFile(char *time) {	
@@ -262,17 +262,38 @@ void startUp(unsigned int bootType) {
 	char buffer[400];
 	char strCounts[32];
 	char filename[FILE_LENGTH];
-	int key, ret;
+	int key, ret, callPushPull = 0,callProcessInbox = 0;
 	int configExists = 0, normal_shutdown=1;
 	int inspect = 0;
-		
+
 	setLED(LED_ALL,TRUE);  // start lights to indicate user should wait during startup until the device is ready
+	systemCounts.month = 1;
+	systemCounts.monthday = 1;
+	systemCounts.year = 2000;
+
+	// Before any trouble is caused, allow forcing USB mode.		
+	key = keyCheck(1);  // long keycheck 
+	key &= ~LONG_KEY_STROKE;
+	if (key == KEY_STAR || key == KEY_MINUS) {
+		SystemIntoUDisk(1);	
+		callProcessInbox = 1;
+	} else if (key == KEY_PLUS)
+		callPushPull = 1;  // call pushContentGetFeedback() at end up this fct.
+
+	if (fileExists((LPSTR)INSPECT_TRIGGER_FILE))
+		inspect = 1;  // used to check for .loc file and other changes that don't normally occur
+
+	ret = loadSystemCounts();  // calling this before config means we rely on the default location for system-vars
+	systemCounts.year =	++systemCounts.powerUpNumber + 2000; 
+	if (ret == -1 || inspect)
+		setLocation(systemCounts.location);
+	saveSystemCounts();	
 
 	strcpy(buffer,"\x0d\x0a" "---------------------------------------------------\x0d\x0a" "Serial#:");		
 	strcat(buffer,getDeviceSN(0));
 	strcat(buffer,"\x0d\x0a" "Clock:");
 	getRTC(buffer+strlen(buffer));
-	logStringRTCOptional(buffer, ASAP, LOG_ALWAYS,0);
+	logStringRTCOptional(buffer, ASAP, LOG_ALWAYS,0);  // calling this before config means we rely on default location
 		
 	if(bootType == BOOT_TYPE_COLD_RESET) {
 		extern unsigned long rtcAlarm[];
@@ -283,17 +304,38 @@ void startUp(unsigned int bootType) {
 		}
 		curAlarmSet = 0;
 		rtc_fired = 0;
-		systemCounts.month = 1;
-		systemCounts.monthday = 1;
-		systemCounts.poweredDays = 1;
-		systemCounts.year = 2000 + systemCounts.powerUpNumber;
-				
 		strcpy(buffer,"BOOT_TYPE_COLD_RESET -- NEW BATTERIES???");
 		if (*P_Hour >= 24) {
 			setRTC(0,2,0);  //  reset before saving anything to disk and running macros
 			strcat(buffer,"\x0d\x0a" "Clock:Reset due to h>=24");
 		}
 		logStringRTCOptional(buffer, ASAP, LOG_ALWAYS,0);
+
+		if (isCorrupted((char *)"a:/system")) {
+			logString((char *)"Corruption: system",BUFFER,LOG_NORMAL);
+			replaceFromBackup("a:/system");
+		}
+		if (isCorrupted((char *)"a:/log-archive")) {
+			logString((char *)"Corruption: log-archive",BUFFER,LOG_NORMAL);
+			replaceFromBackup("a:/log-archive");
+		}
+		if (isCorrupted((char *)"a:/log")) {
+			logString((char *)"Corruption: log",BUFFER,LOG_NORMAL);
+			replaceFromBackup("a:/log");
+		}
+		if (isCorrupted((char *)"a:/languages")) {
+			logString((char *)"Corruption: languages",BUFFER,LOG_NORMAL);			
+			replaceFromBackup("a:/languages");
+		}
+		if (isCorrupted((char *)"a:/statistics")) {
+			logString((char *)"Corruption: statistics",BUFFER,LOG_NORMAL);			
+			replaceFromBackup("a:/statistics");
+		}
+		if (isCorrupted((char *)"a:/messages")) {
+			logString((char *)"Corruption: messages",BUFFER,LOG_NORMAL);						
+			replaceFromBackup("a:/messages");
+		}
+
 		forceflushLog();
 
 #ifdef HALT_ON_COLD_START
@@ -315,6 +357,8 @@ void startUp(unsigned int bootType) {
 #endif
 	}
 
+	playDing();  // it is important to play a sound immediately to stop user from wondering if power is on
+
 // for really low batteries the playDing() below will cause a low voltage reset
 // handling that will go into Halt mode above
 // pressing play or black circle will get back here and the cycle will repeat
@@ -332,31 +376,6 @@ void startUp(unsigned int bootType) {
 	rename((LPSTR)"a:\\system",(LPSTR)"a:\\_1system");
 	
 	*/
-		
-	playDing();  // it is important to play a sound immediately to stop user from wondering if power is on
-	if (fileExists((LPSTR)INSPECT_TRIGGER_FILE))
-		inspect = 1;  // used to check for .loc file and other changes that don't normally occur
-	key = keyCheck(1);  // long keycheck 
-	key &= ~LONG_KEY_STROKE;
-
-	// voltage checks in SystemIntoUSB.c
-	if (key == KEY_STAR || key == KEY_MINUS) {
-		// allows USB device mode no matter what is on memory card
-		Snd_Stop();
-		//cleanUpOldRevs(); // cleanup any old revs before someone sees the file system
-		SystemIntoUDisk(1);	
-		SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
-		loadConfigFile();
-		initializeProfiles(); 
-		processInbox();
-		resetSystem();
-	} else if (key == KEY_PLUS) {
-		// copy outbox files to connecting device, get stats and audio feedback
-		loadConfigFile();
-		initializeProfiles(); 
-		pushContentGetFeedback();
-		resetSystem();
-	}	
 
 	if (!SNexists()) {
 		// This will update the version when the device has just been programmed with probe,
@@ -367,7 +386,6 @@ void startUp(unsigned int bootType) {
 		strcat(buffer,VERSION);
 		logStringRTCOptional(buffer,ASAP,LOG_NORMAL,0);
 	}
-	SysDisableWaitMode(WAITMODE_CHANNEL_A);
 
 // try to load a saved config.bin if present
 	configExists = (restore_config_bin() == -1?0:1);
@@ -379,9 +397,13 @@ void startUp(unsigned int bootType) {
 		// Try loading config.txt file. If doesn't load, still try firmware update, but then go to testPCB() afterwards.
 		configExists = (loadConfigFile() == -1?0:1);
 	}
+	if (configExists) {
+		fixnull_config_strings();
+	} else {
+		logStringRTCOptional((char *)"No config file bin,txt,or backup. Using defaults.",BUFFER,LOG_ALWAYS,0);
+		disaster_config_strings();
+	}
 			
-	adjustVolume(NORMAL_VOLUME,FALSE,FALSE);
-	adjustSpeed(NORMAL_SPEED,FALSE);
 	// if inspect file was present, check for new firmware, but don't flash if voltage is low
 	// Any .img file in the root will be found if inspect is set, but system.img can be found without needing the inspect file
 	if((inspect || fileExists((LPSTR)"a:/system.img") )&& V_MIN_SDWRITE_VOLTAGE <= vCur_1) {
@@ -398,28 +420,11 @@ void startUp(unsigned int bootType) {
 		}
 	}
 	
-	if (configExists) {
-		fixnull_config_strings();
-	} else {
-		logStringRTCOptional((char *)"No config file bin,txt,or backup. Using defaults.",BUFFER,LOG_ALWAYS,0);
-		disaster_config_strings();
-	}
-
-	setLED(LED_ALL,TRUE);
-
 	if (!SNexists()) {
 		logException(32,(const char *)"no serial number",LOG_ONLY);
 		testPCB();	
 	}
 	
-	//loadDefaultUserPackage(); --moved this to load dynamically into pkgUser so that we could save the memory of pkgDefault
-	if (MACRO_FILE)	
-		loadMacro();
-	ret = loadSystemCounts();
-	systemCounts.powerUpNumber++;
-	if (ret == -1 || inspect)
-		setLocation(systemCounts.location);
-	saveSystemCounts();	
 	if (inspect) {
 		ret = checkRTCFile(buffer);
 		if (ret >= 0) {
@@ -464,13 +469,6 @@ void startUp(unsigned int bootType) {
 	}
 	logStringRTCOptional(buffer,BUFFER,LOG_ALWAYS,0);
 		
-	if (initializeProfiles()) { 
-		if (inspect)
-			processInbox();
-	} else
-		testPCB();	
-	SetSystemClockRate(CLOCK_RATE); // either set in config file or the default 48 MHz set at beginning of startUp()
-
 	unlink ((LPSTR) (STAT_DIR SNCSV));
 	strcpy(buffer,getDeviceSN(1));
 	strcat(buffer, ",");
@@ -487,16 +485,32 @@ void startUp(unsigned int bootType) {
 			close(ret);
 		}
 	}
-	SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
-	loadPackage(PKG_SYS,currentProfileLanguage());
 
-	setNextAlarm();	// be sure at least midnight alarm is set
-	logString("call mainLoop",BUFFER,LOG_DETAIL);
-	
+	initializeProfiles(); 
+	if (inspect || callProcessInbox) {
+		processInbox();
+		resetSystem();
+	}
+	if (callPushPull) {
+		// copy outbox files to connecting device, get stats and audio feedback
+		pushContentGetFeedback();
+		resetSystem();
+	}	
+
+	SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
+
+	setNextAlarm();	// be sure at least midnight alarm is set	
 	ret = *P_RTC_INT_Status;	
 	*P_RTC_INT_Status |= ret;	// clear all interrupt flags
 	if (inspect)
 		unlink((LPSTR)INSPECT_TRIGGER_FILE);	
+	if (MACRO_FILE)	
+		loadMacro();
+	adjustVolume(NORMAL_VOLUME,FALSE,FALSE);
+	adjustSpeed(NORMAL_SPEED,FALSE);
+	loadPackage(PKG_SYS,currentProfileLanguage());
+	logString("call mainLoop",BUFFER,LOG_DETAIL);
+	SetSystemClockRate(CLOCK_RATE); // either set in config file or the default 48 MHz set at beginning of startUp()
 	mainLoop();
 }
 static char * addTextToSystemHeap (char *line) {
@@ -528,7 +542,7 @@ int loadConfigFile(void) {
 	char *name, *value;
 	char buffer[READ_LENGTH+1];
 	int attempt, goodPass;
-	const int MAX_RETRIES = 3;
+	const int MAX_RETRIES = 1;
 
 	ret = 0;	
 	buffer[READ_LENGTH] = '\0'; //prevents readLine from searching for \n past buffer
@@ -1002,8 +1016,8 @@ static int disaster_config_strings() {
 		LIST_NUM_PREFIX       = addTextToSystemHeap(DEFAULT_LIST_NUM_PREFIX);
 		CUSTOM_PKG_PREFIX     = addTextToSystemHeap(DEFAULT_CUSTOM_PKG_PREFIX);				
 		AUDIO_FILE_EXT        = addTextToSystemHeap(DEFAULT_AUDIO_FILE_EXT);
-		USER_CONTROL_TEMPLATE = addTextToSystemHeap(DEFAULT_USER_CONTROL_TEMPLATE);
-		MACRO_FILE            = addTextToSystemHeap(DEFAULT_MACRO_FILE);
+		USER_CONTROL_TEMPLATE = 0;
+		MACRO_FILE            = 0;
 }
 
 #define FIXNULL(string) if(string == 0) string = addTextToSystemHeap(DEFAULT_ ## string)

@@ -79,7 +79,7 @@ struct s_dosdate
 
 void FS_OS_GetDate(struct s_dosdate *dd)
 {
-	 dd->year = 2000 + systemCounts.powerUpNumber;
+	 dd->year = systemCounts.year;
 	 dd->month = systemCounts.month;
 	 dd->monthday = systemCounts.monthday;
 }

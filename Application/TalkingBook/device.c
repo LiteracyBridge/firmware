@@ -824,6 +824,8 @@ void rtcAlarmFired(unsigned long alarm) {
 //	if(*P_Hour == 0 && *P_Minute == 0) { // bump systemcounters 
 		loadSystemCounts();
 		systemCounts.poweredDays += 1;
+		systemCounts.monthday++;
+		fixBadDate(&systemCounts);
 		saveSystemCounts();
 //		logRTC(); // remove
 		while(*P_Second == 0) wait(100);

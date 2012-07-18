@@ -78,6 +78,7 @@ int main (int bootType) {
 	if(bootType == BOOT_TYPE_RTC_ALARM) {
 		backfromRTC();
 	}
+	SysDisableWaitMode(WAITMODE_CHANNEL_A); //not actually sure what it does, but it may belong here more than startup()
 
 	startUp(bootType);
 	return 0;

@@ -42,15 +42,60 @@ void saveSystemCounts() {
 	close(handle);
 }
 
+extern void
+fixBadDate(SystemCounts *sc) {
+	int advance = 0;
+	
+	if (sc->year < 2000)
+		sc->year = 2000;
+	if (sc->monthday < 1)
+		sc->monthday = 1;
+
+	switch (sc->month) {
+		case 1:
+		case 3:
+		case 5:
+		case 7:
+		case 8:
+		case 10: // special handling for December
+			if (sc->monthday > 31)
+				advance = 1;
+			break;
+		case 2:
+			if (sc->monthday > 28)
+				advance = 1; // ignore leapyear calculation
+			break;
+		case 4:
+		case 6:
+		case 9:
+		case 11:
+			if (sc->monthday > 30)
+				advance = 1;
+			break;
+		case 12:
+			if (sc->monthday <= 31)
+				break;
+		default:
+			sc->month = sc->monthday = 1;
+			break;
+	}
+	if (advance) {
+		sc->month++;
+		sc->monthday = 1;
+	}
+}
+
 int loadSystemCounts() {
 	int handle, ret;
 
 	handle = tbOpen((LPSTR)(SYSTEM_VARIABLE_FILE),O_RDONLY);
-	if (handle != -1)
+	if (handle != -1) {
 		ret = read(handle,(unsigned long)&systemCounts<<1,sizeof(SystemCounts)<<1);
+		fixBadDate(&systemCounts);
+	}		
 	else {
 		ret = -1;
-		systemCounts.location[0] = 0;;
+		systemCounts.location[0] = 0;
 		systemCounts.powerUpNumber = 0;
 		systemCounts.poweredDays = 0;
 		systemCounts.year = 2000;
