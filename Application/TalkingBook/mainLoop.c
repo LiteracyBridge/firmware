@@ -566,6 +566,7 @@ void mainLoop (void) {
 			else {
 				switch (context.queuedPackageNameIndex) {
 					case SAME_SYSTEM:
+						logString((char *)"Home",BUFFER,LOG_NORMAL);
 						loadPackage(context.queuedPackageType, NULL);
 						break;
 					case PREV_SYSTEM:
