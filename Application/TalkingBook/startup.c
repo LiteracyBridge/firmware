@@ -487,23 +487,20 @@ void startUp(unsigned int bootType) {
 	}
 
 	initializeProfiles(); 
-	if (inspect || callProcessInbox) {
+	if (inspect)
+		unlink((LPSTR)INSPECT_TRIGGER_FILE);	
+	if (inspect || callProcessInbox)
 		processInbox();
-		resetSystem();
-	}
-	if (callPushPull) {
-		// copy outbox files to connecting device, get stats and audio feedback
+	if (callPushPull)  // copy outbox files to connecting device, get stats and audio feedback
 		pushContentGetFeedback();
-		resetSystem();
-	}	
+	if (callProcessInbox || callPushPull)
+		resetSystem();  //TODO:not sure this is still necessary 
 
 	SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
 
 	setNextAlarm();	// be sure at least midnight alarm is set	
 	ret = *P_RTC_INT_Status;	
 	*P_RTC_INT_Status |= ret;	// clear all interrupt flags
-	if (inspect)
-		unlink((LPSTR)INSPECT_TRIGGER_FILE);	
 	if (MACRO_FILE)	
 		loadMacro();
 	adjustVolume(NORMAL_VOLUME,FALSE,FALSE);
