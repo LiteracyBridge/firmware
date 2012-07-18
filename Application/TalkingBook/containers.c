@@ -642,6 +642,8 @@ extern void logProfile() {
 	strcat(strLog,currentProfileLanguage());
 	strcat(strLog,",");
 	strcat(strLog,currentProfileMessageList());
+	strcat(strLog,",");
+	strcat(strLog,currentProfileControlTrack());
 	logString(strLog,BUFFER,LOG_NORMAL);	
 }
 
