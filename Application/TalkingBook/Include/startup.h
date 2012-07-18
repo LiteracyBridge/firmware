@@ -246,7 +246,7 @@ typedef struct config_bin {
 #define DEFAULT_NEW_PKG_SUBDIR    "messages/"
 #define DEFAULT_SYS_UPDATE_SUBDIR "sys-updates/"
 #define DEFAULT_LOG_FILE          "a:/log/log.txt"
-#define DEFAULT_LIST_MASTER       "activeLists"
+#define DEFAULT_LIST_MASTER       "_activeLists"
 #define DEFAULT_SYSTEM_VARIABLE_FILE "a:/system/system-vars"
 #define DEFAULT_PKG_NUM_PREFIX    "P"
 #define DEFAULT_LIST_NUM_PREFIX   "L"
