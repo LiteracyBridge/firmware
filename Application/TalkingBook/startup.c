@@ -470,10 +470,12 @@ void startUp(unsigned int bootType) {
 		case 1:
 			strcat(buffer,"Normal"); 
 			break;
-		case 2:
+		default:
 			strcat(buffer,"Detail"); 
 			break;
 	}
+	if (inspect)
+		strcat(buffer,"\x0d\x0a" "Inspect triggerd");
 	if(normal_shutdown) {
 		if (DEBUG_MODE == LOG_DETAIL) {
 			strcat(buffer,(char *)"\x0d\x0a" "Restored configuration from config.bin successfully");
@@ -505,11 +507,10 @@ void startUp(unsigned int bootType) {
 		unlink((LPSTR)INSPECT_TRIGGER_FILE);	
 	if (inspect || callProcessInbox)
 		processInbox();
-	if (callPushPull)  // copy outbox files to connecting device, get stats and audio feedback
+	if (callPushPull) { // copy outbox files to connecting device, get stats and audio feedback
 		pushContentGetFeedback();
-	if (callProcessInbox || callPushPull)
 		resetSystem();  //TODO:not sure this is still necessary 
-
+	}
 	SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
 
 	setNextAlarm();	// be sure at least midnight alarm is set	
@@ -554,7 +555,8 @@ int loadConfigFile(void) {
 	char buffer[READ_LENGTH+1];
 	int attempt, goodPass;
 	const int MAX_RETRIES = 1;
-
+	
+	#define OLD_CONFIG_FW_UPDATE_FILENAME "a:/system/config-VERSION-CHANGED.txt"
 	ret = 0;	
 	buffer[READ_LENGTH] = '\0'; //prevents readLine from searching for \n past buffer
 	
@@ -562,6 +564,11 @@ int loadConfigFile(void) {
 		goodPass = 1;
 		MACRO_FILE = 0; // default case if no MACRO_FILE listed
 		handle = tbOpen((unsigned long)(CONFIG_FILE),O_RDONLY);
+		if ((handle == -1) && fileExists((LPSTR)OLD_CONFIG_FW_UPDATE_FILENAME)) { 
+			// this code is just for backward compat during the fw upgrade from v1.70 to v1.71
+			rename((LPSTR)OLD_CONFIG_FW_UPDATE_FILENAME,(LPSTR)CONFIG_FILE);
+			handle = tbOpen((unsigned long)(CONFIG_FILE),O_RDONLY);
+		}
 		if (handle == -1) {
 			replaceFromBackup((char *)CONFIG_FILE);
 			handle = tbOpen((unsigned long)(CONFIG_FILE),O_RDONLY);
