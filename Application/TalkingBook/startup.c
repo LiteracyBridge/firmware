@@ -191,12 +191,16 @@ static int setLocation(char *location) {
 	char *cp;
 	int ret;
 	struct f_info file_info;
-	
+	char newPath[PATH_LENGTH];
+		
 	ret =_findfirst((LPSTR)LOCATION_FILE_PATTERN, &file_info, D_FILE);
 	if (ret >=0) {
 		strcpy(location,file_info.f_name);
 		cp = strrchr(location,'.');
-		*cp = 0;	
+		*cp = 0;
+		strcpy(newPath,DEFAULT_SYSTEM_PATH);
+		strcat(newPath,file_info.f_name);
+		rename((LPSTR)file_info.f_name,(LPSTR)newPath);	
 	} 
 	return ret;
 }
