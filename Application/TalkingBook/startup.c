@@ -269,7 +269,7 @@ void startUp(unsigned int bootType) {
 	setLED(LED_ALL,TRUE);  // start lights to indicate user should wait during startup until the device is ready
 	systemCounts.month = 1;
 	systemCounts.monthday = 1;
-	systemCounts.year = 2000;
+	systemCounts.year = FILE_YEAR_MIN;
 
 	// Before any trouble is caused, allow forcing USB mode.		
 	key = keyCheck(1);  // long keycheck 
@@ -284,7 +284,7 @@ void startUp(unsigned int bootType) {
 		inspect = 1;  // used to check for .loc file and other changes that don't normally occur
 
 	ret = loadSystemCounts();  // calling this before config means we rely on the default location for system-vars
-	systemCounts.year =	++systemCounts.powerUpNumber + 2000; 
+	systemCounts.powerUpNumber++; 
 	if (ret == -1 || inspect)
 		setLocation(systemCounts.location);
 	saveSystemCounts();	
@@ -304,13 +304,17 @@ void startUp(unsigned int bootType) {
 		}
 		curAlarmSet = 0;
 		rtc_fired = 0;
-		strcpy(buffer,"BOOT_TYPE_COLD_RESET -- NEW BATTERIES???");
-		if (*P_Hour >= 24) {
-			setRTC(0,2,0);  //  reset before saving anything to disk and running macros
-			strcat(buffer,"\x0d\x0a" "Clock:Reset due to h>=24");
+		if (!(*P_Reset_Flag & 0x0010)) { 
+			// if cold start was due to a reset, power was never removed
+			systemCounts.year++;
+			saveSystemCounts();	
+			strcpy(buffer,"BOOT_TYPE_COLD_RESET -- NEW BATTERIES???");
+			if (*P_Hour >= 24) {
+				setRTC(0,1,0);  //  reset before saving anything to disk and running macros
+				strcat(buffer,"\x0d\x0a" "Clock:Reset due to h>=24");
+			}
+			logStringRTCOptional(buffer, ASAP, LOG_ALWAYS,0);
 		}
-		logStringRTCOptional(buffer, ASAP, LOG_ALWAYS,0);
-
 		if (isCorrupted((char *)"a:/system")) {
 			logString((char *)"Corruption: system",BUFFER,LOG_NORMAL);
 			replaceFromBackup("a:/system");
@@ -339,6 +343,7 @@ void startUp(unsigned int bootType) {
 		forceflushLog();
 
 #ifdef HALT_ON_COLD_START
+		logStringRTCOptional((char *)"Halting after cold start",ASAP,LOG_NORMAL,0);
 		setLED(LED_ALL,FALSE);  
 		//setOperationalMode((int)P_SLEEP);  //DEVICE-90 - does too much fs activity
 		*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
@@ -414,6 +419,9 @@ void startUp(unsigned int bootType) {
 			close(ret);
 			ret = tbOpen((LPSTR)FIRMWARE_UPDATE_NOTIF_FILE,O_CREAT|O_RDWR|O_TRUNC);
 			close(ret);
+			strcpy(buffer,"Found new firmware:");
+			strcat(buffer,filename);
+			logStringRTCOptional((char *)buffer,ASAP,LOG_NORMAL,0);
 			// inspect file will still be there since fw update will prevent this function from reaching the end.
 			// where the unlink is.
 			startUpdate(filename);
@@ -446,6 +454,8 @@ void startUp(unsigned int bootType) {
 	}
 	strcat(buffer,(char *)"\x0d\x0a" "Cycle:");
 	longToDecimalString(systemCounts.powerUpNumber,(char *)(buffer+strlen(buffer)),4);
+	strcat(buffer,(char *)"  Period:");
+	longToDecimalString(CLOCK_PERIOD, (char *)(buffer+strlen(buffer)), 4);
 	strcat(buffer,(char *)"  Powered Days:");
 	longToDecimalString(systemCounts.poweredDays, (char *)(buffer+strlen(buffer)), 4);
 	strcat(buffer,"\x0d\x0a" "Debug:");

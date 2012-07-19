@@ -46,8 +46,8 @@ extern void
 fixBadDate(SystemCounts *sc) {
 	int advance = 0;
 	
-	if (sc->year < 2000)
-		sc->year = 2000;
+	if (sc->year < FILE_YEAR_MIN)
+		sc->year = FILE_YEAR_MIN;
 	if (sc->monthday < 1)
 		sc->monthday = 1;
 
@@ -98,7 +98,7 @@ int loadSystemCounts() {
 		systemCounts.location[0] = 0;
 		systemCounts.powerUpNumber = 0;
 		systemCounts.poweredDays = 0;
-		systemCounts.year = 2000;
+		systemCounts.year = FILE_YEAR_MIN;
 		systemCounts.month = 1;
 		systemCounts.monthday = 1;
 	}

@@ -75,10 +75,11 @@ void setRTC(unsigned int h, unsigned int m, unsigned int s) {
 }
 
 extern void getRTC(char * str) {
-	unsigned long c,d,h,m,s;
-	char time[20];
+	unsigned long c,p,d,h,m,s;
+	char time[25];
 	
 	c = (unsigned long)systemCounts.powerUpNumber;
+	p = (unsigned long)CLOCK_PERIOD;  
 	d = (unsigned long)systemCounts.poweredDays;
 	h = (unsigned long) *P_Hour;	
 	m = (unsigned long) *P_Minute;
@@ -87,17 +88,19 @@ extern void getRTC(char * str) {
 	if (c) {
 		longToDecimalString(c,time,4);
 		time[4] = 'c';
-		longToDecimalString(d,time+5,3);
-		time[8] = 'd';
+		longToDecimalString(p,time+5,3);
+		time[8] = 'p';
+		longToDecimalString(d,time+9,3);
+		time[12] = 'd';
 	} else 
-		strcpy(time,"----c---d");	// if cold-start and sys-vars has not been loaded yet
-	longToDecimalString(h,time+9,2);
-	time[11] = 'h';
-	longToDecimalString(m,time+12,2);
-	time[14] = 'm';
-	longToDecimalString(s,time+15,2);
-	time[17] = 's';
-	time[18] = 0;
+		strcpy(time,"----c---p---d");	// if cold-start and sys-vars has not been loaded yet
+	longToDecimalString(h,time+13,2);
+	time[15] = 'h';
+	longToDecimalString(m,time+16,2);
+	time[18] = 'm';
+	longToDecimalString(s,time+19,2);
+	time[21] = 's';
+	time[22] = 0;
 	strcpy(str,time);
 }
 	
