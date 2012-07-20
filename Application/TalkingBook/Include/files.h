@@ -30,7 +30,8 @@
 #define LOG_ARCHIVE_PATH	"a:/log-archive/"
 #define LOG_ARCHIVE_OTHERS_PATH		LOG_ARCHIVE_PATH "others/"
 #define LOG_EXTENSION		".txt"
-
+#define INSPECT_TRIGGER_FILE	"inspect"
+#define OTHER_INSPECT_TRIGGER_FILE	"b:/" INSPECT_TRIGGER_FILE
 #define BKPATH "a:/backup/"
 #define LOST "a:/LOST"
 #define LOG_ARCHIVE "a:/archive/"
@@ -71,4 +72,5 @@ extern void forceflushLog(void);
 extern void logStat(char *);
 extern int isCorrupted(char *);
 extern int replaceFromBackup(char *);
+extern void triggerInspection(void);
 #endif

@@ -284,7 +284,7 @@ void startUp(unsigned int bootType) {
 	} else if (key == KEY_PLUS)
 		callPushPull = 1;  // call pushContentGetFeedback() at end up this fct.
 
-	if (fileExists((LPSTR)INSPECT_TRIGGER_FILE))
+	if (fileExists((LPSTR)SELF_INSPECT_TRIGGER_FILE))
 		inspect = 1;  // used to check for .loc file and other changes that don't normally occur
 
 	ret = loadSystemCounts();  // calling this before config means we rely on the default location for system-vars
@@ -419,7 +419,7 @@ void startUp(unsigned int bootType) {
 		inspect = 1;  
 		updateSN(UPDATE_FP);
 		if (check_new_sd_flash(filename)) {
-			ret = tbOpen((LPSTR)INSPECT_TRIGGER_FILE,O_CREAT|O_RDWR|O_TRUNC);
+			ret = tbOpen((LPSTR)SELF_INSPECT_TRIGGER_FILE,O_CREAT|O_RDWR|O_TRUNC);
 			close(ret);
 			ret = tbOpen((LPSTR)FIRMWARE_UPDATE_NOTIF_FILE,O_CREAT|O_RDWR|O_TRUNC);
 			close(ret);
@@ -504,7 +504,7 @@ void startUp(unsigned int bootType) {
 
 	initializeProfiles(); 
 	if (inspect)
-		unlink((LPSTR)INSPECT_TRIGGER_FILE);	
+		unlink((LPSTR)SELF_INSPECT_TRIGGER_FILE);	
 	if (inspect || callProcessInbox)
 		processInbox();
 	if (callPushPull) { // copy outbox files to connecting device, get stats and audio feedback

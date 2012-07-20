@@ -1460,3 +1460,12 @@ extern int isCorrupted(char * filePath) {
 	}
 	return foundCorruption;		
 }
+
+extern void
+triggerInspection(void) {
+	int ret;
+	
+	// create empty file on other device to tell it to inspect for updates
+	ret = tbOpen((LPSTR)OTHER_INSPECT_TRIGGER_FILE,O_CREAT|O_RDWR|O_TRUNC);
+	close(ret);
+}

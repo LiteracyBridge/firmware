@@ -11,7 +11,7 @@
 #define BOOT_TYPE_COLD_RESET 0
 #define BOOT_TYPE_KEY_PRESS  1
 #define BOOT_TYPE_RTC_ALARM  2
-#define INSPECT_TRIGGER_FILE	"a:/inspect"
+#define SELF_INSPECT_TRIGGER_FILE	"a:/" INSPECT_TRIGGER_FILE
 #define FIRMWARE_UPDATE_NOTIF_FILE	"a:/fwupdate"
 #define LOCATION_FILE_PATTERN	"a:/*.loc"
 #define SET_RTC_FILE_PATTERN	"a:/*.rtc"

@@ -131,11 +131,7 @@ int d2dCopy(const char * packageName,const char * filenameList) {
 	//TODO: break (gracefully) after some time delay if never connected to another device
 	retCopy = setUSBHost(TRUE);
 	if (retCopy == 0) {
-		// code below is borrowed from the delete fct
-		strcpy(strLog,"\x0d\x0a");
-		longToDecimalString(timeNow,strLog+2,5);
-		strcat((char *)strLog,(const char *)": COPY ");
-		
+		triggerInspection(); // create empty file on other device to tell it to inspect for updates		
 		strcpy(newPkgPath,INBOX_PATH);
 		newPkgPath[0] = 'b'; //change a:/ drive to b:/ drive
 		strcat(newPkgPath,NEW_PKG_SUBDIR);
@@ -633,6 +629,8 @@ copyProfile(void) {
 	char from[PATH_LENGTH], to[PATH_LENGTH];
 	int ret;
 	
+	triggerInspection(); // create empty file on other device to tell it to inspect for updates		
+
 	// copy language 
 	strcpy(from,LANGUAGES_PATH);
 	strcat(from,currentProfileLanguage()); // just language portion
@@ -684,11 +682,11 @@ cloneDevice() {
 	struct f_info fi;
 	
 // format b:        [ _format(0, FAT16_Type);  works on a:]
-
 	ret = _format(1, FAT16_Type);   // 0 == a, 1 == b?
+	
+	triggerInspection(); // create empty file on other device to tell it to inspect for updates		
 
 // recursively copy files
-
 	ret = cloneDir("a:/", "b:/");
 //	mkdir((LPSTR)"a:/clonetest");   // Test - remove	
 //	ret = cloneDir("a:/", "a:/clonetest"); // Test - remove	
@@ -937,6 +935,7 @@ pushContentGetFeedback() {
 	
 	ret = setUSBHost(TRUE);
 	if (ret == 0) {
+		triggerInspection(); // create empty file on other device to tell it to inspect for updates		
 		//copy this device's outbox to connected device's inbox
 		if (dirExists((LPSTR)OUTBOX_PATH)) {
 			strcpy(bInbox,INBOX_PATH);
