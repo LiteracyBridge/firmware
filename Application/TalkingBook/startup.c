@@ -271,6 +271,7 @@ void startUp(unsigned int bootType) {
 	int inspect = 0;
 
 	setLED(LED_ALL,TRUE);  // start lights to indicate user should wait during startup until the device is ready
+	// set temporary valid date for file ops (like logging) until system variables are read 
 	systemCounts.month = 1;
 	systemCounts.monthday = 1;
 	systemCounts.year = FILE_YEAR_MIN;
@@ -303,20 +304,23 @@ void startUp(unsigned int bootType) {
 		extern unsigned long rtcAlarm[];
 		extern unsigned long curAlarmSet;    
 		extern unsigned long rtc_fired;
+		int wasReset = 0;
 		for(key=0; key<N_RTC_INIT; key++) {
 			rtcAlarm[key] = 0;
 		}
 		curAlarmSet = 0;
 		rtc_fired = 0;
-		if (!(*P_Reset_Flag & 0x0010)) { 
-			// if cold start was due to a reset, power was never removed
-			systemCounts.year++;
+		if ((*P_Reset_Flag & 0x0010))
+			wasReset = 1;  // if cold start was due to a reset, power was never removed
+
+		else {
+			// power was removed: can't rely on clock.  Start new clocl "period" and reset RTC.
+			wasReset = 0;
+			setRTC(0,1,0);  //  no idea what time it is so reset to 1 min past midnight to avoid the midnight alarm
+			systemCounts.year++;	
+			systemCounts.poweredDays = 0;
 			saveSystemCounts();	
 			strcpy(buffer,"BOOT_TYPE_COLD_RESET -- NEW BATTERIES???");
-			if (*P_Hour >= 24) {
-				setRTC(0,1,0);  //  reset before saving anything to disk and running macros
-				strcat(buffer,"\x0d\x0a" "Clock:Reset due to h>=24");
-			}
 			logStringRTCOptional(buffer, ASAP, LOG_ALWAYS,0);
 		}
 		if (isCorrupted((char *)"a:/system")) {
@@ -343,26 +347,27 @@ void startUp(unsigned int bootType) {
 			logString((char *)"Corruption: messages",BUFFER,LOG_NORMAL);						
 			replaceFromBackup("a:/messages");
 		}
-
 		forceflushLog();
 
 #ifdef HALT_ON_COLD_START
-		logStringRTCOptional((char *)"Halting after cold start",ASAP,LOG_NORMAL,0);
-		setLED(LED_ALL,FALSE);  
-		//setOperationalMode((int)P_SLEEP);  //DEVICE-90 - does too much fs activity
-		*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
-		turnAmpOff();
-		
-		//disable SD card
- 		*P_IOA_Dir  |= 0x1000;
- 		*P_IOA_Attrib |= 0x1000; 	
-    	*P_IOA_Buffer  |= 0x1000;	
-		// disable NOR flash
-	 	*P_IOD_Dir  |= 0x0001;	 
-	 	*P_IOD_Attrib |= 0x0001;
-	    *P_IOD_Buffer  |= 0x0001;	
-		//_SystemOnOff();  // go to P_SLEEP mode, does not return
-		SysIntoHaltMode();
+		if (!wasReset) { // don't halt if reset for firmware reflashing or if an error caused a reset
+			logStringRTCOptional((char *)"Halting after cold start",ASAP,LOG_NORMAL,0);
+			setLED(LED_ALL,FALSE);  
+			//setOperationalMode((int)P_SLEEP);  //DEVICE-90 - does too much fs activity
+			*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
+			turnAmpOff();
+			
+			//disable SD card
+	 		*P_IOA_Dir  |= 0x1000;
+	 		*P_IOA_Attrib |= 0x1000; 	
+	    	*P_IOA_Buffer  |= 0x1000;	
+			// disable NOR flash
+		 	*P_IOD_Dir  |= 0x0001;	 
+		 	*P_IOD_Attrib |= 0x0001;
+		    *P_IOD_Buffer  |= 0x0001;	
+			//_SystemOnOff();  // go to P_SLEEP mode, does not return
+			SysIntoHaltMode();
+		}
 #endif
 	}
 
@@ -443,7 +448,7 @@ void startUp(unsigned int bootType) {
 			setRTCFromText(buffer);
 			strcpy(buffer,"Clock:");
 			getRTC(buffer+strlen(buffer));
-			strcat(buffer," (hms reset by *.rtc file)");
+			strcat(buffer," (time and/or date reset by *.rtc file)");
 			logStringRTCOptional(buffer,BUFFER,LOG_ALWAYS,0);	
 		}
 	}

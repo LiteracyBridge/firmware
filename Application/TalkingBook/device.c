@@ -1,5 +1,6 @@
 // Copyright 2009-2011 Literacy Bridge
 // Contact: info@literacybridge.org
+#include <ctype.h>
 #include "./system/include/system_head.h"
 #include "Include/talkingbook.h"
 #include "Include/files.h"
@@ -20,7 +21,9 @@ extern int SystemIntoUDisk(unsigned int);
 extern void KeyScan_ServiceLoop(void);
 extern int SP_GetCh(void);
 extern INT16 SD_Initial(void);
-
+static void setDate(unsigned int, unsigned int);
+static char* findTimePart (char *, char);
+	
 static void logKeystroke(int);
 //static void Log_ClockCtrl(void);
 static void turnSDoff(void);
@@ -46,16 +49,58 @@ void resetRTC(void) {
 	setRTC(0,0,1);
 }
 
+static char*
+findTimePart (char *time, char timeCode) {
+	char *ptr;	
+	
+	ptr = strchr(time,timeCode);
+	if (ptr) {
+		while(isdigit(*(ptr-1)))
+			ptr--;
+		if (!isdigit(*ptr))
+			ptr = NULL;
+	}
+	return ptr;			
+}
+
+
+static void 
+setDate(unsigned int month, unsigned int date) {
+	systemCounts.month = month;
+	systemCounts.monthday = date;
+	saveSystemCounts();	
+}
+
 void setRTCFromText(char *time) {
-	unsigned int s, m, h;
+	// This function parses the date and or time using any of the following format:
+	//  1. #h#m#s
+	//  2. #m#d
+	//  3. #m#d#h#m#s
+	//  where '#' represents any valid positive integer.  
+	//  Note that 'm' is used for month and for minute. 'm' will mean month, unless it follows an 'h'.
+	//  Note that year is not set because it is used to indicate the time period (see cold_start code)
+	
+	int month = -1, date = -1, hour = -1, min = -1, sec = -1;
 	char *ptr;
 	
-	h = strToInt(time);
-	if ((ptr = strchr(time,'h')))
-		m = strToInt(ptr+1);
-	if ((ptr = strchr(time,'m')))
-		s = strToInt(ptr+1);
-	setRTC(h,m,s);	
+	if ((ptr = findTimePart(time,'m'))) {
+		month = strToInt(ptr);
+		if ((ptr = findTimePart(time,'d')))
+			date = strToInt(ptr);
+		else 
+			month = -1;
+	}
+	if ((ptr = findTimePart(time,'h'))) {
+		hour = strToInt(ptr);
+		if ((ptr = findTimePart(ptr,'m')))
+			min = strToInt(ptr);
+		if ((ptr = findTimePart(ptr,'s')))
+			sec = strToInt(ptr);
+	}
+	if (month >= 1 && date >= 1)
+		setDate(month,date);
+	if (hour >= 0 && min >= 0 && sec >= 0)
+		setRTC(hour,min,sec);
 }
 
 void setRTC(unsigned int h, unsigned int m, unsigned int s) {
@@ -473,6 +518,10 @@ void resetSystem(void) {
 	// set watchdog timer to reset device; 0x780A (Watchdog Reset Control Register)
 	// see GPL Programmer's Manual (V1.0 Dec 20,2006), Section 3.5, page 18
 	stop(); 
+	if (PLEASE_WAIT_IDX && context.package) {  // prevents trying to insert this sound before config & control files are loaded.
+		insertSound(&pkgSystem.files[PLEASE_WAIT_IDX],NULL,TRUE); 
+	}
+	playBip();
 	setLED(LED_ALL,FALSE);  
 	logString((char *)"* RESET *",ASAP,LOG_ALWAYS);
 	fs_safexit(); // should close all open files

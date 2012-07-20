@@ -245,11 +245,6 @@ processSystemFiles(void) {
 	l = (long)copyMovedir((char *)strSysUpdatePath, (char *)"a:/");  // returns # of items copied
 	ret = check_new_sd_flash(strSysUpdatePath);  //strSysUpdatePath may be changed
 	if ((l > 1) || (ret != 0)) { // 1 is for the SYS_UPDATE_SUBDIR
-		if (PLEASE_WAIT_IDX && context.package) {  // prevents trying to insert this sound before config & control files are loaded.
-			insertSound(&pkgSystem.files[PLEASE_WAIT_IDX],NULL,TRUE); 
-		}
-		playBip();
-		setLED(LED_ALL,FALSE);  
 		resetSystem(); // reset to begin new firmware reprogramming or to reload new config/system control
 	}
 }

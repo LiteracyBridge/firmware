@@ -4,8 +4,8 @@
 #ifndef	__SYS_COUNTERS_h__
 #define	__SYS_COUNTERS_h__
 
-#define FILE_YEAR_MIN 2000
-#define CLOCK_PERIOD	(systemCounts.year - FILE_YEAR_MIN + 1)
+#define FILE_YEAR_MIN 2001
+#define CLOCK_PERIOD	(systemCounts.year - FILE_YEAR_MIN)
 
 typedef struct SystemCounts SystemCounts;
 
