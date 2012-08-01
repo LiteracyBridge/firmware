@@ -572,9 +572,8 @@ void setOperationalMode(int newmode) {
     // when leaving wait mode, next instruction is executed, so we return here
     return;
   } else {
-		// give visual and aural feedback to 
-		playBip();
-  		setLED(LED_ALL,TRUE);
+		// give visual feedback of shutting down (aural feedback when user causes shutdown in takeAction())
+ 		setLED(LED_ALL,TRUE);
   		buildMyStatsCSV();
 		buildExchgOstats();
  		clearDeleteQueue();

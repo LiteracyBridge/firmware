@@ -460,6 +460,8 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 		cp1 = filepath + strlen(filepath);	// save this position
 		strcat(filepath, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN);
 		strcat(filepath, "_");
+		strcat(filepath, cursor); //adding category code to filename, primarily to make is easy to find feedback category
+		strcat(filepath, "_");
 		strcat(filepath, digits);
 		strcpy(pkgName, cp1);      // change pkgName to show file name we used
 		strcat(filepath,AUDIO_FILE_EXT);

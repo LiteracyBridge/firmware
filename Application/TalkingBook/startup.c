@@ -268,7 +268,7 @@ void startUp(unsigned int bootType) {
 	char filename[FILE_LENGTH];
 	int key, ret, callPushPull = 0,callProcessInbox = 0;
 	int configExists = 0, normal_shutdown=1;
-	int inspect = 0;
+	int inspect = 0, firmwareWasUpdated = 0;
 
 	setLED(LED_ALL,TRUE);  // start lights to indicate user should wait during startup until the device is ready
 	// set temporary valid date for file ops (like logging) until system variables are read 
@@ -285,11 +285,13 @@ void startUp(unsigned int bootType) {
 	} else if (key == KEY_PLUS)
 		callPushPull = 1;  // call pushContentGetFeedback() at end up this fct.
 
-	if (fileExists((LPSTR)SELF_INSPECT_TRIGGER_FILE))
+	if ((bootType == BOOT_TYPE_COLD_RESET) || fileExists((LPSTR)SELF_INSPECT_TRIGGER_FILE))
 		inspect = 1;  // used to check for .loc file and other changes that don't normally occur
 
 	ret = loadSystemCounts();  // calling this before config means we rely on the default location for system-vars
 	systemCounts.powerUpNumber++; 
+	if (inspect)
+		firmwareWasUpdated = fileExists((LPSTR)FIRMWARE_UPDATE_NOTIF_FILE);
 	if (ret == -1 || inspect)
 		setLocation(systemCounts.location);
 	saveSystemCounts();	
@@ -310,9 +312,10 @@ void startUp(unsigned int bootType) {
 		}
 		curAlarmSet = 0;
 		rtc_fired = 0;
-		if ((*P_Reset_Flag & 0x0010))
+		if ((*P_Reset_Flag & 0x0001))
+			logStringRTCOptional((char *)"LVR RESET!", ASAP,LOG_ALWAYS,0);
+		if ((*P_Reset_Flag & 0x0010) || firmwareWasUpdated)
 			wasReset = 1;  // if cold start was due to a reset, power was never removed
-
 		else {
 			// power was removed: can't rely on clock.  Start new clocl "period" and reset RTC.
 			wasReset = 0;
@@ -332,8 +335,8 @@ void startUp(unsigned int bootType) {
 			replaceFromBackup("a:/log-archive");
 		}
 		if (isCorrupted((char *)"a:/log")) {
-			logString((char *)"Corruption: log",BUFFER,LOG_NORMAL);
 			replaceFromBackup("a:/log");
+			logString((char *)"Corruption: log",BUFFER,LOG_NORMAL);
 		}
 		if (isCorrupted((char *)"a:/languages")) {
 			logString((char *)"Corruption: languages",BUFFER,LOG_NORMAL);			
@@ -453,11 +456,11 @@ void startUp(unsigned int bootType) {
 		}
 	}
 	if (!systemCounts.location[0] || !strncmp(systemCounts.location,(char *)"Non-",4))
-		playBips(3);
+		playDings(2);
 	strcpy(buffer,"Location:");
 	strcat(buffer,systemCounts.location);
 	strcat(buffer,(const char *)"\x0d\x0a" "Version:" VERSION);
-	if (inspect && fileExists((LPSTR)FIRMWARE_UPDATE_NOTIF_FILE)) {
+	if (firmwareWasUpdated) {
 		strcat(buffer," (New firmware)");
 		unlink((LPSTR)FIRMWARE_UPDATE_NOTIF_FILE);
 	}
@@ -480,7 +483,7 @@ void startUp(unsigned int bootType) {
 			break;
 	}
 	if (inspect)
-		strcat(buffer,"\x0d\x0a" "Inspect triggerd");
+		strcat(buffer,"\x0d\x0a" "Inspect triggered");
 	if(normal_shutdown) {
 		if (DEBUG_MODE == LOG_DETAIL) {
 			strcat(buffer,(char *)"\x0d\x0a" "Restored configuration from config.bin successfully");
@@ -528,6 +531,7 @@ void startUp(unsigned int bootType) {
 	loadPackage(PKG_SYS,currentProfileLanguage());
 	logString("call mainLoop",BUFFER,LOG_DETAIL);
 	SetSystemClockRate(CLOCK_RATE); // either set in config file or the default 48 MHz set at beginning of startUp()
+	checkInactivity(TRUE); //reset the inactivity timer
 	mainLoop();
 }
 static char * addTextToSystemHeap (char *line) {

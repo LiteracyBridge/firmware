@@ -36,7 +36,6 @@ static void processIntoBlock(int);
 static EnumAction processEndBlock(int);
 static void endOfTimeframe(int, BOOL);
 static void keyResponse(void);
-int checkInactivity(BOOL);
 static void loadDraftTranslation(void);
 static void takeAction (Action *, EnumAction);
 static void finishTranslation(void);
@@ -454,62 +453,29 @@ static void keyResponse(void) {
 	}
 }
 
-extern int checkInactivity(BOOL resetTimer) {
+extern void checkInactivity(BOOL resetTimer) {
 	unsigned long currentTime;
-	APP_IRAM static BOOL warnedUser;
 	APP_IRAM static unsigned long lastActivity;
 	APP_IRAM static unsigned long lastUSBCheck;
-	APP_IRAM static int justLogged;
-	APP_IRAM static BOOL green;
-	char stringLog[20];
-		
+	
 	currentTime = getRTCinSeconds();	
-
-	if(currentTime <= INACTIVITY_SECONDS) {  // when time rolls over do not HALT if up and running
-		resetTimer = TRUE;
-	}
 	
 	if (resetTimer) {
 		lastUSBCheck = lastActivity = currentTime;
-		warnedUser = FALSE;
-	} else if (INACTIVITY_SECONDS && !warnedUser && currentTime - lastActivity > INACTIVITY_SECONDS) {
-//		adjustVolume(MAX_VOLUME-3,FALSE,TRUE);  // todo: move this -3 to config
-		// todo: add a check to see if earphones are used -- if so, reduce volume
-//		insertSound(&pkgSystem.files[INACTIVITY_SOUND_FILE_IDX],NULL,FALSE);
-//		restoreVolume(FALSE);
+		return;
+	}
+	if (INACTIVITY_SECONDS && (currentTime - lastActivity) > INACTIVITY_SECONDS) {
 		lastActivity = currentTime;
-//#ifdef TB_CAN_WAKE
 		if(MEM_TYPE == MX_MID) {
 			setOperationalMode((int)P_HALT);  // keep RTC running
 		} else {
-//#else 
 			setOperationalMode((int)P_SLEEP); // shut down completely if will require power sw recycle to turn on
 			// Might want to go back to the audio alert since old hardware uses much more current in sleep than new hw
 		}
-//#endif
-	} else if (currentTime - lastActivity > 30) { //todo: move this to config file
-		// blink green light when paused/stopped to remind that power is on
-		if ((currentTime % 4) == 1) {
-			if (!green) {
-				setLED(LED_GREEN,TRUE);
-				green = TRUE;
-			} 
-		} else if (green) {
-			setLED(LED_GREEN,FALSE);
-			green = FALSE;
-		}		
 	}	
-	// log time every minute to track power-on time
-	if (!justLogged && !(currentTime % 60) && (context.isStopped || context.isPaused)) {
-		longToDecimalString(currentTime,stringLog,5);
-		logString(stringLog,ASAP,LOG_NORMAL);
-		justLogged = 1;	
-	} else if (justLogged  && (currentTime % 60))
-		justLogged = 0;		
-
-	if(USB_CLIENT_POLL_INTERVAL && (currentTime - lastUSBCheck > USB_CLIENT_POLL_INTERVAL)) {
+	if(USB_CLIENT_POLL_INTERVAL && ((currentTime - lastUSBCheck) > USB_CLIENT_POLL_INTERVAL)) {
 		int usbret;
-		
+
 		lastUSBCheck = currentTime;
 		usbret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY);
 		while(usbret == 1) {
@@ -519,7 +485,7 @@ extern int checkInactivity(BOOL resetTimer) {
 			SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
 			lastActivity = currentTime; //	count being in usb as active
 			processInbox();
-		}
+		} 
 	}
 }
 // process an alarm that has fired fired here
@@ -1921,13 +1887,15 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			// call sleep function
 			logString((char *)"USER SLEEP",BUFFER,LOG_ALWAYS);
 			stop();
+			playBip();
 			setOperationalMode((int)P_SLEEP); 
 			break;
 		case HALT:
 			logString((char *)"USER HALT",BUFFER,LOG_ALWAYS);
 			stop();
 			// call sleep function
-			setOperationalMode((int)P_HALT); 
+			playBip();
+ 			setOperationalMode((int)P_HALT); 
 			break;
 		case TEST_PCB:
 			testPCB();
