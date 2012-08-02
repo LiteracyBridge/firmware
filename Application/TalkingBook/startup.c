@@ -261,6 +261,18 @@ static void clearDir(char* dir) {
 	}
 }
 */
+void initAlarmData()
+{
+	extern unsigned long rtcAlarm[];
+	extern unsigned long curAlarmSet;    
+	extern unsigned long rtc_fired;
+	int key;
+	for(key=0; key<N_RTC_INIT; key++) {
+		rtcAlarm[key] = 0;
+	}
+	curAlarmSet = 0;
+	rtc_fired = 0;
+}
 
 void startUp(unsigned int bootType) {
 	char buffer[400];
@@ -307,15 +319,14 @@ void startUp(unsigned int bootType) {
 		extern unsigned long curAlarmSet;    
 		extern unsigned long rtc_fired;
 		int wasReset = 0;
-		for(key=0; key<N_RTC_INIT; key++) {
-			rtcAlarm[key] = 0;
-		}
-		curAlarmSet = 0;
-		rtc_fired = 0;
+
+		initAlarmData();
+
 		if ((*P_Reset_Flag & 0x0001))
 			logStringRTCOptional((char *)"LVR RESET!", ASAP,LOG_ALWAYS,0);
 		if ((*P_Reset_Flag & 0x0010) || firmwareWasUpdated)
 			wasReset = 1;  // if cold start was due to a reset, power was never removed
+
 		else {
 			// power was removed: can't rely on clock.  Start new clocl "period" and reset RTC.
 			wasReset = 0;
@@ -463,6 +474,7 @@ void startUp(unsigned int bootType) {
 	if (firmwareWasUpdated) {
 		strcat(buffer," (New firmware)");
 		unlink((LPSTR)FIRMWARE_UPDATE_NOTIF_FILE);
+		initAlarmData();
 	}
 	strcat(buffer,(char *)"\x0d\x0a" "Cycle:");
 	longToDecimalString(systemCounts.powerUpNumber,(char *)(buffer+strlen(buffer)),4);

@@ -79,7 +79,7 @@ int main (int bootType) {
 		backfromRTC();
 	}
 	SysDisableWaitMode(WAITMODE_CHANNEL_A); //not actually sure what it does, but it may belong here more than startup()
-
+	
 	startUp(bootType);
 	return 0;
 }
@@ -89,6 +89,7 @@ backfromRTC()
 {
 	char buf[64];
 	unsigned int hr, min, sec;
+	unsigned long ul;
 	
 // If we are here we are back from RTC int, and we have not initialized ram
 //  - the RTC continued to run
@@ -117,10 +118,11 @@ backfromRTC()
 //	wait(1000);
 //	setLED(LED_GREEN,FALSE);
 
-	if(hr == 0 && min == 0) {
+	ul = (long)((long)hr*3600L) + (long)((long)min*60L) + (long)sec;
+	rtcAlarmFired(ul);
+	if(hr == 0 && min == 0 && sec == 0) {
 		int wrk = *P_RTC_INT_Status;
 		*P_RTC_INT_Status |= wrk;	// clear all interrupt flags
-		rtcAlarmFired(0L);
 		setOperationalMode((int)P_HALT);    //go back to HALT, does not return
 	} else {
 		disk_safe_exit(0); // close all open files - we are reiniting
