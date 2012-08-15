@@ -110,7 +110,7 @@ backfromRTC()
 	
 //	if(sav_Int_status2 & 0x2) {  // rtc alarm fired
 //		*P_RTC_INT_Status |= 0x50f;	//clear all possible RTC interrupts
-	strcpy(buf, "back from Halt - RTC Alarm fired\n");
+	strcpy(buf, "back from Halt - RTC Alarm fired");
 	logString(buf, ASAP, LOG_NORMAL);
 //	RTC_Alarm_Fired();			// do isr work, will ste next alarm
 	
