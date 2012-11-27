@@ -287,7 +287,8 @@ void startUp(unsigned int bootType) {
 	systemCounts.month = 1;
 	systemCounts.monthday = 1;
 	systemCounts.year = FILE_YEAR_MIN;
-
+	//confirming SN is important to address corruption removing the SN file and then stats are unclear
+	confirmSNonDisk();
 	// Before any trouble is caused, allow forcing USB mode.		
 	key = keyCheck(1);  // long keycheck 
 	key &= ~LONG_KEY_STROKE;
@@ -319,6 +320,7 @@ void startUp(unsigned int bootType) {
 		extern unsigned long curAlarmSet;    
 		extern unsigned long rtc_fired;
 		int wasReset = 0;
+		int hasCorruption = 0;
 
 		initAlarmData();
 
@@ -339,29 +341,37 @@ void startUp(unsigned int bootType) {
 		}
 		if (isCorrupted((char *)"a:/system")) {
 			logString((char *)"Corruption: system",BUFFER,LOG_NORMAL);
-			replaceFromBackup("a:/system");
+			hasCorruption = 1;
+			//replaceFromBackup("a:/system");
 		}
 		if (isCorrupted((char *)"a:/log-archive")) {
 			logString((char *)"Corruption: log-archive",BUFFER,LOG_NORMAL);
-			replaceFromBackup("a:/log-archive");
+			hasCorruption = 1;
+			//replaceFromBackup("a:/log-archive");
 		}
 		if (isCorrupted((char *)"a:/log")) {
 			replaceFromBackup("a:/log");
-			logString((char *)"Corruption: log",BUFFER,LOG_NORMAL);
+			hasCorruption = 1;
+			//logString((char *)"Corruption: log",BUFFER,LOG_NORMAL);
 		}
 		if (isCorrupted((char *)"a:/languages")) {
 			logString((char *)"Corruption: languages",BUFFER,LOG_NORMAL);			
-			replaceFromBackup("a:/languages");
+			hasCorruption = 1;
+			//replaceFromBackup("a:/languages");
 		}
 		if (isCorrupted((char *)"a:/statistics")) {
 			logString((char *)"Corruption: statistics",BUFFER,LOG_NORMAL);			
-			replaceFromBackup("a:/statistics");
+			hasCorruption = 1;
+			//replaceFromBackup("a:/statistics");
 		}
 		if (isCorrupted((char *)"a:/messages")) {
 			logString((char *)"Corruption: messages",BUFFER,LOG_NORMAL);						
-			replaceFromBackup("a:/messages");
+			hasCorruption = 1;
+			//replaceFromBackup("a:/messages");
 		}
 		forceflushLog();
+		if (hasCorruption)
+			playBips(3);
 
 #ifdef HALT_ON_COLD_START
 		if (!wasReset) { // don't halt if reset for firmware reflashing or if an error caused a reset

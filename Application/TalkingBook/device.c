@@ -21,6 +21,8 @@ extern int SystemIntoUDisk(unsigned int);
 extern void KeyScan_ServiceLoop(void);
 extern int SP_GetCh(void);
 extern INT16 SD_Initial(void);
+extern void checkDoubleSRNprefix(void); 
+extern void SD_Uninitial(void);		
 static void setDate(unsigned int, unsigned int);
 static char* findTimePart (char *, char);
 	
@@ -28,7 +30,6 @@ static void logKeystroke(int);
 //static void Log_ClockCtrl(void);
 static void turnSDoff(void);
 static void turnNORoff(void);
-static void confirmSNonDisk(void);
 
 APP_IRAM static int volume, speed;
 APP_IRAM static unsigned long voltage; // voltage sample 
@@ -368,7 +369,7 @@ getCurVoltageSample() {
 						logString(log,BUFFER, LOG_ALWAYS);
 					
 						if((voltageDropRate > 25) && (vCur_1 < 250)) {  //heuristic constants, may need to change
-							logString("VOLTAGE DROPPING FAST - NEED NEW BATTERIES" , ASAP, LOG_ALWAYS);
+							logString("VOLTAGE DROPPING FAST - SHUTTING DOWN" , ASAP, LOG_ALWAYS);
 							flushLog();
 							refuse_lowvoltage(1);
 						}
@@ -579,8 +580,8 @@ void setOperationalMode(int newmode) {
  		clearDeleteQueue();
   		write_config_bin();  // build a config.bin
 		writeVersionToDisk(SYSTEM_PATH);  // make sure the version file is correct
+		checkDoubleSRNprefix(); // this can be removed once the dup serial number prefixes are fixed
   		confirmSNonDisk(); // make sure the serial number file is correct 
- 		//cleanUpOldRevs(); // cleanup any old revs 
     	// assume calling for sleep or halt
 		*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
 		if (newmode == (int)P_HALT)
@@ -1072,24 +1073,29 @@ KEY_TimeBase_B_isr() {	//TimerBase B fired
 	keydown_counter += 1;
 }
 
-static void confirmSNonDisk(void) {
+extern void confirmSNonDisk(void) {
 	int exists, handle, ret;
 	char fileSN[PATH_LENGTH],filePattern[PATH_LENGTH];
+	char sysPath[PATH_LENGTH];	
 	struct f_info file_info;
-		
-	strcpy(fileSN,SYSTEM_PATH);
+	
+	if (SYSTEM_PATH)
+		strcpy(sysPath,SYSTEM_PATH);
+	else 
+		strcpy(sysPath,DEFAULT_SYSTEM_PATH);
+	strcpy(fileSN,sysPath);
 	strcat(fileSN, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN);
 	strcat(fileSN, (char *)SERIAL_EXT);
 	exists = fileExists((LPSTR) fileSN);
 	if (!exists) {
-		tbChdir((LPSTR)SYSTEM_PATH);
+		mkdir((LPSTR)sysPath);
+		tbChdir((LPSTR)sysPath);
 		strcpy(filePattern,(char *)"*" SERIAL_EXT);
 		ret =_findfirst((LPSTR)filePattern, &file_info, D_FILE);
 		while (ret >= 0) { 			
 			ret = unlink((LPSTR)file_info.f_name);
 			ret = _findnext(&file_info);
 		}
-		mkdir((LPSTR)SYSTEM_PATH); 
 		handle = tbOpen((LPSTR)fileSN,O_CREAT|O_RDWR|O_TRUNC);
 		close(handle);
 	}

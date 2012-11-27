@@ -87,6 +87,7 @@ extern void setRTCalarm(unsigned int, unsigned int, unsigned int);
 extern unsigned long addAlarm(unsigned int hour, unsigned int minute, unsigned int second);
 extern void set_voltmaxvolume(BOOL); 
 extern void setNextAlarm(void);
+extern void confirmSNonDisk(void);
 
 #define N_RTC_ALARMS 6
 #define N_RTC_INIT   N_RTC_ALARMS+1

@@ -10,6 +10,7 @@ void Check_flash_reprog();
 static void NewCurrent();
 void FlashReprogHimem(flash *fp);
 void FlashReprogLomem(flash *fp, unsigned int *);
+extern void write_app_flash(int *, int, unsigned int);
 
 // flash address 0xf800 maps to 0x3f800, but with 32k block flash device the erase at this address
 //   erases 0x38000 thru 0x3ffff, the code below reserves that 32k block, and it it not used
@@ -160,13 +161,14 @@ ReprogFailed(flash *fp)
 */
 
 void updateSN(char* path) {
-	extern void write_app_flash(int *, int, unsigned int);
 	struct f_info file_info;
 	char *newSN;
 	char pathFrom[PATH_LENGTH], pathTo[PATH_LENGTH];
-	int ret, goodSN, sameSN;
+	int ret, goodSN, sameSN, len;
 	int reuseSystemSRNfile;
-		
+
+	ret = goodSN = sameSN = reuseSystemSRNfile = 0;			
+
 	// see if a .srn file is present
 	strcpy(pathFrom,path);
 	strcat(pathFrom,SERIAL_FN);
@@ -196,17 +198,21 @@ void updateSN(char* path) {
 			ret = rename((LPSTR)pathFrom,(LPSTR)pathTo);
 			if (ret == -1) 
 				unlink((LPSTR)pathFrom);
-	 	} else
+	 	} else if (!flagSNexists)
 			reuseSystemSRNfile = goodSN = 1; // "srn." won't be at the beginning of the file in /system	
 
 	 	//check that new sn is not the same as old - force goodSN to 0 if it is the same
-		if (*(char *)TB_SERIAL_NUMBER_ADDR) // otherwise 0-length string will look equal
-			goodSN &= strncmp(newSN,(char *)TB_SERIAL_NUMBER_ADDR,strlen((char *)TB_SERIAL_NUMBER_ADDR));
-					
+		len = strlen((char *)TB_SERIAL_NUMBER_ADDR);
+		if (goodSN && ((dot-newSN) == len)) {
+			if (!strncmp(newSN,(char *)TB_SERIAL_NUMBER_ADDR,len)) {
+				goodSN = 0;
+			}
+		}
 		// check the extension was found
 		if (dot == NULL)
 			goodSN = 0;
 		
+		len = strlen(newSN) - 3; //skip serial number extension
 		// If 1) bad SN format or 2) if the erase code isn't used when an SN exists, then return without action.
 	 	if (goodSN && (!flagSNexists || (flagSNexists && flagErase))) { 	
 			//prepare to delete old SN file, but don't do it until after writing new serial number
@@ -216,28 +222,42 @@ void updateSN(char* path) {
 				strcat(pathTo,(char *)SERIAL_EXT);				
 			}
 			if(goodSN && (!flagSNexists || (flagSNexists && flagErase)) ) {
-				int vlen = strlen(newSN) - 3; //skip serial number extension
 				if (newSN == dot)
-					vlen = 0;
+					len = 0;
 				else
 					*dot = 0;
 				if (reuseSystemSRNfile) {
 					// if reusing the /system *.srn file, then we must manually add the srn prefix
 					strcpy(pathFrom,CONST_TB_SERIAL_PREFIX);
 					strcat(pathFrom,newSN);
-					vlen = strlen(pathFrom);
+					len = strlen(pathFrom);
 
-					write_app_flash((int *)pathFrom, vlen, (unsigned int)0x0000);
+					write_app_flash((int *)pathFrom, len, (unsigned int)0x0000);
 				} else
-					write_app_flash((int *)newSN, vlen, (unsigned int)0x0000);
+					write_app_flash((int *)newSN, len, (unsigned int)0x0000);
 			}
 			if (flagErase) {
 				unlink((LPSTR)pathTo);
 			}
-	 	} else if (flagErase) {
+	 	} else if (flagErase && (len == 1)) { // just the '.' between -erase- and srn
 	 		// no SN - just erase
 	 		write_app_flash((int *)"", 0, (unsigned int)0x0000);
 	 	}
+	}
+}
+
+void checkDoubleSRNprefix(void) {
+	int len;
+	char str[80];
+	len = strlen((char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN);
+	if (len > CONST_TB_SERIAL_PREFIX_LEN && !strncmp((char *)(TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN),(char *)CONST_TB_SERIAL_PREFIX,CONST_TB_SERIAL_PREFIX_LEN)) {
+		strcpy(str,"Fixing Double SRN Prefix: from ");
+		strcat(str,(char *)TB_SERIAL_NUMBER_ADDR);
+		strcat(str,(char *)" to ");
+		strcat(str,(char *)(TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN));
+		logString(str,BUFFER,LOG_NORMAL);
+		strcpy(str,(char *)(TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN));
+		write_app_flash((int *)str, len, (unsigned int)0x0000);
 	}
 }
 

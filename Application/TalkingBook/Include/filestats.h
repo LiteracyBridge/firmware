@@ -16,7 +16,10 @@
 
 void recordStats(char *filename, unsigned long handle, unsigned int why, unsigned long data);
 
+#define STATS_HEADER_SIZE	20
 struct ondisk_filestats {
+	unsigned long headerCode;
+	char msgId[STATS_HEADER_SIZE];
 	unsigned long stat_num_opens;
 	unsigned long stat_num_completions;
 	unsigned long stat_num_copies;

@@ -815,6 +815,11 @@ int addField(int handle, unsigned int field_id, char *field_value, int numfieldv
     return(ret);
 }
 
+void setStatsHeader(struct ondisk_filestats *stats, char *msgId) {
+	stats->headerCode = 0x12358D15;
+	LBstrncpy(stats->msgId,msgId,STATS_HEADER_SIZE); 
+}
+
 void recordStats(char *filename, unsigned long handle, unsigned int why, unsigned long misc)
 {
 	int metaRead(int fd, unsigned int field_id, unsigned int *buf);
@@ -854,6 +859,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 		} else {
 			statINIT = 0;
 		}
+		setStatsHeader(&tmp_file_stats,STAT_FN);
 		break;
 	case STAT_CLOSE:
 		msgTime = Snd_A1800_GetCurrentTime();  // in ms
@@ -871,6 +877,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 				stathandle = tbOpen((LPSTR)statpath, O_CREAT|O_RDWR);
 				if(stathandle >= 0) {
 					ret = read(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
+					setStatsHeader(&tmp_file_stats,STAT_FN);
 					lseek(stathandle, 0L, SEEK_SET);
 					if(wrk >= SACM_A1800_Bytes) {
 						tmp_file_stats.stat_num_opens += 1; 
@@ -905,6 +912,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 			ret = read(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
 			lseek(stathandle, 0L, SEEK_SET);
 			tmp_file_stats.stat_num_copies += 1; 
+			setStatsHeader(&tmp_file_stats,STAT_FN);
 			ret = write(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
 			close(stathandle);
 		}
@@ -931,6 +939,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 		if(stathandle >= 0) {
 			ret = read(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
 			lseek(stathandle, 0L, SEEK_SET);
+			setStatsHeader(&tmp_file_stats,STAT_FN);
 			tmp_file_stats.stat_num_survey1 += 1; 
 			ret = write(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
 			close(stathandle);
@@ -948,6 +957,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 			ret = read(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
 			lseek(stathandle, 0L, SEEK_SET);
 			tmp_file_stats.stat_num_apply += 1; 
+			setStatsHeader(&tmp_file_stats,STAT_FN);
 			ret = write(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
 			close(stathandle);
 		}
@@ -964,6 +974,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 			ret = read(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
 			lseek(stathandle, 0L, SEEK_SET);
 			tmp_file_stats.stat_num_useless += 1; 
+			setStatsHeader(&tmp_file_stats,STAT_FN);
 			ret = write(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
 			close(stathandle);
 		}
