@@ -540,17 +540,6 @@ newUpdateCategory(struct newContent *pNC, int isDir) {
 		if (ret == -1)
 			ret = insertStringInFile(buffer,tmpbuf,0);
 	
-	/*
-		// FOR TESTING ONLY: To test lots of writes to a list file
-		for(ret = 0;ret < MAX_VOLUME; ret++) {
-			tmpbuf[0]='0'+ret%65;
-			insertStringInFile(buffer,tmpbuf,0);	
-			setLED(LED_RED,FALSE);
-			wait(200);
-			setLED(LED_RED,TRUE);			
-		} 
-	
-	*/
 		// if categorized as other, ensure other is on the activeList
 		if((cp = strrchr(buffer, '/')) && (!strcmp(cp+1, OTHER_CATEGORY ".txt")))
 			addCategoryToActiveLists((char *)OTHER_CATEGORY,currentProfileMessageList());
