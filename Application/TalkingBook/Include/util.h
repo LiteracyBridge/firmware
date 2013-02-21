@@ -28,6 +28,7 @@ extern void longToDecimalString(long, char *, int);
 extern void unsignedlongToDecimalString(unsigned long, char *, int);
 extern void longToHexString(long, char *, int);
 extern void unsignedlongToHexString(unsigned long, char *);
+extern void intToBinaryString(int, char *);
 extern long strToLong (char *);
 extern int goodChar(char,int);
 extern int goodString(char *,int);

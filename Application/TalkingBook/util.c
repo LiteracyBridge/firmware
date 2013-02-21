@@ -186,6 +186,26 @@ void unsignedlongToHexString(unsigned long l, char * string) {
 	*cursor = 0;	
 }
 
+void intToBinaryString(int i, char * string) {
+	int bit; 
+	long divisor;
+	unsigned long num;
+	char * cursor = string;
+	int bitCount = 16;
+	
+	num = i;
+	for (divisor=1;bitCount>1;bitCount--)
+		divisor *= 2;
+	for (;divisor >= 2;divisor /= 2) {
+		bit = num/divisor;
+		num -= (bit * divisor);
+		*cursor++ = bit + 0x30;
+	}
+	*cursor++ = (num % 2) + 0x30;
+	*cursor = 0;	
+}
+
+
 
 long strToLong (char *str) {
 	//todo: flag when NaN
