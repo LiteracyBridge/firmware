@@ -25,18 +25,24 @@ extern void checkDoubleSRNprefix(void);
 extern void SD_Uninitial(void);		
 static void setDate(unsigned int, unsigned int);
 static char* findTimePart (char *, char);
-	
+
 static void logKeystroke(int);
 //static void Log_ClockCtrl(void);
 static void turnSDoff(void);
 static void turnNORoff(void);
 
 APP_IRAM static int volume, speed;
-APP_IRAM static unsigned long voltage; // voltage sample 
 APP_IRAM static int oldVolume;
-extern APP_IRAM int vThresh_1;
-extern APP_IRAM unsigned int vCur_1;
+APP_IRAM int volumeMaxThisCycle;
 APP_IRAM static unsigned int keydown_counter;
+APP_IRAM unsigned int vCur_1;
+APP_IRAM unsigned long tCur_1;
+APP_IRAM int vThresh_1;
+APP_IRAM int shuttingDown;
+	
+
+APP_IRAM static int v_high = 0;
+APP_IRAM static int v_low = 0xFC;
 
 // data stored between 0 and &rtc_fired+2 is not initialized by startup_Data.asm
 //    data stored here survives going into and returning from HALT mode
@@ -120,6 +126,17 @@ void setRTC(unsigned int h, unsigned int m, unsigned int s) {
 	}
 }
 
+extern void appendHiLoVoltage(char *string) {
+	longToDecimalString(v_high,string+strlen(string),3);
+	strcat(string,"/");
+	longToDecimalString(vCur_1,string+strlen(string),3);
+	strcat(string,"/");
+	longToDecimalString(v_low,string+strlen(string),3);
+	strcat(string,"V");	
+	v_high = vCur_1;
+	v_low = vCur_1;
+}
+
 extern void getRTC(char * str) {
 	unsigned long c,p,d,h,m,s;
 	char time[25];
@@ -199,16 +216,16 @@ void setLED(unsigned int color, BOOL on) {
 }
 
 int restoreVolume(BOOL normalVolume) {
-	int ret;
-	
+		
 	if (normalVolume)
-		ret = adjustVolume(NORMAL_VOLUME,FALSE,FALSE);
+		adjustVolume(NORMAL_VOLUME,FALSE,FALSE);
 	else
-		ret = adjustVolume(oldVolume,FALSE,FALSE);
-	return ret;
+		adjustVolume(oldVolume,FALSE,FALSE);
+	return volume;
 }
 
 int adjustVolume (int amount, BOOL relative, BOOL rememberOldVolume) {
+	int ret;
 /*
 	APP_IRAM static long timeLastVolChg = 0;
 	long timeCurrent,diff;
@@ -237,16 +254,21 @@ int adjustVolume (int amount, BOOL relative, BOOL rememberOldVolume) {
 	else
 		volume = amount;
 	
-	set_voltmaxvolume(FALSE);
+	ret = set_voltmaxvolume(FALSE);
 
-	if (volume > MAX_VOLUME) { 
-		volume = MAX_VOLUME;
-		playBip();	
+	if (volume > volumeMaxThisCycle) { 
+		volume = volumeMaxThisCycle;
+		setLED(LED_RED,TRUE);
+		playBip();
+		setLED(LED_RED,FALSE);
+		ret = -1;	
 	}
 	if (volume < MIN_VOLUME)  
 		volume = MIN_VOLUME;
 	SACM_Volume(volume);	
-	return volume;
+	if (ret != -1)
+		ret = volume;
+	return ret;
 }
 
 int adjustSpeed (int amount, BOOL relative) {
@@ -277,130 +299,164 @@ void setUSBDevice (BOOL set) {
 		flushLog();
 		//cleanUpOldRevs(); // cleanup any old revs
 		SystemIntoUDisk(USB_CLIENT_SVC_LOOP_CONTINUOUS);	
-		SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
-		processInbox();
-	}
-}
-
-void logVoltage() {
-	int i;
-	unsigned int sample;
-	char buffer[40];
-	unsigned long time = getRTCinSeconds();
-	APP_IRAM static unsigned long timeLastSample = -1;
-	
-//	if ((context.isStopped || context.isPaused) && (time > (timeInitialized + 2)))     // 2-3 second delay)
-	if (VOLTAGE_SAMPLE_FREQ_SEC && (context.isStopped || context.isPaused) && time > (timeLastSample+VOLTAGE_SAMPLE_FREQ_SEC)) { 	
-		sample = getCurVoltageSample();
-		strcpy(buffer,"V:");
-	 	longToHexString(((long)vThresh_1 & 0xffff),buffer+strlen(buffer),1);
-	 	strcat(buffer," | ");
-	 	
-		if(sample == 0xffff) {
-			sample = getCurVoltageSample();
-			if(sample == 0xffff)
-				return;
-		}
-		
-		longToDecimalString((long)sample,buffer+strlen(buffer),3);
-		i = strlen(buffer);
-		buffer[i+1] = 0;
-		buffer[i] = buffer[i-1];
-		buffer[i-1] = buffer[i-2];
-		buffer[i-2] = '.'; 
-		logString(buffer,ASAP,LOG_DETAIL);				
-	 	voltage = sample;			 		
-		timeLastSample = time;
+		fastShutdown();
+//		SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
+//		checkVoltage();  // USB may have been supplying sole power -- need to check if voltage dropping fast		
+//		processInbox();
+//		checkVoltage();  // USB may have been supplying sole power -- need to check if voltage dropping fast
 	}
 }
 
 unsigned int
 getCurVoltageSample() {	
-	unsigned ret = 0xffff;
-	APP_IRAM static BOOL wasSampleStarted = FALSE;
-	unsigned long currentTimeInSec;
-	unsigned int voltageDropTime;
-	APP_IRAM static unsigned long timeLastVoltageMilestone = 0;
-	char log[80];
-	
-	if (!wasSampleStarted) {
+	unsigned sample;
+
+	do {
 		*P_ADC_Setup |= 0x4000;
 		*P_MADC_Ctrl |= 0x40; // set STRCNV, starting the voltage sample
-		wasSampleStarted = TRUE;
-	} else if (*P_MADC_Ctrl & 0x80) {  // checks CNVRDY (sample is ready)					
-	 	ret = (unsigned int)*P_MADC_Data;
-	 	
-//rhm			 	sample >>= 4; // only bits 4-15
-//rhm				f = 2 * 3.3 * (sample / (float)0x0fff); // ref = 3.3v; LINE1 measures 1/2 voltage
-//rhm				sample = (unsigned int) (f * 100); // to give "x.xx" for total voltage
+	
+		while (!(*P_MADC_Ctrl & 0x80)); // wait until CNVRDY (sample is ready)					
+		sample = (unsigned int)*P_MADC_Data;
+		*P_ADC_Setup &= ~0x4000; // disable ADCEN to save power
+		sample /= 99;  //RHM heuristically determined to work on my board, replaced 3 lines below
+	} while (sample == 0);
+	//	sample >>= 4; // only bits 4-15
+	//	f = 2 * 3.3 * (sample / (float)0x0fff); // ref = 3.3v; LINE1 measures 1/2 voltage
+	//	sample = (unsigned int) (f * 100); // to give "x.xx" for total voltage
+	
+	if (sample < V_MIN_POSSIBLE_VOLTAGE)
+		sample = V_EXTERNAL_VOLTAGE;	
+	return sample;
+}
 
-		ret /= 99;  //RHM heuristically determined to work on my board, replaced 3 lines above
-		
-		if (ret < V_MIN_POSSIBLE_VOLTAGE) // must be powered externally 
-			ret = V_NORMAL_VOLTAGE; // set ret to ensure all voltage checks pass
+unsigned int
+checkVoltage() {	
+	int v;
+	unsigned long currentTimeInSec;
+	unsigned int tripRate;
+	APP_IRAM static unsigned long timeStartedFalling;
+	APP_IRAM static unsigned int voltageStartedFalling;
+	APP_IRAM static unsigned long timePaused = 0;
+	APP_IRAM static unsigned int voltagePaused;
+	APP_IRAM static unsigned int voltageAvgPaused;
+	APP_IRAM static unsigned int readingsPaused = 0;
+	char log[80];
+	int isPlaying;
 
-	 	*P_ADC_Setup &= ~0x4000; // disable ADCEN to save power
-		wasSampleStarted = FALSE;
-		vThresh_1 <<= 1;
-		if(ret < vCur_1)	// if voltage < vCur_1 set a bit in vThresh_1, all ones in vThresh means 16 samples in a row below 
-			vThresh_1 |= 1;
-		if(vThresh_1 == 0xffff) {
-			unsigned int delta_voltage = vCur_1 - ret;
-//			--vCur_1;	// drop current nominal voltage
-			vCur_1 = ret;
-			vThresh_1 = 0;	// reset threshold bits
-			currentTimeInSec = getRTCinSeconds();
-			if(delta_voltage >= V_VOLTAGE_DROP_CHECK_INTERVAL) {
-//			if (!(vCur_1 % V_VOLTAGE_DROP_CHECK_INTERVAL)) {
-				if (timeLastVoltageMilestone) {
-					unsigned int voltageDropRate;
-					voltageDropTime = currentTimeInSec - timeLastVoltageMilestone; 
-					strcpy(log, (char *) "VOLTAGE DROP RATE: 0."); 
-					longToDecimalString((long)delta_voltage,log+strlen(log),2);
-					strcat(log,(char *) "v in ");
-					longToDecimalString((long)voltageDropTime,log+strlen(log),4);
-					strcat(log, (char *) " sec");
-					logString(log,BUFFER, LOG_ALWAYS);
-					
-					if(voltageDropTime > 0) {  // don't divide by 0
-						voltageDropRate = (delta_voltage * 10) / voltageDropTime;
-						strcpy(log, (char *) "VOLTAGE DROP RATE: "); 
-						longToDecimalString((long)voltageDropRate, log+strlen(log), 3);
-						logString(log,BUFFER, LOG_ALWAYS);
-					
-						if((voltageDropRate > 25) && (vCur_1 < 250)) {  //heuristic constants, may need to change
-							logString("VOLTAGE DROPPING FAST - SHUTTING DOWN" , ASAP, LOG_ALWAYS);
-							flushLog();
-							refuse_lowvoltage(1);
-						}
-					}
-				
-					if (voltageDropTime < V_FAST_VOLTAGE_DROP_TIME_SEC && vCur_1 < V_MIN_VOL_VOLTAGE) {
-						// Maybe try an adjustment like the one below, but that might be too aggressive
-						// vFast_Voltage_Drop_Time_Sec = voltageDropTime;
-						set_voltmaxvolume(TRUE);						
-					} 
-				}  
-				timeLastVoltageMilestone = currentTimeInSec;
-			}
+	v = getCurVoltageSample();
+	isPlaying = (SACM_Status() && !context.isPaused);
+	currentTimeInSec = getRTCinSeconds();
 
-
-			if (1) {  // (DEBUG_MODE) {
-				longToDecimalString(currentTimeInSec,log,5);
-				strcat(log,(char *)": v");
-				longToDecimalString(vCur_1, log+strlen(log), 3);
-				logString(log,BUFFER,LOG_NORMAL);
-			}
-			if(vCur_1 < V_MIN_RUN_VOLTAGE) {
-				refuse_lowvoltage(1);
-			} else if (vCur_1 <= V_MIN_SDWRITE_VOLTAGE) {
-				Snd_Stop(); // in case running audio causes a problem with logging
-				strcpy(log,(char *)"Low voltage->Logging terminated.");
-				logString(log,ASAP, LOG_ALWAYS);
-			} 
-		}
+	if (v < V_MIN_RUN_VOLTAGE_TRANS) {
+		forceflushLog();  // to ensure the log msg below is not beyond buffer
+		logString("v < V_MIN_RUN_VOLTAGE_TRANS" , BUFFER, LOG_ALWAYS);
+		fastShutdown();
 	}
-	return(ret);
+	
+	if (isPlaying && timePaused)
+		timePaused = 0;
+	else if (!isPlaying && !timePaused) {
+		timePaused = currentTimeInSec;
+		voltageAvgPaused = voltagePaused = v;
+		readingsPaused = 1;
+	} else if (!isPlaying && timePaused) {
+		readingsPaused++;
+		if (readingsPaused >= 50 && ((v+10) < voltageAvgPaused)) {
+			forceflushLog();  // to ensure the log msg below is not beyond buffer
+			strcpy(log,(char *)"Paused v:");
+			longToDecimalString(v,log+strlen(log),3);
+			strcat(log,(char *)" Avg:");
+			longToDecimalString(voltageAvgPaused,log+strlen(log),3);
+			strcat(log,(char *)" R:");
+			longToDecimalString(readingsPaused,log+strlen(log),5);
+			logString(log , BUFFER, LOG_ALWAYS);
+			fastShutdown();
+		} 
+		voltageAvgPaused = ((long)voltageAvgPaused * (long)(readingsPaused-1) + v) / readingsPaused;
+		voltagePaused = v;
+	}
+	
+	if (v > v_high)
+		v_high = v;
+	if (v < v_low)
+		v_low = v;
+	if(v < vCur_1) {	// if voltage < vCur_1 set a bit in vThresh_1
+		vThresh_1++;
+	} else {
+		// remember v & t for short-term voltage rate calculation when threshold is reached
+		voltageStartedFalling = v;
+		timeStartedFalling = currentTimeInSec;
+		if (v > vCur_1)
+			vThresh_1 = 0;
+	}
+	if((isPlaying && vThresh_1 == 8) || (!isPlaying && vThresh_1 == 2)) { //low samples when playing or paused
+		unsigned int delta_voltage = vCur_1 - v;
+		unsigned int delta_voltage_trans = voltageStartedFalling - v;
+		unsigned int voltageDropRateStatic = 0;
+		unsigned int voltageDropRateTrans = 0;
+		unsigned int voltageDropTime = currentTimeInSec - tCur_1;
+		unsigned int voltageDropTimeTrans = currentTimeInSec - timeStartedFalling;
+		
+		if (delta_voltage >= 2)
+			voltageDropRateStatic = (delta_voltage * 10) / (voltageDropTime?voltageDropTime:1);// don't divide by 0
+		if (delta_voltage_trans >= 2)
+			voltageDropRateTrans = (delta_voltage_trans * 10) / (voltageDropTimeTrans?voltageDropTimeTrans:1);// don't divide by 0
+		vCur_1 = v;
+		vThresh_1 = 0;	// reset threshold bits
+
+		if (vCur_1 < V_MIN_RUN_VOLTAGE) {
+			forceflushLog();  // to ensure the log msg below is not beyond buffer
+			logString("vCur_1 < V_MIN_RUN_VOLTAGE" , BUFFER, LOG_ALWAYS);
+			fastShutdown();
+		}
+		
+		if (delta_voltage >= 2 || delta_voltage_trans >= 2) {
+			if (isPlaying)
+				strcpy(log,(char *)"PLAYING ");
+			else
+				strcpy(log,(char *)"PAUSED ");
+			strcat(log, (char *) "VOLTAGE DROP: 0."); 
+			longToDecimalString((long)delta_voltage,log+strlen(log),2);
+			strcat(log,(char *)"v/0.");
+			longToDecimalString((long)delta_voltage_trans,log+strlen(log),2);
+			strcat(log,(char *) "v in ");
+			longToDecimalString((long)voltageDropTime,log+strlen(log),4);
+			strcat(log, (char *) " sec/");
+			longToDecimalString((long)voltageDropTimeTrans,log+strlen(log),4);
+			strcat(log, (char *) " sec");
+			logString(log,BUFFER, LOG_ALWAYS);		
+						
+			strcpy(log, (char *) "VOLTAGE DROP RATE: "); 
+			longToDecimalString((long)voltageDropRateStatic, log+strlen(log), 3);
+			strcat(log, (char *) "/"); 
+			longToDecimalString((long)voltageDropRateTrans, log+strlen(log), 3);
+			logString(log,BUFFER, LOG_ALWAYS);
+					
+			if (isPlaying) {
+				if (vCur_1 < 220) 
+					tripRate = 75;
+				else 
+					tripRate = 200;
+			} else {
+				if (vCur_1 < 220) 
+					tripRate = 20;
+				else 
+					tripRate = 75;
+			}
+						
+			if (voltageDropRateStatic >= tripRate) { 
+				forceflushLog();  // to ensure the log msg below is not beyond buffer
+				logString("Static voltage dropping fast" , BUFFER, LOG_ALWAYS);
+				fastShutdown();
+			} else if (voltageDropRateStatic >= tripRate * 0.8) {
+				adjustVolume(-1,TRUE,FALSE);  // getting too close; lower volume
+				playBip();
+			} else			
+				set_voltmaxvolume(FALSE);				
+		}		
+		tCur_1 = currentTimeInSec;
+	}
+	return v;
 }
 
 int keyCheck(int longCheck) {
@@ -486,13 +542,23 @@ int waitForButton(int targetedButton) {
 
 void wait(int t) { //t=time in msec
 	unsigned int i;
-	unsigned long j;
+	unsigned long j, k;
 	unsigned long int cyclesPerMilliSecond = (long)(*P_PLLN & 0x3f) * 1000L;  // 96000 at 96MHz	
 	const unsigned int cyclesPerNOP = 70; // cycles for each no-operation instruction
-	const unsigned int NOPsPerMilliSecond = cyclesPerMilliSecond / cyclesPerNOP; // loop count per millisecond
+	const unsigned int cyclesPerVoltCheck = cyclesPerNOP * 300; // cycles for each no-operation instruction
+//	const unsigned int NOPsPerMilliSecond = cyclesPerMilliSecond / cyclesPerNOP; // loop count per millisecond
+	const unsigned int VChecksPerMilliSecond = cyclesPerMilliSecond / cyclesPerVoltCheck; // loop count per millisecond
 	for (i = 0; i < t; i++) 
-		for (j = 0; j < NOPsPerMilliSecond; j++)  
-			asm("nop\n");  // a CPU no-op instruction to pass the time
+		for (j = 0; j < VChecksPerMilliSecond; j++) {
+//			asm("nop\n");  // a CPU no-op instruction to pass the time
+			if (!shuttingDown) {
+				checkVoltage();
+			} else {  // shutting down - don't check voltage - instead use NOPs
+				for (k=0; k< (cyclesPerVoltCheck/cyclesPerNOP);k++) {
+					asm("nop\n");		 				
+				}
+			}
+		} 
 }
 
 
@@ -518,10 +584,12 @@ int waitAndCheckKeys(int t) { //t=time in msec
 void resetSystem(void) {
 	// set watchdog timer to reset device; 0x780A (Watchdog Reset Control Register)
 	// see GPL Programmer's Manual (V1.0 Dec 20,2006), Section 3.5, page 18
+	checkVoltage();  // USB may have been supplying sole power -- need to check if voltage dropping fast
 	stop(); 
 	if (PLEASE_WAIT_IDX && context.package) {  // prevents trying to insert this sound before config & control files are loaded.
 		insertSound(&pkgSystem.files[PLEASE_WAIT_IDX],NULL,TRUE); 
 	}
+	checkVoltage();  // USB may have been supplying sole power -- need to check if voltage dropping fast
 	playBip();
 	setLED(LED_ALL,FALSE);  
 	logString((char *)"* RESET *",ASAP,LOG_ALWAYS);
@@ -563,9 +631,56 @@ static void logKeystroke(int intKey) {
 	}
 }
 
+void housekeeping() {
+		// give visual feedback of shutting down (aural feedback when user causes shutdown in takeAction())
+	turnAmpOff();
+	setLED(LED_ALL,TRUE);
+	buildMyStatsCSV();
+	buildExchgOstats();
+	clearDeleteQueue();
+	write_config_bin();  // build a config.bin
+	writeVersionToDisk(SYSTEM_PATH);  // make sure the version file is correct
+	checkDoubleSRNprefix(); // this can be removed once the dup serial number prefixes are fixed
+	confirmSNonDisk(); // make sure the serial number file is correct 
+	saveLogFile(0);	
+}
+		
+
+void fastShutdown() {
+	if (shuttingDown)
+		return;
+	setLED(LED_ALL,TRUE);
+	turnAmpOff();
+	shuttingDown = 1;
+	logString("SHUTTING DOWN" , BUFFER, LOG_ALWAYS);
+	forceflushLog();
+	//saveLogFile(0);	
+	//write_config_bin();  // build a config.bin
+	shutdown();
+	SysIntoHaltMode();
+	while(1);	
+}
+		
+void shutdown() {
+	*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt		
+	disk_safe_exit(0);
+// try to get the sd card in a safe state - reverse what we do on startup		
+	_deviceunmount(0);
+	fs_uninit();
+	SD_Uninitial();		
+	turnSDoff();
+	setLED(LED_ALL,FALSE);
+	setLED(LED_RED,TRUE);
+	wait(150);
+	setLED(LED_RED,FALSE);
+	setLED(LED_GREEN,TRUE);
+	wait(50);
+	setLED(LED_ALL,FALSE);
+	turnNORoff();
+}
+
 void setOperationalMode(int newmode) {
 	extern void buildMyStatsCSV();
-	extern void saveLogFile(int);
 	
   if(newmode == (int)P_WAIT) {
   	// stop();  --- should we see if we can WAIT while paused in an audio file?
@@ -573,70 +688,23 @@ void setOperationalMode(int newmode) {
     // when leaving wait mode, next instruction is executed, so we return here
     return;
   } else {
-		// give visual feedback of shutting down (aural feedback when user causes shutdown in takeAction())
- 		setLED(LED_ALL,TRUE);
-  		buildMyStatsCSV();
-		buildExchgOstats();
- 		clearDeleteQueue();
-  		write_config_bin();  // build a config.bin
-		writeVersionToDisk(SYSTEM_PATH);  // make sure the version file is correct
-		checkDoubleSRNprefix(); // this can be removed once the dup serial number prefixes are fixed
-  		confirmSNonDisk(); // make sure the serial number file is correct 
     	// assume calling for sleep or halt
-		*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
 		if (newmode == (int)P_HALT)
 			logString((char *)"Halting",BUFFER,LOG_NORMAL);
 		else // newmode == (int)P_SLEEP
 			logString((char *)"Sleeping",BUFFER,LOG_NORMAL);			
-		
-		saveLogFile(0);	
-		
-	  	Snd_Stop();    // no logging
-		setLED(LED_ALL,FALSE);
-	
-		turnAmpOff();
-
-		disk_safe_exit(0);
-// try to get the sd card in a safe state - reversw what we do on startup		
-		_deviceunmount(0);
-		fs_uninit();
-		SD_Uninitial();		
-
-		turnSDoff();
-		turnNORoff();
-	  	
+		housekeeping();
+		shutdown();		
 	  	if (newmode == (int)P_HALT)  {
-/*
-	  		setRTCalarmSeconds(61);		// device should come back on in 61 seconds
-*/
 		  	SysIntoHaltMode();
 	  	}
 		else { // newmode == (int)P_SLEEP
-			disk_safe_exit(0);
-
 			_SystemOnOff();
 		}
-	
 		while(1);	
 	    // cpu reset on exiting halt/sleep mode, so nothing below here executes
      }
 }
-
-/*
-void
-Log_ClockCtrl() {
-	char buffer[80];
- 	unsigned int r1 = (unsigned int)*P_Clock_Ctrl;
- 	strcpy(buffer, "P_Clock_Ctrl = 0x");
-	longToHexString((long)r1,buffer+strlen(buffer),1);
-	logString(buffer,ASAP);
-	
- 	strcpy(buffer, "P_IOB_Buffer = 0x");
- 	r1 = *P_IOB_Buffer;
-	longToHexString((long)r1,buffer+strlen(buffer),1);
-	logString(buffer,ASAP);
-}
-*/
 
 int logLongHex(unsigned long data) {
 	char strHex[7];
@@ -660,55 +728,68 @@ refuse_lowvoltage(int die)
 		LED_RED = DEFAULT_LED_RED;
 		LED_ALL = LED_GREEN | LED_RED;
 	} else {	
-		playBip();
-		playBip();
+		playBips(2);
 	}
-	if(die != 0) {
-		setLED(LED_ALL, FALSE);
-		wait(500);
+	if(die) {
+		setLED(LED_GREEN, FALSE);
 		setLED(LED_RED, TRUE);
-		wait(500);
+		wait(200);
 		setLED(LED_RED, FALSE);
-		wait(500);
+		wait(200);
 		setLED(LED_RED, TRUE);
-		wait(500);
-		setLED(LED_RED, FALSE);
-		setOperationalMode((int)P_SLEEP);
+		wait(200);
+		fastShutdown();
 	}
 }
 
-void
+int
 set_voltmaxvolume(BOOL forceLower)
 {
-	int wrk = V_MIN_VOL_VOLTAGE - vCur_1;
+	const int MAX_ALLOWED_VOLUME = 12;
+	const int MAX_ALLOWED_VOLUME_MIN_VOLTAGE = 320;
+	const int MAX_MODERATE_VOLUME = 4;
+	const int MAX_MODERATE_VOLUME_MIN_VOLTAGE = 240;
+	const int MIN_VOLUME_VOLTAGE = 190;
+	const int HIGH_VOLUME_VOLT_PER_VOLUME = (MAX_ALLOWED_VOLUME_MIN_VOLTAGE - MAX_MODERATE_VOLUME_MIN_VOLTAGE) / (MAX_ALLOWED_VOLUME - MAX_MODERATE_VOLUME);
+	const int LOW_VOLUME_VOLT_PER_VOLUME = (MAX_MODERATE_VOLUME_MIN_VOLTAGE - MIN_VOLUME_VOLTAGE) / (MAX_MODERATE_VOLUME - 1);
 	
-	if (wrk <= 0 || forceLower) {
+	int maxVol, ret = 0;
+	
+	if (vCur_1 == V_EXTERNAL_VOLTAGE || (vCur_1 >= MAX_ALLOWED_VOLUME_MIN_VOLTAGE))
+		return ret;
+	if (vCur_1 <= MIN_VOLUME_VOLTAGE)
+		maxVol = 1;
+	else if (vCur_1 >= MAX_MODERATE_VOLUME_MIN_VOLTAGE)
+		maxVol = MAX_MODERATE_VOLUME + (vCur_1 - MAX_MODERATE_VOLUME_MIN_VOLTAGE)/HIGH_VOLUME_VOLT_PER_VOLUME;
+	else
+		maxVol = 1 + (vCur_1 - MIN_VOLUME_VOLTAGE)/LOW_VOLUME_VOLT_PER_VOLUME;
+	
+	if (maxVol < volumeMaxThisCycle || forceLower) {
 		if (forceLower)
-			wrk = MAX_VOLUME - 1;			
-		else {
-			wrk >>= 3;
-			// for every .08 volt below V_MIN_VOL_VOLTAGE subtract 1 from MAX_VOLUME
-			wrk = 16 - wrk;
-		}
-		if(wrk < 1) wrk = 1;
-		if(wrk < MAX_VOLUME) {
-			MAX_VOLUME = wrk;
-			if (volume > MAX_VOLUME) {
-				volume = MAX_VOLUME;
+			maxVol = volumeMaxThisCycle - 1;			
+		if(maxVol < 1) maxVol = 1;
+		if(maxVol < volumeMaxThisCycle) {
+			volumeMaxThisCycle = maxVol;
+			if (volume > volumeMaxThisCycle) {
+				volume = volumeMaxThisCycle;
 				SACM_Volume(volume);
-				playBip();	
+				setLED(LED_RED,TRUE);
+				playBip();
+				setLED(LED_RED,FALSE);
+				ret = -1;	
 			}
 			if (TRUE) { // logging voltage for all devices in the field (DEBUG_MODE) {
 				char log[15] = "v---,MV--,CV--";
 				longToDecimalString(vCur_1, log+1, 3);
 				log[4] = ',';
-				longToDecimalString((long)MAX_VOLUME,log+7,2);
+				longToDecimalString((long)volumeMaxThisCycle,log+7,2);
 				log[9] = ',';
 				longToDecimalString((long)volume,log+11,2);
 				logString(log,BUFFER,LOG_NORMAL);
 			}		
 		}
 	}
+	return ret; // -1 indicates that current volume had to be lowered, due to lower max
 }
 
 void
@@ -754,12 +835,15 @@ SNexists(void) {
 
 char *
 getDeviceSN(int includePrefix) {
+	char *ret;
+	
 	if (strncmp(CONST_TB_SERIAL_PREFIX,P_TB_SERIAL_PREFIX,strlen(CONST_TB_SERIAL_PREFIX)))
-		return (char *)0;
-	if (includePrefix)
-		return P_TB_SERIAL_PREFIX;
+		ret = NO_SRN;
+	else if (includePrefix)
+		ret = P_TB_SERIAL_PREFIX;
 	else
-		return P_TB_SERIAL_NUMBER;	
+		ret = P_TB_SERIAL_NUMBER;	
+	return ret;
 }
 
 void writeVersionToDisk(char *path) {
@@ -1079,6 +1163,8 @@ extern void confirmSNonDisk(void) {
 	char sysPath[PATH_LENGTH];	
 	struct f_info file_info;
 	
+	if (!SNexists())
+		return; // no serial number - don't write to disk
 	if (SYSTEM_PATH)
 		strcpy(sysPath,SYSTEM_PATH);
 	else 

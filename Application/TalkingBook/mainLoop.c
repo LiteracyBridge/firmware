@@ -482,9 +482,12 @@ extern void checkInactivity(BOOL resetTimer) {
 			usbret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_ONCE);
 		}
 		if (!usbret) { //USB connection was made
-			SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
-			lastActivity = currentTime; //	count being in usb as active
-			processInbox();
+			fastShutdown();
+//			checkVoltage();  // USB may have been supplying sole power -- need to check if voltage dropping fast
+//			SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
+//			lastActivity = currentTime; //	count being in usb as active
+//			processInbox();
+//			checkVoltage();  // USB may have been supplying sole power -- need to check if voltage dropping fast
 		} 
 	}
 }
@@ -517,7 +520,7 @@ void mainLoop (void) {
 	APP_IRAM static unsigned long lastActivity;
 	void processAlarm();
 	unsigned int compressedTime;
-	unsigned int getCurVoltageSample();
+	unsigned int checkVoltage();
 	CtnrBlock *insertBlock;
 	ListItem *list;
 	TranslationList *transList;
@@ -592,9 +595,8 @@ void mainLoop (void) {
 				insertSound(&pkgSystem.files[POST_PLAY_FILE_IDX],NULL,FALSE); 					
 			}	
 		}
+		checkVoltage();
 		if (++inactivityCheckCounter > 10) {
-			while(getCurVoltageSample() == 0xffff);
-			set_voltmaxvolume(FALSE);
 			checkInactivity(!context.isStopped && !context.isPaused);
 			inactivityCheckCounter = 0;
 		}
@@ -868,7 +870,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 	char filename[PATH_LENGTH],filepath[PATH_LENGTH],tempPath[PATH_LENGTH];
 	char *cursor, *cursor2;
 	CtnrFile *replayFile;
-	char tempBuffer[30];
+	char tempBuffer[100];
 		
 	replayFile = NULL;
 	list = NULL;
@@ -1086,9 +1088,6 @@ static void takeAction (Action *action, EnumAction actionCode) {
 		case JUMP_LIST:
 			stop();
 			markEndPlay(getRTCinSeconds());
-			//strcpy(tempBuffer,"Diag-destination");
-			//longToDecimalString((long)destination,tempBuffer+strlen(tempBuffer),2);
-			//logException(99,tempBuffer,(context.package == &pkgSystem)?USB_MODE:RESET); 
 			if (destination == MAX_LISTS)
 				transList = &context.package->transList;
 			else {
@@ -1549,13 +1548,26 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 
 		case VOLUME_UP:
-			logString((char *)"Louder",BUFFER,LOG_ALWAYS);
-			adjustVolume(VOLUME_INCREMENT,TRUE,FALSE);
+			ret = adjustVolume(VOLUME_INCREMENT,TRUE,FALSE);
+			tempInt = getVolume();
+			if (ret == -1)
+				strcpy(tempBuffer,"Attempt Louder:Vol=");
+			else
+				strcpy(tempBuffer,"Louder:Vol=");
+			longToDecimalString((long)tempInt,tempBuffer+strlen(tempBuffer),2);
+			strcat(tempBuffer," Volt=");
+			longToDecimalString((long)vCur_1,tempBuffer+strlen(tempBuffer),3);
+			logString(tempBuffer,BUFFER,LOG_ALWAYS);
 			break;
 
 		case VOLUME_DOWN:
-			logString((char *)"Quieter",BUFFER,LOG_ALWAYS);
 			adjustVolume(-VOLUME_INCREMENT,TRUE,FALSE);
+			tempInt = getVolume();
+			strcpy(tempBuffer,"Quieter:Vol=");
+			longToDecimalString((long)tempInt,tempBuffer+strlen(tempBuffer),2);
+			strcat(tempBuffer," Volt=");
+			longToDecimalString((long)vCur_1,tempBuffer+strlen(tempBuffer),3);
+			logString(tempBuffer,BUFFER,LOG_ALWAYS);
 			break;
 
 		case VOLUME_NORMAL:
@@ -1945,8 +1957,10 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			insertSound(getFileFromBlock(soundInsertBlock),soundInsertBlock,TRUE);
 		}
 		else {
-			soundInsertBlock = &context.package->blocks[getSoundInsertIdxFromAux(aux)];
-			insertSound(getFileFromBlock(soundInsertBlock),soundInsertBlock,FALSE);
+			if (!(actionCode == VOLUME_UP && ret == -1)) {  // don't play volume sound if prevented from increasing volume
+				soundInsertBlock = &context.package->blocks[getSoundInsertIdxFromAux(aux)];
+				insertSound(getFileFromBlock(soundInsertBlock),soundInsertBlock,FALSE);
+			}
 		}
 	}
 	// process start block action if landing on the start of a new block

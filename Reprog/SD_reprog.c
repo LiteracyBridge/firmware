@@ -312,6 +312,7 @@ void startUpdate(char *filenameUpdate) {
 
 	if(FL.fileHandle < 0)
 			return;	// no system update image in folder, return
+	checkVoltage();
 	playBips(2);
 	setLED(LED_RED,TRUE);
 	

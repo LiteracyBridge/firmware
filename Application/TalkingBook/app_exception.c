@@ -15,9 +15,19 @@ extern int SystemIntoUDisk(unsigned int);
 
 void logException(unsigned int errorCode, const char * pStrError, int takeAction) {
 	// errorcode == 1 means memory error from BodyInit() and ucBSInit()
-	int i; 
+	int i, ret; 
 	char errorString[160];
 	char filePath[PATH_LENGTH];
+	static int logExceptionStack = 0;
+
+	// prevent infinite recursion of log calling open calling log...	
+	if (logExceptionStack++) {
+		 if (logExceptionStack == 2) {
+		 	logExceptionStack = 1;
+		 	return;
+		 }
+	}
+		 
 	
 	if(vCur_1 < V_MIN_SDWRITE_VOLTAGE) {
 	}
@@ -42,10 +52,10 @@ void logException(unsigned int errorCode, const char * pStrError, int takeAction
 			}
 		}
 		else {
-			appendStringToFile(ERROR_LOG_FILE,errorString);	
-			if (pStrError) {
+			ret = appendStringToFile(ERROR_LOG_FILE,errorString);	
+			if (ret != -1 && pStrError) {
 				LBstrncpy(errorString,pStrError,80);
-				appendStringToFile(ERROR_LOG_FILE,errorString);
+				ret = appendStringToFile(ERROR_LOG_FILE,errorString);
 			}
 		}
 	}		
@@ -82,5 +92,7 @@ void logException(unsigned int errorCode, const char * pStrError, int takeAction
 		else if (takeAction ==  SHUT_DOWN)
 			setOperationalMode((int)P_SLEEP);
 	}
+	if (logExceptionStack)
+		logExceptionStack = 0;
 }
 

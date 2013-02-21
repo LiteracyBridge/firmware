@@ -7,7 +7,7 @@
 #include ".\Component\Include\FS\vfs.h"
 #include "./Application/TalkingBook/Include/lists.h"
 
-#define LOG_BUFFER_SIZE		512
+#define LOG_BUFFER_SIZE		1024
 #define COPY_BUFFER_SIZE    1024
 #define ASAP				0
 #define BUFFER				1
@@ -73,4 +73,6 @@ extern void logStat(char *);
 extern int isCorrupted(char *);
 extern int replaceFromBackup(char *);
 extern void triggerInspection(void);
+extern void saveLogFile(int);
+extern int setLocation(char *); 
 #endif

@@ -37,7 +37,7 @@ void saveSystemCounts() {
 		if (ret)
 			logString((char *)"failed unlink of system var file",BUFFER,LOG_ALWAYS);
 		close(handle);
-		logException(17,SYSTEM_VARIABLE_FILE,RESET); //can't save SYSTEM_VARIABLE_FILE;
+		logException(17,SYSTEM_VARIABLE_FILE,SHUT_DOWN); //can't save SYSTEM_VARIABLE_FILE;
 	}
 	close(handle);
 }
@@ -94,13 +94,15 @@ int loadSystemCounts() {
 		fixBadDate(&systemCounts);
 	}		
 	else {
+		logString((char *)"***CAN'T LOAD SYSTEM COUNTS***",BUFFER,LOG_NORMAL);
 		ret = -1;
-		systemCounts.location[0] = 0;
 		systemCounts.powerUpNumber = 0;
 		systemCounts.poweredDays = 0;
 		systemCounts.year = FILE_YEAR_MIN;
 		systemCounts.month = 1;
 		systemCounts.monthday = 1;
+		systemCounts.location[0] = 0;
+		setLocation(systemCounts.location);
 	}
 	close(handle);
 	return ret;

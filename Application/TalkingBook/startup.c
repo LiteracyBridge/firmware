@@ -25,7 +25,12 @@ extern unsigned int SetSystemClockRate(unsigned int);
 extern int SystemIntoUDisk(unsigned int);
 extern INT16 SD_Initial(void);
 
-static int setLocation(char *);
+extern APP_IRAM int vThresh_1;
+extern APP_IRAM unsigned int vCur_1;
+extern APP_IRAM unsigned long tCur_1;
+extern APP_IRAM int shuttingDown;
+extern APP_IRAM int volumeMaxThisCycle;
+
 static int checkRTCFile(char *);	
 static char * addTextToSystemHeap (char *);
 static int loadConfigFile (void);
@@ -70,14 +75,14 @@ APP_IRAM unsigned int V_FAST_VOLTAGE_DROP_TIME_SEC, V_VOLTAGE_DROP_CHECK_INTERVA
 
 //if most recent 16 voltage readings are below vCur_1 (vThresh_1 == 0xffff),
 //   subtract 1 from vCur_1 and zero vThreah_1
-APP_IRAM unsigned int vCur_1;
-APP_IRAM int vThresh_1;
 APP_IRAM unsigned int MEM_TYPE;   // sst or mx
 
 void setDefaults(void) {
 	// This function sets variables that are usually set in config file, 
 	// but they need defaults in case config file doesn't list them or isn't loaded yet
-		
+
+	shuttingDown = 0;
+			
 	if(MEM_TYPE == MX_MID) {
 		// BELOW ARE THE GOOD KEY CODES FOR SCH 3.1+
 		KEY_DOWN   = V1_DEFAULT_KEY_DOWN;
@@ -108,7 +113,7 @@ void setDefaults(void) {
 	LED_RED          = DEFAULT_LED_RED;
 	MAX_SPEED        = DEFAULT_MAX_SPEED;
 	NORMAL_SPEED     = DEFAULT_NORMAL_SPEED;
-	MAX_VOLUME       = DEFAULT_MAX_VOLUME;
+	volumeMaxThisCycle = MAX_VOLUME       = DEFAULT_MAX_VOLUME;
 	MIN_VOLUME		 = DEFAULT_MIN_VOLUME;
 	NORMAL_VOLUME    = DEFAULT_NORMAL_VOLUME;
 	SPEED_INCREMENT  = DEFAULT_SPEED_INCREMENT;
@@ -170,6 +175,8 @@ void setDefaults(void) {
 	ADMIN_COMBO_KEYS   = KEY_UP | KEY_DOWN;
 	LOG_FILE = (char *)DEFAULT_LOG_FILE; // chicken & egg - we haven't read config.txt or config.bin to set LOG_FILE
 	SYSTEM_VARIABLE_FILE = (char *)DEFAULT_SYSTEM_VARIABLE_FILE;
+
+	set_voltmaxvolume(FALSE);
 }
 
 static int checkRTCFile(char *time) {	
@@ -183,24 +190,6 @@ static int checkRTCFile(char *time) {
 		cp = strrchr(time,'.');
 		*cp = 0;
 		unlink((LPSTR)file_info.f_name);	
-	} 
-	return ret;
-}
-
-static int setLocation(char *location) {
-	char *cp;
-	int ret;
-	struct f_info file_info;
-	char newPath[PATH_LENGTH];
-		
-	ret =_findfirst((LPSTR)LOCATION_FILE_PATTERN, &file_info, D_FILE);
-	if (ret >=0) {
-		strcpy(location,file_info.f_name);
-		cp = strrchr(location,'.');
-		*cp = 0;
-		strcpy(newPath,DEFAULT_SYSTEM_PATH);
-		strcat(newPath,file_info.f_name);
-		rename((LPSTR)file_info.f_name,(LPSTR)newPath);	
 	} 
 	return ret;
 }
@@ -282,43 +271,47 @@ void startUp(unsigned int bootType) {
 	int configExists = 0, normal_shutdown=1;
 	int inspect = 0, firmwareWasUpdated = 0;
 
+	checkVoltage();
 	setLED(LED_ALL,TRUE);  // start lights to indicate user should wait during startup until the device is ready
 	// set temporary valid date for file ops (like logging) until system variables are read 
 	systemCounts.month = 1;
 	systemCounts.monthday = 1;
 	systemCounts.year = FILE_YEAR_MIN;
-	//confirming SN is important to address corruption removing the SN file and then stats are unclear
-	confirmSNonDisk();
 	// Before any trouble is caused, allow forcing USB mode.		
 	key = keyCheck(1);  // long keycheck 
 	key &= ~LONG_KEY_STROKE;
-	if (key == KEY_STAR || key == KEY_MINUS) {
+	if ((key & KEY_STAR) == KEY_STAR || (key & KEY_MINUS) == KEY_MINUS) {
 		SystemIntoUDisk(1);	
-		callProcessInbox = 1;
+		fastShutdown();
+//		callProcessInbox = 1;
 	} else if (key == KEY_PLUS)
 		callPushPull = 1;  // call pushContentGetFeedback() at end up this fct.
+
+	//confirming SN is important to address corruption removing the SN file and then stats are unclear
+	checkVoltage();  
+	confirmSNonDisk();
 
 	if ((bootType == BOOT_TYPE_COLD_RESET) || fileExists((LPSTR)SELF_INSPECT_TRIGGER_FILE))
 		inspect = 1;  // used to check for .loc file and other changes that don't normally occur
 
+	checkVoltage();  
 	ret = loadSystemCounts();  // calling this before config means we rely on the default location for system-vars
 	systemCounts.powerUpNumber++; 
 	if (inspect)
 		firmwareWasUpdated = fileExists((LPSTR)FIRMWARE_UPDATE_NOTIF_FILE);
 	if (ret == -1 || inspect)
 		setLocation(systemCounts.location);
+	checkVoltage();  
 	saveSystemCounts();	
 
 	strcpy(buffer,"\x0d\x0a" "---------------------------------------------------\x0d\x0a" "Serial#:");		
 	strcat(buffer,getDeviceSN(0));
 	strcat(buffer,"\x0d\x0a" "Clock:");
 	getRTC(buffer+strlen(buffer));
+	checkVoltage();
 	logStringRTCOptional(buffer, ASAP, LOG_ALWAYS,0);  // calling this before config means we rely on default location
 		
 	if(bootType == BOOT_TYPE_COLD_RESET) {
-		extern unsigned long rtcAlarm[];
-		extern unsigned long curAlarmSet;    
-		extern unsigned long rtc_fired;
 		int wasReset = 0;
 		int hasCorruption = 0;
 
@@ -335,6 +328,7 @@ void startUp(unsigned int bootType) {
 			setRTC(0,1,0);  //  no idea what time it is so reset to 1 min past midnight to avoid the midnight alarm
 			systemCounts.year++;	
 			systemCounts.poweredDays = 0;
+			checkVoltage();  
 			saveSystemCounts();	
 			strcpy(buffer,"BOOT_TYPE_COLD_RESET -- NEW BATTERIES???");
 			logStringRTCOptional(buffer, ASAP, LOG_ALWAYS,0);
@@ -369,6 +363,7 @@ void startUp(unsigned int bootType) {
 			hasCorruption = 1;
 			//replaceFromBackup("a:/messages");
 		}
+		checkVoltage();  
 		forceflushLog();
 		if (hasCorruption)
 			playBips(3);
@@ -377,7 +372,7 @@ void startUp(unsigned int bootType) {
 		if (!wasReset) { // don't halt if reset for firmware reflashing or if an error caused a reset
 			logStringRTCOptional((char *)"Halting after cold start",ASAP,LOG_NORMAL,0);
 			setLED(LED_ALL,FALSE);  
-			//setOperationalMode((int)P_SLEEP);  //DEVICE-90 - does too much fs activity
+			//setOperationalMode((int)P_HALT);  //DEVICE-90 - does too much fs activity
 			*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt
 			turnAmpOff();
 			
@@ -395,7 +390,9 @@ void startUp(unsigned int bootType) {
 #endif
 	}
 
+	checkVoltage();  
 	playDing();  // it is important to play a sound immediately to stop user from wondering if power is on
+	checkVoltage();  
 
 // for really low batteries the playDing() below will cause a low voltage reset
 // handling that will go into Halt mode above
@@ -426,6 +423,7 @@ void startUp(unsigned int bootType) {
 	}
 
 // try to load a saved config.bin if present
+	checkVoltage();  
 	configExists = (restore_config_bin() == -1?0:1);
 	
 	if(!configExists) {
@@ -444,6 +442,7 @@ void startUp(unsigned int bootType) {
 			
 	// if inspect file was present, check for new firmware, but don't flash if voltage is low
 	// Any .img file in the root will be found if inspect is set, but system.img can be found without needing the inspect file
+	checkVoltage();  
 	if((inspect || fileExists((LPSTR)"a:/system.img") )&& V_MIN_SDWRITE_VOLTAGE <= vCur_1) {
 		inspect = 1;  
 		updateSN(UPDATE_FP);
@@ -467,6 +466,7 @@ void startUp(unsigned int bootType) {
 	}
 	
 	if (inspect) {
+		checkVoltage();  
 		ret = checkRTCFile(buffer);
 		if (ret >= 0) {
 			setRTCFromText(buffer);
@@ -513,7 +513,11 @@ void startUp(unsigned int bootType) {
 	} else {
 		strcat(buffer,(char *)"\x0d\x0a" "Apparently ABNORMAL shutdown (no or corrupt config.bin)");
 	}
+	checkVoltage();  
 	logStringRTCOptional(buffer,BUFFER,LOG_ALWAYS,0);
+	strcpy(buffer,"Init volt:");
+	longToDecimalString(vCur_1,buffer+strlen(buffer),3);
+	logString(buffer,BUFFER,LOG_NORMAL);	
 		
 	unlink ((LPSTR) (STAT_DIR SNCSV));
 	strcpy(buffer,getDeviceSN(1));
@@ -524,6 +528,7 @@ void startUp(unsigned int bootType) {
 	{
 		int ret, bytesToWrite;
 		char line[80];
+		checkVoltage();  
 		ret = tbOpen((LPSTR)(STAT_DIR SNCSV), O_RDWR|O_CREAT);
 		if (ret >= 0) {
 			bytesToWrite = convertDoubleToSingleChar(line,buffer,TRUE);
@@ -535,9 +540,12 @@ void startUp(unsigned int bootType) {
 	initializeProfiles(); 
 	if (inspect)
 		unlink((LPSTR)SELF_INSPECT_TRIGGER_FILE);	
-	if (inspect || callProcessInbox)
+	if (inspect || callProcessInbox) {
+		checkVoltage();  
 		processInbox();
+	}
 	if (callPushPull) { // copy outbox files to connecting device, get stats and audio feedback
+		checkVoltage();  
 		pushContentGetFeedback();
 		resetSystem();  //TODO:not sure this is still necessary 
 	}
@@ -550,10 +558,12 @@ void startUp(unsigned int bootType) {
 		loadMacro();
 	adjustVolume(NORMAL_VOLUME,FALSE,FALSE);
 	adjustSpeed(NORMAL_SPEED,FALSE);
+	checkVoltage();  
 	loadPackage(PKG_SYS,currentProfileLanguage());
 	logString("call mainLoop",BUFFER,LOG_DETAIL);
 	SetSystemClockRate(CLOCK_RATE); // either set in config file or the default 48 MHz set at beginning of startUp()
 	checkInactivity(TRUE); //reset the inactivity timer
+	checkVoltage();  
 	mainLoop();
 }
 static char * addTextToSystemHeap (char *line) {
@@ -727,6 +737,7 @@ int loadConfigFile(void) {
 		logString((char *)"CONFIG_FILE NOT READ CORRECTLY",BUFFER,LOG_ALWAYS);	  //logException(14,0,USB_MODE); 		
 	}
 	close(handle);
+	set_voltmaxvolume(FALSE);
 	LED_ALL = LED_GREEN | LED_RED;
 	if (*(LOG_FILE+1) != ':')
 		LOG_FILE = 0; // should be == "a://....." otherwise, logging is turned off
@@ -736,41 +747,39 @@ int loadConfigFile(void) {
 void initVoltage()
 {
 	APP_IRAM static unsigned long timeInitialized = -1;
-	int i, j, k, sumv;
+	int i, j, sumv[64], v;
+	unsigned long sumvTotal = 0;
+	unsigned long lowVoltage;
 
 	// init battery voltage sensing	
 	*P_ADC_Setup |= 0x8000;  // enable ADBEN
 	*P_MADC_Ctrl &= ~0x05;  // clear CHSEL (channel select)
 	*P_MADC_Ctrl |=  0x02;  // select LINEIN1 
 	timeInitialized = 0;
+	lowVoltage = 0;
 
-	for(i=0, j=0, sumv=0; i<8; ) {	//establish startup voltage
-		int v;
-//		while((v = getCurVoltageSample()) == 0xffff)
-//			;
-		for(k=0; k<20; k++) {
+	for (j=0;j<64;j++) {
+		for(i=0,sumv[j]=0; i<8;i++ ) {	//establish startup voltage
 			v = getCurVoltageSample();
-			if(v != 0xffff)
-				break;
-			wait(20);
-		}
-		if(v == 0xffff)
-			v = 0;
-		
-		if(j++ >= 4) {
-			sumv += v;
-			i++;
-		}
+//			if (v < V_MIN_RUN_VOLTAGE)
+//				lowVoltage += 1<<((j*8)+i); //record which of 16 bits was low voltage
+			sumv[j] += v;
+		}	
+//		shuttingDown = 1;  // prevent wait() from calling voltage check function
+//		wait(200);
+//		shuttingDown = 0;
+		sumvTotal += sumv[j];
+		sumv[j] >>= 3; 
 	}
-	vCur_1 = sumv >> 3; // average 8 readings
+	vCur_1 = sumvTotal >> 9; // average 512 group readings
+	if(vCur_1 < V_MIN_RUN_VOLTAGE_STARTUP) { //((sumv[0] > sumv[1] && sumv[1] > sumv[2] && sumv[2] > sumv[3])) {
+		setLED(LED_ALL,TRUE);
+		shutdown();
+	}
 	vThresh_1 = 0;
-	
-	if((vCur_1 > V_MIN_POSSIBLE_VOLTAGE) && (vCur_1 < V_MIN_RUN_VOLTAGE)) {
-		refuse_lowvoltage(1);
-		// not reached
-	}
-	set_voltmaxvolume(FALSE);
+	tCur_1 = getRTCinSeconds();
 }
+
 unsigned int GetMemManufacturer()
 {
 	flash  FL = {0};

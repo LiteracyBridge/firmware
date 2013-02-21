@@ -359,6 +359,7 @@ void insertSound(CtnrFile *file, CtnrBlock *block, BOOL wait) {
 		play(context.file,block?block->startTime:0);
 		context.isPaused = FALSE;
 		while (SACM_Status() && !keystroke) {
+			checkVoltage();
 			if (block && lBlockEndPoint < Snd_A1800_GetCurrentTime()) {
 				stop();
 			 	break;
@@ -387,6 +388,7 @@ void insertSound(CtnrFile *file, CtnrBlock *block, BOOL wait) {
 		play(file,block?block->startTime:0);
 		context.isPaused = FALSE;
 		while (SACM_Status() && !keystroke) {
+			checkVoltage();
 			if (block && lBlockEndPoint < Snd_A1800_GetCurrentTime()) {
 				stop();
 			 	break;
@@ -426,7 +428,7 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 	long start, end, prev;
 	CtnrFile *file;
 	int key;
-	int low_voltage, v;
+	int low_voltage;
 	unsigned long wrk1;
 	char *cp, *cp1, category[9];
 	long metadata_start;
@@ -502,16 +504,16 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 		Snd_SACM_RecFAT(handle, C_CODEC_AUDIO1800, BIT_RATE);
 		low_voltage = 0;
 		do {
+			checkVoltage();
+			if(vCur_1 < V_MIN_SDWRITE_VOLTAGE) {
+				low_voltage = 1;
+			}
 			end = getRTCinSeconds();	
 			if (0==(end%2) && (prev != end)) { // blink LED every three seconds
 				prev = end;
 				setLED(LED_RED,FALSE);
 				wait (100);
 				setLED(LED_RED,TRUE);
-				while((v = getCurVoltageSample()) == 0xffff);
-				if(vCur_1 < V_MIN_SDWRITE_VOLTAGE) {
-					low_voltage = 1;
-				}
 			}
 			key = keyCheck(0);
 			if (key == KEY_PLAY) { // pause  TODO: this key press to pause shouldn't be hard coded
@@ -534,8 +536,6 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 //		}
 		SACM_Stop();		//Snd_Stop(); // no need to call stop() and flush the log
 		setLED(LED_RED,FALSE);
-		turnAmpOn();
-		playDing();
 		//lseek(handle, 6, SEEK_SET );			//Seek to the start of the file input
 		//write(handle,(LPSTR)header<<1,6);
  
@@ -543,8 +543,13 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
                
         close(handle);	// rhm:  I think its already closed, I can't write to it here
         
+		if (low_voltage == 0) {
+			turnAmpOn();
+			playDing();
+			// no need to advance the per-startup recording count if we are immediately shutting down now.
         systemCounts.recordingNumber++;  // bump global recording number
         saveSystemCounts();
+		}
         
        	handle = tbOpen((LPSTR)filepath,O_RDWR);
        	if (handle >= 0) {
@@ -738,6 +743,8 @@ void markEndPlay(long timeNow) {
 			longToDecimalString(SACM_A1800_Msec/1000,log+strlen(log),4);
 			strcat(log,"sec @VOL=");
 			longToDecimalString((long)getVolume(),log+strlen(log),2);
+			strcat(log," @Volt=");
+			longToDecimalString((long)vCur_1,log+strlen(log),3);
 			if (context.msgAtEnd)
 				strcat(log, "-Ended");
 			strcat(log,"\x0d\x0a");
@@ -760,6 +767,8 @@ void markStartPlay(long timeNow, const char * name) {
 		log[LOG_LENGTH-2] = '~';
 	strcat(log," @VOL=");
 	longToDecimalString((long)getVolume(),log+strlen(log),2);
+	strcat(log," @Volt=");
+	longToDecimalString((long)vCur_1,log+strlen(log),3);
 	logString(log,BUFFER,LOG_NORMAL);
 	strcpy(msgName,name);
 	msgNotPlayedSec = 0;	

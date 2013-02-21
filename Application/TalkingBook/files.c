@@ -6,12 +6,14 @@
 #include "Include/audio.h"
 #include "Include/files.h"
 #include "Include/filestats.h"
+#include "Include/startup.h"
 #include "Include/sys_counters.h"
 
 APP_IRAM static long filePosition;
 APP_IRAM char logBuffer[LOG_BUFFER_SIZE];
 APP_IRAM int idxLogBuffer;
 
+extern APP_IRAM int shuttingDown;
 extern APP_IRAM unsigned int vCur_1;
 extern void refuse_lowvoltage(int);
 static int copyfiles(char *, char *);
@@ -72,7 +74,8 @@ void logNumber(long l, int digits, int whenToWrite, int logPriority) {
 }
 
 extern void logStringRTCOptional(char *string, int whenToWrite, int logPriority, int shouldRTC) { 
-	int len, available;
+	#define AVAILABLE	(LOG_BUFFER_SIZE - idxLogBuffer - 3)
+	int len;
 	char newString[256];
 	
 	if (logPriority > DEBUG_MODE)
@@ -80,6 +83,7 @@ extern void logStringRTCOptional(char *string, int whenToWrite, int logPriority,
 	if (LOG_FILE) {
 		if (shouldRTC) {
 			getRTC(newString);
+			appendHiLoVoltage(newString);
 			strcat(newString,":");
 		}
 		else
@@ -91,20 +95,29 @@ extern void logStringRTCOptional(char *string, int whenToWrite, int logPriority,
 			logBuffer[idxLogBuffer++] = 0x0a;
 			logBuffer[idxLogBuffer] = '\0';			 
 		}
-		available = LOG_BUFFER_SIZE - idxLogBuffer - 1;	
 		len = strlen(newString);		
-		if ((available > 0) && (len > available)) {
-			memcpy(&logBuffer[idxLogBuffer],newString,available);
-			idxLogBuffer = LOG_BUFFER_SIZE;
-			logBuffer[LOG_BUFFER_SIZE - 1] = '\0';
-		} else if (available >= len) {
+		if (AVAILABLE >= len) {
 			strcpy(&logBuffer[idxLogBuffer],newString);
 			idxLogBuffer += len;
-			logBuffer[idxLogBuffer] = '\0';			 
+			logBuffer[idxLogBuffer] = '\0';
+			if (whenToWrite==ASAP)
+				flushLog(); // This will attempt to flush log (only if audio is not playing).  				
+		} else if (AVAILABLE > 0 && len > AVAILABLE) {
+			flushLog(); // This will attempt to flush log (only if audio is not playing).  If that works, more AVAILABLE will increase.
+			if ((AVAILABLE > 0) && (len > AVAILABLE)) {		// try again
+				memcpy(&logBuffer[idxLogBuffer],newString,AVAILABLE);
+				idxLogBuffer = LOG_BUFFER_SIZE;
+				logBuffer[LOG_BUFFER_SIZE - 2] = logBuffer[LOG_BUFFER_SIZE - 3] = logBuffer[LOG_BUFFER_SIZE - 4] = 'Z'; 
+				logBuffer[LOG_BUFFER_SIZE - 1] = '\0';
+			} else if (AVAILABLE >= len) {
+				strcpy(&logBuffer[idxLogBuffer],newString);
+				idxLogBuffer += len;
+				logBuffer[idxLogBuffer] = '\0';			 
+				if (whenToWrite==ASAP)
+					flushLog(); // This will attempt to flush log (only if audio is not playing).  				
 		}
-		if (whenToWrite==ASAP && !SACM_Status())
-			flushLog();
-		if (available < (LOG_BUFFER_SIZE - 72))
+		}			
+		if (AVAILABLE < 72)
 			flushLog();
 	}
 }
@@ -114,10 +127,12 @@ void logString(char *string, int whenToWrite, int logPriority) {
 }
 
 void flushLog(void) {
-
 	if (idxLogBuffer && LOG_FILE && !SACM_Status()) {	
 		appendStringToFile(LOG_FILE,logBuffer);	
 		idxLogBuffer = 0;
+	}
+	if (!LOG_FILE && !shuttingDown) {
+		fastShutdown();
 	}
 }
 void forceflushLog(void) {
@@ -130,15 +145,17 @@ void forceflushLog(void) {
 }
 void
 saveLogFile(int noteCorruption) {
-	char newlogname[128], *cp, strwrk[8];
+	char newlogname[128], strwrk[8];
 	int i;
 
 	extern SystemCounts systemCounts;
 	
+	if (!LOG_FILE)
+		return;
+	
 	mkdir((LPSTR)LOG_ARCHIVE_PATH);
 	
 	strcpy(newlogname, LOG_ARCHIVE_PATH);
-	cp = strrchr(LOG_FILE, '/') + 1;
 	longToDecimalString(systemCounts.powerUpNumber, strwrk, 4);
 	strcat(newlogname,(char *)"log_");
 	strcat(newlogname, getDeviceSN(0)); 
@@ -260,8 +277,14 @@ int appendStringToFile(const char * filename, char * strText) {
 
 	ret = -1;
 	handle = tbOpen((LPSTR)filename,O_RDWR);
-	if (handle == -1)
+	if (handle == -1) {
 		ret = insertStringInNewFile (filename,strText);
+		if (ret == -1 && LOG_FILE && (!strcmp((char *)filename,(char *)LOG_FILE))) {
+			// Log file cannot be created due to memory card corruption.
+			// Don't bother trying anymore.
+			LOG_FILE = 0;
+		}
+	}
 	else {
 		lseek(handle,0,SEEK_END);
 		ret = 0;
@@ -525,7 +548,7 @@ INT16 tbOpen(LPSTR path, INT16 open_flag) {
 	char dirPath[PATH_LENGTH];
 	char logMsg[PATH_LENGTH + 20];
 	char *ptr, *pPath;
-	static int openLogStack = 0;
+	APP_IRAM static int openLogStack = 0;
 
 	// prevent infinite recursion of log calling open calling log...	
 	if (!strcmp((char *)path,(char *)LOG_FILE)) {
@@ -548,7 +571,7 @@ INT16 tbOpen(LPSTR path, INT16 open_flag) {
 		wait(100);
 	}
 	if (handle == -1) {
-		if (strcmp((char *)path,LOG_FILE)) { // error didn't occur trying to open log file
+		if (strcmp((char *)path,LOG_FILE) && strcmp((char *)path,DEFAULT_LOG_FILE)) { // error didn't occur trying to open log file
 			strcpy(logMsg,(char *)"Cannot open ");
 			strcat(logMsg,(char *)path);
 			logString(logMsg,BUFFER,LOG_NORMAL);
@@ -567,7 +590,7 @@ INT16 tbOpen(LPSTR path, INT16 open_flag) {
 		if (ptr)
 			*ptr = 0;
 		if ((strlen(dirPath) > 2) && isCorrupted(dirPath)) {  // exclude root, "a:"
-			if (strcmp((char *)path,LOG_FILE)) { // error didn't occur trying to open log file
+			if (strcmp((char *)path,LOG_FILE) && strcmp((char *)path,DEFAULT_LOG_FILE)) { // error didn't occur trying to open log file
 				strcpy(logMsg,(char *)"CORRUPTED: ");
 				strcat(logMsg,dirPath);
 				if (ptr) {
@@ -1282,7 +1305,7 @@ expandOstatFile(char *filename) {
 				cp1 = strchr(strLog, ',');
 				if(cp1 == NULL)
 					break;
-				*cp1++;
+				cp1++;
 				diskver = strToLong(cp1);
 			} else {
 				diskver = -1;
@@ -1349,6 +1372,7 @@ replaceFromBackup(char *path)
 	char * wrkpath;
 	char msg[128];
 	
+	return -1;	
 	strcpy(msg,"Attempting replace ");
 	strcat(msg,path);
 	strcat(msg," from backup.");
@@ -1468,4 +1492,34 @@ triggerInspection(void) {
 	// create empty file on other device to tell it to inspect for updates
 	ret = tbOpen((LPSTR)OTHER_INSPECT_TRIGGER_FILE,O_CREAT|O_RDWR|O_TRUNC);
 	close(ret);
+}
+
+int setLocation(char *location) {
+	char *cp;
+	int ret;
+	struct f_info file_info;
+	char path[PATH_LENGTH];
+	
+	strcpy(path,(char *)"a:/");
+	strcat(path,LOCATION_FILE_PATTERN);	
+	ret =_findfirst((LPSTR)path, &file_info, D_FILE);
+	if (ret >=0) {
+		strcpy(location,file_info.f_name);
+		cp = strrchr(location,'.');
+		*cp = 0;
+		strcpy(path,DEFAULT_SYSTEM_PATH);
+		strcat(path,file_info.f_name);
+		rename((LPSTR)file_info.f_name,(LPSTR)path);	
+	} else {
+		// check if already stored in system path
+		strcpy(path,(char *)DEFAULT_SYSTEM_PATH);
+		strcat(path,LOCATION_FILE_PATTERN);		
+		ret =_findfirst((LPSTR)path, &file_info, D_FILE);
+		if (ret >=0) {
+			strcpy(location,file_info.f_name);
+			cp = strrchr(location,'.');
+			*cp = 0;
+		}
+	}
+	return ret;
 }
