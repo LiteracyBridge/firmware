@@ -556,6 +556,7 @@ void startUp(unsigned int bootType) {
 	*P_RTC_INT_Status |= ret;	// clear all interrupt flags
 	if (MACRO_FILE)	
 		loadMacro();
+	loadVolumeProfile();
 	adjustVolume(NORMAL_VOLUME,FALSE,FALSE);
 	adjustSpeed(NORMAL_SPEED,FALSE);
 	checkVoltage();  

@@ -1635,6 +1635,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 					break;
 				default:
 					if (context.isPaused) {
+						updateVolumeProfile(0,getRTCinSeconds()); 
 						context.isPaused = FALSE;
 						resume();	
 						logString((char *)"UNPAUSED",BUFFER,LOG_ALWAYS);
@@ -1652,6 +1653,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;
 			
 		case PAUSE:
+			updateVolumeProfile(0,getRTCinSeconds()); 
 			pause();
 			context.isPaused = TRUE;
 			logString((char *)"PAUSED",BUFFER,LOG_ALWAYS);
@@ -2005,8 +2007,7 @@ void loadPackage(int pkgType, const char * pkgName) {
 	// log start of new user package and duration of last package for user experience tracking
 	timeNow = getRTCinSeconds();
 	markEndPlay(timeNow);
-	if (pkgType != PKG_SYS)
-		markStartPlay(timeNow,pkgName);
+	markStartPlay(timeNow,pkgName);
 
 	context.lastFile = NULL;
 	context.queuedPackageType = PKG_NONE; //reset takeAction's JUMP_PACKAGE or JUMP_PACKAGE

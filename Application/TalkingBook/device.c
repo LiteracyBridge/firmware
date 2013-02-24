@@ -31,9 +31,6 @@ static void logKeystroke(int);
 static void turnSDoff(void);
 static void turnNORoff(void);
 
-APP_IRAM static int volume, speed;
-APP_IRAM static int oldVolume;
-APP_IRAM int volumeMaxThisCycle;
 APP_IRAM static unsigned int keydown_counter;
 APP_IRAM unsigned int vCur_1;
 APP_IRAM unsigned long tCur_1;
@@ -139,7 +136,7 @@ extern void appendHiLoVoltage(char *string) {
 
 extern void getRTC(char * str) {
 	unsigned long c,p,d,h,m,s;
-	char time[25];
+	char time[RTC_STRING_LENGTH];
 	
 	c = (unsigned long)systemCounts.powerUpNumber;
 	p = (unsigned long)CLOCK_PERIOD;  
@@ -213,84 +210,6 @@ void setLED(unsigned int color, BOOL on) {
 		LEDPort->nBuffer   |= color;
 	} else
 		LEDPort->nBuffer   &= ~color;  //LEDPort->nData   &= ~color;
-}
-
-int restoreVolume(BOOL normalVolume) {
-		
-	if (normalVolume)
-		adjustVolume(NORMAL_VOLUME,FALSE,FALSE);
-	else
-		adjustVolume(oldVolume,FALSE,FALSE);
-	return volume;
-}
-
-int adjustVolume (int amount, BOOL relative, BOOL rememberOldVolume) {
-	int ret;
-/*
-	APP_IRAM static long timeLastVolChg = 0;
-	long timeCurrent,diff;
-	char stringLog[30];
-	
-	timeCurrent = getRTCinSeconds();
-	diff = timeCurrent - timeLastVolChg;
-	timeLastVolChg = timeCurrent;
-	
-	strcat(stringLog,"V:");
-	longToDecimalString((long)volume,stringLog+3,5);
-	strcat(stringLog,",");
-	longToDecimalString(diff,stringLog+strlen(stringLog),5);
-	strcat(stringLog,"sec   ");
-	if (relative && amount > 0)
-		strcat(stringLog,"+");
-	else if (relative && amount < 0)
-		strcat(stringLog,"-");
-	logString(stringLog,BUFFER);
-*/		
-	if (rememberOldVolume)
-		oldVolume = volume;
-	
-	if (relative)
-		volume += amount;
-	else
-		volume = amount;
-	
-	ret = set_voltmaxvolume(FALSE);
-
-	if (volume > volumeMaxThisCycle) { 
-		volume = volumeMaxThisCycle;
-		setLED(LED_RED,TRUE);
-		playBip();
-		setLED(LED_RED,FALSE);
-		ret = -1;	
-	}
-	if (volume < MIN_VOLUME)  
-		volume = MIN_VOLUME;
-	SACM_Volume(volume);	
-	if (ret != -1)
-		ret = volume;
-	return ret;
-}
-
-int adjustSpeed (int amount, BOOL relative) {
-	if (relative)
-		speed += amount;
-	else
-		speed = amount;
-
-	if (speed > MAX_SPEED)  
-		speed = MAX_SPEED;
-	if (speed < 0)  
-		speed = 0;
-	SACM_Speed(speed);	
-	return speed;
-}
-
-int getVolume(void) {
-	return volume;
-}
-
-int getSpeed(void) {
-	return speed;
 }
 
 void setUSBDevice (BOOL set) {		
@@ -635,13 +554,14 @@ void housekeeping() {
 		// give visual feedback of shutting down (aural feedback when user causes shutdown in takeAction())
 	turnAmpOff();
 	setLED(LED_ALL,TRUE);
-	buildMyStatsCSV();
-	buildExchgOstats();
-	clearDeleteQueue();
+	saveVolumeProfile();
 	write_config_bin();  // build a config.bin
 	writeVersionToDisk(SYSTEM_PATH);  // make sure the version file is correct
 	checkDoubleSRNprefix(); // this can be removed once the dup serial number prefixes are fixed
 	confirmSNonDisk(); // make sure the serial number file is correct 
+	buildMyStatsCSV();
+	buildExchgOstats();
+	clearDeleteQueue();
 	saveLogFile(0);	
 }
 		
@@ -742,55 +662,6 @@ refuse_lowvoltage(int die)
 	}
 }
 
-int
-set_voltmaxvolume(BOOL forceLower)
-{
-	const int MAX_ALLOWED_VOLUME = 12;
-	const int MAX_ALLOWED_VOLUME_MIN_VOLTAGE = 320;
-	const int MAX_MODERATE_VOLUME = 4;
-	const int MAX_MODERATE_VOLUME_MIN_VOLTAGE = 240;
-	const int MIN_VOLUME_VOLTAGE = 190;
-	const int HIGH_VOLUME_VOLT_PER_VOLUME = (MAX_ALLOWED_VOLUME_MIN_VOLTAGE - MAX_MODERATE_VOLUME_MIN_VOLTAGE) / (MAX_ALLOWED_VOLUME - MAX_MODERATE_VOLUME);
-	const int LOW_VOLUME_VOLT_PER_VOLUME = (MAX_MODERATE_VOLUME_MIN_VOLTAGE - MIN_VOLUME_VOLTAGE) / (MAX_MODERATE_VOLUME - 1);
-	
-	int maxVol, ret = 0;
-	
-	if (vCur_1 == V_EXTERNAL_VOLTAGE || (vCur_1 >= MAX_ALLOWED_VOLUME_MIN_VOLTAGE))
-		return ret;
-	if (vCur_1 <= MIN_VOLUME_VOLTAGE)
-		maxVol = 1;
-	else if (vCur_1 >= MAX_MODERATE_VOLUME_MIN_VOLTAGE)
-		maxVol = MAX_MODERATE_VOLUME + (vCur_1 - MAX_MODERATE_VOLUME_MIN_VOLTAGE)/HIGH_VOLUME_VOLT_PER_VOLUME;
-	else
-		maxVol = 1 + (vCur_1 - MIN_VOLUME_VOLTAGE)/LOW_VOLUME_VOLT_PER_VOLUME;
-	
-	if (maxVol < volumeMaxThisCycle || forceLower) {
-		if (forceLower)
-			maxVol = volumeMaxThisCycle - 1;			
-		if(maxVol < 1) maxVol = 1;
-		if(maxVol < volumeMaxThisCycle) {
-			volumeMaxThisCycle = maxVol;
-			if (volume > volumeMaxThisCycle) {
-				volume = volumeMaxThisCycle;
-				SACM_Volume(volume);
-				setLED(LED_RED,TRUE);
-				playBip();
-				setLED(LED_RED,FALSE);
-				ret = -1;	
-			}
-			if (TRUE) { // logging voltage for all devices in the field (DEBUG_MODE) {
-				char log[15] = "v---,MV--,CV--";
-				longToDecimalString(vCur_1, log+1, 3);
-				log[4] = ',';
-				longToDecimalString((long)volumeMaxThisCycle,log+7,2);
-				log[9] = ',';
-				longToDecimalString((long)volume,log+11,2);
-				logString(log,BUFFER,LOG_NORMAL);
-			}		
-		}
-	}
-	return ret; // -1 indicates that current volume had to be lowered, due to lower max
-}
 
 void
 turnAmpOff(void) {

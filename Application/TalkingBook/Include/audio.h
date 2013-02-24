@@ -5,6 +5,15 @@
 #define	__AUDIO_h__
 
 #include "containers.h"
+#include "device.h"
+
+typedef struct VolumeProfile VolumeProfile;
+
+struct VolumeProfile {
+	unsigned long volumeSeconds[16];
+	char periodStartRTC[RTC_STRING_LENGTH];
+	char lastUpdateRTC[RTC_STRING_LENGTH];		
+};
 
 extern unsigned long SACM_A1800_Bytes;
 extern unsigned long SACM_A1800_Msec;		 
@@ -36,5 +45,15 @@ extern int createRecording(char *, int, char *, BOOL);
 #define MIN_AUDIO_FILE_SIZE         0		
 extern void markEndPlay(long);
 extern void markStartPlay(long, const char *);
-
+extern int restoreVolume(BOOL);
+extern int adjustVolume (int, BOOL, BOOL);
+extern int adjustSpeed (int, BOOL);
+extern int getVolume(void);
+extern int getSpeed(void);
+extern int set_voltmaxvolume(BOOL); 
+extern void logVoltageProfile(void);
+extern void loadVolumeProfile(void);
+extern void updateVolumeProfile(int, long);
+extern void saveVolumeProfile(void);
+extern void startVolumeProfile(void);
 #endif

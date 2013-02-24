@@ -40,6 +40,7 @@
 #define TIMEBASE_B_16HZ       0xe001
 #define KEY_LONG_DOWN_THRESH  24
 #define LONG_KEY_STROKE       0x4000
+#define RTC_STRING_LENGTH		23
 extern unsigned int LONG_KEYPRESS_COUNTER;
 
 extern int KEY_PLAY, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_SELECT, KEY_STAR, KEY_HOME, KEY_PLUS, KEY_MINUS;	
@@ -56,11 +57,6 @@ extern void appendHiLoVoltage(char *);
 extern void resetRTC(void);
 extern long getRTCinSeconds(void);
 extern void setLED(unsigned int, BOOL);
-extern int restoreVolume(BOOL);
-extern int adjustVolume (int, BOOL, BOOL);
-extern int adjustSpeed (int, BOOL);
-extern int getVolume(void);
-extern int getSpeed(void);
 extern void setUSBDevice (BOOL);
 extern unsigned int getCurVoltageSample(void);
 extern unsigned int checkVoltage(void);
@@ -90,7 +86,6 @@ extern unsigned long setRTCalarmMinutes(unsigned int);
 extern unsigned long setRTCalarmHours(unsigned);
 extern void setRTCalarm(unsigned int, unsigned int, unsigned int);
 extern unsigned long addAlarm(unsigned int hour, unsigned int minute, unsigned int second);
-extern int set_voltmaxvolume(BOOL); 
 extern void setNextAlarm(void);
 extern void confirmSNonDisk(void);
 

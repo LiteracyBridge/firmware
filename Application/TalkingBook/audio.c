@@ -9,10 +9,10 @@
 #include "Include/device.h"
 #include "Include/containers.h"
 #include "Include/files.h"
-#include "Include/audio.h"
 #include "Include/metadata.h"
 #include "Include/filestats.h"
 #include "Include/startup.h"
+#include "Include/audio.h"
 
 APP_IRAM unsigned int  stat_pkg_type;
 APP_IRAM int statINIT = 0;
@@ -21,6 +21,11 @@ APP_IRAM unsigned long SACM_A1800_Msec;
 APP_IRAM unsigned int msgNotPlayedSec;
 APP_IRAM int pauseStarted;
 APP_IRAM char msgName[FILE_LENGTH];
+APP_IRAM VolumeProfile volumeProfile;
+APP_IRAM long lastVolumeChangeRTC;
+APP_IRAM static int volume, speed;
+APP_IRAM static int oldVolume;
+APP_IRAM int volumeMaxThisCycle;
 
 static char STAT_FN[FILE_LENGTH];
 
@@ -33,7 +38,9 @@ extern void User_SetDecodeLength(unsigned long);
 static int getFileHandle (CtnrFile *);
 static void playLongInt(CtnrFile *, unsigned long);
 static int recordAudio(char *, char *, BOOL);
-//static void createStatsFile(unsigned long);
+static void setVolume(int newVol);
+static void initVolumeProfile(void);
+static void	getVolumeProfileFilename(char *);	
 
 extern APP_IRAM unsigned int vCur_1;
 
@@ -727,7 +734,9 @@ int createRecording(char *pkgName, int fromHeadphone, char *listName, BOOL relat
 void markEndPlay(long timeNow) {
 	long timeDiff;
 	char log[80];
-		
+
+	updateVolumeProfile(getVolume(),timeNow);
+	saveVolumeProfile();
 	if (context.packageStartTime) {
 		timeDiff = timeNow - context.packageStartTime - msgNotPlayedSec;
 		if (context.package->pkg_type > PKG_SYS) {
@@ -748,7 +757,8 @@ void markEndPlay(long timeNow) {
 			if (context.msgAtEnd)
 				strcat(log, "-Ended");
 			strcat(log,"\x0d\x0a");
-			logString(log,BUFFER,LOG_NORMAL);
+			logString(log,ASAP,LOG_NORMAL);
+			logVoltageProfile();	
 		}
 	}
 }
@@ -757,21 +767,25 @@ void markStartPlay(long timeNow, const char * name) {
 	const int LOG_LENGTH = PATH_LENGTH + 20;
 	char log[LOG_LENGTH];
 	
-	context.packageStartTime = timeNow;
-	context.msgAtEnd = FALSE;
-	context.msgLengthMsec = 0;
-//	strcpy(log,"\x0d\x0a");
-//	longToDecimalString(timeNow,log+2,8);
-	strcpy((char *)log,(const char *)"PLAY ");
-	if (LBstrncat((char *)log,name,LOG_LENGTH) == LOG_LENGTH-1)
-		log[LOG_LENGTH-2] = '~';
-	strcat(log," @VOL=");
-	longToDecimalString((long)getVolume(),log+strlen(log),2);
-	strcat(log," @Volt=");
-	longToDecimalString((long)vCur_1,log+strlen(log),3);
-	logString(log,BUFFER,LOG_NORMAL);
-	strcpy(msgName,name);
-	msgNotPlayedSec = 0;	
+	updateVolumeProfile(0,timeNow); // assume no audio playing since last start/stop
+	
+	if (context.queuedPackageType != PKG_SYS) {
+		context.packageStartTime = timeNow;
+		context.msgAtEnd = FALSE;
+		context.msgLengthMsec = 0;
+	//	strcpy(log,"\x0d\x0a");
+	//	longToDecimalString(timeNow,log+2,8);
+		strcpy((char *)log,(const char *)"PLAY ");
+		if (LBstrncat((char *)log,name,LOG_LENGTH) == LOG_LENGTH-1)
+			log[LOG_LENGTH-2] = '~';
+		strcat(log," @VOL=");
+		longToDecimalString((long)getVolume(),log+strlen(log),2);
+		strcat(log," @Volt=");
+		longToDecimalString((long)vCur_1,log+strlen(log),3);
+		logString(log,ASAP,LOG_NORMAL);
+		strcpy(msgName,name);
+		msgNotPlayedSec = 0;	
+	}
 }
 
 int writeLE32(int handle, long value, long offset) {
@@ -1140,4 +1154,224 @@ int convertTwoByteToSingleChar(unsigned int *buf, const unsigned int *tmpbuf, in
 	return(j);
 }
 
+int restoreVolume(BOOL normalVolume) {
+	int v;	
+	if (normalVolume)
+		v = adjustVolume(NORMAL_VOLUME,FALSE,FALSE);
+	else
+		v = adjustVolume(oldVolume,FALSE,FALSE);
+	if (v == -1) // adjustVolume returns -1 if already at max volume
+		v = getVolume();
+	return v;
+}
+
+int adjustVolume (int amount, BOOL relative, BOOL rememberOldVolume) {
+	int ret;
+	int v;
+	
+	v = getVolume();
+	if (rememberOldVolume)
+		oldVolume = v;
+	
+	if (relative)
+		v += amount;
+	else
+		v = amount;
+	
+	ret = set_voltmaxvolume(FALSE);
+
+	if (v > volumeMaxThisCycle) { 
+		v = volumeMaxThisCycle;
+		setLED(LED_RED,TRUE);
+		playBip();
+		setLED(LED_RED,FALSE);
+		ret = -1;	
+	}
+	if (v < MIN_VOLUME)  
+		v = MIN_VOLUME;
+	setVolume(v);
+	if (ret != -1)
+		ret = v;
+	return ret;
+}
+
+int adjustSpeed (int amount, BOOL relative) {
+	if (relative)
+		speed += amount;
+	else
+		speed = amount;
+
+	if (speed > MAX_SPEED)  
+		speed = MAX_SPEED;
+	if (speed < 0)  
+		speed = 0;
+	SACM_Speed(speed);	
+	return speed;
+}
+
+int getVolume(void) {
+	return volume;
+}
+
+int getSpeed(void) {
+	return speed;
+}
+
+
+int
+set_voltmaxvolume(BOOL forceLower)
+{
+	const int MAX_ALLOWED_VOLUME = 12;
+	const int MAX_ALLOWED_VOLUME_MIN_VOLTAGE = 320;
+	const int MAX_MODERATE_VOLUME = 4;
+	const int MAX_MODERATE_VOLUME_MIN_VOLTAGE = 240;
+	const int MIN_VOLUME_VOLTAGE = 190;
+	const int HIGH_VOLUME_VOLT_PER_VOLUME = (MAX_ALLOWED_VOLUME_MIN_VOLTAGE - MAX_MODERATE_VOLUME_MIN_VOLTAGE) / (MAX_ALLOWED_VOLUME - MAX_MODERATE_VOLUME);
+	const int LOW_VOLUME_VOLT_PER_VOLUME = (MAX_MODERATE_VOLUME_MIN_VOLTAGE - MIN_VOLUME_VOLTAGE) / (MAX_MODERATE_VOLUME - 1);
+	
+	int vol, maxVol, ret = 0;
+	
+	vol = getVolume();
+	if (vCur_1 == V_EXTERNAL_VOLTAGE || (vCur_1 >= MAX_ALLOWED_VOLUME_MIN_VOLTAGE))
+		return ret;
+	if (vCur_1 <= MIN_VOLUME_VOLTAGE)
+		maxVol = 1;
+	else if (vCur_1 >= MAX_MODERATE_VOLUME_MIN_VOLTAGE)
+		maxVol = MAX_MODERATE_VOLUME + (vCur_1 - MAX_MODERATE_VOLUME_MIN_VOLTAGE)/HIGH_VOLUME_VOLT_PER_VOLUME;
+	else
+		maxVol = 1 + (vCur_1 - MIN_VOLUME_VOLTAGE)/LOW_VOLUME_VOLT_PER_VOLUME;
+	
+	if (maxVol < volumeMaxThisCycle || forceLower) {
+		if (forceLower)
+			maxVol = volumeMaxThisCycle - 1;			
+		if(maxVol < 1) maxVol = 1;
+		if(maxVol < volumeMaxThisCycle) {
+			volumeMaxThisCycle = maxVol;
+			if (vol > volumeMaxThisCycle) {
+				vol = volumeMaxThisCycle;
+				setVolume(vol);
+				setLED(LED_RED,TRUE);
+				playBip();
+				setLED(LED_RED,FALSE);
+				ret = -1;	
+			}
+			if (DEBUG_MODE >= LOG_NORMAL) { // logging voltage for all devices in the field (DEBUG_MODE) {
+				char log[15] = "v---,MV--,CV--";
+				longToDecimalString(vCur_1, log+1, 3);
+				log[4] = ',';
+				longToDecimalString((long)volumeMaxThisCycle,log+7,2);
+				log[9] = ',';
+				longToDecimalString((long)vol,log+11,2);
+				logString(log,BUFFER,LOG_NORMAL);
+			}		
+		}
+	}
+	return ret; // -1 indicates that current volume had to be lowered, due to lower max
+}
+
+extern void updateVolumeProfile(int lastVolume, long currentRTCsec) {
+	int diffSec;
+	
+	diffSec = currentRTCsec - lastVolumeChangeRTC;
+	if (diffSec < 0) {
+		// new day must have occurred
+		diffSec = currentRTCsec + (86400-lastVolumeChangeRTC);
+	}
+	volumeProfile.volumeSeconds[lastVolume] += diffSec;
+	getRTC(volumeProfile.lastUpdateRTC);
+	lastVolumeChangeRTC = currentRTCsec;
+}
+
+static void setVolume(int newVol) {
+	long time;
+	
+	time = getRTCinSeconds();
+	if (SACM_Status())
+		updateVolumeProfile(volume,time);  // log play at prior volume
+	else
+		updateVolumeProfile(0,time);  	// log non-play time
+	volume = newVol;	
+	SACM_Volume(volume);	
+}
+
+extern void logVoltageProfile(void) {
+	int i;
+	char log[200];
+	long time, sum = 0;
+	
+	if (DEBUG_MODE < LOG_DETAIL)
+		return; // not worth logging, according to config file
+	flushLog(); //  clear buffer
+	strcpy(log,(char *)"Volume Profile for: ");
+	strcat(log,volumeProfile.periodStartRTC);
+	strcat(log,(char *)"\x0d\x0a");
+	strcat(log,(char *)" last updated     : ");
+	strcat(log,volumeProfile.lastUpdateRTC);	
+	logString(log,BUFFER,LOG_NORMAL);
+	strcpy(log,(char *)" ");
+	for (i=0;i<16;i++) { // this should add 160 characters to log[200]
+		time = volumeProfile.volumeSeconds[i];
+		sum += time;
+		longToDecimalString(i,log+strlen(log),2);
+		strcat(log,(char *)":");		
+		longToDecimalString(time,log+strlen(log),5);
+		strcat(log,(char *)"  ");		
+	}	
+	logString(log,BUFFER,LOG_NORMAL);
+
+	strcpy(log,(char *)" SUM:");		
+	longToDecimalString(sum,log+strlen(log),6);
+	logString(log,ASAP,LOG_NORMAL);
+}
+
+static void initVolumeProfile(void) {
+	int i;
+	
+	lastVolumeChangeRTC = getRTCinSeconds();
+	getRTC(volumeProfile.periodStartRTC);
+	strcpy(volumeProfile.lastUpdateRTC,"no update");	
+	for (i=0;i<16;i++) 
+	volumeProfile.volumeSeconds[i]=0;	
+	logString((char *)"Initializing new Volume Profile",BUFFER,LOG_NORMAL);
+}
+
+extern void saveVolumeProfile(void) {
+	int handle, ret;
+	char filename[PATH_LENGTH];
+ 	
+	getVolumeProfileFilename(filename);	
+//	ret = unlink((LPSTR)(filename));
+	handle = tbOpen((LPSTR)(filename),O_CREAT|O_TRUNC|O_RDWR);
+	if (handle != -1) {
+		ret = write(handle, (unsigned long)&volumeProfile<<1, sizeof(volumeProfile)<<1);
+		close(handle);
+	} else
+		logString((char *)"failed to write volume profile",BUFFER,LOG_ALWAYS);
+}
+
+extern void loadVolumeProfile(void) {
+	int handle, ret;
+	char filename[PATH_LENGTH];
+
+	getVolumeProfileFilename(filename);	
+	handle = tbOpen((LPSTR)(filename),O_RDONLY);
+	if (handle != -1) {
+		ret = read(handle,(unsigned long)&volumeProfile<<1,sizeof(volumeProfile)<<1);
+		close(handle);
+	} else {
+		initVolumeProfile();
+	}
+	lastVolumeChangeRTC = getRTCinSeconds();
+	logVoltageProfile();
+}
+
+static void getVolumeProfileFilename(char *vpFilename) {
+	strcpy(vpFilename,STAT_DIR);
+	strcat(vpFilename,getDeviceSN(0));
+	strcat(vpFilename,(char *)"_");
+	longToDecimalString(CLOCK_PERIOD,vpFilename+strlen(vpFilename),3);
+	strcat(vpFilename,(char *)".bin");
+	logString(vpFilename,BUFFER,LOG_DETAIL);
+	return;
+}
 
