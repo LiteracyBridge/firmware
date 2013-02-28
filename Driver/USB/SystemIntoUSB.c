@@ -187,7 +187,7 @@ int SystemIntoUDisk(unsigned int serviceloop)
 		int tmp;
 		long j;
 		tmp = R_USB_State_Machine;
-		for(j=0; j<100000; j++) {
+		for(j=0; j<10000; j++) {
 
 
 			USB_ServiceLoop(0);

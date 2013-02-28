@@ -271,6 +271,14 @@ void startUp(unsigned int bootType) {
 	int configExists = 0, normal_shutdown=1;
 	int inspect = 0, firmwareWasUpdated = 0;
 
+	setLED(LED_GREEN,TRUE);
+	ret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY);
+	while(ret == 1) {
+		ret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_ONCE);
+	}
+	if (!ret) { //USB connection was made
+		fastShutdown();
+	}
 	checkVoltage();
 	setLED(LED_ALL,TRUE);  // start lights to indicate user should wait during startup until the device is ready
 	// set temporary valid date for file ops (like logging) until system variables are read 
