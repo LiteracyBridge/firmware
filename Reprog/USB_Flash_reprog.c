@@ -160,7 +160,7 @@ void EndFlashProg()
 
 
 
-void write_app_flash(int *bufp, int len, unsigned int fill)
+void write_app_flash(int *bufp, int len, int startoffset)
 {
 	flash  FL = {0}, *newfp; 
 	int fl_size = USB_Flash_init((flash *)0, 0), i;
@@ -177,26 +177,23 @@ void write_app_flash(int *bufp, int len, unsigned int fill)
 
 	
 	newfp->pflash = (unsigned int *)TB_SERIAL_NUMBER_ADDR;
-	if(newfp->Flash_type == MX_MID) {	// MX memory, erase 1 4k chunk at 0x37000
-		newfp->erasesector(newfp);
-	} else { // SST memory, erase 2 2k chunks
-		newfp->erasesector(newfp);
-		newfp->pflash = (unsigned int *)TB_SERIAL_NUMBER_ADDR + 0x800;
-		newfp->erasesector(newfp);
-		newfp->pflash = (unsigned int *)TB_SERIAL_NUMBER_ADDR;
+	
+	if(startoffset == 0) {
+		if(newfp->Flash_type == MX_MID) {	// MX memory, erase 1 4k chunk at 0x37000
+			newfp->erasesector(newfp);
+		} else { // SST memory, erase 2 2k chunks
+			newfp->erasesector(newfp);
+			newfp->pflash = (unsigned int *)TB_SERIAL_NUMBER_ADDR + 0x800;
+			newfp->erasesector(newfp);
+			newfp->pflash = (unsigned int *)TB_SERIAL_NUMBER_ADDR;
+		}
 	}
 	
 	for(i=0; i<len; i++) {
-		(*newfp->writeword)(newfp, TB_SERIAL_NUMBER_ADDR + i, bufp[i]);
+		int j = i + startoffset;
+		(*newfp->writeword)(newfp, TB_SERIAL_NUMBER_ADDR + j, bufp[i]);
 	}
-	if(fill == 0xffff) {
-		__asm__("irq on");	
-		__asm__("fiq on");
-		return;
-	}
-	for(; i<4095; i++) {
-		(*newfp->writeword)(newfp, TB_SERIAL_NUMBER_ADDR + i, fill);
-	} 
+
 	__asm__("irq on");	
 	__asm__("fiq on");
 }

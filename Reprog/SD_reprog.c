@@ -10,7 +10,7 @@ void Check_flash_reprog();
 static void NewCurrent();
 void FlashReprogHimem(flash *fp);
 void FlashReprogLomem(flash *fp, unsigned int *);
-extern void write_app_flash(int *, int, unsigned int);
+extern void write_app_flash(int *, int, int);
 
 // flash address 0xf800 maps to 0x3f800, but with 32k block flash device the erase at this address
 //   erases 0x38000 thru 0x3ffff, the code below reserves that 32k block, and it it not used
@@ -232,16 +232,16 @@ void updateSN(char* path) {
 					strcat(pathFrom,newSN);
 					len = strlen(pathFrom);
 
-					write_app_flash((int *)pathFrom, len, (unsigned int)0x0000);
+					write_app_flash((int *)pathFrom, len, 0);
 				} else
-					write_app_flash((int *)newSN, len, (unsigned int)0x0000);
+					write_app_flash((int *)newSN, len, 0);
 			}
 			if (flagErase) {
 				unlink((LPSTR)pathTo);
 			}
 	 	} else if (flagErase && (len == 1)) { // just the '.' between -erase- and srn
 	 		// no SN - just erase
-	 		write_app_flash((int *)"", 0, (unsigned int)0x0000);
+	 		write_app_flash((int *)"", 0, 0);
 	 	}
 	}
 }
@@ -257,7 +257,7 @@ void checkDoubleSRNprefix(void) {
 		strcat(str,(char *)(TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN));
 		logString(str,BUFFER,LOG_NORMAL);
 		strcpy(str,(char *)(TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN));
-		write_app_flash((int *)str, len, (unsigned int)0x0000);
+		write_app_flash((int *)str, len, 0);
 	}
 }
 

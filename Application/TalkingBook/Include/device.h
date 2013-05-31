@@ -30,6 +30,7 @@
 
 #define TB_SERIAL_NUMBER_ADDR  		0x37000
 #define TB_SERIAL_NUMBER_ADDR_TEXT	"0x37000" //must match TB_SERIAL_NUMBER_ADDR
+#define TB_FLASH_SIZE               0x1000    // 4096
 #define P_TB_SERIAL_PREFIX			(char *)(TB_SERIAL_NUMBER_ADDR)
 #define CONST_TB_SERIAL_PREFIX		(char *)"srn."
 #define CONST_TB_SERIAL_PREFIX_LEN	(strlen(CONST_TB_SERIAL_PREFIX))   // strlen of TB_SERIAL_PREFIX above
