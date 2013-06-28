@@ -314,7 +314,7 @@ void startUpdate(char *filenameUpdate) {
 			return;	// no system update image in folder, return
 	checkVoltage();
 	playBips(2);
-	setLED(LED_RED,TRUE);
+	setLED(LED_ALL,TRUE);
 	
 	//commenting these two lines out since we want reprogramming to happen before config file loading where log filename is given
 	//strcpy(strLog, "Reprogramming with new firmware update");	

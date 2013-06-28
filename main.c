@@ -45,11 +45,8 @@ int main (int bootType) {
 //	sav_Int_status2 = *P_INT_Status2;
 
 	MEM_TYPE = GetMemManufacturer();
-	
-//	if(bootType == BOOT_TYPE_RTC_ALARM) {
-//		backfromRTC();
-//	}
-	
+	setDefaults();
+	setLED(LED_ALL,TRUE);  // start lights to indicate user should wait during startup until the device is ready
 	initVoltage();	// get initial voltage before SACM_Init in BodyInit - may never run BodyInit()
 	
 	BodyInit();
@@ -66,7 +63,6 @@ int main (int bootType) {
 
 	ChangeCodePage(UNI_ENGLISH);
 	SetSystemClockRate(MAX_CLOCK_SPEED); // to speed up initial startup -- set CLOCK_RATE later
-	setDefaults();
 	
 	if(bootType != BOOT_TYPE_COLD_RESET) {
 		fixRegs();

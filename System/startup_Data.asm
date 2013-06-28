@@ -21,8 +21,8 @@ _RESET:
 		
 	sp = __sn_sp_val
 
-	//r15=[P_Clock_Ctrl]			//Check if warm reset,ÔÝÊ±ÆÁ±Î.
-	r15=0
+	r15=[P_Clock_Ctrl]			//Check if warm reset,ÔÝÊ±ÆÁ±Î.
+	//r15=0
 
 ?WaitPll0:
 	r1 = [P_Power_State]
@@ -74,11 +74,16 @@ _RESET:
 //	cmp	r15,0					//Check if warm reset
 //	jne	L_Wakeup
 	r1=[P_INT_Status1]
-	jz	L_Not_Key_Press
+	jz	L_Chk_Clk_Ctrl_First
+L_Key_Press:
 	[P_INT_Status1] = r1		// clear any interrupts
 	r1 = BOOT_TYPE_KEY_PRESS
 	push r1 ,r1 to [sp]
 	jmp L_init_ram
+
+L_Chk_Clk_Ctrl_First:
+	cmp r15,0x0600
+	je L_Key_Press
 	
 L_Not_Key_Press:
 	r1=[P_INT_Status2]

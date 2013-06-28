@@ -176,7 +176,6 @@ void setDefaults(void) {
 	LOG_FILE = (char *)DEFAULT_LOG_FILE; // chicken & egg - we haven't read config.txt or config.bin to set LOG_FILE
 	SYSTEM_VARIABLE_FILE = (char *)DEFAULT_SYSTEM_VARIABLE_FILE;
 
-	set_voltmaxvolume(FALSE);
 }
 
 static int checkRTCFile(char *time) {	
@@ -271,16 +270,15 @@ void startUp(unsigned int bootType) {
 	int configExists = 0, normal_shutdown=1;
 	int inspect = 0, firmwareWasUpdated = 0;
 
-	setLED(LED_GREEN,TRUE);
-	ret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY);
+/*	ret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY);
+
 	while(ret == 1) {
 		ret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_ONCE);
 	}
 	if (!ret) { //USB connection was made
 		fastShutdown();
 	}
-	checkVoltage();
-	setLED(LED_ALL,TRUE);  // start lights to indicate user should wait during startup until the device is ready
+*/	checkVoltage();
 	// set temporary valid date for file ops (like logging) until system variables are read 
 	systemCounts.month = 1;
 	systemCounts.monthday = 1;
@@ -373,8 +371,15 @@ void startUp(unsigned int bootType) {
 		}
 		checkVoltage();  
 		forceflushLog();
-		if (hasCorruption)
-			playBips(3);
+		if (hasCorruption) {
+			ret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY);		
+			while(ret == 1) {
+				ret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_ONCE);
+			}
+			if (!ret) { //USB connection was made
+				fastShutdown();
+			}
+		}
 
 #ifdef HALT_ON_COLD_START
 		if (!wasReset) { // don't halt if reset for firmware reflashing or if an error caused a reset
@@ -782,11 +787,28 @@ void initVoltage()
 	}
 	vCur_1 = sumvTotal >> 9; // average 512 group readings
 	if(vCur_1 < V_MIN_RUN_VOLTAGE_STARTUP) { //((sumv[0] > sumv[1] && sumv[1] > sumv[2] && sumv[2] > sumv[3])) {
+		shuttingDown = 1;
+		//SHUT DOWN - don't call shutdown() since that assumes SACM and other things have been initialized
+		*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt		
+		// disk_safe_exit(0);
+		// try to get the sd card in a safe state - reverse what we do on startup		
+		// _deviceunmount(0);
+		// fs_uninit(); // SD_Uninitial(); // turnSDoff();
+		// SACM_Volume(1); // playDing(); // turnAmpOff();
 		setLED(LED_ALL,TRUE);
-		shutdown();
+		wait(150);
+		setLED(LED_ALL,FALSE);
+		wait(150);
+		setLED(LED_ALL,TRUE);
+		wait(50);
+		setLED(LED_ALL,FALSE);
+		turnNORoff();
+		SysIntoHaltMode();
+		while(1);	
 	}
 	vThresh_1 = 0;
 	tCur_1 = getRTCinSeconds();
+	set_voltmaxvolume(FALSE);
 }
 
 unsigned int GetMemManufacturer()

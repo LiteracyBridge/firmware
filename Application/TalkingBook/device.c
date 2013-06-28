@@ -29,7 +29,7 @@ static char* findTimePart (char *, char);
 static void logKeystroke(int);
 //static void Log_ClockCtrl(void);
 static void turnSDoff(void);
-static void turnNORoff(void);
+static void voltageShutdown(void);
 
 APP_IRAM static unsigned int keydown_counter;
 APP_IRAM unsigned int vCur_1;
@@ -268,8 +268,13 @@ checkVoltage() {
 
 	if (v < V_MIN_RUN_VOLTAGE_TRANS) {
 		forceflushLog();  // to ensure the log msg below is not beyond buffer
-		logString("v < V_MIN_RUN_VOLTAGE_TRANS" , BUFFER, LOG_ALWAYS);
-		fastShutdown();
+		strcpy(log,"v < V_MIN_RUN (");
+		longToDecimalString(v,log+strlen(log),3);
+		strcat(log," < ");
+		longToDecimalString(V_MIN_RUN_VOLTAGE_TRANS,log+strlen(log),3);		
+		strcat(log,")");
+		logString(log, BUFFER, LOG_ALWAYS);
+		voltageShutdown();
 	}
 	
 	if (isPlaying && timePaused)
@@ -289,7 +294,7 @@ checkVoltage() {
 			strcat(log,(char *)" R:");
 			longToDecimalString(readingsPaused,log+strlen(log),5);
 			logString(log , BUFFER, LOG_ALWAYS);
-			fastShutdown();
+			voltageShutdown();
 		} 
 		voltageAvgPaused = ((long)voltageAvgPaused * (long)(readingsPaused-1) + v) / readingsPaused;
 		voltagePaused = v;
@@ -310,46 +315,46 @@ checkVoltage() {
 	}
 	if((isPlaying && vThresh_1 == 8) || (!isPlaying && vThresh_1 == 2)) { //low samples when playing or paused
 		unsigned int delta_voltage = vCur_1 - v;
-		unsigned int delta_voltage_trans = voltageStartedFalling - v;
+//		unsigned int delta_voltage_trans = voltageStartedFalling - v;
 		unsigned int voltageDropRateStatic = 0;
-		unsigned int voltageDropRateTrans = 0;
+//		unsigned int voltageDropRateTrans = 0;
 		unsigned int voltageDropTime = currentTimeInSec - tCur_1;
-		unsigned int voltageDropTimeTrans = currentTimeInSec - timeStartedFalling;
+//		unsigned int voltageDropTimeTrans = currentTimeInSec - timeStartedFalling;
 		
 		if (delta_voltage >= 2)
 			voltageDropRateStatic = (delta_voltage * 10) / (voltageDropTime?voltageDropTime:1);// don't divide by 0
-		if (delta_voltage_trans >= 2)
+/*		if (delta_voltage_trans >= 2)
 			voltageDropRateTrans = (delta_voltage_trans * 10) / (voltageDropTimeTrans?voltageDropTimeTrans:1);// don't divide by 0
-		vCur_1 = v;
+*/		vCur_1 = v;
 		vThresh_1 = 0;	// reset threshold bits
 
 		if (vCur_1 < V_MIN_RUN_VOLTAGE) {
 			forceflushLog();  // to ensure the log msg below is not beyond buffer
 			logString("vCur_1 < V_MIN_RUN_VOLTAGE" , BUFFER, LOG_ALWAYS);
-			fastShutdown();
+			voltageShutdown();
 		}
 		
-		if (delta_voltage >= 2 || delta_voltage_trans >= 2) {
+		if (delta_voltage >= 2 /*|| delta_voltage_trans >= 2*/) {
 			if (isPlaying)
 				strcpy(log,(char *)"PLAYING ");
 			else
 				strcpy(log,(char *)"PAUSED ");
 			strcat(log, (char *) "VOLTAGE DROP: 0."); 
 			longToDecimalString((long)delta_voltage,log+strlen(log),2);
-			strcat(log,(char *)"v/0.");
+/*			strcat(log,(char *)"v/0.");
 			longToDecimalString((long)delta_voltage_trans,log+strlen(log),2);
-			strcat(log,(char *) "v in ");
+*/			strcat(log,(char *) "v in ");
 			longToDecimalString((long)voltageDropTime,log+strlen(log),4);
-			strcat(log, (char *) " sec/");
+/*			strcat(log, (char *) " sec/");
 			longToDecimalString((long)voltageDropTimeTrans,log+strlen(log),4);
-			strcat(log, (char *) " sec");
+*/			strcat(log, (char *) " sec");
 			logString(log,BUFFER, LOG_ALWAYS);		
 						
 			strcpy(log, (char *) "VOLTAGE DROP RATE: "); 
 			longToDecimalString((long)voltageDropRateStatic, log+strlen(log), 3);
-			strcat(log, (char *) "/"); 
+/*			strcat(log, (char *) "/"); 
 			longToDecimalString((long)voltageDropRateTrans, log+strlen(log), 3);
-			logString(log,BUFFER, LOG_ALWAYS);
+*/			logString(log,BUFFER, LOG_ALWAYS);
 					
 			if (isPlaying) {
 				if (vCur_1 < 220) 
@@ -366,7 +371,7 @@ checkVoltage() {
 			if (voltageDropRateStatic >= tripRate) { 
 				forceflushLog();  // to ensure the log msg below is not beyond buffer
 				logString("Static voltage dropping fast" , BUFFER, LOG_ALWAYS);
-				fastShutdown();
+				voltageShutdown();
 			} else if (voltageDropRateStatic >= tripRate * 0.8) {
 				adjustVolume(-1,TRUE,FALSE);  // getting too close; lower volume
 				playBip();
@@ -552,7 +557,6 @@ static void logKeystroke(int intKey) {
 
 void housekeeping() {
 		// give visual feedback of shutting down (aural feedback when user causes shutdown in takeAction())
-	turnAmpOff();
 	setLED(LED_ALL,TRUE);
 	saveVolumeProfile();
 	write_config_bin();  // build a config.bin
@@ -564,13 +568,17 @@ void housekeeping() {
 	clearDeleteQueue();
 	saveLogFile(0);	
 }
-		
+
+static void voltageShutdown() {
+	SACM_Volume(1);
+	playBip();
+	fastShutdown();
+}
 
 void fastShutdown() {
 	if (shuttingDown)
 		return;
 	setLED(LED_ALL,TRUE);
-	turnAmpOff();
 	shuttingDown = 1;
 	logString("SHUTTING DOWN" , BUFFER, LOG_ALWAYS);
 	forceflushLog();
@@ -582,6 +590,7 @@ void fastShutdown() {
 }
 		
 void shutdown() {
+	shuttingDown = 1; // prevents the call to wait() below from checking voltage
 	*P_Clock_Ctrl |= 0x200;	//bit 9 KCEN enable IOB0-IOB2 key change interrupt		
 	disk_safe_exit(0);
 // try to get the sd card in a safe state - reverse what we do on startup		
@@ -589,6 +598,9 @@ void shutdown() {
 	fs_uninit();
 	SD_Uninitial();		
 	turnSDoff();
+	SACM_Volume(1);
+	playDing();
+	turnAmpOff();
 	setLED(LED_ALL,FALSE);
 	setLED(LED_RED,TRUE);
 	wait(150);
@@ -658,7 +670,7 @@ refuse_lowvoltage(int die)
 		wait(200);
 		setLED(LED_RED, TRUE);
 		wait(200);
-		fastShutdown();
+		voltageShutdown();
 	}
 }
 
@@ -685,7 +697,7 @@ turnSDoff(void) {
     *P_IOA_Buffer  |= 0x1000;	
 }
 
-static void 
+extern void 
 turnNORoff(void) {
 	// disable NOR flash
  	*P_IOD_Dir  |= 0x0001;	 
@@ -1056,4 +1068,9 @@ extern void confirmSNonDisk(void) {
 		handle = tbOpen((LPSTR)fileSN,O_CREAT|O_RDWR|O_TRUNC);
 		close(handle);
 	}
+}
+
+extern
+void alertCorruption(void) {
+	playBips(3);
 }

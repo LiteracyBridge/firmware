@@ -18,6 +18,7 @@ extern APP_IRAM unsigned int vCur_1;
 extern void refuse_lowvoltage(int);
 static int copyfiles(char *, char *);
 extern 	int convertTwoByteToSingleChar(unsigned int *, const unsigned int *, int);
+extern int SystemIntoUDisk(unsigned int);
 
 BOOL nextNameValuePair (int handle, char *buffer, char delimiter, char **name, char **value) {
 	BOOL ret;
@@ -132,6 +133,15 @@ void flushLog(void) {
 		idxLogBuffer = 0;
 	}
 	if (!LOG_FILE && !shuttingDown) {
+		int ret;
+		alertCorruption();
+		ret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY);		
+		while(ret == 1) {
+			ret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_ONCE);
+		}
+		if (!ret) { //USB connection was made
+			fastShutdown();
+		}
 		fastShutdown();
 	}
 }
@@ -1467,9 +1477,9 @@ extern int isCorrupted(char * filePath) {
 	int ret;
 	int foundCorruption = 0;
 	
-	if (!dirExists((LPSTR)filePath))
-		return -1;
-
+	if (!dirExists((LPSTR)filePath)) {
+		foundCorruption = 1;	
+	} else {
 	LBstrncpy(filter,filePath,PATH_LENGTH-1);
 	if (filter[strlen(filter)-1] != '/')
 		strcat(filter,(char *)"/");
@@ -1482,6 +1492,9 @@ extern int isCorrupted(char * filePath) {
 		} 
 		ret = _findnext(&fi);		
 	}
+	}
+	if (foundCorruption)
+		alertCorruption();
 	return foundCorruption;		
 }
 

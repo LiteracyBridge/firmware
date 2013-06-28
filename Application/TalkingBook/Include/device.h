@@ -23,7 +23,7 @@
 #define V_MIN_VOL_VOLTAGE 310
 
 // must be powered externally if less than this (hundredths of volts)
-#define V_MIN_POSSIBLE_VOLTAGE 80
+#define V_MIN_POSSIBLE_VOLTAGE 120
 
 //used when powered externally to ensure all voltage checks pass (hundredths of volts)
 #define V_EXTERNAL_VOLTAGE 400 		// higher than possible with batteries -- used to indicate running on external power
@@ -50,7 +50,7 @@ extern int MAX_SPEED, NORMAL_SPEED, SPEED_INCREMENT;
 extern int NORMAL_VOLUME, MAX_VOLUME, MIN_VOLUME, VOLUME_INCREMENT;
 
 extern void KeyScan_ServiceLoop(void);
-
+extern void turnNORoff(void);
 extern void setRTCFromText(char *);
 extern void setRTC(unsigned int, unsigned int, unsigned int);
 extern void getRTC(char *);
@@ -89,6 +89,7 @@ extern void setRTCalarm(unsigned int, unsigned int, unsigned int);
 extern unsigned long addAlarm(unsigned int hour, unsigned int minute, unsigned int second);
 extern void setNextAlarm(void);
 extern void confirmSNonDisk(void);
+extern void alertCorruption(void);
 
 #define N_RTC_ALARMS 6
 #define N_RTC_INIT   N_RTC_ALARMS+1
