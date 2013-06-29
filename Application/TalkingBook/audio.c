@@ -1087,34 +1087,18 @@ int metaRead(int fd, unsigned int field_id, unsigned int *buf) {
 		ret = readLE16(fd, (long)&fid, CURRENT_POS);
 //		printf("\n  field id=%d\n",fid);
 		ret = readLE32(fd, (long)&fieldlen, CURRENT_POS);
-//		printf("    filed length=%d\n", fieldlen);
-		ret = read(fd, (unsigned long)&nfv << 1, 1);
-		nfv &= 1;
-//		printf("    num field values=%d\n", nfv);
-		for(j=0; j<nfv; j++) {
-			unsigned int fl;
-			ret = readLE16(fd, (long)&fl, CURRENT_POS);
-//			printf("    field value length[%d]=%d\n",j,fl);
-			ret = read(fd, (unsigned long) tmpbuf << 1, fl);
-			if(field_id == fid) {
+		if(field_id == fid) {
+			ret = read(fd, (unsigned long)&nfv << 1, 1);
+			nfv &= 1; // This will only ever return the first part of the metadata item, which is fine for now
+			for(j=0; j<nfv; j++) {
+				unsigned int fl;
+				ret = readLE16(fd, (long)&fl, CURRENT_POS);
+				ret = read(fd, (unsigned long) tmpbuf << 1, fl);
 				ret1 = fl;
 				goto foundit;
 			}
-//			printf("    field value[%d]=",j);
-/*			for(k=0; k<fl; k++) {
-				printf("0x%.2x ", buf[k]);
-			}
-			printf("\n");
-*/
-//			printf("'%s'",buf);
-/*			if(fid == 0) { // categories
-				unsigned int m = buf[0] - '0';
-				if((m >= 0 && m < 9)) {
-					printf(" (%s) ", categories[m]);
-				}
-			}
-			printf("\n");
-			*/
+		} else {
+			lseek(fd,fieldlen, SEEK_CUR); //skip past this metadata item
 		}
 	}
 failed:
