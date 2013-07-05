@@ -842,7 +842,7 @@ int addField(int handle, unsigned int field_id, char *field_value, int numfieldv
 
 void setStatsHeader(struct ondisk_filestats *stats, char *msgId) {
 	stats->headerCode = 0x12358D15;
-	LBstrncpy(stats->msgId,msgId,STATS_HEADER_SIZE); 
+	LBstrncpy(stats->msgId,msgId,MAX_MESSAGE_ID_LENGTH); 
 }
 
 void recordStats(char *filename, unsigned long handle, unsigned int why, unsigned long misc)
@@ -907,8 +907,11 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 					if(wrk >= SACM_A1800_Bytes) {
 						tmp_file_stats.stat_num_opens += 1; 
 						tmp_file_stats.stat_num_completions += 1;
-					} else if (msgTime > 10000)
-						tmp_file_stats.stat_num_opens += 1; 						
+						writeMsgEventToFlash ((char *)STAT_FN, 4);
+					} else if (msgTime > 10000) {
+						tmp_file_stats.stat_num_opens += 1;
+						writeMsgEventToFlash ((char *)STAT_FN, 0);
+					}
 					ret = write(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
 					close(stathandle);
 				}

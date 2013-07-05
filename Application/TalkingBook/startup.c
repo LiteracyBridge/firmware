@@ -287,6 +287,11 @@ void startUp(unsigned int bootType) {
 	key = keyCheck(1);  // long keycheck 
 	key &= ~LONG_KEY_STROKE;
 	if ((key & KEY_STAR) == KEY_STAR || (key & KEY_MINUS) == KEY_MINUS) {
+		if ((key & KEY_STAR) == KEY_STAR) {
+			// refresh file on memory card with binary file of system info and stats data
+			// only do this with KEY_STAR, so that KEY_MINUS can be used if an error in writing stats file prevents going into USB mode
+			exportFlashStats();
+		}
 		SystemIntoUDisk(1);	
 		fastShutdown();
 //		callProcessInbox = 1;
@@ -295,11 +300,17 @@ void startUp(unsigned int bootType) {
 
 	//confirming SN is important to address corruption removing the SN file and then stats are unclear
 	checkVoltage();  
-	confirmSNonDisk();
+	if (SNexists()) {
+		setSystemData((char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN,(char *)"ving-ving",(char *)"2013-03",0x31,0x32);
+	}
+	//confirmSNonDisk();
 
-	if ((bootType == BOOT_TYPE_COLD_RESET) || fileExists((LPSTR)SELF_INSPECT_TRIGGER_FILE))
+	if ((bootType == BOOT_TYPE_COLD_RESET) || fileExists((LPSTR)SELF_INSPECT_TRIGGER_FILE)) {
 		inspect = 1;  // used to check for .loc file and other changes that don't normally occur
-
+		coldStartNORStats();
+	} else {
+		warmStartNORStats();	
+	}
 	checkVoltage();  
 	ret = loadSystemCounts();  // calling this before config means we rely on the default location for system-vars
 	systemCounts.powerUpNumber++; 
@@ -431,6 +442,7 @@ void startUp(unsigned int bootType) {
 		updateSN(DEFAULT_SYSTEM_PATH);  // use the srn file that might be left from pre-firmware update
 		writeVersionToDisk(DEFAULT_SYSTEM_PATH);	
 		strcpy(buffer,"Probe Firmware Update:");
+		firmwareWasUpdated = 1;
 		strcat(buffer,VERSION);
 		logStringRTCOptional(buffer,ASAP,LOG_NORMAL,0);
 	}
@@ -497,8 +509,11 @@ void startUp(unsigned int bootType) {
 	if (firmwareWasUpdated) {
 		strcat(buffer," (New firmware)");
 		unlink((LPSTR)FIRMWARE_UPDATE_NOTIF_FILE);
+		// check if using old SRN. prefix in flash; if so; need to erase block and rewrite SRN and then write new data
 		initAlarmData();
 	}
+	strcat(buffer,(char *)"\x0d\x0a" "Package:");
+	strcat(buffer,getPackageName());
 	strcat(buffer,(char *)"\x0d\x0a" "Cycle:");
 	longToDecimalString(systemCounts.powerUpNumber,(char *)(buffer+strlen(buffer)),4);
 	strcat(buffer,(char *)"  Period:");

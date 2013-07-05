@@ -1677,22 +1677,6 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			}
 			
 			cursor = getCurrentList(&pkgSystem.lists[context.package->idxMasterList]);
-/* now in createRecording
-			do {
-				strcpy(filename,USER_PATH);
-				getPkgNumber(filename+strlen(USER_PATH),TRUE);
-				strcat(filename,(const char *)CATEGORY_DELIM_STR);
-				strcat(filename,cursor); // adds current listname to new recording name
-				cursor2 = filename + strlen(filename);
-				strcat(filename,AUDIO_FILE_EXT);
-				ret = fileExists((LPSTR)filename); // this causes approx 1 sec delay!
-			} while (ret);
-			*cursor2 = 0; // remove extension
-			strcpy(filename,filename+strlen(USER_PATH)); //remove path
-			
-			strcpy(filename,(const char *)CATEGORY_DELIM_STR);
-			strcat(filename,cursor); // adds current listname to new recording name
-*/
 			//filename is now output from createRecording - name of new file without the .a18 suffix
 			//cursor is name of current list
 			ret = createRecording(filename,aux,cursor,FALSE);
@@ -1729,19 +1713,6 @@ static void takeAction (Action *action, EnumAction actionCode) {
 				break;
 			}
 			strcpy(tempPath,FEEDBACK_CATEGORY);
-			/*
-			do {
-				strcpy(filepath,USER_PATH);
-				getPkgNumber(filepath+strlen(USER_PATH),TRUE);
-				strcat(filepath,(const char *)CATEGORY_DELIM_STR);
-				strcat(filepath,tempPath); // adds current listname to new recording name
-				cursor2 = filepath + strlen(filepath);
-				strcat(filepath,AUDIO_FILE_EXT);
-				ret = fileExists((LPSTR)filepath); // this causes approx 1 sec delay!
-			} while (ret);
-			*cursor2 = 0; // remove extension
-			strcpy(filename,filepath+strlen(USER_PATH)); //remove path
-			*/
 			//filename is name of new file
 			//cursor is name of current list
 			ret = createRecording(filename,aux,tempPath,TRUE);

@@ -169,8 +169,10 @@ void write_app_flash(int *bufp, int len, int startoffset)
 	USB_Flash_init(&FL, 1);
 	(flash *)newfp = &FL;
 	
-	if(len > 4096)
-		len = 4096;
+	if(len < 1 || (startoffset + len) > TB_FLASH_SIZE) {
+		logException(99,(const char *)"Attempted to write beyond flash boundary",0);
+		return;
+	}
 	
 	__asm__("irq off");
 	__asm__("fiq off");
