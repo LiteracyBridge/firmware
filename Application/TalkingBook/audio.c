@@ -646,8 +646,10 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 	 		addField(handle,DC_SOURCE,unique_id,1);       
 	        metadata_numfields += 1;
 
-			longToDecimalString(systemCounts.powerUpNumber,(char *)temp,4);
-			addField(handle,DC_DATE,temp,1);
+			strcpy(temp,getPackageName());
+			strcat(temp,(char *)":");
+			longToDecimalString(systemCounts.powerUpNumber,(char *)(temp+strlen(temp)),4);
+			addField(handle,LB_DATE_RECORDED,temp,1);
 	        metadata_numfields += 1;
 	        
 	        // add other fields here
