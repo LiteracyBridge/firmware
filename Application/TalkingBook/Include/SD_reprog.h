@@ -20,6 +20,6 @@
 #define PREV_EXT		".old"
 extern int check_new_sd_flash(char *);
 extern void startUpdate(char *);
-extern void updateSN(char *);
+//extern void updateSN(char *);
 
 #endif

@@ -11,6 +11,8 @@
 #define OTHER_CATEGORY		"0"
 #define FAVORITES_CATEGORY	"0-2"
 #define FEEDBACK_CATEGORY	"9"
+#define TB_CATEGORY			"$0-1"
+
 typedef struct ListItem ListItem;
 typedef struct TranslationList TranslationList;
 typedef enum EnumListType EnumListType;

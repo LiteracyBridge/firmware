@@ -72,7 +72,7 @@ static void
 setDate(unsigned int month, unsigned int date) {
 	systemCounts.month = month;
 	systemCounts.monthday = date;
-	saveSystemCounts();	
+	//saveSystemCounts();	
 }
 
 void setRTCFromText(char *time) {
@@ -135,32 +135,43 @@ extern void appendHiLoVoltage(char *string) {
 }
 
 extern void getRTC(char * str) {
-	unsigned long c,p,d,h,m,s;
+	unsigned long r,c,p,d,h,m,s;
 	char time[RTC_STRING_LENGTH];
 	
-	c = (unsigned long)systemCounts.powerUpNumber;
-	p = (unsigned long)CLOCK_PERIOD;  
-	d = (unsigned long)systemCounts.poweredDays;
 	h = (unsigned long) *P_Hour;	
 	m = (unsigned long) *P_Minute;
 	s = (unsigned long) *P_Second;
+	if (h >23) {
+		h -= 24;
+		setRTC(h,m,s);
+		incrementCumulativeDays();
+	}
+	r = (long)getRotation();
+	c = (long)getPowerups();
+	p = (long)getPeriod();  
+	d = (long)getCumulativeDays();
 
-	if (c) {
-		longToDecimalString(c,time,4);
-		time[4] = 'c';
-		longToDecimalString(p,time+5,3);
-		time[8] = 'p';
-		longToDecimalString(d,time+9,3);
-		time[12] = 'd';
-	} else 
-		strcpy(time,"----c---p---d");	// if cold-start and sys-vars has not been loaded yet
-	longToDecimalString(h,time+13,2);
-	time[15] = 'h';
-	longToDecimalString(m,time+16,2);
-	time[18] = 'm';
-	longToDecimalString(s,time+19,2);
-	time[21] = 's';
-	time[22] = 0;
+	if (r >= 0)
+		time[0] = r + '0';
+	else
+		time[0] = '_';
+	time[1] = 'r';
+	longToDecimalString(c,time+2,4);
+	time[6] = 'c';
+	if (p >= 0)
+		longToDecimalString(p,time+7,3);
+	else
+		strcpy(time+7,(char *)"___");
+	time[10] = 'p';
+	longToDecimalString(d,time+11,3);
+	time[14] = 'd';
+	longToDecimalString(h,time+15,2);
+	time[17] = 'h';
+	longToDecimalString(m,time+18,2);
+	time[20] = 'm';
+	longToDecimalString(s,time+21,2);
+	time[23] = 's';
+	time[24] = 0;
 	strcpy(str,time);
 }
 	
@@ -561,8 +572,8 @@ void housekeeping() {
 	saveVolumeProfile();
 	write_config_bin();  // build a config.bin
 	writeVersionToDisk(SYSTEM_PATH);  // make sure the version file is correct
-	checkDoubleSRNprefix(); // this can be removed once the dup serial number prefixes are fixed
-	confirmSNonDisk(); // make sure the serial number file is correct 
+	//checkDoubleSRNprefix(); // this can be removed once the dup serial number prefixes are fixed
+	//confirmSNonDisk(); // make sure the serial number file is correct 
 	buildMyStatsCSV();
 	buildExchgOstats();
 	clearDeleteQueue();
@@ -717,15 +728,10 @@ SNexists(void) {
 }
 
 char *
-getDeviceSN(int includePrefix) {
+getDeviceSN(void) {
 	char *ret;
 	
-	if (strncmp(CONST_TB_SERIAL_PREFIX,P_TB_SERIAL_PREFIX,strlen(CONST_TB_SERIAL_PREFIX)))
-		ret = NO_SRN;
-	else if (includePrefix)
-		ret = P_TB_SERIAL_PREFIX;
-	else
-		ret = P_TB_SERIAL_NUMBER;	
+	ret = getSerialNumber();
 	return ret;
 }
 
@@ -840,15 +846,17 @@ void rtcAlarmFired(unsigned long alarm) {
 
 	if((alarm & 0x00ffffffL) == 0) {
 //	if(*P_Hour == 0 && *P_Minute == 0) { // bump systemcounters 
-		loadSystemCounts();
-		systemCounts.poweredDays += 1;
-		systemCounts.monthday++;
-		fixBadDate(&systemCounts);
-		saveSystemCounts();
+		incrementCumulativeDays();
+//		loadSystemCounts();
+		//TODO:Redundant with Flash system counter
+//		systemCounts.poweredDays += 1;
+//		systemCounts.monthday++;
+//		fixBadDate(&systemCounts);
+//		saveSystemCounts();
 //		logRTC(); // remove
 		while(*P_Second == 0) wait(100);
 		strcpy(buffer,"poweredDays=");
-		longToDecimalString(systemCounts.poweredDays, buffer+12, 4);
+		longToDecimalString(getCumulativeDays(), buffer+12, 4);
 		logString(buffer,ASAP,LOG_ALWAYS);
 		lastActivity = 0;  // if up when rollover prevent shutdown
 //		resetRTC();
@@ -970,12 +978,12 @@ void setNextAlarm() {
 			strcpy(buf,"setRTCalarm to ");
 			unsignedlongToHexString((unsigned long)newAlarm, (char *)strbuf);
 			strcat(buf, strbuf);
-			logString(buf,BUFFER,LOG_NORMAL);
+			logString(buf,BUFFER,LOG_DETAIL);
 			 
 			strcpy(buf,"   RTC = ");
 			unsignedlongToHexString(curRTC, (char *)strbuf);
 			strcat(buf, strbuf);
-			logString(buf,BUFFER,LOG_NORMAL); 
+			logString(buf,BUFFER,LOG_DETAIL); 
 		
 			curAlarmSet = newAlarm;
 			break;	
@@ -983,7 +991,7 @@ void setNextAlarm() {
 	}
 
 	if(curAlarmSet == 0 ) {
-		logString("setRTCalarm(0,0,0)",BUFFER,LOG_NORMAL); 
+		logString("setRTCalarm(0,0,0)",BUFFER,LOG_DETAIL); 
 		while(*P_Hour == 0 && *P_Minute == 0 && *P_Second == 0);
 		setRTCalarm(0, 0, 0);
 // test		setPlus10();	
@@ -1046,14 +1054,14 @@ extern void confirmSNonDisk(void) {
 	char sysPath[PATH_LENGTH];	
 	struct f_info file_info;
 	
-	if (!SNexists())
-		return; // no serial number - don't write to disk
+//	if (!SNexists())
+//		return; // no serial number - don't write to disk
 	if (SYSTEM_PATH)
 		strcpy(sysPath,SYSTEM_PATH);
 	else 
 		strcpy(sysPath,DEFAULT_SYSTEM_PATH);
 	strcpy(fileSN,sysPath);
-	strcat(fileSN, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN);
+	strcat(fileSN, (char *)getSerialNumber());
 	strcat(fileSN, (char *)SERIAL_EXT);
 	exists = fileExists((LPSTR) fileSN);
 	if (!exists) {

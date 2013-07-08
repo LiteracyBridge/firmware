@@ -162,7 +162,7 @@ ReprogFailed(flash *fp)
 }
 */
 
-void updateSN(char* path) {
+/*void updateSN(char* path) {
 	struct f_info file_info;
 	char *newSN;
 	char pathFrom[PATH_LENGTH], pathTo[PATH_LENGTH];
@@ -235,10 +235,10 @@ void updateSN(char* path) {
 					len = strlen(pathFrom);
 
 //					write_app_flash((int *)pathFrom, len, 0);
-					setSystemData((char *)pathFrom,(char *)"ving-ving",(char *)"2013-03",0x31,0x32);
-				} else
+//					setSystemData((char *)pathFrom,(char *)"ving-ving",(char *)"2013-03",0x31,0x32);
+				} //else
 //					write_app_flash((int *)newSN, len, 0);
-					setSystemData((char *)newSN,(char *)"ving-ving",(char *)"2013-03",0x31,0x32);
+//					setSystemData((char *)newSN,(char *)"ving-ving",(char *)"2013-03",0x31,0x32);
 			}
 			if (flagErase) {
 				unlink((LPSTR)pathTo);
@@ -249,8 +249,9 @@ void updateSN(char* path) {
 	 	}
 	}
 }
+*/
 
-void checkDoubleSRNprefix(void) {
+/*void checkDoubleSRNprefix(void) {
 	int len;
 	char str[80];
 	len = strlen((char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN);
@@ -264,6 +265,7 @@ void checkDoubleSRNprefix(void) {
 //		write_app_flash((int *)str, len, 0);
 	}
 }
+*/
 
 int check_new_sd_flash(char * filename) {
 	struct f_info file_info;

@@ -6,8 +6,8 @@
 
 #include "lists.h"
 
-#define MAX_PROFILES	10
-#define MAX_LANGUAGES 	5
+#define MAX_PROFILES	5
+#define MAX_LANGUAGES 	3
 #define MAX_MESSAGE_LISTS	5
 #define MAX_CONTROL_TRACKS 3
 #define MAX_LANGUAGE_CODE_LENGTH 12	// long enough to support current new language naming convention in wrap_translation()
@@ -19,7 +19,7 @@
 #define MAX_STATES		(2 * MAX_BLOCKS)   // should always be 2 x MAX_BLOCKS
 #define MAX_ACTIONS		170   // a little more than 2 actions per block (in addition to start/end actions)
 #define MAX_LISTS		3  		// includes 2 regular lists (list of lists and list of packages) and translation list
-#define MAX_BLOCK_OVERLAP	3   // allows for a file-wide block, a page, and a hyperlink
+#define MAX_BLOCK_OVERLAP	2   // allows for a file-wide block, a page, and a hyperlink
 #define PKG_HEAP_SIZE	500  // enough for ~5 chars per struct file/filename and per ListItem filename
 #define PKG_STACK_SIZE	80   // only stores one item and is erased by next item stored (used for list item filenames)
 // PKG_STACK_SIZE is used so that list filenames can be relative to the heap without being accumulated and hogging memory
@@ -54,7 +54,7 @@ enum EnumEvent {
 };
 enum EnumAction {NOP = 0, STOP, PAUSE, JUMP_BLOCK, RETURN, INSERT_SOUND, START_END_MARKER,			
 				PLAY_PAUSE, COPY, CLONE, COPY_PROFILE, RECORD_TITLE, RECORD_MSG, PACKAGE_RECORDING, RECORD_FEEDBACK, RECORD_TRANSLATION, TRIM,
-				TOGGLE_LOCK, POSITION_TO_TOP, SURVEY_TAKEN, SURVEY_APPLY, SURVEY_USELESS, FWD, BACK, JUMP_TIME, CALL_BLOCK, JUMP_PACKAGE, 
+				TOGGLE_LOCK, POSITION_TO_TOP, SURVEY_TAKEN, SURVEY_APPLY, SURVEY_USELESS, ROTATE, FWD, BACK, JUMP_TIME, CALL_BLOCK, JUMP_PACKAGE, 
 				JUMP_LIST, TRANSLATED_LIST, NOT_TRANSLATED_LIST, TRANSLATE_DELETE_FINISH, 
 				TRANSLATE_NEW, TRANSLATE_OVERWRITE,DELETE, DELETE_MESSAGES, DELETE_TRANSLATION, WRAP_TRANSLATION,
 				MAKE_FAVORITE,

@@ -205,6 +205,14 @@ void stop(void) {
 	flushLog();
 }
 
+extern
+void updatePausedTime(void) {
+	if (pauseStarted != -1) {
+		msgNotPlayedSec += getRTCinSeconds() - pauseStarted;
+		pauseStarted = -1;
+	}
+}
+
 static int getFileHandle (CtnrFile *newFile) {
 	int handle, ret = 0; 
 	char sTemp[PATH_LENGTH];
@@ -555,7 +563,7 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 			playDing();
 			// no need to advance the per-startup recording count if we are immediately shutting down now.
         systemCounts.recordingNumber++;  // bump global recording number
-        saveSystemCounts();
+        //saveSystemCounts();
 		}
         
        	handle = tbOpen((LPSTR)filepath,O_RDWR);
@@ -581,7 +589,7 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 	
 	
 	        strcat(unique_id, "_");    
-	        longToDecimalString(systemCounts.powerUpNumber,(char *)temp,4);
+	        longToDecimalString(getPowerups(),(char *)temp,4);
 	        strcat(unique_id, temp);
 	        strcat(unique_id, "_"); 
 	        longToDecimalString(systemCounts.recordingNumber,(char *)temp,4);
@@ -638,17 +646,17 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 	        	}
 	        }
 	
-	        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
+	        strcpy(unique_id, getSerialNumber()); // skip serial number prefix
 	 		addField(handle,DC_PUBLISHER,unique_id,1);       
 	        metadata_numfields += 1;
 	
-	        strcpy(unique_id, systemCounts.location); // skip serial number prefix
+	        strcpy(unique_id, getLocation()); // skip serial number prefix
 	 		addField(handle,DC_SOURCE,unique_id,1);       
 	        metadata_numfields += 1;
 
 			strcpy(temp,getPackageName());
 			strcat(temp,(char *)":");
-			longToDecimalString(systemCounts.powerUpNumber,(char *)(temp+strlen(temp)),4);
+			longToDecimalString(getPowerups(),(char *)(temp+strlen(temp)),4);
 			addField(handle,LB_DATE_RECORDED,temp,1);
 	        metadata_numfields += 1;
 	        
@@ -738,8 +746,9 @@ void markEndPlay(long timeNow) {
 	char log[80];
 
 	updateVolumeProfile(getVolume(),timeNow);
-	saveVolumeProfile();
 	if (context.packageStartTime) {
+		saveVolumeProfile();
+		updatePausedTime();
 		timeDiff = timeNow - context.packageStartTime - msgNotPlayedSec;
 		if (context.package->pkg_type > PKG_SYS) {
 			recordStats(NULL, 0xffffffff, STAT_TIMEPLAYED, timeDiff);
@@ -751,7 +760,7 @@ void markEndPlay(long timeNow) {
 			strcat (log," ");
 			longToDecimalString(timeDiff,log+strlen(log),4);
 			strcat(log,"/");
-			longToDecimalString(SACM_A1800_Msec/1000,log+strlen(log),4);
+			longToDecimalString(context.msgLengthMsec/1000,log+strlen(log),4);
 			strcat(log,"sec @VOL=");
 			longToDecimalString((long)getVolume(),log+strlen(log),2);
 			strcat(log," @Volt=");
@@ -889,9 +898,25 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 	case STAT_CLOSE:
 		msgTime = Snd_A1800_GetCurrentTime();  // in ms
 		if(statINIT > 0) {   
-			wrk = lseek(SACMFileHandle, 0L, SEEK_CUR);
 			if(stat_pkg_type > PKG_SYS) {	
-				
+				char *category = getCurrentList(&pkgSystem.lists[0]);
+				if (strcmp(category,(char *)FEEDBACK_CATEGORY) && strcmp(category,(char *)TB_CATEGORY)) {
+					// do not keep flash stats on user feedback playbacks or TB category playbacks
+					int code = -1;
+					if (msgTime > (context.msgLengthMsec / 100 * 92)) // consider 92% as completed
+						code = 4;
+					else if (msgTime > (context.msgLengthMsec / 100 * 75))
+						code = 3;
+					else if (msgTime > (context.msgLengthMsec>>1))
+						code = 2;
+					else if (msgTime > (context.msgLengthMsec>>2))
+						code = 1;
+					else if (msgTime >= 10000)
+						code = 0;
+					if (code > -1)
+						writeMsgEventToFlash ((char *)STAT_FN, code,(unsigned int)(msgTime/1000));
+				}
+				wrk = lseek(SACMFileHandle, 0L, SEEK_CUR);
 				strcpy(statpath, STAT_DIR);
 				strcat(statpath, STAT_FN); 
 				
@@ -907,10 +932,8 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 					if(wrk >= SACM_A1800_Bytes) {
 						tmp_file_stats.stat_num_opens += 1; 
 						tmp_file_stats.stat_num_completions += 1;
-						writeMsgEventToFlash ((char *)STAT_FN, 4);
 					} else if (msgTime > 10000) {
 						tmp_file_stats.stat_num_opens += 1;
-						writeMsgEventToFlash ((char *)STAT_FN, 0);
 					}
 					ret = write(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
 					close(stathandle);
@@ -980,6 +1003,14 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 	//		strcat(statpath, "~");
 		strcat(statpath, STAT_FN); 
 		
+		if(stat_pkg_type > PKG_SYS) {	
+			char *category = getCurrentList(&pkgSystem.lists[0]);
+			if (strcmp(category,(char *)FEEDBACK_CATEGORY) && strcmp(category,(char *)TB_CATEGORY)) {
+				// do not keep flash stats on user feedback playbacks or TB category playbacks
+				writeMsgEventToFlash ((char *)STAT_FN, 5,0);
+			}
+		}
+
 		stathandle = tbOpen((LPSTR)statpath, O_CREAT|O_RDWR);
 		if(stathandle >= 0) {
 			ret = read(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
@@ -997,6 +1028,13 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 	//		strcat(statpath, "~");
 		strcat(statpath, STAT_FN); 
 		
+		if(stat_pkg_type > PKG_SYS) {	
+			char *category = getCurrentList(&pkgSystem.lists[0]);
+			if (strcmp(category,(char *)FEEDBACK_CATEGORY) && strcmp(category,(char *)TB_CATEGORY)) {
+				// do not keep flash stats on user feedback playbacks or TB category playbacks
+				writeMsgEventToFlash ((char *)STAT_FN, 6,0);
+			}
+		}
 		stathandle = tbOpen((LPSTR)statpath, O_CREAT|O_RDWR);
 		if(stathandle >= 0) {
 			ret = read(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
@@ -1356,7 +1394,7 @@ extern void loadVolumeProfile(void) {
 
 static void getVolumeProfileFilename(char *vpFilename) {
 	strcpy(vpFilename,STAT_DIR);
-	strcat(vpFilename,getDeviceSN(0));
+	strcat(vpFilename,getDeviceSN());
 	strcat(vpFilename,(char *)"_");
 	longToDecimalString(CLOCK_PERIOD,vpFilename+strlen(vpFilename),3);
 	strcat(vpFilename,(char *)".bin");

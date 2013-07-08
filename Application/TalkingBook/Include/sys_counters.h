@@ -29,15 +29,17 @@ extern SystemCounts systemCounts;
 #define NOR_STRUCT_ID_SYSTEM	0
 // 62 words
 struct SystemData {
-	char structType;
+	char structType;  // can act as versioning field (next version could be == 23)
 	unsigned int countReflashes;
 	// updated just once
 	char serialNumber[10];			// .srn  //transition to become one long 32-bit since most SRNs are useless prefix followed by 6-hex digits
 	// updated monthly
+	char updateNumber[10];
 	char location[40]; 					// .loc
 	char contentPackage[10];				// .pkg
 	char dateLastUpdated; // 	last_updated.txt  -- important to know when corruption caused a mid-month reformat or update --could also use days since 1/1/2013
 	char monthLastUpdated; // 	last_updated.txt  -- important to know when corruption caused a mid-month reformat or update --could also use days since 1/1/2013
+	char yearLastUpdated;
 };
 
 //extern SystemData systemData;
@@ -50,7 +52,8 @@ struct SystemCounts2 {
 	char cumulativeDays;
 	char corruptionDay;	
 	unsigned int powerups;
-	struct NORweek weeks[MAX_WEEKS];
+	unsigned int lastInitVoltage;
+	struct NORrotation rotations[MAX_ROTATIONS];
 };
 
 //extern struct SystemCounts2 systemCounts2;
@@ -62,24 +65,41 @@ struct PtrsSystemDataCounts {
 	struct NORcumulativeDays *cumulativeDays;
 	struct NORpowerups *powerups;
 	struct NORcorruption *corruptionDay;
-	struct NORweek *latestWeek;
+	struct NORrotation *latestRotation;
 };
 
 extern struct PtrsSystemDataCounts ptrsCounts;
 extern char getPeriod(void);
 extern char getCumulativeDays(void);
+extern int incrementCumulativeDays(void);
 extern char getCorruptionDay(void);
+extern void setCorruptionDay(char);
 extern unsigned int getPowerups(void); 
-extern struct NORweek *getLatestWeekStruct(void);
-extern void setSystemData(char *, char *, char *, char, char);
+extern struct NORrotation *getLatestRotationStruct(void);
+extern void setSystemData(struct SystemData *);
 extern char *getPackageName(void);
-
-
+extern void setPowerups(unsigned int);
+extern int incrementPeriod(void);
+extern char *getSerialNumber(void);
+extern char *getPackageName(void);
+extern char *getLocation(void);
+extern char *getUpdateNumber(void);
 extern void saveSystemCounts(void);
 extern void fixBadDate(SystemCounts *);
 extern int loadSystemCounts(void);
 extern void getPkgNumber(char *, BOOL);
 extern void getrevdPkgNumber(char *, BOOL);
 extern void initSystemData(void);
-extern char getWeek(void);
+extern char getRotation(void);
+extern char getReflashCount(void);
+extern char getUpdateYear(void);
+extern char getUpdateMonth(void);
+extern char getUpdateDate(void);
+extern void setRotation(char, char, char, int);
+extern void transitionOldToNewFlash(void);
+extern void importNewSystemData(LPSTR);
+extern struct NORrotation *getLatestRotationStruct(void);
+extern unsigned int getLastInitVoltage(void);
+extern int rotate(void);
+
 #endif

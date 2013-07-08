@@ -290,6 +290,8 @@ void startUp(unsigned int bootType) {
 		if ((key & KEY_STAR) == KEY_STAR) {
 			// refresh file on memory card with binary file of system info and stats data
 			// only do this with KEY_STAR, so that KEY_MINUS can be used if an error in writing stats file prevents going into USB mode
+			initSystemData();
+			createMsgNameOffsets();
 			exportFlashStats();
 		}
 		SystemIntoUDisk(1);	
@@ -300,29 +302,36 @@ void startUp(unsigned int bootType) {
 
 	//confirming SN is important to address corruption removing the SN file and then stats are unclear
 	checkVoltage();  
-	if (SNexists()) {
-		setSystemData((char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN,(char *)"ving-ving",(char *)"2013-03",0x31,0x32);
-	}
+	if(fileExists((LPSTR)"a:/system.img"))
+		startUpdate((char *)"a:/system.img");
+	
+	if (SNexists()) 
+		transitionOldToNewFlash();
+	initSystemData();
+	createMsgNameOffsets();
+	if (fileExists(REFLASH_STATS_FILE)) 
+		importNewSystemData(REFLASH_STATS_FILE);
+
 	//confirmSNonDisk();
 
+	checkVoltage();  
+//	ret = loadSystemCounts();  // calling this before config means we rely on the default location for system-vars
+	//systemCounts.powerUpNumber++; 
+	if (inspect)
+		firmwareWasUpdated = fileExists((LPSTR)FIRMWARE_UPDATE_NOTIF_FILE);
+//	if (ret == -1 || inspect)
+//		setLocation(systemCounts.location);
+	checkVoltage();  
+	
 	if ((bootType == BOOT_TYPE_COLD_RESET) || fileExists((LPSTR)SELF_INSPECT_TRIGGER_FILE)) {
 		inspect = 1;  // used to check for .loc file and other changes that don't normally occur
 		coldStartNORStats();
 	} else {
 		warmStartNORStats();	
 	}
-	checkVoltage();  
-	ret = loadSystemCounts();  // calling this before config means we rely on the default location for system-vars
-	systemCounts.powerUpNumber++; 
-	if (inspect)
-		firmwareWasUpdated = fileExists((LPSTR)FIRMWARE_UPDATE_NOTIF_FILE);
-	if (ret == -1 || inspect)
-		setLocation(systemCounts.location);
-	checkVoltage();  
-	saveSystemCounts();	
 
 	strcpy(buffer,"\x0d\x0a" "---------------------------------------------------\x0d\x0a" "Serial#:");		
-	strcat(buffer,getDeviceSN(0));
+	strcat(buffer,getDeviceSN());
 	strcat(buffer,"\x0d\x0a" "Clock:");
 	getRTC(buffer+strlen(buffer));
 	checkVoltage();
@@ -343,8 +352,8 @@ void startUp(unsigned int bootType) {
 			// power was removed: can't rely on clock.  Start new clocl "period" and reset RTC.
 			wasReset = 0;
 			setRTC(0,1,0);  //  no idea what time it is so reset to 1 min past midnight to avoid the midnight alarm
-			systemCounts.year++;	
-			systemCounts.poweredDays = 0;
+			//systemCounts.year++;	
+			//systemCounts.poweredDays = 0;
 			checkVoltage();  
 			saveSystemCounts();	
 			strcpy(buffer,"BOOT_TYPE_COLD_RESET -- NEW BATTERIES???");
@@ -383,6 +392,7 @@ void startUp(unsigned int bootType) {
 		checkVoltage();  
 		forceflushLog();
 		if (hasCorruption) {
+			setCorruptionDay(getCumulativeDays());
 			ret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY);		
 			while(ret == 1) {
 				ret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_ONCE);
@@ -436,6 +446,7 @@ void startUp(unsigned int bootType) {
 	
 	*/
 
+/*	NEED TO REPLACE SNexists() with a fct to check current expected bytes in the same Flash sector 
 	if (!SNexists()) {
 		// This will update the version when the device has just been programmed with probe,
 		// which wipes out the serial number.
@@ -446,7 +457,7 @@ void startUp(unsigned int bootType) {
 		strcat(buffer,VERSION);
 		logStringRTCOptional(buffer,ASAP,LOG_NORMAL,0);
 	}
-
+*/
 // try to load a saved config.bin if present
 	checkVoltage();  
 	configExists = (restore_config_bin() == -1?0:1);
@@ -470,7 +481,7 @@ void startUp(unsigned int bootType) {
 	checkVoltage();  
 	if((inspect || fileExists((LPSTR)"a:/system.img") )&& V_MIN_SDWRITE_VOLTAGE <= vCur_1) {
 		inspect = 1;  
-		updateSN(UPDATE_FP);
+//		updateSN(UPDATE_FP);
 		if (check_new_sd_flash(filename)) {
 			ret = tbOpen((LPSTR)SELF_INSPECT_TRIGGER_FILE,O_CREAT|O_RDWR|O_TRUNC);
 			close(ret);
@@ -485,7 +496,7 @@ void startUp(unsigned int bootType) {
 		}
 	}
 	
-	if (!SNexists()) {
+	if (!SNexists() && !strcmp(NO_SRN,getSerialNumber())) {
 		logException(32,(const char *)"no serial number",LOG_ONLY);
 		testPCB();	
 	}
@@ -501,10 +512,10 @@ void startUp(unsigned int bootType) {
 			logStringRTCOptional(buffer,BUFFER,LOG_ALWAYS,0);	
 		}
 	}
-	if (!systemCounts.location[0] || !strncmp(systemCounts.location,(char *)"Non-",4))
+	if (!getLocation() || !strncmp(getLocation(),(char *)"Non-",4))
 		playDings(2);
 	strcpy(buffer,"Location:");
-	strcat(buffer,systemCounts.location);
+	strcat(buffer,getLocation());
 	strcat(buffer,(const char *)"\x0d\x0a" "Version:" VERSION);
 	if (firmwareWasUpdated) {
 		strcat(buffer," (New firmware)");
@@ -512,14 +523,21 @@ void startUp(unsigned int bootType) {
 		// check if using old SRN. prefix in flash; if so; need to erase block and rewrite SRN and then write new data
 		initAlarmData();
 	}
+	strcat(buffer,(char *)"\x0d\x0a" "Reflashes:");
+	longToDecimalString(getReflashCount(),(char *)(buffer+strlen(buffer)),4);
+	strcat (buffer,(char *)"  (");
+	longToDecimalString((4096-FindFirstFlashOffset()), (char *)(buffer+strlen(buffer)), 4);
+	strcat (buffer,(char *)" words remaining)");
 	strcat(buffer,(char *)"\x0d\x0a" "Package:");
 	strcat(buffer,getPackageName());
-	strcat(buffer,(char *)"\x0d\x0a" "Cycle:");
-	longToDecimalString(systemCounts.powerUpNumber,(char *)(buffer+strlen(buffer)),4);
+	strcat(buffer,(char *)"  Cycle:");
+	longToDecimalString(getPowerups(),(char *)(buffer+strlen(buffer)),4);
+	strcat(buffer,(char *)"  Rotation:");
+	longToDecimalString(getRotation(), (char *)(buffer+strlen(buffer)), 1);
 	strcat(buffer,(char *)"  Period:");
-	longToDecimalString(CLOCK_PERIOD, (char *)(buffer+strlen(buffer)), 4);
+	longToDecimalString(getPeriod(), (char *)(buffer+strlen(buffer)), 4);
 	strcat(buffer,(char *)"  Powered Days:");
-	longToDecimalString(systemCounts.poweredDays, (char *)(buffer+strlen(buffer)), 4);
+	longToDecimalString(getCumulativeDays(), (char *)(buffer+strlen(buffer)), 4);
 	strcat(buffer,"\x0d\x0a" "Debug:");
 	switch (DEBUG_MODE) {
 		case 0:
@@ -548,9 +566,9 @@ void startUp(unsigned int bootType) {
 	logString(buffer,BUFFER,LOG_NORMAL);	
 		
 	unlink ((LPSTR) (STAT_DIR SNCSV));
-	strcpy(buffer,getDeviceSN(1));
+	strcpy(buffer,getDeviceSN());
 	strcat(buffer, ",");
-	longToDecimalString(systemCounts.powerUpNumber, strCounts, 4); 
+	longToDecimalString(getPowerups(), strCounts, 4); 
 	strcat(buffer, strCounts);
 	
 	{

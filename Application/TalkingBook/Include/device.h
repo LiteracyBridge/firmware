@@ -41,7 +41,7 @@
 #define TIMEBASE_B_16HZ       0xe001
 #define KEY_LONG_DOWN_THRESH  24
 #define LONG_KEY_STROKE       0x4000
-#define RTC_STRING_LENGTH		23
+#define RTC_STRING_LENGTH		40
 extern unsigned int LONG_KEYPRESS_COUNTER;
 
 extern int KEY_PLAY, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_SELECT, KEY_STAR, KEY_HOME, KEY_PLUS, KEY_MINUS;	
@@ -73,7 +73,7 @@ extern int logLongHex(unsigned long);
 extern void refuse_lowvoltage(int die);
 extern void turnAmpOff(void);
 extern void turnAmpOn(void);
-extern char* getDeviceSN(int);
+extern char* getDeviceSN(void);
 extern int SNexists(void);
 extern void writeVersionToDisk(char *);
 

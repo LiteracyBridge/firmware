@@ -135,6 +135,7 @@ void flushLog(void) {
 	if (!LOG_FILE && !shuttingDown) {
 		int ret;
 		alertCorruption();
+		setCorruptionDay(getCumulativeDays());
 		ret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY);		
 		while(ret == 1) {
 			ret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_ONCE);
@@ -158,20 +159,18 @@ saveLogFile(int noteCorruption) {
 	char newlogname[128], strwrk[8];
 	int i;
 
-	extern SystemCounts systemCounts;
-	
 	if (!LOG_FILE)
 		return;
 	
 	mkdir((LPSTR)LOG_ARCHIVE_PATH);
 	
 	strcpy(newlogname, LOG_ARCHIVE_PATH);
-	longToDecimalString(systemCounts.powerUpNumber, strwrk, 4);
+	longToDecimalString(getPowerups(), strwrk, 4);
 	strcat(newlogname,(char *)"log_");
-	strcat(newlogname, getDeviceSN(0)); 
+	strcat(newlogname, getSerialNumber()); 
 	strcat(newlogname,(char *)"_");
 	strcat(newlogname, (char *)strwrk);
-	longToDecimalString(systemCounts.poweredDays, strwrk, 4);
+	longToDecimalString(getCumulativeDays(), strwrk, 4);
 	strcat(newlogname,(char *)"_");
 	strcat(newlogname, (char *)strwrk);
 	if (noteCorruption)
@@ -584,7 +583,7 @@ INT16 tbOpen(LPSTR path, INT16 open_flag) {
 		if (strcmp((char *)path,LOG_FILE) && strcmp((char *)path,DEFAULT_LOG_FILE)) { // error didn't occur trying to open log file
 			strcpy(logMsg,(char *)"Cannot open ");
 			strcat(logMsg,(char *)path);
-			logString(logMsg,BUFFER,LOG_NORMAL);
+			logString(logMsg,BUFFER,LOG_DETAIL);
 		}
 		// log potential memory corruption
 		if ((*pPath == '/') || (*(pPath+1) == ':')) {
@@ -600,6 +599,7 @@ INT16 tbOpen(LPSTR path, INT16 open_flag) {
 		if (ptr)
 			*ptr = 0;
 		if ((strlen(dirPath) > 2) && isCorrupted(dirPath)) {  // exclude root, "a:"
+			setCorruptionDay(getCumulativeDays());
 			if (strcmp((char *)path,LOG_FILE) && strcmp((char *)path,DEFAULT_LOG_FILE)) { // error didn't occur trying to open log file
 				strcpy(logMsg,(char *)"CORRUPTED: ");
 				strcat(logMsg,dirPath);
@@ -1427,7 +1427,7 @@ replaceFromBackup(char *path)
 		}
 		strcat(mypath, "_");
 		
-		longToDecimalString(systemCounts.powerUpNumber,(char *)temp,4);
+		longToDecimalString(getPowerups(),(char *)temp,4);
 		temp[4] = 0;
 		strcat(mypath, temp);
 		

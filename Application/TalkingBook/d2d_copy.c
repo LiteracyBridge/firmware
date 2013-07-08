@@ -391,7 +391,7 @@ buildMyStatsCSV() {
 //  first line is serial_number, cycle number
 	strcpy(lineout, (char *)TB_SERIAL_NUMBER_ADDR);
 	strcat(lineout, ",");
-	longToDecimalString(systemCounts.powerUpNumber,(char *)strLog,4);
+	longToDecimalString(getPowerups(),(char *)strLog,4);
 	strcat(lineout, strLog);
 	bytesToWrite = convertDoubleToSingleChar(filename,lineout,TRUE);
 	retCopy = write(mystats, (UINT32)filename << 1, bytesToWrite);

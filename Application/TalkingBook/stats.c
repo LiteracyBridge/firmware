@@ -15,19 +15,18 @@ static void rebuildNORmsgMap(struct NORmsgMap *);
 static void rebuildNORmsgStats(struct NORallMsgStats *);
 static int saveFlashStats(struct SystemData *, struct SystemCounts2 *, struct NORmsgMap *, struct NORallMsgStats *);
 static void *FindNextFlashSameStruct(void *); 
+static void rebuildFlash(int);
+static int ptrSizeOfNORStruct(void *);
 
 // find offset to first writeable byte in SN flash 
 int
 FindFirstFlashOffset() {
 	unsigned int *fp = (unsigned int *) TB_SERIAL_NUMBER_ADDR;
-	int i;
 	
-	for (i=0; i<TB_FLASH_SIZE; i++) {
-		if(*(fp+i) == 0xffff) {  // first unwritten byte
-			break;
-		}
+	while((*((int *)fp) != 0xffff) && ((long)fp < ((long)(TB_SERIAL_NUMBER_ADDR + TB_FLASH_SIZE)))) {
+		fp += ptrSizeOfNORStruct(fp);
 	}	
-	return(i);	
+	return (int)((long)fp-TB_SERIAL_NUMBER_ADDR);
 }
 
 static int 
@@ -37,6 +36,9 @@ sizeOfNORStruct(char idStructType) {
 	switch (idStructType) {
 		case NOR_STRUCT_ID_SYSTEM:
 			ret = sizeof(struct SystemData);
+			break;
+		case NOR_STRUCT_ID_COUNTS:
+			ret = sizeof(struct SystemCounts2);
 			break;
 		case NOR_STRUCT_ID_MSG_MAP:
 			ret = sizeof(struct NORmsgMap);
@@ -62,11 +64,13 @@ sizeOfNORStruct(char idStructType) {
 		case NOR_STRUCT_ID_CORRUPTION:
 			ret = sizeof(struct NORcorruption);
 			break;
-		case NOR_STRUCT_ID_WEEK:
-			ret = sizeof(struct NORweek);
+		case NOR_STRUCT_ID_ROTATION:
+			ret = sizeof(struct NORrotation);
 			break;
 		default:
-			logException(98,(const char *)"unknown NOR struct type",SHUT_DOWN);
+			logException(98,(const char *)"unknown NOR struct type",0);
+			// this could be a trigger that we have an old rev 
+			ret = 1; // inspect every byte, which will more likely lead to a FFFF
 			break;		
 	}	
 	return ret;
@@ -93,30 +97,31 @@ rebuildFlash(int rewriteFlash) {
 	struct SystemCounts2 sc;
 	struct NORmsgMap msgMap;
 	struct NORallMsgStats stats;
-	struct NORweek *week;
-	int ret, m, w, size, totalSize;	
+	struct NORrotation *rotation;
+	struct SystemData *ptrSD;
+	int ret, m, r, size, totalSize;	
 	
 	for (m=0;m < MAX_TRACKED_MESSAGES;m++) {
-		for (w=0;w < MAX_WEEKS; w++) {
-			stats.stats[m][w].structType = -1;
+		for (r=0;r < MAX_ROTATIONS; r++) {
+			stats.stats[m][r].structType = -2;
 		}
 	}
-
-	memcpy(&sd,(struct SystemData *)FindFirstFlashStruct(NOR_STRUCT_ID_SYSTEM),sizeof(struct SystemData));
-
+	ptrSD = (struct SystemData *)FindFirstFlashStruct(NOR_STRUCT_ID_SYSTEM);
+	if (ptrSD != NULL) 
+		memcpy(&sd,ptrSD,sizeof(struct SystemData));
+	if (rewriteFlash) {
+		sd.countReflashes++;
+	}
 	sc.structType = NOR_STRUCT_ID_COUNTS;
 	sc.period = getPeriod();
 	sc.cumulativeDays = getCumulativeDays();
 	sc.corruptionDay = getCorruptionDay();
 	sc.powerups = getPowerups();
-	memcpy((void *)sc.weeks,(void *)getLatestWeekStruct(),sizeof(struct NORweek));
-	week = (struct NORweek *)FindFirstFlashStruct(NOR_STRUCT_ID_WEEK);
-	for (w=0;w < MAX_WEEKS && (week != NULL); w++) {
-		memcpy((void *)&sc.weeks[w],(void *)week,sizeof(struct NORweek));
-		week = (struct NORweek *)FindNextFlashSameStruct(week);
-	}
-	if (w < MAX_WEEKS) {
-		sc.weeks[w].structType = -1;
+	memcpy((void *)sc.rotations,(void *)ptrsCounts.systemCounts->rotations,sizeof(struct NORrotation) * MAX_ROTATIONS);
+	rotation = (struct NORrotation *)FindFirstFlashStruct(NOR_STRUCT_ID_ROTATION);
+	while (rotation != NULL) {
+		memcpy((void *)&sc.rotations[(int)rotation->rotationNumber],(void *)rotation,sizeof(struct NORrotation));
+		rotation = (struct NORrotation *)FindNextFlashSameStruct(rotation);
 	}
 	rebuildNORmsgMap(&msgMap);
 	rebuildNORmsgStats(&stats);
@@ -126,24 +131,24 @@ rebuildFlash(int rewriteFlash) {
 		if(ret != -1) {
 			// erase flash
 			totalSize = 0;
-			size = (sizeof(struct SystemData) + 1) >> 1;	// round up # of words		
+			size = sizeof(struct SystemData);	// round up # of words		
 			write_app_flash((int *)&sd, size, totalSize);
 			totalSize += size;
 			
-			size = (sizeof(struct SystemCounts2) + 1) >> 1;
+			size = sizeof(struct SystemCounts2);
 			write_app_flash((int *)&sc, size, totalSize);
 			totalSize += size;
 
-			size = (sizeof(struct NORmsgMap) + 1) >> 1;
+			size = sizeof(struct NORmsgMap);
 			size -= (MAX_TRACKED_MESSAGES - msgMap.totalMessages) * MAX_MESSAGE_ID_LENGTH;
 			write_app_flash((int *)&msgMap, size, totalSize);
 			totalSize += size;
 
-			size = (sizeof(struct NORmsgStats) + 1) >> 1;		
-			for (w=0; w < stats.totalWeeks;w++) {
+			size = sizeof(struct NORmsgStats);		
+			for (r=0; r < stats.totalRotations;r++) {
 				for (m=0; m < stats.totalMessages; m++) {
-					if (stats.stats[m][w].structType != -1) {
-						write_app_flash((int *)&stats.stats[m][w], size,totalSize);
+					if (stats.stats[m][r].structType != -2) {  // -2 since -1 is FF and is unwritten memory
+						write_app_flash((int *)&stats.stats[m][r], size,totalSize);
 						totalSize += size;
 					}
 				}
@@ -243,27 +248,50 @@ void rebuildNORmsgMap(struct NORmsgMap *msgMap) {
 static
 void rebuildNORmsgStats(struct NORallMsgStats *allStats) {
 	void *fp;
+	int highestMessage=-1, highestRotation=-1;
+	struct NORmsgStats *msgStats;
+	int m,r;
+	//initialize all counters to 0
+	for (m=0; m < MAX_TRACKED_MESSAGES; m++) {
+		for (r=0; r < MAX_ROTATIONS; r++) {
+			msgStats = &allStats->stats[m][r];
+			msgStats->structType = -2;
+			msgStats->countStarted = 0;
+			msgStats->countQuarter = 0;
+			msgStats->countHalf = 0;
+			msgStats->countThreequarters = 0;
+			msgStats->countCompleted = 0;
+			msgStats->countApplied = 0;
+			msgStats->countUseless = 0;
+			msgStats->totalSecondsPlayed = 0; 
+		}
+	}	
+		
 // extern struct NORallMsgStats {
 //	char totalMessages;
-//	char totalWeeks;
-//	struct NORmsgStats stats[MAX_TRACKED_MESSAGES][MAX_WEEKS];
+//	char totalRotations;
+//	struct NORmsgStats stats[MAX_TRACKED_MESSAGES][MAX_ROTATIONS];
 //};
 //struct NORmsgStats {
 //	char structType;	// used to identify data structure
 //	char indexMsg;
-//	char numberWeek;//...
+//	char numberRotation;//...
 //};
 	fp = FindFirstFlashStruct(NOR_STRUCT_ID_MESSAGE_STATS);
 	while (fp != NULL) {
 		//TODO: This code would be much faster if looked for NORstatEvent in parallel with scan for NORmsgStats
 		struct NORmsgStats *msgStats = (struct NORmsgStats *)fp;
 		int indexMsg = msgStats->indexMsg;
-		int week = msgStats->numberWeek;
-		memcpy(&allStats->stats[indexMsg][week],fp,sizeof(struct NORmsgStats));
+		int rotation = msgStats->numberRotation;
+		if (indexMsg > highestMessage)
+			highestMessage = indexMsg;
+		if (rotation > highestRotation)
+			highestRotation = rotation;
+		memcpy(&allStats->stats[indexMsg][rotation],fp,sizeof(struct NORmsgStats));
 		if ((allStats->totalMessages-1) < indexMsg)
 			allStats->totalMessages = indexMsg + 1;
-		if ((allStats->totalWeeks-1) < week)
-			allStats->totalWeeks = week + 1;
+		if ((allStats->totalRotations-1) < rotation)
+			allStats->totalRotations = rotation + 1;
 		fp = FindNextFlashSameStruct(fp);
 	}
 //#define NOR_STRUCT_ID_STAT_EVENT	3
@@ -271,7 +299,7 @@ void rebuildNORmsgStats(struct NORallMsgStats *allStats) {
 //	char structType;
 //	char indexMsg;	// array index for message
 //	char statType; // 0:10sec,1:25%,2:50%,3:75%,4:100%,5:survey:applied,6:survey useless
-//	char week;
+//	char rotation;
 //};
 //struct NORmsgStats {
 //...
@@ -288,8 +316,16 @@ void rebuildNORmsgStats(struct NORallMsgStats *allStats) {
 	while (fp != NULL) {
 		struct NORstatEvent *event = (struct NORstatEvent *)fp;
 		int indexMsg = event->indexMsg;
-		int week = event->week;
-		struct NORmsgStats *msgStats = &allStats->stats[indexMsg][week];
+		int rotation = event->rotation;
+		struct NORmsgStats *msgStats = &allStats->stats[indexMsg][rotation];
+		if (indexMsg > highestMessage)
+			highestMessage = indexMsg;
+		if (rotation > highestRotation)
+			highestRotation = rotation;
+		msgStats->structType = NOR_STRUCT_ID_MESSAGE_STATS;
+		msgStats->indexMsg = indexMsg;
+		msgStats->numberRotation = rotation;
+		msgStats->totalSecondsPlayed += event->secondsOfPlay;
 		switch(event->statType) {
 			case 0:
 				msgStats->countStarted++;
@@ -315,6 +351,8 @@ void rebuildNORmsgStats(struct NORallMsgStats *allStats) {
 		}
 		fp = FindNextFlashSameStruct(fp);
 	}
+	allStats->totalMessages = highestMessage + 1;
+	allStats->totalRotations  = highestRotation + 1;
 }
 
 char getMsgIndex (char * strMessageID) {
@@ -343,13 +381,14 @@ char addNewMsgToMap (char *strMessageID) {
 		msg.structType = NOR_STRUCT_ID_NEW_MSG; 
 		msg.indexMsg = (char)i;
 		strcpy(msg.idMsg,strMessageID);
-		AppendStructToFlash(&msg);
+		// set flash offset using return value of AppendStructToFlash, but adjust to place offset at string within the struct
+		offsetMsgNames[i]=(int)((long)&msg.idMsg-(long)&msg) + ((long)AppendStructToFlash(&msg) - TB_SERIAL_NUMBER_ADDR);
 	}	
 	return i;
 }
 
 extern
-void writeMsgEventToFlash (char *strMessageID, int msgEvent) {
+void writeMsgEventToFlash (char *strMessageID, int msgEvent, unsigned int secondsPlayed) {
 	char msgIndex = getMsgIndex(strMessageID);
 	struct NORstatEvent statEvent;
 
@@ -359,23 +398,24 @@ void writeMsgEventToFlash (char *strMessageID, int msgEvent) {
 	statEvent.structType = NOR_STRUCT_ID_STAT_EVENT;
 	statEvent.indexMsg = msgIndex;
 	statEvent.statType = msgEvent;
-	statEvent.week = getWeek();
+	statEvent.rotation = getRotation();
+	statEvent.secondsOfPlay = secondsPlayed;
 	AppendStructToFlash(&statEvent);
 }	
 
-void guessCurrentWeek() {
-	// needs to allow updating week when agent says so or when we believe from data (like multiple DELETES) that this has happened
-	// this requires storing a struct with dayOfWeekStart along with current week
+void guessCurrentRotation() {
+	// needs to allow updating rotation when agent says so or when we believe from data (like multiple DELETES) that this has happened
+	// this requires storing a struct with dayOfRotationStart along with current rotation
 	//int days = getCumulativeDays() 
-	//week = (days+5)/7
-	//if yes then call updateWeek()
+	//rotation = (days+5)/7
+	//if yes then call updaterotation()
 }
 
-void updateWeek() {
+void updateRotation() {
 }
 
 void midnightUpdate() {
-	// guess if should update NORweek
+	// guess if should update NORrotation
 	// update NORcumulativeDays
 }
 
@@ -386,8 +426,10 @@ void createMsgNameOffsets() {
 	struct NORmsgMap *map = (struct NORmsgMap*)FindFirstFlashStruct(NOR_STRUCT_ID_MSG_MAP);
 
 	offsetMsgNames[0] = 0; // necessary to initialize the end flag if no messages are in flash yet
-	for (i=0; i < map->totalMessages;i++) {
-		offsetMsgNames[i] = (long)&map->msgIdMap[i] - TB_SERIAL_NUMBER_ADDR;
+	if (map != NULL) {
+		for (i=0; i < map->totalMessages;i++) {
+			offsetMsgNames[i] = (long)&map->msgIdMap[i] - TB_SERIAL_NUMBER_ADDR;
+		}
 	}
 	fp = FindFirstFlashStruct(NOR_STRUCT_ID_NEW_MSG);
 	while (fp != NULL) {
@@ -404,21 +446,15 @@ extern
 void warmStartNORStats(void) {
 	unsigned int powerUps;
 	
-	initSystemData();
 	powerUps = getPowerups();
 	powerUps++;
 	setPowerups(powerUps);
-	createMsgNameOffsets();
 }
 
 extern
 void coldStartNORStats(void) {
-	char period;
 	
-	warmStartNORStats();
-	period = getPeriod();
-	period++;
-	setPeriod(period);
+	incrementPeriod();
 }
 
 
@@ -432,10 +468,10 @@ static int saveFlashStats(struct SystemData *sd, struct SystemCounts2 *sc, struc
 	
 	handle = tbOpen((LPSTR)(SYS_DATA_STATS_PATH),O_CREAT|O_TRUNC|O_RDWR);
 	if (handle != -1) {
-		ret = write(handle, (unsigned long)sd<<1, sizeof(sd)<<1);
-		ret = write(handle, (unsigned long)sc<<1, sizeof(sc)<<1);
-		ret = write(handle, (unsigned long)msgMap<<1, sizeof(msgMap)<<1);
-		ret = write(handle, (unsigned long)stats<<1, sizeof(stats)<<1);
+		ret = write(handle, (unsigned long)sd<<1, sizeof(struct SystemData)<<1);
+		ret = write(handle, (unsigned long)sc<<1, sizeof(struct SystemCounts2)<<1);
+		ret = write(handle, (unsigned long)msgMap<<1, sizeof(struct NORmsgMap)<<1);
+		ret = write(handle, (unsigned long)stats<<1, sizeof(struct NORallMsgStats)<<1);
 		close(handle);
 	} else
 		logString((char *)"failed to write system data and stats to " SYS_DATA_STATS_PATH,BUFFER,LOG_ALWAYS);

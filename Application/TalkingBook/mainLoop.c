@@ -466,6 +466,7 @@ extern void checkInactivity(BOOL resetTimer) {
 	}
 	if (INACTIVITY_SECONDS && (currentTime - lastActivity) > INACTIVITY_SECONDS) {
 		lastActivity = currentTime;
+		markEndPlay(getRTCinSeconds());
 		if(MEM_TYPE == MX_MID) {
 			setOperationalMode((int)P_HALT);  // keep RTC running
 		} else {
@@ -658,7 +659,7 @@ static void wrapTranslation() {
 		
 		//Move to new name
 		strcpy(tempPath,LANGUAGES_PATH);
-		strcat(tempPath,getDeviceSN(0));
+		strcat(tempPath,getDeviceSN());
 		strcat(tempPath,"_");
 		len = strlen(tempPath);
 		
@@ -691,7 +692,7 @@ static void wrapTranslation() {
 //		strcat(filepath,"/");
 		
 //		strcpy(tempPath,LISTS_PATH);
-		strcpy(tempPath,getDeviceSN(0));
+		strcpy(tempPath,getDeviceSN());
 		strcat(tempPath,"_");
 		len = strlen(tempPath);
 		longToDecimalString(i,tempPath+len,2);	
@@ -1414,7 +1415,27 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			newTime = newBlock->startTime;
 			reposition = TRUE;
 			break;
-
+		case ROTATE:
+			stop();
+			i = rotate(); 
+			if (i >= 0) { 
+				cpyListPath(filename,(char *)FEEDBACK_CATEGORY);
+				strcat(filename,(char *)FEEDBACK_CATEGORY ".txt");
+				unlink((LPSTR)filename);
+				playDings(i+1);
+				strcpy(filename,(char *)"Rotated to HH 0");
+				filename[strlen(filename)-1] += i;
+				logString(filename,ASAP,LOG_NORMAL);
+			} else {
+				playBips(3);
+				strcpy(filename,(char *)"Attempted to rotate beyond the max limit of 0");
+				filename[strlen(filename)-1] += i;
+				logString(filename,ASAP,LOG_NORMAL);					
+			}
+			context.queuedPackageNameIndex = SAME_SYSTEM;
+			context.queuedPackageType = PKG_SYS;
+			reposition = TRUE;
+			break;
 		case TOGGLE_LOCK:
 			logString((char *)"Toggle Lock/Unlock of Category List",BUFFER,LOG_ALWAYS);
 			stop();
@@ -1978,7 +1999,8 @@ void loadPackage(int pkgType, const char * pkgName) {
 	// log start of new user package and duration of last package for user experience tracking
 	timeNow = getRTCinSeconds();
 	markEndPlay(timeNow);
-	markStartPlay(timeNow,pkgName);
+	if (pkgType != PKG_SYS)
+		markStartPlay(timeNow,pkgName);
 
 	context.lastFile = NULL;
 	context.queuedPackageType = PKG_NONE; //reset takeAction's JUMP_PACKAGE or JUMP_PACKAGE

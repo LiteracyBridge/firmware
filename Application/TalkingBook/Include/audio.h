@@ -56,4 +56,5 @@ extern void loadVolumeProfile(void);
 extern void updateVolumeProfile(int, long);
 extern void saveVolumeProfile(void);
 extern void startVolumeProfile(void);
+extern void updatePausedTime(void);
 #endif

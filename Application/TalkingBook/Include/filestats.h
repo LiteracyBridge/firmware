@@ -15,14 +15,14 @@
 #define SYS_DATA_STATS_PATH		STAT_DIR SYS_DATA_STATS_FILE
 #define CLI_STAT_DIR "b:/statistics/stats/" 
 #define CLI_OSTAT_DIR "b:/statistics/ostats/"
-
+#define REFLASH_STATS_FILE		((LPSTR)"a:/update.txt")
 #define SNCSV "SN.csv"
 
 void recordStats(char *filename, unsigned long handle, unsigned int why, unsigned long data);
 
 #define MAX_MESSAGE_ID_LENGTH	20
-#define MAX_TRACKED_MESSAGES		40
-#define MAX_WEEKS					5
+#define MAX_TRACKED_MESSAGES		20
+#define MAX_ROTATIONS					5
 
 extern void write_app_flash(int *, int, int);
 
@@ -48,11 +48,11 @@ struct NORmsgMap {
 
 // Rebuild:UPDATE
 #define NOR_STRUCT_ID_MESSAGE_STATS	2
-// 5 words x 40 msgs x 5 weeks = 1000 words
+// 10 words x 20 msgs x 5 rotations = 1000 words
 struct NORmsgStats {
 	char structType;	// used to identify data structure
 	char indexMsg;
-	char numberWeek;
+	char numberRotation;
 	char countStarted;
 	char countQuarter;
 	char countHalf;
@@ -60,6 +60,7 @@ struct NORmsgStats {
 	char countCompleted;
 	char countApplied;
 	char countUseless;
+	unsigned int totalSecondsPlayed;
 };
 // If we have 40 messages at 5 words each, that's 200 words out of 4096 words.
 // But we also need a map for the 40 messages.  At 4 words per id, that's a 160-word array.
@@ -72,8 +73,8 @@ struct NORmsgStats {
 
 struct NORallMsgStats {
 	char totalMessages;
-	char totalWeeks;
-	struct NORmsgStats stats[MAX_TRACKED_MESSAGES][MAX_WEEKS];
+	char totalRotations;
+	struct NORmsgStats stats[MAX_TRACKED_MESSAGES][MAX_ROTATIONS];
 };
 
 
@@ -84,7 +85,8 @@ struct NORstatEvent {
 	char structType;
 	char indexMsg;	// array index for message
 	char statType; // 0:10sec,1:25%,2:50%,3:75%,4:100%,5:survey:applied,6:survey useless
-	char week;
+	char rotation;
+	unsigned int secondsOfPlay;
 };
 
 
@@ -117,6 +119,7 @@ struct NORcumulativeDays {
 struct NORpowerups {
 	char structType;
 	unsigned int powerups;
+	int initVoltage;
 };
 
 // Rebuild:GROUP (for now - could save 25 words)
@@ -129,15 +132,16 @@ struct NORcorruption {
 
 // Rebuild:GROUP
 // 2 words x 5 = 10 words  // keep these -- don't 
-#define NOR_STRUCT_ID_WEEK		9
-struct NORweek {
+#define NOR_STRUCT_ID_ROTATION		9
+struct NORrotation {
 	char structType;
-	char weekNumber;
+	char rotationNumber;
 	char periodNumber;
 	char daysAfterLastUpdate;
+	int initVoltage;
 };
 
-// 3 words if we wanted a week timing map - not such a big deal compared to 10
+// 3 words if we wanted a rotation timing map - not such a big deal compared to 10
 //char structType;
 //char dayOfUpdate[5]
 
@@ -155,9 +159,11 @@ extern void *FindFlashStruct(char, int);
 extern void exportFlashStats(void);
 extern void *FindFirstFlashStruct(char);
 extern void *AppendStructToFlash(void *);
-extern void writeMsgEventToFlash (char *, int);
+extern void writeMsgEventToFlash (char *, int, unsigned int);
 extern void warmStartNORStats(void);
 extern void coldStartNORStats(void);
+extern void createMsgNameOffsets(void);
+extern int FindFirstFlashOffset(void);
 
 #endif
 
