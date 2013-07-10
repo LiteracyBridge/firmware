@@ -269,6 +269,16 @@ void startUp(unsigned int bootType) {
 	int key, ret, callPushPull = 0,callProcessInbox = 0;
 	int configExists = 0, normal_shutdown=1;
 	int inspect = 0, firmwareWasUpdated = 0;
+	extern unsigned long rtc_fired;
+
+	if(rtc_fired == 0xff000000) {	
+		rtc_fired = 0;
+		while(*P_Second == 0) wait(100);
+		initSystemData();
+		incrementCumulativeDays();
+		fastShutdown();
+	}
+
 
 /*	ret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY);
 
@@ -351,7 +361,7 @@ void startUp(unsigned int bootType) {
 		else {
 			// power was removed: can't rely on clock.  Start new clocl "period" and reset RTC.
 			wasReset = 0;
-			setRTC(0,1,0);  //  no idea what time it is so reset to 1 min past midnight to avoid the midnight alarm
+			//setRTC(0,1,0);  //  no idea what time it is so reset to 1 min past midnight to avoid the midnight alarm
 			//systemCounts.year++;	
 			//systemCounts.poweredDays = 0;
 			checkVoltage();  
@@ -424,6 +434,7 @@ void startUp(unsigned int bootType) {
 #endif
 	}
 
+	setNextAlarm();	// be sure at least midnight alarm is set	
 	checkVoltage();  
 	playDing();  // it is important to play a sound immediately to stop user from wondering if power is on
 	checkVoltage();  
@@ -459,7 +470,6 @@ void startUp(unsigned int bootType) {
 	}
 */
 // try to load a saved config.bin if present
-	checkVoltage();  
 	configExists = (restore_config_bin() == -1?0:1);
 	
 	if(!configExists) {
@@ -496,7 +506,7 @@ void startUp(unsigned int bootType) {
 		}
 	}
 	
-	if (!SNexists() && !strcmp(NO_SRN,getSerialNumber())) {
+	if (!SNexists() && !strcmp(NO_SRN,getSerialNumber())) {  // NO_SRN was used in prior flash/SRN layout when a SRN was erased and not replaced
 		logException(32,(const char *)"no serial number",LOG_ONLY);
 		testPCB();	
 	}
@@ -506,7 +516,7 @@ void startUp(unsigned int bootType) {
 		ret = checkRTCFile(buffer);
 		if (ret >= 0) {
 			setRTCFromText(buffer);
-			strcpy(buffer,"Clock:");
+			strcpy(buffer,"Set Clock:");
 			getRTC(buffer+strlen(buffer));
 			strcat(buffer," (time and/or date reset by *.rtc file)");
 			logStringRTCOptional(buffer,BUFFER,LOG_ALWAYS,0);	
@@ -597,7 +607,6 @@ void startUp(unsigned int bootType) {
 	}
 	SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
 
-	setNextAlarm();	// be sure at least midnight alarm is set	
 	ret = *P_RTC_INT_Status;	
 	*P_RTC_INT_Status |= ret;	// clear all interrupt flags
 	if (MACRO_FILE)	

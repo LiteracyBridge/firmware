@@ -17,6 +17,8 @@ static int saveFlashStats(struct SystemData *, struct SystemCounts2 *, struct NO
 static void *FindNextFlashSameStruct(void *); 
 static void rebuildFlash(int);
 static int ptrSizeOfNORStruct(void *);
+static void createMsgNameOffsetsFromMap(void);
+
 
 // find offset to first writeable byte in SN flash 
 int
@@ -30,10 +32,12 @@ FindFirstFlashOffset() {
 }
 
 static int 
-sizeOfNORStruct(char idStructType) {
-	int ret;	
-
-	switch (idStructType) {
+ptrSizeOfNORStruct(void *structType) {
+	int ret;
+	int msgCount;
+	struct NORmsgMap *map;
+	
+	switch (*(char *)structType) {
 		case NOR_STRUCT_ID_SYSTEM:
 			ret = sizeof(struct SystemData);
 			break;
@@ -41,7 +45,15 @@ sizeOfNORStruct(char idStructType) {
 			ret = sizeof(struct SystemCounts2);
 			break;
 		case NOR_STRUCT_ID_MSG_MAP:
-			ret = sizeof(struct NORmsgMap);
+			// This is the one struct that can have a variable length in memory.
+			// Need to determine how many messages are included in map to get size
+			//struct NORmsgMap {
+			//	char structType;
+			//	char totalMessages;
+			//	char msgIdMap[MAX_TRACKED_MESSAGES][MAX_MESSAGE_ID_LENGTH];
+			map=(struct NORmsgMap *)structType;
+			msgCount=map->totalMessages;
+			ret = sizeof(struct NORmsgMap) - ((MAX_TRACKED_MESSAGES - msgCount) * MAX_MESSAGE_ID_LENGTH);
 			break;
 		case NOR_STRUCT_ID_MESSAGE_STATS:
 			ret = sizeof(struct NORmsgStats);
@@ -76,16 +88,6 @@ sizeOfNORStruct(char idStructType) {
 	return ret;
 }
 
-static int 
-ptrSizeOfNORStruct(void *structType) {
-	int ret;
-	char idStructType;
-	
-	idStructType = *(char *)structType;	
-	ret = sizeOfNORStruct(idStructType); 
-	return ret;
-}
-
 static void
 rebuildFlash(int rewriteFlash) {
 	// refresh system data
@@ -117,6 +119,7 @@ rebuildFlash(int rewriteFlash) {
 	sc.cumulativeDays = getCumulativeDays();
 	sc.corruptionDay = getCorruptionDay();
 	sc.powerups = getPowerups();
+	sc.lastInitVoltage = getLastInitVoltage();
 	memcpy((void *)sc.rotations,(void *)ptrsCounts.systemCounts->rotations,sizeof(struct NORrotation) * MAX_ROTATIONS);
 	rotation = (struct NORrotation *)FindFirstFlashStruct(NOR_STRUCT_ID_ROTATION);
 	while (rotation != NULL) {
@@ -129,6 +132,14 @@ rebuildFlash(int rewriteFlash) {
 	ret = saveFlashStats(&sd, &sc, &msgMap, &stats);
 	if (rewriteFlash) {
 		if(ret != -1) {
+			//FOR DEBUGGING PURPOSES, dump entire memory block to disk before and after reflash
+			int handle;
+			handle = tbOpen((LPSTR)(SYS_DATA_STATS_PATH_DEBUG_PRE),O_CREAT|O_TRUNC|O_RDWR);
+			if (handle != -1) {
+				ret = write(handle, (unsigned long)TB_SERIAL_NUMBER_ADDR<<1, TB_FLASH_SIZE<<1);
+				close(handle);
+			}
+			
 			// erase flash
 			totalSize = 0;
 			size = sizeof(struct SystemData);	// round up # of words		
@@ -137,12 +148,20 @@ rebuildFlash(int rewriteFlash) {
 			
 			size = sizeof(struct SystemCounts2);
 			write_app_flash((int *)&sc, size, totalSize);
+			ptrsCounts.systemCounts = (struct SystemCounts2 *)(unsigned long)(TB_SERIAL_NUMBER_ADDR + totalSize); 
+			ptrsCounts.period = (struct NORperiod *)&ptrsCounts.systemCounts->period;
+			ptrsCounts.corruptionDay = (struct NORcorruption *)&ptrsCounts.systemCounts->corruptionDay;		
+			ptrsCounts.cumulativeDays = (struct NORcumulativeDays *)&ptrsCounts.systemCounts->cumulativeDays;
+			for (r=1;r < MAX_ROTATIONS && ptrsCounts.systemCounts->rotations[r].structType == NOR_STRUCT_ID_ROTATION;r++);
+			ptrsCounts.latestRotation = &ptrsCounts.systemCounts->rotations[r-1];
+			ptrsCounts.powerups = (struct NORpowerups *)&ptrsCounts.systemCounts->powerups;
 			totalSize += size;
 
 			size = sizeof(struct NORmsgMap);
 			size -= (MAX_TRACKED_MESSAGES - msgMap.totalMessages) * MAX_MESSAGE_ID_LENGTH;
 			write_app_flash((int *)&msgMap, size, totalSize);
 			totalSize += size;
+			createMsgNameOffsetsFromMap();
 
 			size = sizeof(struct NORmsgStats);		
 			for (r=0; r < stats.totalRotations;r++) {
@@ -152,6 +171,12 @@ rebuildFlash(int rewriteFlash) {
 						totalSize += size;
 					}
 				}
+			}
+			//FOR DEBUGGING PURPOSES, dump entire memory block to disk before and after reflash
+			handle = tbOpen((LPSTR)(SYS_DATA_STATS_PATH_DEBUG_POST),O_CREAT|O_TRUNC|O_RDWR);
+			if (handle != -1) {
+				ret = write(handle, (unsigned long)TB_SERIAL_NUMBER_ADDR<<1, TB_FLASH_SIZE<<1);
+				close(handle);
 			}
 		} else
 			logException(96,(const char *)"Can't save flash stats, so will not erase and rebuild flash.",SHUT_DOWN);
@@ -403,34 +428,29 @@ void writeMsgEventToFlash (char *strMessageID, int msgEvent, unsigned int second
 	AppendStructToFlash(&statEvent);
 }	
 
-void guessCurrentRotation() {
-	// needs to allow updating rotation when agent says so or when we believe from data (like multiple DELETES) that this has happened
-	// this requires storing a struct with dayOfRotationStart along with current rotation
-	//int days = getCumulativeDays() 
-	//rotation = (days+5)/7
-	//if yes then call updaterotation()
-}
 
-void updateRotation() {
-}
-
-void midnightUpdate() {
-	// guess if should update NORrotation
-	// update NORcumulativeDays
-}
-
-void createMsgNameOffsets() {
-	void *fp = NULL;
-	int indexMsg = 0;
-	int i;
+static
+void createMsgNameOffsetsFromMap(void) {
+	int i = 0;
 	struct NORmsgMap *map = (struct NORmsgMap*)FindFirstFlashStruct(NOR_STRUCT_ID_MSG_MAP);
 
-	offsetMsgNames[0] = 0; // necessary to initialize the end flag if no messages are in flash yet
 	if (map != NULL) {
 		for (i=0; i < map->totalMessages;i++) {
 			offsetMsgNames[i] = (long)&map->msgIdMap[i] - TB_SERIAL_NUMBER_ADDR;
 		}
 	}
+}
+
+void createMsgNameOffsets() {
+	void *fp = NULL;
+	int indexMsg;
+
+	// initialize array with 0s indicating end of list (msgMap won't exist until first reflash after an update)
+	for (indexMsg=0; indexMsg < MAX_TRACKED_MESSAGES; indexMsg++) 
+		offsetMsgNames[indexMsg] = 0;
+	createMsgNameOffsetsFromMap();
+	
+	// now add to what was created from the map with all the new message event structs
 	fp = FindFirstFlashStruct(NOR_STRUCT_ID_NEW_MSG);
 	while (fp != NULL) {
 		struct NORnewMsg *newMsg = (struct NORnewMsg *)fp;
@@ -438,8 +458,6 @@ void createMsgNameOffsets() {
 		offsetMsgNames[indexMsg] = (long)&newMsg->idMsg - TB_SERIAL_NUMBER_ADDR;
 		fp = FindNextFlashSameStruct(fp);
 	}
-	if (indexMsg < MAX_TRACKED_MESSAGES - 1)
-		offsetMsgNames[indexMsg + 1] = 0; // end flag
 }
 
 extern

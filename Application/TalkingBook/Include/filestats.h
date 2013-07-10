@@ -13,6 +13,8 @@
 #define OSTAT_DIR "a:/statistics/ostats/"
 #define SYS_DATA_STATS_FILE		"flashData.bin"
 #define SYS_DATA_STATS_PATH		STAT_DIR SYS_DATA_STATS_FILE
+#define SYS_DATA_STATS_PATH_DEBUG_PRE		STAT_DIR "dump-preflash.bin"
+#define SYS_DATA_STATS_PATH_DEBUG_POST		STAT_DIR "dump-postflash.bin"
 #define CLI_STAT_DIR "b:/statistics/stats/" 
 #define CLI_OSTAT_DIR "b:/statistics/ostats/"
 #define REFLASH_STATS_FILE		((LPSTR)"a:/update.txt")
@@ -137,7 +139,7 @@ struct NORrotation {
 	char structType;
 	char rotationNumber;
 	char periodNumber;
-	char daysAfterLastUpdate;
+	unsigned int hoursAfterLastUpdate;
 	int initVoltage;
 };
 

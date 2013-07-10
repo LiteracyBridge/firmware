@@ -27,7 +27,7 @@ struct SystemCounts {
 extern SystemCounts systemCounts;
 
 #define NOR_STRUCT_ID_SYSTEM	0
-// 62 words
+// 0x4b / 75d words 
 struct SystemData {
 	char structType;  // can act as versioning field (next version could be == 23)
 	unsigned int countReflashes;
@@ -45,7 +45,7 @@ struct SystemData {
 //extern SystemData systemData;
 
 #define NOR_STRUCT_ID_COUNTS	10
-// 13 words
+// 6+5*5=31 words or 0x1F words
 struct SystemCounts2 {
 	char structType;
 	char period;

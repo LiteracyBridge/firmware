@@ -525,10 +525,20 @@ void resetSystem(void) {
 		insertSound(&pkgSystem.files[PLEASE_WAIT_IDX],NULL,TRUE); 
 	}
 	checkVoltage();  // USB may have been supplying sole power -- need to check if voltage dropping fast
+	saveVolumeProfile();
+	logString((char *)"* RESET *",ASAP,LOG_ALWAYS);
+	saveLogFile(0);	
+	fs_safexit(); // should close all open files
+	disk_safe_exit(0);
+// try to get the sd card in a safe state - reverse what we do on startup		
+	_deviceunmount(0);
+	fs_uninit();
+	SD_Uninitial();		
+	turnSDoff();
+
 	playBip();
 	setLED(LED_ALL,FALSE);  
-	logString((char *)"* RESET *",ASAP,LOG_ALWAYS);
-	fs_safexit(); // should close all open files
+
 	*P_WatchDog_Ctrl &= ~0x4001; // clear bits 14 and 0 for resetting system and time=0.125 sec 	
 	*P_WatchDog_Ctrl |= 0x8004; // set bits 2 and 15 for 0.125 sec, system reset, and enable watchdog
 	while(1);	

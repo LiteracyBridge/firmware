@@ -88,6 +88,7 @@ fixBadDate(SystemCounts *sc) {
 	}
 }
 
+
 int loadSystemCounts() {
 	int handle, ret;
 
@@ -111,31 +112,35 @@ int loadSystemCounts() {
 	return ret;
 }
 
+
 extern
 void initSystemData() {
 	int i;
 	ptrsCounts.systemData = (struct SystemData *)FindFirstFlashStruct(NOR_STRUCT_ID_SYSTEM);
 	ptrsCounts.systemCounts = (struct SystemCounts2 *)FindFirstFlashStruct(NOR_STRUCT_ID_COUNTS);
-	if (ptrsCounts.systemCounts != NULL) {
-		for (i=1;i < MAX_ROTATIONS && ptrsCounts.systemCounts->rotations[i].structType == NOR_STRUCT_ID_ROTATION;i++);
-	}
-		ptrsCounts.period = (struct  NORperiod *)FindLastFlashStruct(NOR_STRUCT_ID_PERIOD);
-	if (ptrsCounts.period == NULL)
+	
+	ptrsCounts.period = (struct  NORperiod *)FindLastFlashStruct(NOR_STRUCT_ID_PERIOD);
+	if (ptrsCounts.period == NULL && ptrsCounts.systemCounts != NULL)
 		ptrsCounts.period = (struct NORperiod *)&ptrsCounts.systemCounts->period;
-		ptrsCounts.corruptionDay = (struct NORcorruption *)FindLastFlashStruct(NOR_STRUCT_ID_CORRUPTION);
-	if (ptrsCounts.corruptionDay == NULL)
+	
+	ptrsCounts.corruptionDay = (struct NORcorruption *)FindLastFlashStruct(NOR_STRUCT_ID_CORRUPTION);
+	if (ptrsCounts.corruptionDay == NULL && ptrsCounts.systemCounts != NULL)
 		ptrsCounts.corruptionDay = (struct NORcorruption *)&ptrsCounts.systemCounts->corruptionDay;		
-		ptrsCounts.cumulativeDays = (struct NORcumulativeDays *)FindLastFlashStruct(NOR_STRUCT_ID_CUMULATIVE_DAYS);
-	if (ptrsCounts.cumulativeDays == NULL)
+	
+	ptrsCounts.cumulativeDays = (struct NORcumulativeDays *)FindLastFlashStruct(NOR_STRUCT_ID_CUMULATIVE_DAYS);
+	if (ptrsCounts.cumulativeDays == NULL && ptrsCounts.systemCounts != NULL)
 		ptrsCounts.cumulativeDays = (struct NORcumulativeDays *)&ptrsCounts.systemCounts->cumulativeDays;
+	
 	ptrsCounts.latestRotation = (struct NORrotation *)FindLastFlashStruct(NOR_STRUCT_ID_ROTATION);
-	if (ptrsCounts.latestRotation == NULL) 
+	if (ptrsCounts.latestRotation == NULL && ptrsCounts.systemCounts != NULL) {
+		for (i=1;i < MAX_ROTATIONS && ptrsCounts.systemCounts->rotations[i].structType == NOR_STRUCT_ID_ROTATION;i++);
 		ptrsCounts.latestRotation = &ptrsCounts.systemCounts->rotations[i-1];
-		ptrsCounts.powerups = (struct NORpowerups *)FindLastFlashStruct(NOR_STRUCT_ID_POWERUPS);
-	if (ptrsCounts.powerups == NULL)
+	}
+	ptrsCounts.powerups = (struct NORpowerups *)FindLastFlashStruct(NOR_STRUCT_ID_POWERUPS);
+	if (ptrsCounts.powerups == NULL && ptrsCounts.systemCounts != NULL)
 		ptrsCounts.powerups = (struct NORpowerups *)&ptrsCounts.systemCounts->powerups;
 	
-	systemCounts.year = 2000 + getPeriod();
+	systemCounts.year = FILE_YEAR_MIN + getPeriod();
 	systemCounts.month = getUpdateMonth();
 	systemCounts.monthday = getUpdateDate() + getCumulativeDays();
 	fixBadDate(&systemCounts);
@@ -159,24 +164,16 @@ getPeriod() {
 extern int
 incrementPeriod(void) {
 	struct NORperiod period;
-	int daysSinceRotation;
-	struct NORrotation *latestRotation = getLatestRotationStruct();
+//	int daysSinceRotation;
+//	struct NORrotation *latestRotation = getLatestRotationStruct();
 	int currentPeriod = getPeriod() + 1;
-	int lastInitVoltage = getLastInitVoltage();
+//	int lastInitVoltage = getLastInitVoltage();
 	
 	period.structType = NOR_STRUCT_ID_PERIOD;
 	period.period = currentPeriod;
 	ptrsCounts.period = (struct NORperiod *)AppendStructToFlash(&period);
-	systemCounts.year = 2000 + currentPeriod;
+	systemCounts.year = FILE_YEAR_MIN + getPeriod();
 
-	
-/*	NO LONGER GOING TO GUESS ABOUT THE ROTATION: IT'S UP TO AGENT TO SET THAT APPROPRIATELY
-	daysSinceRotation = getCumulativeDays() - latestRotation->daysAfterLastUpdate;
-	if (daysSinceRotation >= 6)
-		setRotation(latestRotation->rotationNumber+1,currentPeriod,getCumulativeDays(),vCur_1);
-	else if ((vCur_1 >= 310) && ((vCur_1 - lastInitVoltage) > 30) && (daysSinceRotation >= 2))
-		setRotation(latestRotation->rotationNumber+1,currentPeriod,getCumulativeDays(),vCur_1);		
-*/	
 	return currentPeriod;
 }
 
@@ -273,6 +270,7 @@ setPowerups(unsigned int powerupNumber) {
 	if (powerupNumber > currentPowerups) {	
 		powerups.structType = NOR_STRUCT_ID_POWERUPS;
 		powerups.powerups = powerupNumber;
+		checkVoltage();  // updates vCur_1 used in next line
 		powerups.initVoltage = vCur_1;
 		ptrsCounts.powerups = (struct NORpowerups *)AppendStructToFlash(&powerups);		
 	}
@@ -304,15 +302,17 @@ char getRotation() {
 extern int
 rotate(void) {
 	int rotation = getRotation() + 1;
-	if (rotation >= MAX_ROTATIONS)
+	if (rotation >= MAX_ROTATIONS)  // TODO: Should we use this to indicate the last rotation is now complete?  Maybe if agents are clearing feedback msgs anyway
 		rotation = -1;
-	else
-		setRotation(rotation,getPeriod(),getCumulativeDays(),vCur_1);
+	else {
+		checkVoltage();  // updates vCur_1 used in next line
+		setRotation(rotation,getPeriod(),(getCumulativeDays()*24) + *P_Hour + (*P_Minute / 30),vCur_1);
+	}
 	return rotation;
 }
 
 extern void
-setRotation(char rotationNumber, char period, char days, int voltage) {
+setRotation(char rotationNumber, char period, char hours, int voltage) {
 	struct NORrotation rotation;
 	char currentRotationNumber = getRotation();
 	
@@ -322,7 +322,7 @@ setRotation(char rotationNumber, char period, char days, int voltage) {
 		rotation.structType = NOR_STRUCT_ID_ROTATION;
 		rotation.rotationNumber = rotationNumber;
 		rotation.periodNumber = period;
-		rotation.daysAfterLastUpdate = days;
+		rotation.hoursAfterLastUpdate = hours;
 		rotation.initVoltage = voltage;
 		ptrsCounts.latestRotation = (struct NORrotation *)AppendStructToFlash(&rotation);
 	}
@@ -405,7 +405,7 @@ setSystemData(struct SystemData *sd) {
 		sd->yearLastUpdated = getUpdateYear();
 	systemCounts.monthday = sd->dateLastUpdated;
 	systemCounts.month = sd->monthLastUpdated; 
-	systemCounts.year = 2000 + getPeriod();
+	systemCounts.year = FILE_YEAR_MIN + getPeriod();
 
 	sc.structType = NOR_STRUCT_ID_COUNTS;
 	sc.period = 0;
@@ -416,7 +416,7 @@ setSystemData(struct SystemData *sd) {
 	sc.rotations[0].structType = NOR_STRUCT_ID_ROTATION;
 	sc.rotations[0].rotationNumber = 0;
 	sc.rotations[0].periodNumber = 0;
-	sc.rotations[0].daysAfterLastUpdate = 0;
+	sc.rotations[0].hoursAfterLastUpdate = 0;
 	for (i=1; i< MAX_ROTATIONS; i++) {
 		sc.rotations[i].structType = -2; // -1 is bad since FF is unwritten memory
 	}

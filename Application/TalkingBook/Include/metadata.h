@@ -14,7 +14,8 @@
 #define DTB_REVISION		16
 #define LB_DURATION			22
 #define LB_DATE_RECORDED	25
-
+#define LB_TIMING			27
+#define	LB_PRIMARY_SPEAKER	28
 #define DC_AUDIO_ITEM_ID	0x40   // change to match ACM
 
 #define METADATA_VERSION 1

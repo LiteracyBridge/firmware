@@ -442,7 +442,7 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
     char unique_id[PATH_LENGTH], digits[16];
 	long start, end, prev;
 	CtnrFile *file;
-	int key;
+	int key,i;
 	int low_voltage;
 	unsigned long wrk1;
 	char *cp, *cp1, category[9];
@@ -654,11 +654,33 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 	 		addField(handle,DC_SOURCE,unique_id,1);       
 	        metadata_numfields += 1;
 
+	        longToDecimalString(getUpdateYear(),(char *)temp,4);
+	        strcat(temp,(char *)"-");
+	        i = getCumulativeDays() + getUpdateDate();
+	        if (i>30) { // quick hack to not worry about exact number of days in month
+	        	longToDecimalString(getUpdateMonth()+1,(char *)temp+strlen(temp),2);
+	        	i -= 30;
+	        } else 
+	        	longToDecimalString(getUpdateMonth(),(char *)temp+strlen(temp),2);
+	        strcat(temp,(char *)"-");
+	        longToDecimalString(i,(char *)temp+strlen(temp),2);
+	 		addField(handle,LB_DATE_RECORDED,temp,1);       
+	        metadata_numfields += 1;
+
 			strcpy(temp,getPackageName());
 			strcat(temp,(char *)":");
 			longToDecimalString(getPowerups(),(char *)(temp+strlen(temp)),4);
-			addField(handle,LB_DATE_RECORDED,temp,1);
+			addField(handle,LB_TIMING,temp,1);
 	        metadata_numfields += 1;
+
+			strcpy(temp,(char *)"HH Rotation 0");
+			temp[strlen(temp)-1] += getRotation();
+			strcat(temp,(char *)":Day ");
+			i = getCumulativeDays() - (((struct NORrotation *)getLatestRotationStruct())->hoursAfterLastUpdate / 24) + 1; 
+			longToDecimalString(i,(char *)(temp+strlen(temp)),2);
+			addField(handle,LB_PRIMARY_SPEAKER,temp,1);
+	        metadata_numfields += 1;
+
 	        
 	        // add other fields here
 	        
