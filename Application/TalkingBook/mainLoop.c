@@ -1282,7 +1282,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			break;		
 
 		case DELETE:
-			stop();
+			markEndPlay(getRTCinSeconds());
 			list = &pkgSystem.lists[context.package->idxMasterList];
 			if(list->isLocked) {
 				insertSound(&pkgSystem.files[SORRY_LOCKED_SUBJECT_IDX],NULL,TRUE);
@@ -1759,6 +1759,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 			// this is designed to fall through
 			
 		case JUMP_BLOCK:
+			markEndPlay(getRTCinSeconds());
 			newBlock = &context.package->blocks[destination];
 			newTime = newBlock->startTime;
 			reposition = TRUE;

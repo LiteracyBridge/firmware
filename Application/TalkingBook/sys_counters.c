@@ -115,31 +115,15 @@ int loadSystemCounts() {
 
 extern
 void initSystemData() {
-	int i;
 	ptrsCounts.systemData = (struct SystemData *)FindFirstFlashStruct(NOR_STRUCT_ID_SYSTEM);
 	ptrsCounts.systemCounts = (struct SystemCounts2 *)FindFirstFlashStruct(NOR_STRUCT_ID_COUNTS);
 	
-	ptrsCounts.period = (struct  NORperiod *)FindLastFlashStruct(NOR_STRUCT_ID_PERIOD);
-	if (ptrsCounts.period == NULL && ptrsCounts.systemCounts != NULL)
-		ptrsCounts.period = (struct NORperiod *)&ptrsCounts.systemCounts->period;
-	
-	ptrsCounts.corruptionDay = (struct NORcorruption *)FindLastFlashStruct(NOR_STRUCT_ID_CORRUPTION);
-	if (ptrsCounts.corruptionDay == NULL && ptrsCounts.systemCounts != NULL)
-		ptrsCounts.corruptionDay = (struct NORcorruption *)&ptrsCounts.systemCounts->corruptionDay;		
-	
-	ptrsCounts.cumulativeDays = (struct NORcumulativeDays *)FindLastFlashStruct(NOR_STRUCT_ID_CUMULATIVE_DAYS);
-	if (ptrsCounts.cumulativeDays == NULL && ptrsCounts.systemCounts != NULL)
-		ptrsCounts.cumulativeDays = (struct NORcumulativeDays *)&ptrsCounts.systemCounts->cumulativeDays;
-	
+	ptrsCounts.period = (struct  NORperiod *)FindLastFlashStruct(NOR_STRUCT_ID_PERIOD);	
+	ptrsCounts.corruptionDay = (struct NORcorruption *)FindLastFlashStruct(NOR_STRUCT_ID_CORRUPTION);	
+	ptrsCounts.cumulativeDays = (struct NORcumulativeDays *)FindLastFlashStruct(NOR_STRUCT_ID_CUMULATIVE_DAYS);	
 	ptrsCounts.latestRotation = (struct NORrotation *)FindLastFlashStruct(NOR_STRUCT_ID_ROTATION);
-	if (ptrsCounts.latestRotation == NULL && ptrsCounts.systemCounts != NULL) {
-		for (i=1;i < MAX_ROTATIONS && ptrsCounts.systemCounts->rotations[i].structType == NOR_STRUCT_ID_ROTATION;i++);
-		ptrsCounts.latestRotation = &ptrsCounts.systemCounts->rotations[i-1];
-	}
 	ptrsCounts.powerups = (struct NORpowerups *)FindLastFlashStruct(NOR_STRUCT_ID_POWERUPS);
-	if (ptrsCounts.powerups == NULL && ptrsCounts.systemCounts != NULL)
-		ptrsCounts.powerups = (struct NORpowerups *)&ptrsCounts.systemCounts->powerups;
-	
+
 	systemCounts.year = FILE_YEAR_MIN + getPeriod();
 	systemCounts.month = getUpdateMonth();
 	systemCounts.monthday = getUpdateDate() + getCumulativeDays();
@@ -152,11 +136,7 @@ getPeriod() {
 	if (ptrsCounts.period != NULL) {
 		ret = ptrsCounts.period->period;
 	} else {
-		struct NORperiod *period = (struct NORperiod *)FindLastFlashStruct(NOR_STRUCT_ID_PERIOD);
-		if (period != NULL) {
-			ret = period->period;
-			ptrsCounts.period = period;
-		}
+		ret = ptrsCounts.systemCounts->period;
 	}
 	return ret;
 }
@@ -183,11 +163,7 @@ getCumulativeDays() {
 	if (ptrsCounts.cumulativeDays != NULL) {
 		ret = ptrsCounts.cumulativeDays->cumulativeDaysSinceUpdate;
 	} else {
-		struct NORcumulativeDays *days = (struct NORcumulativeDays *)FindLastFlashStruct(NOR_STRUCT_ID_CUMULATIVE_DAYS);
-		if (days != NULL) {
-			ret = days->cumulativeDaysSinceUpdate;
-			ptrsCounts.cumulativeDays = days;
-		}
+		ret = ptrsCounts.systemCounts->cumulativeDays;
 	}
 	return ret;
 }
@@ -211,11 +187,7 @@ getCorruptionDay() {
 	if (ptrsCounts.corruptionDay != NULL) {
 		ret = ptrsCounts.corruptionDay->daysAfterLastUpdate;
 	} else {
-		struct NORcorruption *corruption = (struct NORcorruption *)FindLastFlashStruct(NOR_STRUCT_ID_CORRUPTION);
-		if (corruption != NULL) {
-			ret = corruption->daysAfterLastUpdate;
-			ptrsCounts.corruptionDay = corruption;
-		}
+		ret = ptrsCounts.systemCounts->corruptionDay;
 	}
 	return ret;
 }
@@ -238,11 +210,7 @@ getLastInitVoltage(void) {
 	if (ptrsCounts.powerups != NULL) {
 		ret = ptrsCounts.powerups->initVoltage;
 	} else {
-		struct NORpowerups *powerups = (struct NORpowerups *)FindLastFlashStruct(NOR_STRUCT_ID_POWERUPS);
-		if (powerups != NULL) {
-			ret = powerups->initVoltage;
-			ptrsCounts.powerups = powerups;
-		}
+		ret = ptrsCounts.systemCounts->lastInitVoltage;
 	}
 	return ret;
 }
@@ -253,11 +221,7 @@ getPowerups() {
 	if (ptrsCounts.powerups != NULL) {
 		ret = ptrsCounts.powerups->powerups;
 	} else {
-		struct NORpowerups *powerups = (struct NORpowerups *)FindLastFlashStruct(NOR_STRUCT_ID_POWERUPS);
-		if (powerups != NULL) {
-			ret = powerups->powerups;
-			ptrsCounts.powerups = powerups;
-		}
+		ret = ptrsCounts.systemCounts->powerups;
 	}
 	return ret;
 }
@@ -279,14 +243,13 @@ setPowerups(unsigned int powerupNumber) {
 extern
 struct NORrotation *getLatestRotationStruct() {
 	struct NORrotation *ret = NULL;
+	int r;
+	
 	if (ptrsCounts.latestRotation != NULL) {
 		ret = ptrsCounts.latestRotation;
 	} else {
-		struct NORrotation *rotation = (struct NORrotation *)FindLastFlashStruct(NOR_STRUCT_ID_ROTATION);
-		if (rotation != NULL) {
-			ret = rotation;
-			ptrsCounts.latestRotation = rotation;
-		}
+		for (r=1;r < MAX_ROTATIONS && ptrsCounts.systemCounts->rotations[r].structType == NOR_STRUCT_ID_ROTATION;r++);
+		ret = (struct NORrotation *)&ptrsCounts.systemCounts->rotations[r-1];
 	}
 	return ret;
 }
@@ -294,6 +257,7 @@ struct NORrotation *getLatestRotationStruct() {
 char getRotation() {
 	struct NORrotation *rotation = getLatestRotationStruct(); 
 	char ret = -1;
+	
 	if (rotation != NULL)
 		ret = rotation->rotationNumber;
 	return ret;

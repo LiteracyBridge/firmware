@@ -149,12 +149,12 @@ rebuildFlash(int rewriteFlash) {
 			size = sizeof(struct SystemCounts2);
 			write_app_flash((int *)&sc, size, totalSize);
 			ptrsCounts.systemCounts = (struct SystemCounts2 *)(unsigned long)(TB_SERIAL_NUMBER_ADDR + totalSize); 
-			ptrsCounts.period = (struct NORperiod *)&ptrsCounts.systemCounts->period;
-			ptrsCounts.corruptionDay = (struct NORcorruption *)&ptrsCounts.systemCounts->corruptionDay;		
-			ptrsCounts.cumulativeDays = (struct NORcumulativeDays *)&ptrsCounts.systemCounts->cumulativeDays;
-			for (r=1;r < MAX_ROTATIONS && ptrsCounts.systemCounts->rotations[r].structType == NOR_STRUCT_ID_ROTATION;r++);
-			ptrsCounts.latestRotation = &ptrsCounts.systemCounts->rotations[r-1];
-			ptrsCounts.powerups = (struct NORpowerups *)&ptrsCounts.systemCounts->powerups;
+			ptrsCounts.period = NULL; // (struct NORperiod *)&ptrsCounts.systemCounts->period;
+			ptrsCounts.corruptionDay = NULL;  // (struct NORcorruption *)&ptrsCounts.systemCounts->corruptionDay;		
+			ptrsCounts.cumulativeDays = NULL;  // (struct NORcumulativeDays *)&ptrsCounts.systemCounts->cumulativeDays;
+			//for (r=1;r < MAX_ROTATIONS && ptrsCounts.systemCounts->rotations[r].structType == NOR_STRUCT_ID_ROTATION;r++);
+			ptrsCounts.latestRotation = NULL;  //  &ptrsCounts.systemCounts->rotations[r-1];
+			ptrsCounts.powerups = NULL;  // (struct NORpowerups *)&ptrsCounts.systemCounts->powerups;
 			totalSize += size;
 
 			size = sizeof(struct NORmsgMap);
@@ -166,7 +166,7 @@ rebuildFlash(int rewriteFlash) {
 			size = sizeof(struct NORmsgStats);		
 			for (r=0; r < stats.totalRotations;r++) {
 				for (m=0; m < stats.totalMessages; m++) {
-					if (stats.stats[m][r].structType != -2) {  // -2 since -1 is FF and is unwritten memory
+					if (stats.stats[m][r].structType == NOR_STRUCT_ID_MESSAGE_STATS) {
 						write_app_flash((int *)&stats.stats[m][r], size,totalSize);
 						totalSize += size;
 					}
@@ -273,6 +273,7 @@ void rebuildNORmsgMap(struct NORmsgMap *msgMap) {
 static
 void rebuildNORmsgStats(struct NORallMsgStats *allStats) {
 	void *fp;
+	char log[40];
 	int highestMessage=-1, highestRotation=-1;
 	struct NORmsgStats *msgStats;
 	int m,r;
@@ -343,6 +344,23 @@ void rebuildNORmsgStats(struct NORallMsgStats *allStats) {
 		int indexMsg = event->indexMsg;
 		int rotation = event->rotation;
 		struct NORmsgStats *msgStats = &allStats->stats[indexMsg][rotation];
+		
+		log[0] = 0;
+		if (indexMsg > MAX_TRACKED_MESSAGES) {
+			strcpy(log,(char *)"NORstatEvent had bad msg #");
+			longToDecimalString(indexMsg,log+strlen(log),5);
+			strcat(log," rotation #");
+			longToDecimalString(rotation,log+strlen(log),5);			
+		}
+		if (rotation > MAX_ROTATIONS) {
+			strcpy(log,(char *)"NORstatEvent had bad rotation #");
+			longToDecimalString(rotation,log+strlen(log),5);			
+			strcat(log," message #");
+			longToDecimalString(indexMsg,log+strlen(log),5);
+		}
+		if (log[0] != 0) {
+			logException(97,log,0);
+		}
 		if (indexMsg > highestMessage)
 			highestMessage = indexMsg;
 		if (rotation > highestRotation)
