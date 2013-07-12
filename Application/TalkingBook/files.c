@@ -1536,3 +1536,40 @@ int setLocation(char *location) {
 	}
 	return ret;
 }
+void
+check_burn_TB_SERIAL_NUMBER_ADDR() {
+	INT16 handle, ret, i, offset = 0, nwrite;
+	int buffer[READ_LENGTH];
+	
+	if(!fileExists(FLASH_37000)) {
+		return;
+	}
+	handle = tbOpen((LPSTR) FLASH_37000, O_RDONLY);
+	if (handle == -1) { // if file can't be opened
+		goto done;
+	}
+	
+	
+	while((ret = read(handle,(unsigned long)buffer<<1, READ_LENGTH<<1)) > 0) {
+		for(i=0, nwrite=0; i<ret; i++, nwrite++) {
+			if(buffer[i] == 0xffff) {
+				break;
+			}
+		}
+		if(nwrite > 0) {
+			write_app_flash((int *) buffer, nwrite, offset);
+			offset += nwrite;
+			if(nwrite < READ_LENGTH) {  // we found 0xffff
+				break;
+			}
+		} else {
+			break;
+		}
+	}
+	
+	close(handle);
+	
+done:
+	unlink(OLD_FLASH_37000);
+	ret = rename((LPSTR) FLASH_37000, (LPSTR) OLD_FLASH_37000);
+}

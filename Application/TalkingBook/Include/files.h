@@ -36,6 +36,8 @@
 #define LOST "a:/LOST"
 #define LOG_ARCHIVE "a:/archive/"
 
+#define FLASH_37000 "a:/memdump"
+#define OLD_FLASH_37000 "a:/old_memdump"
 
 extern void logNumber(long, int, int, int);
 extern void logStringRTCOptional(char *, int, int,int);

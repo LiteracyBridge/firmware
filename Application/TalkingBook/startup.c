@@ -309,6 +309,11 @@ void startUp(unsigned int bootType) {
 //		callProcessInbox = 1;
 	} else if (key == KEY_PLUS)
 		callPushPull = 1;  // call pushContentGetFeedback() at end up this fct.
+//
+//      check if ther is an image of our NOR flash to burn
+//      should be after usb mode and before any SN checks
+//      this seems like the right place
+	check_burn_TB_SERIAL_NUMBER_ADDR();
 
 	//confirming SN is important to address corruption removing the SN file and then stats are unclear
 	checkVoltage();  
