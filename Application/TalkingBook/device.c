@@ -36,7 +36,7 @@ APP_IRAM unsigned int vCur_1;
 APP_IRAM unsigned long tCur_1;
 APP_IRAM int vThresh_1;
 APP_IRAM int shuttingDown;
-	
+APP_IRAM int inUSBHostMode;
 
 APP_IRAM static int v_high = 0;
 APP_IRAM static int v_low = 0xFC;
@@ -370,13 +370,17 @@ checkVoltage() {
 			if (isPlaying) {
 				if (vCur_1 < 220) 
 					tripRate = 75;
-				else 
+				else if (vCur_1 < 320)
 					tripRate = 200;
+				else 
+					tripRate = 300;
 			} else {
 				if (vCur_1 < 220) 
 					tripRate = 20;
-				else 
+				else if (vCur_1 < 320)
 					tripRate = 75;
+				else 
+					tripRate = 150;
 			}
 						
 			if (voltageDropRateStatic >= tripRate) { 

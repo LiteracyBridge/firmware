@@ -306,6 +306,7 @@ int setUSBHost(BOOL enter) {
 			wait(1000);
 			USBHost_Flag = C_USBDevicesmountOK;
 		}
+		inUSBHostMode = 1;
 	} else {
 			//  unmount USB devices;  
 			if(_deviceunmount(1) != 0x00)
@@ -316,8 +317,8 @@ int setUSBHost(BOOL enter) {
 			*P_USBH_INTEN  = 0;	
 			SetSystemClockRate(CLOCK_RATE);  //set clock to non usb host value
 			setLED(LED_RED,FALSE);
+			inUSBHostMode = 0;
 	}
-
 	return 0;
 }
 

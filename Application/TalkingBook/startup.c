@@ -175,7 +175,7 @@ void setDefaults(void) {
 	ADMIN_COMBO_KEYS   = KEY_UP | KEY_DOWN;
 	LOG_FILE = (char *)DEFAULT_LOG_FILE; // chicken & egg - we haven't read config.txt or config.bin to set LOG_FILE
 	SYSTEM_VARIABLE_FILE = (char *)DEFAULT_SYSTEM_VARIABLE_FILE;
-
+	inUSBHostMode = 0;
 }
 
 static int checkRTCFile(char *time) {	
