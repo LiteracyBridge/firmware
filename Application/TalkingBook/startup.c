@@ -352,11 +352,11 @@ void startUp(unsigned int bootType) {
 	checkVoltage();
 	logStringRTCOptional(buffer, ASAP, LOG_ALWAYS,0);  // calling this before config means we rely on default location
 		
+	initAlarmData(); // Calling this with every startup should get rid of all alarms other than the midnight alarm, which should now consistently work.
+
 	if(bootType == BOOT_TYPE_COLD_RESET) {
 		int wasReset = 0;
 		int hasCorruption = 0;
-
-		initAlarmData();
 
 		if ((*P_Reset_Flag & 0x0001))
 			logStringRTCOptional((char *)"LVR RESET!", ASAP,LOG_ALWAYS,0);
