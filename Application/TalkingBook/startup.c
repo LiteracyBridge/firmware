@@ -30,6 +30,7 @@ extern APP_IRAM unsigned int vCur_1;
 extern APP_IRAM unsigned long tCur_1;
 extern APP_IRAM int shuttingDown;
 extern APP_IRAM int volumeMaxThisCycle;
+extern APP_IRAM int inUSBHostMode;
 
 static int checkRTCFile(char *);	
 static char * addTextToSystemHeap (char *);

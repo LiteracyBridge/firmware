@@ -40,6 +40,7 @@ extern void DrvRTCIntDisable( void );
 extern void DrvEnableReminderISR( void );
 extern void DrvDisableReminderISR( void );
 extern unsigned int CLOCK_RATE;
+extern APP_IRAM int inUSBHostMode;
 
 extern APP_IRAM unsigned int vCur_1;
 extern void refuse_lowvoltage(int);
