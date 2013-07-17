@@ -89,7 +89,8 @@ extern unsigned long addAlarm(unsigned int hour, unsigned int minute, unsigned i
 extern void setNextAlarm(void);
 extern void confirmSNonDisk(void);
 extern void alertCorruption(void);
-
+extern void	confirmPackageNameonDisk(void);
+extern void confirmLocationonDisk(void);
 #define N_RTC_ALARMS 6
 #define N_RTC_INIT   N_RTC_ALARMS+1
 

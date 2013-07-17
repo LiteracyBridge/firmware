@@ -586,7 +586,6 @@ void housekeeping() {
 	saveVolumeProfile();
 	exportFlashStats();
 	write_config_bin();  // build a config.bin
-	writeVersionToDisk(SYSTEM_PATH);  // make sure the version file is correct
 	//checkDoubleSRNprefix(); // this can be removed once the dup serial number prefixes are fixed
 	//confirmSNonDisk(); // make sure the serial number file is correct 
 	buildMyStatsCSV();
@@ -1089,6 +1088,67 @@ extern void confirmSNonDisk(void) {
 			ret = _findnext(&file_info);
 		}
 		handle = tbOpen((LPSTR)fileSN,O_CREAT|O_RDWR|O_TRUNC);
+		close(handle);
+	}
+}
+
+extern void confirmLocationonDisk(void) {
+	int exists, handle, ret;
+	char fileLoc[PATH_LENGTH],filePattern[PATH_LENGTH];
+	char sysPath[PATH_LENGTH];	
+	struct f_info file_info;
+	
+//	if (!SNexists())
+//		return; // no serial number - don't write to disk
+	if (SYSTEM_PATH)
+		strcpy(sysPath,SYSTEM_PATH);
+	else 
+		strcpy(sysPath,DEFAULT_SYSTEM_PATH);
+	strcpy(fileLoc,sysPath);
+	strcat(fileLoc, (char *)getLocation());
+	strcat(fileLoc, (char *)LOCATION_FILE_EXTENSION);
+	exists = fileExists((LPSTR) fileLoc);
+	if (!exists) {
+		mkdir((LPSTR)sysPath);
+		tbChdir((LPSTR)sysPath);
+		strcpy(filePattern,(char *)DEFAULT_SYSTEM_PATH);
+		strcat(filePattern,(char *)LOCATION_FILE_PATTERN);
+		ret =_findfirst((LPSTR)filePattern, &file_info, D_FILE);
+		while (ret >= 0) { 			
+			ret = unlink((LPSTR)file_info.f_name);
+			ret = _findnext(&file_info);
+		}
+		handle = tbOpen((LPSTR)fileLoc,O_CREAT|O_RDWR|O_TRUNC);
+		close(handle);
+	}
+}
+
+extern void confirmPackageNameonDisk(void) {
+	int exists, handle, ret;
+	char filePkg[PATH_LENGTH],filePattern[PATH_LENGTH];
+	char sysPath[PATH_LENGTH];	
+	struct f_info file_info;
+	
+//	if (!SNexists())
+//		return; // no serial number - don't write to disk
+	if (SYSTEM_PATH)
+		strcpy(sysPath,SYSTEM_PATH);
+	else 
+		strcpy(sysPath,DEFAULT_SYSTEM_PATH);
+	strcpy(filePkg,sysPath);
+	strcat(filePkg, (char *)getPackageName());
+	strcat(filePkg, (char *)PACKAGE_EXT);
+	exists = fileExists((LPSTR) filePkg);
+	if (!exists) {
+		mkdir((LPSTR)sysPath);
+		tbChdir((LPSTR)sysPath);
+		strcpy(filePattern,(char *)"*" PACKAGE_EXT);
+		ret =_findfirst((LPSTR)filePattern, &file_info, D_FILE);
+		while (ret >= 0) { 			
+			ret = unlink((LPSTR)file_info.f_name);
+			ret = _findnext(&file_info);
+		}
+		handle = tbOpen((LPSTR)filePkg,O_CREAT|O_RDWR|O_TRUNC);
 		close(handle);
 	}
 }

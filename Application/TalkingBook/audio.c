@@ -817,7 +817,8 @@ void markStartPlay(long timeNow, const char * name) {
 		longToDecimalString((long)vCur_1,log+strlen(log),3);
 		logString(log,ASAP,LOG_NORMAL);
 		strcpy(msgName,name);
-		msgNotPlayedSec = 0;	
+		msgNotPlayedSec = 0;
+		pauseStarted = -1;	
 	}
 }
 

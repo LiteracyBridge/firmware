@@ -8,6 +8,7 @@
 
 #define FILE_YEAR_MIN 2000
 #define CLOCK_PERIOD	(systemCounts.year - FILE_YEAR_MIN)
+#define PACKAGE_EXT		".pkg"
 
 typedef struct SystemCounts SystemCounts;
 

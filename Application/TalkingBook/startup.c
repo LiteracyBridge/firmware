@@ -327,9 +327,6 @@ void startUp(unsigned int bootType) {
 	createMsgNameOffsets();
 	if (fileExists(REFLASH_STATS_FILE)) 
 		importNewSystemData(REFLASH_STATS_FILE);
-
-	//confirmSNonDisk();
-
 	checkVoltage();  
 //	ret = loadSystemCounts();  // calling this before config means we rely on the default location for system-vars
 	//systemCounts.powerUpNumber++; 
