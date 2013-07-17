@@ -392,6 +392,12 @@ setSystemData(struct SystemData *sd) {
 
 	size = sizeof(struct SystemCounts2);	// round up # of words		
 	write_app_flash((int *)&sc, size, totalSize);
+	ptrsCounts.systemCounts = (struct SystemCounts2 *)(TB_SERIAL_NUMBER_ADDR + totalSize);
+	ptrsCounts.period = NULL;
+	ptrsCounts.cumulativeDays = NULL;
+	ptrsCounts.powerups = NULL;
+	ptrsCounts.corruptionDay = NULL;
+	ptrsCounts.latestRotation = NULL;
 }
 
 extern char *
