@@ -584,6 +584,7 @@ void housekeeping() {
 		// give visual feedback of shutting down (aural feedback when user causes shutdown in takeAction())
 	setLED(LED_ALL,TRUE);
 	saveVolumeProfile();
+	exportFlashStats();
 	write_config_bin();  // build a config.bin
 	writeVersionToDisk(SYSTEM_PATH);  // make sure the version file is correct
 	//checkDoubleSRNprefix(); // this can be removed once the dup serial number prefixes are fixed
