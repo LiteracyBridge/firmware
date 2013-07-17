@@ -1182,7 +1182,7 @@ buildExchgOstats() {
 	delim_len = convertDoubleToSingleChar(delim,delim,FALSE);
 	
 	strcpy(to, OSTAT_DIR);
-	strcat(to, (const char *)TB_SERIAL_NUMBER_ADDR);
+	strcat(to, (const char *)getSerialNumber());
 	strcat(to, OSTATS_EXCHG_EXT);
 
 	// process any ostats files from other devices	
@@ -1298,7 +1298,7 @@ expandOstatFile(char *filename) {
 			if(cp == NULL)
 				break;
 			*cp = 0;
-			if(!strcmp(from, (const char *)TB_SERIAL_NUMBER_ADDR)) {
+			if(!strcmp(from, (const char *)getSerialNumber())) {
 				state = FIND_DELIM;
 				break;   // its me, some other device reported this device's stats
 			}

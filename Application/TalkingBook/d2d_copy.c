@@ -379,7 +379,7 @@ buildMyStatsCSV() {
 	char *cp;
 
 	strcpy(to, STAT_DIR);
-	strcat(to, (const char *)TB_SERIAL_NUMBER_ADDR);
+	strcat(to, (const char *)getSerialNumber());
 	strcat(to, ".csv");
 	cp = strrchr(to, '/') + 1;
 
@@ -389,7 +389,7 @@ buildMyStatsCSV() {
 	}
 
 //  first line is serial_number, cycle number
-	strcpy(lineout, (char *)TB_SERIAL_NUMBER_ADDR);
+	strcpy(lineout, (char *)getSerialNumber());
 	strcat(lineout, ",");
 	longToDecimalString(getPowerups(),(char *)strLog,4);
 	strcat(lineout, strLog);
@@ -449,12 +449,12 @@ void exchangeStatsCSV() {
 //	mkdir("a:/b/system/ostats");  // remove after testing
 //	strcpy(to, "a:/b/system/ostats/");  // remove after testing with a b folder on a:
 
-	strcat(to, (const char *)TB_SERIAL_NUMBER_ADDR);
+	strcat(to, (const char *)getSerialNumber());
 	strcat(to, ".csv");
 	
 	
 	strcpy(from, STAT_DIR);
-	strcat(from, (const char *)TB_SERIAL_NUMBER_ADDR);
+	strcat(from, (const char *)getSerialNumber());
 	strcat(from, ".csv");
 	
 	ret = fileCopy((char *)from, (char *)to);
@@ -465,11 +465,11 @@ void exchangeStatsCSV() {
 //
 
 	strcpy(to, CLI_OSTAT_DIR);
-	strcat(to, (const char *)TB_SERIAL_NUMBER_ADDR);
+	strcat(to, (const char *)getSerialNumber());
 	strcat(to, OSTATS_EXCHG_EXT);
 	
 	strcpy(from, OSTAT_DIR);
-	strcat(from, (const char *)TB_SERIAL_NUMBER_ADDR);
+	strcat(from, (const char *)getSerialNumber());
 	strcat(from, OSTATS_EXCHG_EXT);
 
 //  from a: to b:
@@ -700,7 +700,7 @@ cloneDevice() {
 	if(newlog >= 0) {
 		close(newlog);
 		strcpy(to, "CLONED by ");
-		strcat(to, (char *) (TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN));
+		strcat(to, (char *) getSerialNumber());
 		appendStringToFile(path, to);
 	}
 	

@@ -466,7 +466,7 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 		catLangDir(filepath);	
 //		strcat(filepath,pkgName);
 		cp1 = filepath + strlen(filepath);	// save this position
-		strcat(filepath, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN);
+		strcat(filepath, getSerialNumber());
 		strcat(filepath, "_");
 		strcat(filepath, digits);
 		strcpy(pkgName, cp1);      // change pkgName to show file name we used
@@ -475,7 +475,7 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 		strcpy(filepath,USER_PATH);
 //		strcat(filepath,pkgName);
 		cp1 = filepath + strlen(filepath);	// save this position
-		strcat(filepath, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN);
+		strcat(filepath, getSerialNumber());
 		strcat(filepath, "_");
 		strcat(filepath, cursor); //adding category code to filename, primarily to make is easy to find feedback category
 		strcat(filepath, "_");
@@ -575,7 +575,7 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 	        writeLE32(handle, wrk1, CURRENT_POS);  //meta data version = 1
 	        writeLE32(handle, metadata_numfields, CURRENT_POS); // 4 byte for num fields
 	        
-	        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
+	        strcpy(unique_id, getSerialNumber()); // skip serial number prefix
 	        strcat(unique_id, "_");    
 	       	strcat(unique_id, digits);
 	            
@@ -585,7 +585,7 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 	        addField(handle, DTB_REVISION, (char *)"0", 1);       
 	        metadata_numfields += 1;
 	        
-	        strcpy(unique_id, (char *)TB_SERIAL_NUMBER_ADDR + CONST_TB_SERIAL_PREFIX_LEN); // skip serial number prefix
+	        strcpy(unique_id, getSerialNumber()); // skip serial number prefix
 	
 	
 	        strcat(unique_id, "_");    
