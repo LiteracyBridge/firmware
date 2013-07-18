@@ -500,7 +500,7 @@ exportFlashStats(void) {
 	rebuildFlash(0);	
 	//Temporary code until transition is complete to new flash stats:
 	confirmSNonDisk();
-	writeVersionToDisk(SYSTEM_PATH);  // make sure the version file is correct
+	writeVersionToDisk(DEFAULT_SYSTEM_PATH);  // make sure the version file is correct
 	confirmPackageNameonDisk();
 	confirmLocationonDisk();
 }

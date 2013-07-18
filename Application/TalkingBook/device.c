@@ -383,7 +383,7 @@ checkVoltage() {
 					tripRate = 150;
 			}
 						
-			if (voltageDropRateStatic >= tripRate) { 
+			if (voltageDropRateStatic >= tripRate && v < 350) { 
 				forceflushLog();  // to ensure the log msg below is not beyond buffer
 				logString("Static voltage dropping fast" , BUFFER, LOG_ALWAYS);
 				voltageShutdown();
