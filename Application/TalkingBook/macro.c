@@ -177,6 +177,17 @@ int nextMacroKey (int keystroke) {
 	}
 
 	if ((idxMacro >= MAX_MACRO_ITEMS) || (macro[idxMacro].wait == -1)) {
+/*
+		char msg[80];
+		char wrk[10];
+		strcpy(msg, "Macro idxMacro=");
+		unsignedlongToHexString((unsigned long) idxMacro, wrk);
+		strcat(msg, wrk);
+		strcat(msg," macro[idxMacro].wait=");
+		unsignedlongToHexString((unsigned long) (macro[idxMacro].wait), wrk); 
+		strcat(msg, wrk);
+		logString(msg, BUFFER, LOG_ALWAYS);
+*/
 		MACRO_FILE = 0; // end of macros
 		keystroke = 0;
 		idxMacro = idxLoop = countLoop = secLastMacro = 0;

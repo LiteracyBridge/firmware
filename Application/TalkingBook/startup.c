@@ -66,7 +66,7 @@ APP_IRAM int GREEN_LED_WHEN_PLAYING;
 APP_IRAM int INACTIVITY_SECONDS;
 APP_IRAM int MIC_GAIN_NORMAL, MIC_GAIN_HEADPHONE;
 APP_IRAM char *USER_CONTROL_TEMPLATE;
-APP_IRAM char *MACRO_FILE;
+APP_IRAM char *MACRO_FILE, *MACRO_FILE_SAVE;
 APP_IRAM int VOLTAGE_SAMPLE_FREQ_SEC, USB_CLIENT_POLL_INTERVAL;
 APP_IRAM int DEBUG_MODE, LOG_KEYS;
 APP_IRAM unsigned int CLOCK_RATE;
@@ -474,6 +474,15 @@ void startUp(unsigned int bootType) {
 */
 // try to load a saved config.bin if present
 	configExists = (restore_config_bin() == -1?0:1);
+	if(configExists) {
+		strcpy(buffer, "restore config_bin succeeded, MACRO_FILE=");
+		if(MACRO_FILE) {
+			strcat(buffer, MACRO_FILE);
+		} else {
+			strcat(buffer, "NULL");
+		}
+		logString(buffer, BUFFER, LOG_ALWAYS);
+	}
 	
 	if(!configExists) {
 		//config.bin does not exist or is corrupted so not a normal shutdown
@@ -662,7 +671,7 @@ int loadConfigFile(void) {
 	
 	for (attempt = 0,goodPass = 0;attempt < MAX_RETRIES && !goodPass;attempt++) {
 		goodPass = 1;
-		MACRO_FILE = 0; // default case if no MACRO_FILE listed
+		MACRO_FILE = MACRO_FILE_SAVE = 0; // default case if no MACRO_FILE listed
 		handle = tbOpen((unsigned long)(CONFIG_FILE),O_RDONLY);
 		if ((handle == -1) && fileExists((LPSTR)OLD_CONFIG_FW_UPDATE_FILENAME)) { 
 			// this code is just for backward compat during the fw upgrade from v1.70 to v1.71
@@ -779,7 +788,7 @@ int loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"MIC_GAIN_NORMAL")) MIC_GAIN_NORMAL=strToInt(value);
 				else if (!strcmp(name,(char *)"MIC_GAIN_HEADPHONE")) MIC_GAIN_HEADPHONE=strToInt(value);
 				else if (!strcmp(name,(char *)"USER_CONTROL_TEMPLATE")) USER_CONTROL_TEMPLATE=addTextToSystemHeap(value);
-				else if (!strcmp(name,(char *)"MACRO_FILE")) MACRO_FILE=addTextToSystemHeap(value);
+				else if (!strcmp(name,(char *)"MACRO_FILE")) MACRO_FILE=addTextToSystemHeap(value), MACRO_FILE_SAVE=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"VOLTAGE_SAMPLE_FREQ_SEC")) VOLTAGE_SAMPLE_FREQ_SEC=strToInt(value);
 				else if (!strcmp(name,(char *)"USB_CLIENT_POLL_INTERVAL")) USB_CLIENT_POLL_INTERVAL=strToInt(value);
 				else if (!strcmp(name,(char *)"DEBUG_MODE")) DEBUG_MODE=strToInt(value);
@@ -960,7 +969,18 @@ int write_config_bin () {
 		SAV_CONFIG_INT (MIC_GAIN_NORMAL);
 		SAV_CONFIG_INT (MIC_GAIN_HEADPHONE);		
  		SAV_CONFIG_STRING (USER_CONTROL_TEMPLATE);
-		SAV_CONFIG_STRING (MACRO_FILE);
+ 		
+//		SAV_CONFIG_STRING (MACRO_FILE);
+		if(MACRO_FILE_SAVE) {
+			char msg[80];
+			strcpy(msg, "write_config_bin save MACRO_FILE ");
+			strcat(msg, MACRO_FILE_SAVE);
+			logString(msg, ASAP, LOG_ALWAYS);
+			strcpy(cfg_string_buf + offset, MACRO_FILE_SAVE);
+			cfg.offset_MACRO_FILE = offset;
+			offset += strlen(MACRO_FILE_SAVE) + 1;
+		}
+
 		SAV_CONFIG_INT (VOLTAGE_SAMPLE_FREQ_SEC);
 		SAV_CONFIG_INT (USB_CLIENT_POLL_INTERVAL);
 		SAV_CONFIG_INT (DEBUG_MODE);
@@ -969,7 +989,7 @@ int write_config_bin () {
 		SAV_CONFIG_INT (LONG_LIST_NAMES);
 		SAV_CONFIG_INT (V_FAST_VOLTAGE_DROP_TIME_SEC);
 		SAV_CONFIG_INT (V_VOLTAGE_DROP_CHECK_INTERVAL);
-		SAV_CONFIG_INT (LONG_KEYPRESS_COUNTER);\
+		SAV_CONFIG_INT (LONG_KEYPRESS_COUNTER);
 		
 		cfg.len_string_buf = cfg_string_buf_len;
 		
@@ -1120,6 +1140,9 @@ static int restore_config_bin () {
 		SET_CONFIG_STRING(AUDIO_FILE_EXT);
 		SET_CONFIG_STRING(USER_CONTROL_TEMPLATE);
 		SET_CONFIG_STRING(MACRO_FILE);
+		if(MACRO_FILE) {
+			MACRO_FILE_SAVE = addTextToSystemHeap(MACRO_FILE);
+		}
 	}
 	
 	LED_ALL = LED_GREEN | LED_RED;
@@ -1152,6 +1175,7 @@ static int disaster_config_strings() {
 		AUDIO_FILE_EXT        = addTextToSystemHeap(DEFAULT_AUDIO_FILE_EXT);
 		USER_CONTROL_TEMPLATE = 0;
 		MACRO_FILE            = 0;
+		MACRO_FILE_SAVE       = 0;
 }
 
 #define FIXNULL(string) if(string == 0) string = addTextToSystemHeap(DEFAULT_ ## string)

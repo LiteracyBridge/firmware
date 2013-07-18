@@ -147,7 +147,7 @@ extern void cleanUpOldRevs(void);
 				strlen (CUSTOM_PKG_PREFIX) + 1 + \
 				strlen (AUDIO_FILE_EXT) + 1 + \
 				strlen (USER_CONTROL_TEMPLATE) + 1 + \
-				strlen (MACRO_FILE) + 1
+				strlen (MACRO_FILE_SAVE) + 1
 
 typedef struct config_bin {
 				int KEY_PLAY;
