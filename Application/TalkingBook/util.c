@@ -8,6 +8,9 @@
 #include ".\System\Include\System\GPL162002.h"
 #include "Include/device.h"
 #include "Include/files.h"
+
+static int isWhiteSpace(char);
+
 int strIndex (const char *str, char c) {
 	char * cursor;
 	int ret;
@@ -302,4 +305,20 @@ unsigned long rand() {
 	return(ret);
 }
 
+static
+int isWhiteSpace(char c) {
+	return ((c==0x09 || c==0x0a || c==0x0d || c==0x20)?1:0);
+}
 
+char *trim(char *string) {
+	char *ptr;
+	
+	ptr = string + strlen(string); // start at the null
+	while (isWhiteSpace(*(ptr-1)) && ptr > string) {
+		ptr--;	
+	}
+	*ptr = 0;  // now that previous character is first non-white-space, add null to terminate
+	
+	for (ptr=string;isWhiteSpace(*ptr);ptr++);
+	return ptr;
+}

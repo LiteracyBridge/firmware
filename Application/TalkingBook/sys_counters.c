@@ -308,18 +308,19 @@ importNewSystemData (LPSTR importFile) {
 		// test there is a new line and that it isn't a comment (starting with "#")
 		if(*name == '#')
 			continue;
-		if (!strcmp(name,(char *)"SRN")) strcpy(sd.serialNumber,value);
+		if (!strcmp(name,(char *)"SRN")) strcpy(sd.serialNumber,trim(value));
 			else if (!strcmp(name,(char *)"REFLASH")) sd.countReflashes=strToInt(value);
-			else if (!strcmp(name,(char *)"PACKAGE")) strcpy(sd.contentPackage,value);
-			else if (!strcmp(name,(char *)"UPDATE")) strcpy(sd.updateNumber,value);
-			else if (!strcmp(name,(char *)"LOCATION")) strcpy(sd.location,value);
+			else if (!strcmp(name,(char *)"PACKAGE")) strcpy(sd.contentPackage,trim(value));
+			else if (!strcmp(name,(char *)"UPDATE")) strcpy(sd.updateNumber,trim(value));
+			else if (!strcmp(name,(char *)"LOCATION")) strcpy(sd.location,trim(value));
 			else if (!strcmp(name,(char *)"YEAR")) sd.yearLastUpdated=strToInt(value);
 			else if (!strcmp(name,(char *)"MONTH")) sd.monthLastUpdated=strToInt(value);
 			else if (!strcmp(name,(char *)"DATE")) sd.dateLastUpdated=strToInt(value);
 	}
 	close(handle);
 	setSystemData(&sd);	
-	unlink(REFLASH_STATS_FILE);
+	unlink(REFLASH_STATS_FILE_ARCHIVE);
+	rename(REFLASH_STATS_FILE,REFLASH_STATS_FILE_ARCHIVE);
 }
 	
 extern void 

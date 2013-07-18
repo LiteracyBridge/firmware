@@ -18,6 +18,7 @@
 #define CLI_STAT_DIR "b:/statistics/stats/" 
 #define CLI_OSTAT_DIR "b:/statistics/ostats/"
 #define REFLASH_STATS_FILE		((LPSTR)"a:/update.txt")
+#define REFLASH_STATS_FILE_ARCHIVE 	((LPSTR) DEFAULT_SYSTEM_PATH "update.txt")
 #define SNCSV "SN.csv"
 
 void recordStats(char *filename, unsigned long handle, unsigned int why, unsigned long data);

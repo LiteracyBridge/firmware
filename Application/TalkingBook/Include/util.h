@@ -34,6 +34,7 @@ extern int goodChar(char,int);
 extern int goodString(char *,int);
 extern int LBstrncpy (char *, const char *, int);
 extern int LBstrncat (char *, const char *, int);
+extern char* trim(char *);
 
 extern unsigned long rand(void);
 
