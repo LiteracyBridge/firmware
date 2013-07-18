@@ -355,6 +355,9 @@ setSystemData(struct SystemData *sd) {
 			sd->countReflashes = 1;
 		} else
 			strcpy(sd->serialNumber,getSerialNumber());	
+		if (!sd->serialNumber[0]) {
+			strcpy(sd->serialNumber,(char *)"UNKNOWN");			
+		}
 	}
 	if (!sd->location[0]) 
 		strcpy(sd->location,getLocation());
