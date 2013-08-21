@@ -33,7 +33,7 @@ ARYFILE	= "$(OUTDIR)\himem.ary"
 
 SBMFILE	= "$(OUTDIR)\himem.sbm"
 
-OPT	= -S -gstabs -Wall -DUSBRP -mglobal-var-iram -mISA=2.0
+OPT	= -S -gstabs -Wall -DUSBRP -DHIMEM -mglobal-var-iram -mISA=2.0
 
 ASFLAGS	= -t4 -d -be
 
