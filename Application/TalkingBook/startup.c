@@ -24,6 +24,7 @@ extern int testPCB(void);
 extern unsigned int SetSystemClockRate(unsigned int);
 extern int SystemIntoUDisk(unsigned int);
 extern INT16 SD_Initial(void);
+extern void makeEssentialDirs();
 
 extern APP_IRAM int vThresh_1;
 extern APP_IRAM unsigned int vCur_1;
@@ -315,6 +316,10 @@ void startUp(unsigned int bootType) {
 //      should be after usb mode and before any SN checks
 //      this seems like the right place
 	check_burn_TB_SERIAL_NUMBER_ADDR();
+	
+	
+	// make essential directories
+	makeEssentialDirs();
 
 	//confirming SN is important to address corruption removing the SN file and then stats are unclear
 	checkVoltage();  

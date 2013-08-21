@@ -39,6 +39,15 @@
 #define FLASH_37000 "a:/memdump"
 #define OLD_FLASH_37000 "a:/old_memdump"
 
+#include "Application/Talkingbook/Include/filestats.h"
+
+#define LOG_DIR     "a:/log"
+#define INBOX_MESSAGES "a:/Inbox/messages"
+#define INBOX_UPDATES  "a:/Inbox/sys-updates"
+
+#define ESSENTIAL_PATHS    LOG_ARCHIVE, LOG_DIR, STAT_DIR, OSTAT_DIR, INBOX_MESSAGES, INBOX_UPDATES
+
+
 extern void logNumber(long, int, int, int);
 extern void logStringRTCOptional(char *, int, int,int);
 extern void logString(char *, int, int);

@@ -158,6 +158,13 @@ PARAM=
 ID=
 EXPORT=3
 # End Source File
+# Begin Source File
+SOURCE=Application\TalkingBook\stats.c
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
 # End Group
 # Begin Group "Component"
 #PROP Default_Filter=
