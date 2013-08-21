@@ -13,6 +13,11 @@ APP_IRAM static long filePosition;
 APP_IRAM char logBuffer[LOG_BUFFER_SIZE];
 APP_IRAM int idxLogBuffer;
 
+char * essentialPaths[] = {
+	ESSENTIAL_PATHS
+	,""
+};
+
 extern APP_IRAM int shuttingDown;
 extern APP_IRAM unsigned int vCur_1;
 extern void refuse_lowvoltage(int);
@@ -1573,3 +1578,70 @@ done:
 	unlink(OLD_FLASH_37000);
 	ret = rename((LPSTR) FLASH_37000, (LPSTR) OLD_FLASH_37000);
 }
+
+// make a complete path
+// return 0 if fail, non-zero if success
+int mkpath(LPSTR path)
+{
+  int c = 0, ret;
+  char *lastslash = 0, *p;
+  char tmppath[LONG_FILE_LENGTH];
+  
+  strcpy(tmppath, path);
+  p = tmppath;
+  c = strlen(p);
+  if(*(p+c-1) == '/') {
+  	*(p+c-1) = 0;
+  }
+
+  ret = dirExists((LPSTR) p);
+  if(ret) {
+  	return(ret);	// already exists & is a directory
+  }
+  
+  ret = mkdir((LPSTR) p);
+  if(ret == 0) {
+  	return(1);		// all parents existed & we made the new directory
+  }
+  
+  
+// find first slash after root slash
+  if(strchr(p, ':')) {
+  	lastslash = strchr((p+3), '/');  // have drive letter
+  } else {
+  	lastslash = strchr((p+1), '/');  // no drive letter
+  }
+  if(!lastslash) {
+  	return(0);		// we tried mkdir((LPSTR) path); above
+  }
+  
+  ret = 1;
+  while (1) {  // try to make entire directory path
+    if (lastslash) {
+      *lastslash = 0;
+      ret = mkdir(p);
+    }
+    if (!lastslash) {
+    	 break;
+    }
+    
+    *lastslash = '/';
+    lastslash = strchr(lastslash+1, '/');
+  }
+
+  return (ret == 0 ? 1 : 0);
+}
+
+// make sure all directories in essentialPaths array are created
+void
+makeEssentialDirs() {
+	int ret;
+	LPSTR p = essentialPaths[0];
+	while(*((char *)p)) {
+		ret = mkpath(p);
+		p += strlen(p);
+		p++;
+	}
+}
+
+
