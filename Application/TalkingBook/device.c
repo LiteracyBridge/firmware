@@ -279,7 +279,7 @@ checkVoltage() {
 
 	if (v < V_MIN_RUN_VOLTAGE_TRANS) {
 		forceflushLog();  // to ensure the log msg below is not beyond buffer
-		strcpy(log,"v < V_MIN_RUN (");
+		strcpy(log,"SHUTTING DOWN - v < V_MIN_RUN (");
 		longToDecimalString(v,log+strlen(log),3);
 		strcat(log," < ");
 		longToDecimalString(V_MIN_RUN_VOLTAGE_TRANS,log+strlen(log),3);		
@@ -298,7 +298,7 @@ checkVoltage() {
 		readingsPaused++;
 		if (readingsPaused >= 50 && ((v+10) < voltageAvgPaused)) {
 			forceflushLog();  // to ensure the log msg below is not beyond buffer
-			strcpy(log,(char *)"Paused v:");
+			strcpy(log,(char *)"SHUTTING DOWN - Paused v:");
 			longToDecimalString(v,log+strlen(log),3);
 			strcat(log,(char *)" Avg:");
 			longToDecimalString(voltageAvgPaused,log+strlen(log),3);
@@ -341,7 +341,7 @@ checkVoltage() {
 
 		if (vCur_1 < V_MIN_RUN_VOLTAGE) {
 			forceflushLog();  // to ensure the log msg below is not beyond buffer
-			logString("vCur_1 < V_MIN_RUN_VOLTAGE" , BUFFER, LOG_ALWAYS);
+			logString("SHUTTING DOWN - vCur_1 < V_MIN_RUN_VOLTAGE" , BUFFER, LOG_ALWAYS);
 			voltageShutdown();
 		}
 		
@@ -385,7 +385,7 @@ checkVoltage() {
 						
 			if (voltageDropRateStatic >= tripRate && v < 350) { 
 				forceflushLog();  // to ensure the log msg below is not beyond buffer
-				logString("Static voltage dropping fast" , BUFFER, LOG_ALWAYS);
+				logString("SHUTTING DOWN - Static voltage dropping fast" , BUFFER, LOG_ALWAYS);
 				voltageShutdown();
 			} else if (voltageDropRateStatic >= tripRate * 0.8) {
 				adjustVolume(-1,TRUE,FALSE);  // getting too close; lower volume
