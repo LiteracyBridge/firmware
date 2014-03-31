@@ -13,10 +13,10 @@ APP_IRAM static long filePosition;
 APP_IRAM char logBuffer[LOG_BUFFER_SIZE];
 APP_IRAM int idxLogBuffer;
 
-char * essentialPaths[] = {
+/*char * essentialPaths[] = {
 	ESSENTIAL_PATHS
 	,""
-};
+};*/
 
 extern APP_IRAM int shuttingDown;
 extern APP_IRAM unsigned int vCur_1;
@@ -556,7 +556,6 @@ char * getLine (int fileHandle, char *buffer) {
 }
 
 INT16 tbOpen(LPSTR path, INT16 open_flag) {
-	const int RETRIES = 2;
 	int i;
 	INT16 handle;
 	char dirPath[PATH_LENGTH];
@@ -578,18 +577,10 @@ INT16 tbOpen(LPSTR path, INT16 open_flag) {
 		Snd_Stop(); // DO NOT use stop() here because that calls flushLog(), which eventually calls this fct.
 	
 	//todo: move number of attempts into config file, but have fall back number in define (since config has to be open)
-	for (i = 0; i < RETRIES; i++) { 
+	for (i = 0; i < 2; i++) { // 2 retries to allow creating directory 
 		handle = open(path, open_flag);
 		if (handle >= 0)
 			break;
-		wait(100);
-	}
-	if (handle == -1) {
-		if (strcmp((char *)path,LOG_FILE) && strcmp((char *)path,DEFAULT_LOG_FILE)) { // error didn't occur trying to open log file
-			strcpy(logMsg,(char *)"Cannot open ");
-			strcat(logMsg,(char *)path);
-			logString(logMsg,BUFFER,LOG_DETAIL);
-		}
 		// log potential memory corruption
 		if ((*pPath == '/') || (*(pPath+1) == ':')) {
 			// absolute path
@@ -601,8 +592,18 @@ INT16 tbOpen(LPSTR path, INT16 open_flag) {
 		ptr = strrchr(dirPath,'/');
 		if (ptr == NULL)
 			ptr = strrchr(dirPath,'\\');		
-		if (ptr)
+		if (ptr) {
 			*ptr = 0;
+			mkpath((LPSTR)dirPath);
+		}
+		wait(100);
+	}
+	if (handle == -1) {
+		if (strcmp((char *)path,LOG_FILE) && strcmp((char *)path,DEFAULT_LOG_FILE)) { // error didn't occur trying to open log file
+			strcpy(logMsg,(char *)"Cannot open ");
+			strcat(logMsg,(char *)path);
+			logString(logMsg,BUFFER,LOG_DETAIL);
+		}
 		if ((strlen(dirPath) > 2) && isCorrupted(dirPath)) {  // exclude root, "a:"
 			setCorruptionDay(getCumulativeDays());
 			if (strcmp((char *)path,LOG_FILE) && strcmp((char *)path,DEFAULT_LOG_FILE)) { // error didn't occur trying to open log file
@@ -1633,7 +1634,7 @@ int mkpath(LPSTR path)
 }
 
 // make sure all directories in essentialPaths array are created
-void
+/*void
 makeEssentialDirs() {
 	int ret;
 	LPSTR p = essentialPaths[0];
@@ -1643,5 +1644,5 @@ makeEssentialDirs() {
 		p++;
 	}
 }
-
+*/
 

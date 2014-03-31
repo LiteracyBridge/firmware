@@ -319,7 +319,7 @@ void startUp(unsigned int bootType) {
 	
 	
 	// make essential directories
-	makeEssentialDirs();
+	//makeEssentialDirs();  -- commenting out for now: instead using mkpath() to create directories on the fly from tbOpen()
 
 	//confirming SN is important to address corruption removing the SN file and then stats are unclear
 	checkVoltage();  

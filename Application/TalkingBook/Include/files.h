@@ -44,7 +44,7 @@
 #define INBOX_MESSAGES "a:/Inbox/messages"
 #define INBOX_UPDATES  "a:/Inbox/sys-updates"
 
-#define ESSENTIAL_PATHS    LOG_DIR, STAT_DIR, OSTAT_DIR, INBOX_MESSAGES, INBOX_UPDATES
+//#define ESSENTIAL_PATHS    LOG_DIR, STAT_DIR, OSTAT_DIR, INBOX_MESSAGES, INBOX_UPDATES
 
 
 extern void logNumber(long, int, int, int);
