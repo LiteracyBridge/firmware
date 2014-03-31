@@ -614,8 +614,9 @@ void startUp(unsigned int bootType) {
 	if (inspect)
 		unlink((LPSTR)SELF_INSPECT_TRIGGER_FILE);	
 	if (inspect || callProcessInbox) {
-		checkVoltage();  
-		processInbox();
+		//commenting out the call to processInbox() for now since TBs are currently using device-to-device copying
+		//checkVoltage();  
+		//processInbox();
 	}
 	if (callPushPull) { // copy outbox files to connecting device, get stats and audio feedback
 		checkVoltage();  
