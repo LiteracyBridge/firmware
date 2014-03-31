@@ -34,7 +34,6 @@
 #define OTHER_INSPECT_TRIGGER_FILE	"b:/" INSPECT_TRIGGER_FILE
 #define BKPATH "a:/backup/"
 #define LOST "a:/LOST"
-#define LOG_ARCHIVE "a:/archive/"
 
 #define FLASH_37000 "a:/memdump"
 #define OLD_FLASH_37000 "a:/old_memdump"
@@ -45,7 +44,7 @@
 #define INBOX_MESSAGES "a:/Inbox/messages"
 #define INBOX_UPDATES  "a:/Inbox/sys-updates"
 
-#define ESSENTIAL_PATHS    LOG_ARCHIVE, LOG_DIR, STAT_DIR, OSTAT_DIR, INBOX_MESSAGES, INBOX_UPDATES
+#define ESSENTIAL_PATHS    LOG_DIR, STAT_DIR, OSTAT_DIR, INBOX_MESSAGES, INBOX_UPDATES
 
 
 extern void logNumber(long, int, int, int);

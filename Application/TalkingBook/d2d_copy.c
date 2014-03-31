@@ -806,7 +806,7 @@ cloneDir(char *fromdir, char *todir) {
 		if(!strcmp(from, OSTAT_DIR)) {
 			continue;
 		}
-		if(!strcmp(from, LOG_ARCHIVE)) {
+		if(!strcmp(from, LOG_ARCHIVE_PATH)) {
 			continue;
 		}
 		
