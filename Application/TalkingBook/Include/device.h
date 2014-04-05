@@ -87,6 +87,7 @@ extern unsigned long setRTCalarmHours(unsigned);
 extern void setRTCalarm(unsigned int, unsigned int, unsigned int);
 extern unsigned long addAlarm(unsigned int hour, unsigned int minute, unsigned int second);
 extern void setNextAlarm(void);
+extern void removeAlarm(unsigned long );
 extern void confirmSNonDisk(void);
 extern void alertCorruption(void);
 extern void	confirmPackageNameonDisk(void);

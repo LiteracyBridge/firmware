@@ -18,8 +18,8 @@ APP_IRAM unsigned int  stat_pkg_type;
 APP_IRAM int statINIT = 0;
 APP_IRAM unsigned long SACM_A1800_Bytes;
 APP_IRAM unsigned long SACM_A1800_Msec;		 
-APP_IRAM unsigned int msgNotPlayedSec;
-APP_IRAM int pauseStarted;
+APP_IRAM long msgNotPlayedSec;
+APP_IRAM long pauseStarted;
 APP_IRAM char msgName[FILE_LENGTH];
 APP_IRAM VolumeProfile volumeProfile;
 APP_IRAM long lastVolumeChangeRTC;
@@ -545,16 +545,13 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 					resume();
 				}
 			}
+			//if (checkAlarm())
+			//	end = getRTCinSeconds();			
 		} while ((!key || (key == KEY_PLAY)) && (low_voltage == 0)); // TODO: this key press to stop shouldn't be hard coded
-//		while ((end - start) < 3) { // must be at least 2.0 second recording
-//			end = getRTCinSeconds();			
-//		}
 		SACM_Stop();		//Snd_Stop(); // no need to call stop() and flush the log
 		setLED(LED_RED,FALSE);
-		//lseek(handle, 6, SEEK_SET );			//Seek to the start of the file input
-		//write(handle,(LPSTR)header<<1,6);
- 
-// write meta data to end of file
+
+		// write meta data to end of file
                
         close(handle);	// rhm:  I think its already closed, I can't write to it here
         
@@ -654,16 +651,11 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 	 		addField(handle,DC_SOURCE,unique_id,1);       
 	        metadata_numfields += 1;
 
-	        longToDecimalString(getUpdateYear(),(char *)temp,4);
-	        strcat(temp,(char *)"-");
-	        i = getCumulativeDays() + getUpdateDate();
-	        if (i>30) { // quick hack to not worry about exact number of days in month
-	        	longToDecimalString(getUpdateMonth()+1,(char *)temp+strlen(temp),2);
-	        	i -= 30;
-	        } else 
-	        	longToDecimalString(getUpdateMonth(),(char *)temp+strlen(temp),2);
-	        strcat(temp,(char *)"-");
-	        longToDecimalString(i,(char *)temp+strlen(temp),2);
+	        longToDecimalString(systemCounts.year,(char *)temp,4);
+	        strcat(temp,(char *)"/");
+	        longToDecimalString(systemCounts.month,(char *)temp+strlen(temp),2);
+	        strcat(temp,(char *)"/");
+	        longToDecimalString(systemCounts.monthday,(char *)temp+strlen(temp),2);
 	 		addField(handle,LB_DATE_RECORDED,temp,1);       
 	        metadata_numfields += 1;
 
@@ -673,11 +665,18 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 			addField(handle,LB_TIMING,temp,1);
 	        metadata_numfields += 1;
 
+			strcpy(temp,"Cumulative Days:");
+			longToDecimalString(i,(char *)(temp+strlen(temp)),4);
+			logString(temp,BUFFER,LOG_DETAIL);
+			i = (((struct NORrotation *)getLatestRotationStruct())->hoursAfterLastUpdate / 24) + 1; 
+			strcpy(temp,"Days when rotation started:");
+			longToDecimalString(i,(char *)(temp+strlen(temp)),4);
+			logString(temp,BUFFER,LOG_DETAIL);
 			strcpy(temp,(char *)"HH Rotation 0");
 			temp[strlen(temp)-1] += getRotation();
 			strcat(temp,(char *)":Day ");
 			i = getCumulativeDays() - (((struct NORrotation *)getLatestRotationStruct())->hoursAfterLastUpdate / 24) + 1; 
-			longToDecimalString(i,(char *)(temp+strlen(temp)),2);
+			longToDecimalString(i,(char *)(temp+strlen(temp)),3);
 			addField(handle,LB_PRIMARY_SPEAKER,temp,1);
 	        metadata_numfields += 1;
 
@@ -926,7 +925,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 				if (strcmp(category,(char *)FEEDBACK_CATEGORY) && strcmp(category,(char *)TB_CATEGORY)) {
 					// do not keep flash stats on user feedback playbacks or TB category playbacks
 					int code = -1;
-					if (msgTime > (context.msgLengthMsec / 100 * 92)) // consider 92% as completed
+					if (msgTime > (context.msgLengthMsec - 2000 )) // consider within 2 seconds as completed
 						code = 4;
 					else if (msgTime > (context.msgLengthMsec / 100 * 75))
 						code = 3;
@@ -941,7 +940,10 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 				}
 				wrk = lseek(SACMFileHandle, 0L, SEEK_CUR);
 				strcpy(statpath, STAT_DIR);
-				strcat(statpath, STAT_FN); 
+				strcat(statpath, getPackageName()); 
+				strcat(statpath, (char *)"-");
+				strcat(statpath, STAT_FN);
+				strcat(statpath, (char *)".stat"); 
 				
 //				strcpy(msg, "STAT_CLOSE ");
 //				strcat(msg, statpath);
@@ -979,7 +981,10 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 		STAT_FN[strlen(STAT_FN) - 4] = 0; //chop off ".a18"
 		
 		strcpy(statpath, STAT_DIR);
-		strcat(statpath, STAT_FN); 
+		strcat(statpath, getPackageName()); 
+		strcat(statpath, (char *)"-");
+		strcat(statpath, STAT_FN);
+		strcat(statpath, (char *)".stat"); 
 		
 		stathandle = tbOpen((LPSTR)statpath, O_CREAT|O_RDWR);
 		if(stathandle >= 0) {
@@ -1006,9 +1011,10 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 
 	case STAT_SURVEY1:
 		strcpy(statpath, STAT_DIR);
-	//		strcat(statpath, getDeviceSN(0));
-	//		strcat(statpath, "~");
-		strcat(statpath, STAT_FN); 
+		strcat(statpath, getPackageName()); 
+		strcat(statpath, (char *)"-");
+		strcat(statpath, STAT_FN);
+		strcat(statpath, (char *)".stat"); 
 		stathandle = tbOpen((LPSTR)statpath, O_CREAT|O_RDWR);
 		if(stathandle >= 0) {
 			ret = read(stathandle, (unsigned long) &(tmp_file_stats) << 1, STATSIZE);
@@ -1022,9 +1028,10 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 	
 	case STAT_APPLY:
 		strcpy(statpath, STAT_DIR);
-	//		strcat(statpath, getDeviceSN(0));
-	//		strcat(statpath, "~");
-		strcat(statpath, STAT_FN); 
+		strcat(statpath, getPackageName()); 
+		strcat(statpath, (char *)"-");
+		strcat(statpath, STAT_FN);
+		strcat(statpath, (char *)".stat"); 
 		
 		if(stat_pkg_type > PKG_SYS) {	
 			char *category = getCurrentList(&pkgSystem.lists[0]);
@@ -1049,7 +1056,10 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 		strcpy(statpath, STAT_DIR);
 	//		strcat(statpath, getDeviceSN(0));
 	//		strcat(statpath, "~");
+		strcat(statpath, getPackageName()); 
+		strcat(statpath, (char *)"-");
 		strcat(statpath, STAT_FN); 
+		strcat(statpath, (char *)".stat"); 
 		
 		if(stat_pkg_type > PKG_SYS) {	
 			char *category = getCurrentList(&pkgSystem.lists[0]);
@@ -1323,10 +1333,11 @@ extern void updateVolumeProfile(int lastVolume, long currentRTCsec) {
 	int diffSec;
 	
 	diffSec = currentRTCsec - lastVolumeChangeRTC;
-	if (diffSec < 0) {
+	// currentRTCsec should now account for changes in day
+	//if (diffSec < 0) {
 		// new day must have occurred
-		diffSec = currentRTCsec + (86400-lastVolumeChangeRTC);
-	}
+	//	diffSec = currentRTCsec + (86400-lastVolumeChangeRTC);
+	//}
 	volumeProfile.volumeSeconds[lastVolume] += diffSec;
 	getRTC(volumeProfile.lastUpdateRTC);
 	lastVolumeChangeRTC = currentRTCsec;
@@ -1420,8 +1431,7 @@ static void getVolumeProfileFilename(char *vpFilename) {
 	strcat(vpFilename,getDeviceSN());
 	strcat(vpFilename,(char *)"_");
 	longToDecimalString(CLOCK_PERIOD,vpFilename+strlen(vpFilename),3);
-	strcat(vpFilename,(char *)".bin");
+	strcat(vpFilename,(char *)".vol");
 	logString(vpFilename,BUFFER,LOG_DETAIL);
 	return;
 }
-

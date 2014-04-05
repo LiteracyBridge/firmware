@@ -53,7 +53,7 @@ extern void logString(char *, int, int);
 extern char *getLine (int, char *);
 extern BOOL readBuffer(int, char *, int);
 extern BOOL nextNameValuePair (int, char *, char, char **, char **);
-extern void clearStaleLog(void);
+//extern void clearStaleLog(void);
 extern void flushLog(void);
 extern int appendStringToFile(const char *, char *);
 extern int insertStringInFile(const char *, char *, long);
@@ -84,5 +84,5 @@ extern int isCorrupted(char *);
 extern int replaceFromBackup(char *);
 extern void triggerInspection(void);
 extern void saveLogFile(int);
-extern int setLocation(char *); 
+//extern int setLocation(char *); 
 #endif

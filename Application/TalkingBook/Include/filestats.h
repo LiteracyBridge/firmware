@@ -144,17 +144,6 @@ struct NORrotation {
 	int initVoltage;
 };
 
-// 3 words if we wanted a rotation timing map - not such a big deal compared to 10
-//char structType;
-//char dayOfUpdate[5]
-
-// infrequently updated info kept in the serial number flash beyond the serial number
-//Updated 1-10 times per year:
-//   - Location (could be just 2 bytes for an id or ~32 bytes if we wanted to just put the full string in there)
-//   - ID of Content Package (could be just 2 bytes for an id or ~12 bytes if we wanted to just put the full string in there)
-//   - Date of Content Update (could be 2 bytes or ~10 bytes for the whole string)
-
-
 #define STATSIZE (sizeof(struct ondisk_filestats) << 1) 
 
 extern void *FindLastFlashStruct(char);

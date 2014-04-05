@@ -273,28 +273,26 @@ void startUp(unsigned int bootType) {
 	int inspect = 0, firmwareWasUpdated = 0;
 	extern unsigned long rtc_fired;
 
-	if(rtc_fired == 0xff000000) {	
-		rtc_fired = 0;
-		while(*P_Second == 0) wait(100);
-		initSystemData();
-		incrementCumulativeDays();
-		fastShutdown();
-	}
-
-
-/*	ret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY);
-
-	while(ret == 1) {
-		ret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_ONCE);
-	}
-	if (!ret) { //USB connection was made
-		fastShutdown();
-	}
-*/	checkVoltage();
 	// set temporary valid date for file ops (like logging) until system variables are read 
 	systemCounts.month = 1;
 	systemCounts.monthday = 1;
 	systemCounts.year = FILE_YEAR_MIN;
+
+	// confirm systemData structure in NORFlash matches latest version in this firmware (NOR_STRUCT_ID_SYSTEM should increment for any change in struct)
+	// setSystemData() puts the struct SystemData first at TB_SERIAL_NUMBER_ADDR
+	ptrsCounts.systemData = (struct SystemData *)TB_SERIAL_NUMBER_ADDR;
+
+	if(rtc_fired == 0xff000000) {	
+		rtc_fired = 0;
+		while(*P_Second == 0) wait(100);
+		if (ptrsCounts.systemData->structType == NOR_STRUCT_ID_SYSTEM) {
+			initSystemData();
+			incrementCumulativeDays();
+		}
+		fastShutdown();
+	}
+	checkVoltage();
+	
 	// Before any trouble is caused, allow forcing USB mode.		
 	key = keyCheck(1);  // long keycheck 
 	key &= ~LONG_KEY_STROKE;
@@ -302,20 +300,25 @@ void startUp(unsigned int bootType) {
 		if ((key & KEY_STAR) == KEY_STAR) {
 			// refresh file on memory card with binary file of system info and stats data
 			// only do this with KEY_STAR, so that KEY_MINUS can be used if an error in writing stats file prevents going into USB mode
-			initSystemData();
-			createMsgNameOffsets();
-			exportFlashStats();
+
+			// confirm systemData structure in NORFlash matches latest version in this firmware (NOR_STRUCT_ID_SYSTEM should increment for any change in struct)
+			if (ptrsCounts.systemData->structType == NOR_STRUCT_ID_SYSTEM) {
+				initSystemData();
+				createMsgNameOffsets();
+				exportFlashStats();
+			}
 		}
 		SystemIntoUDisk(1);	
 		fastShutdown();
-//		callProcessInbox = 1;
-	} else if (key == KEY_PLUS)
-		callPushPull = 1;  // call pushContentGetFeedback() at end up this fct.
+		//callProcessInbox = 1;
+	} 
+	//else if (key == KEY_PLUS)
+	//	callPushPull = 1;  // call pushContentGetFeedback() at end up this fct.
 //
 //      check if ther is an image of our NOR flash to burn
 //      should be after usb mode and before any SN checks
 //      this seems like the right place
-	check_burn_TB_SERIAL_NUMBER_ADDR();
+//	check_burn_TB_SERIAL_NUMBER_ADDR();
 	
 	
 	// make essential directories
@@ -325,13 +328,33 @@ void startUp(unsigned int bootType) {
 	checkVoltage();  
 	if(fileExists((LPSTR)"a:/system.img"))
 		startUpdate((char *)"a:/system.img");
+
+	// confirm systemData structure in NORFlash matches latest version in this firmware (NOR_STRUCT_ID_SYSTEM should increment for any change in struct)
+	if (ptrsCounts.systemData->structType != NOR_STRUCT_ID_SYSTEM) {
+		// need to reflash from file before going further since SystemData struct has changed
+		if (fileExists(REFLASH_STATS_FILE)) {
+			importNewSystemData(REFLASH_STATS_FILE);
+			unlink(REFLASH_STATS_FILE_ARCHIVE);
+			rename(REFLASH_STATS_FILE,REFLASH_STATS_FILE_ARCHIVE);
+		} else {
+			// firmware SystemData struct and NORFlash are out of synch and there's no flash stats file -- not good
+			// set everything to zero and setSystemData will set strings to UNKNOWN
+			struct SystemData sd;
+			memset(&sd,0,sizeof(struct SystemData));
+			setSystemData(&sd);	
+		}	
+		initSystemData();
+	} else {
+		// need to get current system data before loading new stuff, since SystemData struct has not changed
+		createMsgNameOffsets();
+		initSystemData();
+		if (fileExists(REFLASH_STATS_FILE)) {
+			importNewSystemData(REFLASH_STATS_FILE);
+			unlink(REFLASH_STATS_FILE_ARCHIVE);
+			rename(REFLASH_STATS_FILE,REFLASH_STATS_FILE_ARCHIVE);
+		}
+	}
 	
-	if (SNexists()) 
-		transitionOldToNewFlash();
-	initSystemData();
-	createMsgNameOffsets();
-	if (fileExists(REFLASH_STATS_FILE)) 
-		importNewSystemData(REFLASH_STATS_FILE);
 	checkVoltage();  
 //	ret = loadSystemCounts();  // calling this before config means we rely on the default location for system-vars
 	//systemCounts.powerUpNumber++; 
@@ -354,7 +377,7 @@ void startUp(unsigned int bootType) {
 	getRTC(buffer+strlen(buffer));
 	checkVoltage();
 	logStringRTCOptional(buffer, ASAP, LOG_ALWAYS,0);  // calling this before config means we rely on default location
-		
+	logDate();
 	initAlarmData(); // Calling this with every startup should get rid of all alarms other than the midnight alarm, which should now consistently work.
 
 	if(bootType == BOOT_TYPE_COLD_RESET) {
@@ -373,7 +396,7 @@ void startUp(unsigned int bootType) {
 			//systemCounts.year++;	
 			//systemCounts.poweredDays = 0;
 			checkVoltage();  
-			saveSystemCounts();	
+			//saveSystemCounts();	
 			strcpy(buffer,"BOOT_TYPE_COLD_RESET -- NEW BATTERIES???");
 			logStringRTCOptional(buffer, ASAP, LOG_ALWAYS,0);
 		}
@@ -479,6 +502,7 @@ void startUp(unsigned int bootType) {
 */
 // try to load a saved config.bin if present
 	configExists = (restore_config_bin() == -1?0:1);
+	/*
 	if(configExists) {
 		strcpy(buffer, "restore config_bin succeeded, MACRO_FILE=");
 		if(MACRO_FILE) {
@@ -488,7 +512,7 @@ void startUp(unsigned int bootType) {
 		}
 		logString(buffer, BUFFER, LOG_ALWAYS);
 	}
-	
+	*/
 	if(!configExists) {
 		//config.bin does not exist or is corrupted so not a normal shutdown
 		normal_shutdown = 0;
@@ -557,13 +581,15 @@ void startUp(unsigned int bootType) {
 	strcat (buffer,(char *)" words remaining)");
 	strcat(buffer,(char *)"\x0d\x0a" "Package:");
 	strcat(buffer,getPackageName());
+	strcat(buffer,(char *)"\x0d\x0a" "Update:");
+	strcat(buffer,getUpdateNumber());
 	strcat(buffer,(char *)"  Cycle:");
 	longToDecimalString(getPowerups(),(char *)(buffer+strlen(buffer)),4);
 	strcat(buffer,(char *)"  Rotation:");
 	longToDecimalString(getRotation(), (char *)(buffer+strlen(buffer)), 1);
 	strcat(buffer,(char *)"  Period:");
 	longToDecimalString(getPeriod(), (char *)(buffer+strlen(buffer)), 4);
-	strcat(buffer,(char *)"  Powered Days:");
+	strcat(buffer,(char *)"  Cumulative Days:");
 	longToDecimalString(getCumulativeDays(), (char *)(buffer+strlen(buffer)), 4);
 	strcat(buffer,"\x0d\x0a" "Debug:");
 	switch (DEBUG_MODE) {
@@ -588,6 +614,7 @@ void startUp(unsigned int bootType) {
 	}
 	checkVoltage();  
 	logStringRTCOptional(buffer,BUFFER,LOG_ALWAYS,0);
+	dumpSystemDataToLog(ptrsCounts.systemData);
 	strcpy(buffer,"Init volt:");
 	longToDecimalString(vCur_1,buffer+strlen(buffer),3);
 	logString(buffer,BUFFER,LOG_NORMAL);	
@@ -627,7 +654,7 @@ void startUp(unsigned int bootType) {
 
 	ret = *P_RTC_INT_Status;	
 	*P_RTC_INT_Status |= ret;	// clear all interrupt flags
-	if (MACRO_FILE)	
+	if (*MACRO_FILE)	
 		loadMacro();
 	loadVolumeProfile();
 	adjustVolume(NORMAL_VOLUME,FALSE,FALSE);
@@ -733,7 +760,7 @@ int loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"LED_GREEN")) LED_GREEN=strToInt(value);
 				else if (!strcmp(name,(char *)"LED_RED")) LED_RED=strToInt(value);
 				else if (!strcmp(name,(char *)"MAX_SPEED")) MAX_SPEED=strToInt(value);
-				else if (!strcmp(name,(char *)"NORMAL_SPEED")) NORMAL_SPEED=strToInt(value);
+//				else if (!strcmp(name,(char *)"NORMAL_SPEED")) NORMAL_SPEED=strToInt(value);
 				else if (!strcmp(name,(char *)"MAX_VOLUME")) MAX_VOLUME=strToInt(value);
 				else if (!strcmp(name,(char *)"MIN_VOLUME")) MIN_VOLUME=strToInt(value);
 				else if (!strcmp(name,(char *)"NORMAL_VOLUME")) NORMAL_VOLUME=strToInt(value);
@@ -752,7 +779,7 @@ int loadConfigFile(void) {
 				else if (!strcmp(name,(char *)"SYS_UPDATE_SUBDIR")) SYS_UPDATE_SUBDIR=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"LOG_FILE")) LOG_FILE=addTextToSystemHeap(value);
 				else if (!strcmp(name,(char *)"LIST_MASTER")) LIST_MASTER=addTextToSystemHeap(value);
-				else if (!strcmp(name,(char *)"MAX_PWR_CYCLES_IN_LOG")) MAX_PWR_CYCLES_IN_LOG=strToInt(value);
+//				else if (!strcmp(name,(char *)"MAX_PWR_CYCLES_IN_LOG")) MAX_PWR_CYCLES_IN_LOG=strToInt(value);
 				else if (!strcmp(name,(char *)"SYSTEM_VARIABLE_FILE")) SYSTEM_VARIABLE_FILE=addTextToSystemHeap(value);
 				// can we make the following prefixes be single-byte chars? 
 				// it would make it easier to check list items starts with CUSTOM_PKG_PREFIX
@@ -815,6 +842,11 @@ int loadConfigFile(void) {
 	LED_ALL = LED_GREEN | LED_RED;
 	if (*(LOG_FILE+1) != ':')
 		LOG_FILE = 0; // should be == "a://....." otherwise, logging is turned off
+	if (!MACRO_FILE) {
+		// 
+		MACRO_FILE=addTextToSystemHeap((char*)"");
+		MACRO_FILE_SAVE=addTextToSystemHeap((char*)"");
+	}
 	return ret;
 }
 
@@ -977,7 +1009,7 @@ int write_config_bin () {
  		SAV_CONFIG_STRING (USER_CONTROL_TEMPLATE);
  		
 //		SAV_CONFIG_STRING (MACRO_FILE);
-		if(MACRO_FILE_SAVE) {
+		if(*MACRO_FILE_SAVE) {
 			char msg[80];
 			strcpy(msg, "write_config_bin save MACRO_FILE ");
 			strcat(msg, MACRO_FILE_SAVE);
@@ -1146,7 +1178,7 @@ static int restore_config_bin () {
 		SET_CONFIG_STRING(AUDIO_FILE_EXT);
 		SET_CONFIG_STRING(USER_CONTROL_TEMPLATE);
 		SET_CONFIG_STRING(MACRO_FILE);
-		if(MACRO_FILE) {
+		if(*MACRO_FILE) {
 			MACRO_FILE_SAVE = addTextToSystemHeap(MACRO_FILE);
 		}
 	}

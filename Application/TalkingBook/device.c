@@ -30,6 +30,7 @@ static void logKeystroke(int);
 //static void Log_ClockCtrl(void);
 static void turnSDoff(void);
 static void voltageShutdown(void);
+static long getRTCinSecondsWithoutDays(void);
 
 APP_IRAM static unsigned int keydown_counter;
 APP_IRAM unsigned int vCur_1;
@@ -37,6 +38,7 @@ APP_IRAM unsigned long tCur_1;
 APP_IRAM int vThresh_1;
 APP_IRAM int shuttingDown;
 APP_IRAM int inUSBHostMode;
+APP_IRAM static unsigned long lastTime=0;
 
 APP_IRAM static int v_high = 0;
 APP_IRAM static int v_low = 0xFC;
@@ -105,6 +107,7 @@ void setRTCFromText(char *time) {
 		setDate(month,date);
 	if (hour >= 0 && min >= 0 && sec >= 0)
 		setRTC(hour,min,sec);
+	lastTime=0; // necessary to ensure getRTCinSeconds doesn't get confused with a backwards change in date
 }
 
 void setRTC(unsigned int h, unsigned int m, unsigned int s) {
@@ -194,14 +197,39 @@ void logRTC(void) {
 	logString(time,ASAP,LOG_ALWAYS);
 }*/
 
-long getRTCinSeconds(void) {
+static
+long getRTCinSecondsWithoutDays() {
 	unsigned long ret, secH;
 	unsigned int secM, sec;
-	
+
 	sec = (unsigned int)*P_Second;
 	secM = (unsigned int)*P_Minute * 60;
 	secH = (unsigned long)*P_Hour * 3600;
-	ret = sec + secM + secH;
+	ret = sec + secM + secH;	
+	return ret;
+}
+
+
+
+long getRTCinSeconds(void) {
+	unsigned long ret, secD, noDays;
+	
+	noDays = getRTCinSecondsWithoutDays();
+	secD = (unsigned long)getCumulativeDays() * 24L * 3600L;
+	ret = noDays + secD;
+	while (ret < lastTime) {
+		// new day must have occured 
+		secD = (unsigned long)incrementCumulativeDays() * 24L * 3600L;
+		ret = noDays + secD;
+	}
+	if (rtc_fired && ((rtc_fired & 0x00ffffffL) == 0)) {
+		// remove alarm without incrementing days, since that is done here.
+		// rtcAlarmFired() increments days when device is HALTed
+		removeAlarm(rtc_fired);	// remove from table if present
+		rtc_fired = 0;
+		setNextAlarm();
+	}
+	lastTime = ret;
 	return (long)ret;
 }
 
@@ -436,7 +464,7 @@ int keyCheck(int longCheck) {
 	// BUG: Combo keys are not working. Not sure why yet.
 //	if (keystroke == ADMIN_COMBO_KEYS)
 //		adminOptions();  //might also want to move this to control tracks
-	if (MACRO_FILE) {
+	if (*MACRO_FILE) {
 		keystroke = nextMacroKey(keystroke);
 		logKeystroke(keystroke);
 		return(keystroke);
@@ -809,7 +837,7 @@ setRTCalarmHours(unsigned int hours) {
 
 void
 setRTCalarm(unsigned int hour, unsigned int minute, unsigned int second) {
-	char msg[32] = "set ALM ";
+	//char msg[32] = "set ALM ";
 	
 	*P_Alarm_Second = second;
 	*P_Alarm_Minute = minute;
@@ -818,6 +846,7 @@ setRTCalarm(unsigned int hour, unsigned int minute, unsigned int second) {
 	*P_RTC_INT_Ctrl |= RTC_ALARM_INTERRUPT_ENABLE;
 	*P_RTC_Ctrl     |= (RTC_MODULE_ENABLE | RTC_ALARM_FUNCTION_ENABLE);
 	
+	/*
 	longToDecimalString(hour,msg+8,4);
 	msg[12] = 'h';
 	longToDecimalString(minute,msg+13,2);
@@ -826,6 +855,7 @@ setRTCalarm(unsigned int hour, unsigned int minute, unsigned int second) {
 	msg[18] = 's';
 	msg[19] = 0;
 	logString(msg,ASAP,LOG_DETAIL);
+	*/
 }
 
 /*  called from isr.asm when RTC alarm has fired
@@ -836,7 +866,7 @@ RTC_Alarm_Fired() {
 	
 	int wrk = *P_RTC_INT_Status;
 	
-	rtc_fired = getRTCinSeconds();
+	rtc_fired = getRTCinSecondsWithoutDays();
 	
 	if(rtc_fired == 0) {
 		rtc_fired = 0xff000000;
@@ -854,7 +884,7 @@ void rtcAlarmFired(unsigned long alarm) {
 	strcpy(buffer,"rtcAlarmFired() alarm=");
 	unsignedlongToHexString((long)alarm, (char *)wrk);
 	strcat(buffer, wrk);
-	logString(buffer,ASAP,LOG_ALWAYS);
+	logString(buffer,BUFFER,LOG_DETAIL);
 	
 	removeAlarm(alarm);	// remove from table if present
 
@@ -869,9 +899,6 @@ void rtcAlarmFired(unsigned long alarm) {
 //		saveSystemCounts();
 //		logRTC(); // remove
 		while(*P_Second == 0) wait(100);
-		strcpy(buffer,"poweredDays=");
-		longToDecimalString(getCumulativeDays(), buffer+12, 4);
-		logString(buffer,ASAP,LOG_ALWAYS);
 		lastActivity = 0;  // if up when rollover prevent shutdown
 //		resetRTC();
 //		resetRTC23();  // test, really set rtc to 0,0,1sec
@@ -879,7 +906,8 @@ void rtcAlarmFired(unsigned long alarm) {
 	}
 	setNextAlarm();
 }
-void removeAlarm(unsigned long al)
+
+extern void removeAlarm(unsigned long al)
 {
 	int i, j;
 	
@@ -970,7 +998,7 @@ void logAlarms(char *preface) {
 void setNextAlarm() {
 	unsigned int i, hour, minute, second;
 	unsigned long newAlarm;
-	unsigned long curRTC   = getRTCinSeconds();
+	unsigned long curRTC   = getRTCinSecondsWithoutDays();
 	char buf[64], strbuf[12];
 	
 	curAlarmSet = 0;
@@ -989,6 +1017,7 @@ void setNextAlarm() {
 			setRTCalarm(hour, minute, second);
 			newAlarm = (long)((long)hour * 3600L) + (long)((long)minute * 60L) + (long)second;
 				
+			/*
 			strcpy(buf,"setRTCalarm to ");
 			unsignedlongToHexString((unsigned long)newAlarm, (char *)strbuf);
 			strcat(buf, strbuf);
@@ -998,6 +1027,7 @@ void setNextAlarm() {
 			unsignedlongToHexString(curRTC, (char *)strbuf);
 			strcat(buf, strbuf);
 			logString(buf,BUFFER,LOG_DETAIL); 
+			*/
 		
 			curAlarmSet = newAlarm;
 			break;	
@@ -1005,7 +1035,7 @@ void setNextAlarm() {
 	}
 
 	if(curAlarmSet == 0 ) {
-		logString("setRTCalarm(0,0,0)",BUFFER,LOG_DETAIL); 
+		//logString("setRTCalarm(0,0,0)",BUFFER,LOG_DETAIL); 
 		while(*P_Hour == 0 && *P_Minute == 0 && *P_Second == 0);
 		setRTCalarm(0, 0, 0);
 // test		setPlus10();	

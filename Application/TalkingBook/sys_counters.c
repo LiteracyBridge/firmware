@@ -11,12 +11,16 @@
 
 extern APP_IRAM unsigned int vCur_1;
 extern void refuse_lowvoltage(int);
+static int daysInMonth(int);
 
 APP_IRAM SystemCounts systemCounts;
 APP_IRAM struct SystemData systemData;
 APP_IRAM struct SystemCounts2 systemCounts2;	
 APP_IRAM struct PtrsSystemDataCounts ptrsCounts;
 
+
+/*
+// THIS FCT REPLACED BY struct SystemCounts2 in NORFlash
 void saveSystemCounts() {
 	int handle, ret, i;
 
@@ -44,51 +48,64 @@ void saveSystemCounts() {
 	}
 	close(handle);
 }
+*/
+
+static int daysInMonth(int month) {
+	  int ret;
+	  
+	  switch (month) {
+		case 1:
+		case 3:
+		case 5:
+		case 7:
+		case 8:
+		case 10: 
+		case 12:
+			ret = 31;
+			break;
+		case 2:
+			ret = 28;
+			break;
+		case 4:
+		case 6:
+		case 9:
+		case 11:
+			ret = 30;
+			break;
+		default:
+			ret = 0;
+			break;
+	}
+	return ret;
+}
 
 extern void
 fixBadDate(SystemCounts *sc) {
-	int advance = 0;
+	int maxDays;
 	
 	if (sc->year < FILE_YEAR_MIN)
 		sc->year = FILE_YEAR_MIN;
 	if (sc->monthday < 1)
 		sc->monthday = 1;
 
-	switch (sc->month) {
-		case 1:
-		case 3:
-		case 5:
-		case 7:
-		case 8:
-		case 10: // special handling for December
-			if (sc->monthday > 31)
-				advance = 1;
-			break;
-		case 2:
-			if (sc->monthday > 28)
-				advance = 1; // ignore leapyear calculation
-			break;
-		case 4:
-		case 6:
-		case 9:
-		case 11:
-			if (sc->monthday > 30)
-				advance = 1;
-			break;
-		case 12:
-			if (sc->monthday <= 31)
-				break;
-		default:
-			sc->month = sc->monthday = 1;
-			break;
-	}
-	if (advance) {
-		sc->month++;
-		sc->monthday = 1;
-	}
+	maxDays = daysInMonth(sc->month);
+
+	do {
+		if (sc->monthday > maxDays) {
+			sc->month++;
+			if (sc->month > 12) {
+				sc->month = 1;
+				sc->year++;
+			}
+			sc->monthday -= maxDays;
+		}
+		maxDays = daysInMonth(sc->month);
+	} while (sc->monthday > maxDays);
 }
 
 
+/*
+// THIS FCT REPLACED BY struct SystemCounts2 in NORFlash
 int loadSystemCounts() {
 	int handle, ret;
 
@@ -111,6 +128,7 @@ int loadSystemCounts() {
 	close(handle);
 	return ret;
 }
+*/
 
 
 extern
@@ -124,7 +142,7 @@ void initSystemData() {
 	ptrsCounts.latestRotation = (struct NORrotation *)FindLastFlashStruct(NOR_STRUCT_ID_ROTATION);
 	ptrsCounts.powerups = (struct NORpowerups *)FindLastFlashStruct(NOR_STRUCT_ID_POWERUPS);
 
-	systemCounts.year = FILE_YEAR_MIN + getPeriod();
+	systemCounts.year = getUpdateYear();
 	systemCounts.month = getUpdateMonth();
 	systemCounts.monthday = getUpdateDate() + getCumulativeDays();
 	fixBadDate(&systemCounts);
@@ -144,15 +162,11 @@ getPeriod() {
 extern int
 incrementPeriod(void) {
 	struct NORperiod period;
-//	int daysSinceRotation;
-//	struct NORrotation *latestRotation = getLatestRotationStruct();
 	int currentPeriod = getPeriod() + 1;
-//	int lastInitVoltage = getLastInitVoltage();
 	
 	period.structType = NOR_STRUCT_ID_PERIOD;
 	period.period = currentPeriod;
 	ptrsCounts.period = (struct NORperiod *)AppendStructToFlash(&period);
-	systemCounts.year = FILE_YEAR_MIN + getPeriod();
 
 	return currentPeriod;
 }
@@ -168,16 +182,35 @@ getCumulativeDays() {
 	return ret;
 }
 
+extern void 
+logDate() {
+	char buffer[100];
+	
+	strcpy(buffer,"Date:");
+	longToDecimalString(systemCounts.year,(char *)(buffer+strlen(buffer)),4);
+	strcat(buffer,"/");
+	longToDecimalString(systemCounts.month,(char *)(buffer+strlen(buffer)),2);
+	strcat(buffer,"/");
+	longToDecimalString(systemCounts.monthday,(char *)(buffer+strlen(buffer)),2);
+	logStringRTCOptional(buffer, BUFFER, LOG_ALWAYS,0);  
+}
+
 extern int
 incrementCumulativeDays(void) {
 	struct NORcumulativeDays cumulativeDays;
-	int currentDays = getCumulativeDays() + 1;
+	int currentDays;
+	char buffer[100];
 	
 	cumulativeDays.structType = NOR_STRUCT_ID_CUMULATIVE_DAYS;
+	currentDays = getCumulativeDays() + 1;
 	cumulativeDays.cumulativeDaysSinceUpdate = currentDays;
 	ptrsCounts.cumulativeDays = (struct NORcumulativeDays *)AppendStructToFlash(&cumulativeDays);	
 	systemCounts.monthday++;
 	fixBadDate(&systemCounts);
+	strcpy(buffer,"Cumulative Days=");
+	longToDecimalString(getCumulativeDays(), buffer+strlen(buffer), 3);
+	logString(buffer,BUFFER,LOG_DETAIL);
+	logDate();
 	return currentDays;
 }
 
@@ -276,7 +309,7 @@ rotate(void) {
 }
 
 extern void
-setRotation(char rotationNumber, char period, char hours, int voltage) {
+setRotation(char rotationNumber, char period, unsigned int hours, int voltage) {
 	struct NORrotation rotation;
 	char currentRotationNumber = getRotation();
 	
@@ -308,21 +341,20 @@ importNewSystemData (LPSTR importFile) {
 		// test there is a new line and that it isn't a comment (starting with "#")
 		if(*name == '#')
 			continue;
-		if (!strcmp(name,(char *)"SRN")) strcpy(sd.serialNumber,trim(value));
+		if (!strcmp(name,(char *)"SRN")) LBstrncpy(sd.serialNumber,trim(value),SRN_MAX_LENGTH);
 			else if (!strcmp(name,(char *)"REFLASH")) sd.countReflashes=strToInt(value);
-			else if (!strcmp(name,(char *)"PACKAGE")) strcpy(sd.contentPackage,trim(value));
-			else if (!strcmp(name,(char *)"UPDATE")) strcpy(sd.updateNumber,trim(value));
-			else if (!strcmp(name,(char *)"LOCATION")) strcpy(sd.location,trim(value));
+			else if (!strcmp(name,(char *)"PACKAGE")) LBstrncpy(sd.contentPackage,trim(value),CONTENTPACKAGE_MAX_LENGTH);
+			else if (!strcmp(name,(char *)"UPDATE")) LBstrncpy(sd.updateNumber,trim(value),UPDATENUMBER_MAX_LENGTH);
+			else if (!strcmp(name,(char *)"LOCATION")) LBstrncpy(sd.location,trim(value),LOCATION_MAX_LENGTH);
 			else if (!strcmp(name,(char *)"YEAR")) sd.yearLastUpdated=strToInt(value);
 			else if (!strcmp(name,(char *)"MONTH")) sd.monthLastUpdated=strToInt(value);
 			else if (!strcmp(name,(char *)"DATE")) sd.dateLastUpdated=strToInt(value);
 	}
 	close(handle);
 	setSystemData(&sd);	
-	unlink(REFLASH_STATS_FILE_ARCHIVE);
-	rename(REFLASH_STATS_FILE,REFLASH_STATS_FILE_ARCHIVE);
 }
 	
+/*
 extern void 
 transitionOldToNewFlash(void) {
 	struct SystemData sd;
@@ -339,30 +371,84 @@ transitionOldToNewFlash(void) {
 
 	setSystemData(&sd);
 }
+*/
+
+extern void 
+dumpSystemDataToLog(struct SystemData *sd) {
+	char dump[sizeof(struct SystemData)+100];
+	
+	strcpy(dump,"ST:");
+	longToDecimalString(sd->structType,dump+strlen(dump),3);
+	strcat(dump,",RF:");
+	longToDecimalString(sd->countReflashes,dump+strlen(dump),5);
+	strcat(dump,",SN:");
+	strcat(dump,sd->serialNumber);
+	strcat(dump,",UN:");
+	strcat(dump,sd->updateNumber);
+	strcat(dump,",LOC:");
+	strcat(dump,sd->location);
+	strcat(dump,",PKG:");
+	strcat(dump,sd->contentPackage);
+	strcat(dump,",DAY:");
+	longToDecimalString(sd->dateLastUpdated,dump+strlen(dump),2);
+	strcat(dump,",MON:");
+	longToDecimalString(sd->monthLastUpdated,dump+strlen(dump),2);
+	strcat(dump,",YR:");
+	longToDecimalString(sd->yearLastUpdated,dump+strlen(dump),4);	
+	logString((char *)dump,BUFFER,LOG_ALWAYS);	
+
+/*	strcpy(dump,"FCT");
+	longToDecimalString(sd->structType,dump+strlen(dump),3);
+	strcat(dump,",RF:");
+	longToDecimalString(getReflashCount(),dump+strlen(dump),5);
+	strcat(dump,",SN:");
+	strcat(dump,getSerialNumber());
+	strcat(dump,",UN:");
+	strcat(dump,getUpdateNumber());
+	strcat(dump,",LOC:");
+	strcat(dump,getLocation());
+	strcat(dump,",PKG:");
+	strcat(dump,getPackageName());
+	strcat(dump,",DAY:");
+	longToDecimalString(getUpdateDate(),dump+strlen(dump),2);
+	strcat(dump,",MON:");
+	longToDecimalString(getUpdateMonth(),dump+strlen(dump),2);
+	strcat(dump,",YR:");
+	longToDecimalString(getUpdateYear(),dump+strlen(dump),4);
+	logString((char *)dump,BUFFER,LOG_ALWAYS);	
+*/
+}
+
 
 extern void 
 setSystemData(struct SystemData *sd) {
 	struct SystemCounts2 sc;
 	int size, totalSize, i, reflashes;
 	
+	dumpSystemDataToLog(sd);
+
 	sd->structType = NOR_STRUCT_ID_SYSTEM;
 	reflashes = getReflashCount();
 	if (!sd->countReflashes) 
 		sd->countReflashes = reflashes + 1;
 	if (!sd->serialNumber[0]) {
-		if (SNexists()) { // use old SRN location if the srn. prefix is still in tact for auto-upgrade
-			strcpy(sd->serialNumber,P_TB_SERIAL_NUMBER);
-			sd->countReflashes = 1;
-		} else
-			strcpy(sd->serialNumber,getSerialNumber());	
+		strcpy(sd->serialNumber,getSerialNumber());	
 		if (!sd->serialNumber[0]) {
 			strcpy(sd->serialNumber,(char *)"UNKNOWN");			
 		}
 	}
-	if (!sd->location[0]) 
+	if (!sd->location[0]) {
 		strcpy(sd->location,getLocation());
-	if (!sd->contentPackage[0])
+		if (!sd->location[0]) {
+			strcpy(sd->location,(char *)"UNKNOWN");			
+		}
+	}
+	if (!sd->contentPackage[0]) {
 		strcpy(sd->contentPackage,getPackageName());
+		if (!sd->contentPackage[0]) {
+			strcpy(sd->contentPackage,(char *)"UNKNOWN");			
+		}
+	}
 	if (!sd->updateNumber[0])
 		strcpy(sd->updateNumber,getUpdateNumber());
 	if (!sd->monthLastUpdated)
@@ -371,9 +457,12 @@ setSystemData(struct SystemData *sd) {
 		sd->dateLastUpdated = getUpdateDate();
 	if (!sd->yearLastUpdated)
 		sd->yearLastUpdated = getUpdateYear();
+
+	dumpSystemDataToLog(sd);
+
 	systemCounts.monthday = sd->dateLastUpdated;
 	systemCounts.month = sd->monthLastUpdated; 
-	systemCounts.year = FILE_YEAR_MIN + getPeriod();
+	systemCounts.year = sd->yearLastUpdated;
 
 	sc.structType = NOR_STRUCT_ID_COUNTS;
 	sc.period = 0;
@@ -388,6 +477,8 @@ setSystemData(struct SystemData *sd) {
 	for (i=1; i< MAX_ROTATIONS; i++) {
 		sc.rotations[i].structType = -2; // -1 is bad since FF is unwritten memory
 	}
+	
+	// startup() assumes that struct SystemData is written first at TB_SERIAL_NUMBER_ADDR
 	totalSize = 0;
 	size = sizeof(struct SystemData);	// round up # of words		
 	write_app_flash((int *)sd, size, totalSize);
@@ -460,7 +551,7 @@ getUpdateMonth(void) {
 	return ret;
 }
 
-extern char
+extern int
 getUpdateYear(void) {
 	char ret;
 	

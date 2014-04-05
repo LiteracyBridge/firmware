@@ -9,38 +9,45 @@
 #define FILE_YEAR_MIN 2000
 #define CLOCK_PERIOD	(systemCounts.year - FILE_YEAR_MIN)
 #define PACKAGE_EXT		".pkg"
+#define SRN_MAX_LENGTH				12
+#define UPDATENUMBER_MAX_LENGTH		20
+#define LOCATION_MAX_LENGTH			40
+#define CONTENTPACKAGE_MAX_LENGTH	20
 
 typedef struct SystemCounts SystemCounts;
 
 struct SystemCounts {
-	unsigned long powerUpNumber;
-	unsigned long packageNumber;
-	unsigned long listNumber;
-	unsigned long lastLogErase;
-	unsigned long revdPkgNumber;
+//	unsigned long powerUpNumber;
+//	unsigned long packageNumber;
+//	unsigned long listNumber;
+//	unsigned long lastLogErase;
+//	unsigned long revdPkgNumber;
     unsigned short year;
     unsigned char monthday , month;
    	unsigned long recordingNumber;
-   	unsigned short poweredDays;
-   	char location[40];
+//  	unsigned short poweredDays;
+//   	char location[40];
 };
 
 extern SystemCounts systemCounts;
 
-#define NOR_STRUCT_ID_SYSTEM	0
+#define NOR_STRUCT_ID_SYSTEM	20  // this should be higher than all other NOR_STRUCT_ID_ ..
 // 0x4b / 75d words 
 struct SystemData {
+	//
+	// IMPORTANT: MUST SYNCH WITH JAVA CLASS THAT READS THIS STRUCT IN TB LOADER
+	//
 	char structType;  // can act as versioning field (next version could be == 23)
 	unsigned int countReflashes;
 	// updated just once
-	char serialNumber[10];			// .srn  //transition to become one long 32-bit since most SRNs are useless prefix followed by 6-hex digits
+	char serialNumber[SRN_MAX_LENGTH];			// .srn  //transition to become one long 32-bit since most SRNs are useless prefix followed by 6-hex digits
 	// updated monthly
-	char updateNumber[10];
-	char location[40]; 					// .loc
-	char contentPackage[10];				// .pkg
+	char updateNumber[UPDATENUMBER_MAX_LENGTH];
+	char location[LOCATION_MAX_LENGTH]; 					// .loc
+	char contentPackage[CONTENTPACKAGE_MAX_LENGTH];				// .pkg // should this be profile
 	char dateLastUpdated; // 	last_updated.txt  -- important to know when corruption caused a mid-month reformat or update --could also use days since 1/1/2013
 	char monthLastUpdated; // 	last_updated.txt  -- important to know when corruption caused a mid-month reformat or update --could also use days since 1/1/2013
-	char yearLastUpdated;
+	int yearLastUpdated;
 };
 
 //extern SystemData systemData;
@@ -50,8 +57,8 @@ struct SystemData {
 struct SystemCounts2 {
 	char structType;
 	char period;
-	char cumulativeDays;
-	char corruptionDay;	
+	unsigned int cumulativeDays;
+	unsigned int corruptionDay;	
 	unsigned int powerups;
 	unsigned int lastInitVoltage;
 	struct NORrotation rotations[MAX_ROTATIONS];
@@ -85,7 +92,7 @@ extern char *getSerialNumber(void);
 extern char *getPackageName(void);
 extern char *getLocation(void);
 extern char *getUpdateNumber(void);
-extern void saveSystemCounts(void);
+//extern void saveSystemCounts(void);
 extern void fixBadDate(SystemCounts *);
 extern int loadSystemCounts(void);
 extern void getPkgNumber(char *, BOOL);
@@ -93,14 +100,15 @@ extern void getrevdPkgNumber(char *, BOOL);
 extern void initSystemData(void);
 extern char getRotation(void);
 extern char getReflashCount(void);
-extern char getUpdateYear(void);
+extern int getUpdateYear(void);
 extern char getUpdateMonth(void);
 extern char getUpdateDate(void);
-extern void setRotation(char, char, char, int);
-extern void transitionOldToNewFlash(void);
+extern void setRotation(char, char, unsigned int, int);
+//extern void transitionOldToNewFlash(void);
 extern void importNewSystemData(LPSTR);
 extern struct NORrotation *getLatestRotationStruct(void);
 extern unsigned int getLastInitVoltage(void);
 extern int rotate(void);
-
+extern void logDate(void);
+extern void dumpSystemDataToLog(struct SystemData *);
 #endif

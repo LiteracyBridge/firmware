@@ -44,6 +44,7 @@ BOOL nextNameValuePair (int handle, char *buffer, char delimiter, char **name, c
 	return ret;
 }
 
+/*
 void clearStaleLog() {
 	int handle, ret;
 	char buffer[LOG_CARRYOVER_BYTES / 2];
@@ -71,6 +72,7 @@ void clearStaleLog() {
 		}
 	}
 }
+*/
 
 void logNumber(long l, int digits, int whenToWrite, int logPriority) {
 	char strLong[12];
@@ -599,7 +601,8 @@ INT16 tbOpen(LPSTR path, INT16 open_flag) {
 		wait(100);
 	}
 	if (handle == -1) {
-		if (strcmp((char *)path,LOG_FILE) && strcmp((char *)path,DEFAULT_LOG_FILE)) { // error didn't occur trying to open log file
+		if (strcmp((char *)path,LOG_FILE) && strcmp((char *)path,DEFAULT_LOG_FILE) && strcmp((char *)path,CONFIG_BIN_FILE)) { 
+			// error didn't occur trying to open log file and not typical opening of config.bin before LOG_DETAIL can be set
 			strcpy(logMsg,(char *)"Cannot open ");
 			strcat(logMsg,(char *)path);
 			logString(logMsg,BUFFER,LOG_DETAIL);
@@ -1513,6 +1516,8 @@ triggerInspection(void) {
 	close(ret);
 }
 
+/* replaced by update.txt file
+
 int setLocation(char *location) {
 	char *cp;
 	int ret;
@@ -1542,6 +1547,8 @@ int setLocation(char *location) {
 	}
 	return ret;
 }
+*/
+
 void
 check_burn_TB_SERIAL_NUMBER_ADDR() {
 	INT16 handle, ret, i, offset = 0, nwrite;

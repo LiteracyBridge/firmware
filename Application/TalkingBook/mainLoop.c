@@ -501,7 +501,7 @@ processAlarm(unsigned long alarm) {
 	strcpy(buffer,"mainloop: RTC alarm has fired ");
 	unsignedlongToHexString((long)alarm, (char *)alm);
  	strcat(buffer, alm);
-	logString(buffer,ASAP,LOG_DETAIL);
+	logString(buffer,BUFFER,LOG_DETAIL);
 	
 	rtcAlarmFired(alarm);
 	
@@ -517,16 +517,16 @@ processAlarm(unsigned long alarm) {
 }
 
 void mainLoop (void) {
-	extern unsigned long rtc_fired;
-	APP_IRAM static unsigned long lastActivity;
-	void processAlarm();
 	unsigned int compressedTime;
 	unsigned int checkVoltage();
 	CtnrBlock *insertBlock;
 	ListItem *list;
 	TranslationList *transList;
 	int inactivityCheckCounter = 0;
-	
+	//extern unsigned long rtc_fired;
+	APP_IRAM static unsigned long lastActivity;
+	//void processAlarm();
+
 	while(1) {
 				
 		// check if need to load in a new package
@@ -602,12 +602,14 @@ void mainLoop (void) {
 			inactivityCheckCounter = 0;
 		}
 		keyResponse();
-		
-		if(rtc_fired && !SACM_Status()) {		
+		//checkAlarm();
+		/*
+		if(rtc_fired && !SACM_Status()) {  //commenting out requirement for audio to be stopped since logStrings all buffer while running and shouldn't cause corruption		
 			processAlarm(rtc_fired);
 			rtc_fired = 0;
 			lastActivity = 0;
 		}
+		*/
 	} // end of while(1) loop
 }
 
