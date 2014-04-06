@@ -148,7 +148,7 @@ void flashRed() {
 int audioTests(void) {
 	int key;
 	int handle, i;
-	int start, end, stopTime;
+	long start, end, stopTime;
 	long lTime;
 
 	key = 0;
