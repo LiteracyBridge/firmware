@@ -343,7 +343,7 @@ importNewSystemData (LPSTR importFile) {
 			continue;
 		if (!strcmp(name,(char *)"SRN")) LBstrncpy(sd.serialNumber,trim(value),SRN_MAX_LENGTH);
 			else if (!strcmp(name,(char *)"REFLASH")) sd.countReflashes=strToInt(value);
-			else if (!strcmp(name,(char *)"PACKAGE")) LBstrncpy(sd.contentPackage,trim(value),CONTENTPACKAGE_MAX_LENGTH);
+			else if (!strcmp(name,(char *)"IMAGE")) LBstrncpy(sd.imageName,trim(value),IMAGENAME_MAX_LENGTH);
 			else if (!strcmp(name,(char *)"UPDATE")) LBstrncpy(sd.updateNumber,trim(value),UPDATENUMBER_MAX_LENGTH);
 			else if (!strcmp(name,(char *)"LOCATION")) LBstrncpy(sd.location,trim(value),LOCATION_MAX_LENGTH);
 			else if (!strcmp(name,(char *)"YEAR")) sd.yearLastUpdated=strToInt(value);
@@ -387,15 +387,15 @@ dumpSystemDataToLog(struct SystemData *sd) {
 	strcat(dump,sd->updateNumber);
 	strcat(dump,",LOC:");
 	strcat(dump,sd->location);
-	strcat(dump,",PKG:");
-	strcat(dump,sd->contentPackage);
+	strcat(dump,",IMG:");
+	strcat(dump,sd->imageName);
 	strcat(dump,",DAY:");
 	longToDecimalString(sd->dateLastUpdated,dump+strlen(dump),2);
 	strcat(dump,",MON:");
 	longToDecimalString(sd->monthLastUpdated,dump+strlen(dump),2);
 	strcat(dump,",YR:");
 	longToDecimalString(sd->yearLastUpdated,dump+strlen(dump),4);	
-	logString((char *)dump,BUFFER,LOG_ALWAYS);	
+	logStringRTCOptional((char *)dump,BUFFER,LOG_ALWAYS,0);	
 
 /*	strcpy(dump,"FCT");
 	longToDecimalString(sd->structType,dump+strlen(dump),3);
@@ -443,10 +443,10 @@ setSystemData(struct SystemData *sd) {
 			strcpy(sd->location,(char *)"UNKNOWN");			
 		}
 	}
-	if (!sd->contentPackage[0]) {
-		strcpy(sd->contentPackage,getPackageName());
-		if (!sd->contentPackage[0]) {
-			strcpy(sd->contentPackage,(char *)"UNKNOWN");			
+	if (!sd->imageName[0]) {
+		strcpy(sd->imageName,getImageName());
+		if (!sd->imageName[0]) {
+			strcpy(sd->imageName,(char *)"UNKNOWN");			
 		}
 	}
 	if (!sd->updateNumber[0])
@@ -512,10 +512,10 @@ getLocation(void) {
 }
 
 extern char *
-getPackageName(void) {
+getImageName(void) {
 	char *ret;
 	
-	ret = ptrsCounts.systemData->contentPackage; 
+	ret = ptrsCounts.systemData->imageName; 
 	return ret;
 }
 

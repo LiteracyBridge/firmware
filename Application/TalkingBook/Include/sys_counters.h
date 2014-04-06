@@ -9,10 +9,10 @@
 #define FILE_YEAR_MIN 2000
 #define CLOCK_PERIOD	(systemCounts.year - FILE_YEAR_MIN)
 #define PACKAGE_EXT		".pkg"
-#define SRN_MAX_LENGTH				12
+#define SRN_MAX_LENGTH				12  // this should match the #define in filestats.h (need to consider merging these)
 #define UPDATENUMBER_MAX_LENGTH		20
 #define LOCATION_MAX_LENGTH			40
-#define CONTENTPACKAGE_MAX_LENGTH	20
+#define IMAGENAME_MAX_LENGTH	20
 
 typedef struct SystemCounts SystemCounts;
 
@@ -31,7 +31,7 @@ struct SystemCounts {
 
 extern SystemCounts systemCounts;
 
-#define NOR_STRUCT_ID_SYSTEM	20  // this should be higher than all other NOR_STRUCT_ID_ ..
+#define NOR_STRUCT_ID_SYSTEM	255  // this should be higher than all other NOR_STRUCT_ID_ ..
 // 0x4b / 75d words 
 struct SystemData {
 	//
@@ -44,7 +44,7 @@ struct SystemData {
 	// updated monthly
 	char updateNumber[UPDATENUMBER_MAX_LENGTH];
 	char location[LOCATION_MAX_LENGTH]; 					// .loc
-	char contentPackage[CONTENTPACKAGE_MAX_LENGTH];				// .pkg // should this be profile
+	char imageName[IMAGENAME_MAX_LENGTH];				// .pkg // should this be profile
 	char dateLastUpdated; // 	last_updated.txt  -- important to know when corruption caused a mid-month reformat or update --could also use days since 1/1/2013
 	char monthLastUpdated; // 	last_updated.txt  -- important to know when corruption caused a mid-month reformat or update --could also use days since 1/1/2013
 	int yearLastUpdated;
@@ -85,18 +85,15 @@ extern void setCorruptionDay(char);
 extern unsigned int getPowerups(void); 
 extern struct NORrotation *getLatestRotationStruct(void);
 extern void setSystemData(struct SystemData *);
-extern char *getPackageName(void);
 extern void setPowerups(unsigned int);
 extern int incrementPeriod(void);
 extern char *getSerialNumber(void);
-extern char *getPackageName(void);
+extern char *getImageName(void);
 extern char *getLocation(void);
 extern char *getUpdateNumber(void);
 //extern void saveSystemCounts(void);
 extern void fixBadDate(SystemCounts *);
-extern int loadSystemCounts(void);
-extern void getPkgNumber(char *, BOOL);
-extern void getrevdPkgNumber(char *, BOOL);
+//extern int loadSystemCounts(void);
 extern void initSystemData(void);
 extern char getRotation(void);
 extern char getReflashCount(void);

@@ -12,7 +12,7 @@ static void NewCurrent();
 void FlashReprogHimem(flash *fp);
 void FlashReprogLomem(flash *fp, unsigned int *);
 extern void write_app_flash(int *, int, int);
-
+extern APP_IRAM unsigned long lastTime;
 
 // flash address 0xf800 maps to 0x3f800, but with 32k block flash device the erase at this address
 //   erases 0x38000 thru 0x3ffff, the code below reserves that 32k block, and it it not used
@@ -319,6 +319,7 @@ void startUpdate(char *filenameUpdate) {
 	if(FL.fileHandle < 0)
 			return;	// no system update image in folder, return
 	checkVoltage();
+	lastTime = 0;
 	playBips(2);
 	setLED(LED_ALL,TRUE);
 	

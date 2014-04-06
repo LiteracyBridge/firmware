@@ -639,12 +639,14 @@ extern void logProfile() {
 	char strLog[40];
 	
 	strcpy(strLog,(char *)"PROFILE: ");
+	strcat(strLog,currentProfileName());
+	strcat(strLog,",");
 	strcat(strLog,currentProfileLanguage());
 	strcat(strLog,",");
 	strcat(strLog,currentProfileMessageList());
 	strcat(strLog,",");
 	strcat(strLog,currentProfileControlTrack());
-	logString(strLog,BUFFER,LOG_NORMAL);	
+	logString(strLog,BUFFER,LOG_ALWAYS);	
 }
 
 extern int initializeProfiles() {
@@ -671,7 +673,7 @@ extern int loadProfileNames(char *path, ProfileData *pd) {
 	// It can be used during startup (see initalizeProfiles()) or when inspecting another device's profiles.
 
 	int ret, i, handle;
-	char *ptrLanguage, *ptrMessageList, *ptrControlTrack;
+	char *ptrName,*ptrLanguage, *ptrMessageList, *ptrControlTrack;
 	char buffer[READ_LENGTH+1];
 	char strLog[80];
 	
@@ -686,19 +688,28 @@ extern int loadProfileNames(char *path, ProfileData *pd) {
 	}
 	pd->intTotalProfiles = pd->intTotalLanguages = pd->intTotalMessageLists = pd->intTotalControlTracks = 0;
 	getLine(-1,0);  // reset in case at end from prior use
-	while (nextNameValuePair(handle,buffer,',',&ptrLanguage,&ptrMessageList))	{
+	while (nextNameValuePair(handle,buffer,',',&ptrName,&ptrLanguage))	{
+		if (strlen(ptrName) > MAX_PROFILE_NAME_LENGTH) {
+			strcpy(strLog,(char *)"Profile name too long:");
+			strcat(strLog,ptrName);
+			logException(33,strLog,LOG_ONLY);			
+			ret = -1;
+		} else if (!ptrLanguage) {
+			strcpy(strLog,(char *)"No comma in profile entry. Profile:");
+			strcat(strLog,ptrName);
+			logException(33,strLog,LOG_ONLY);			
+			ret = -1;
+		}
+		ptrMessageList = strchr(ptrLanguage, ',');
+		if(ptrLanguage) {
+			*ptrMessageList++ = 0;
+		}
 		if (strlen(ptrLanguage) > MAX_LANGUAGE_CODE_LENGTH) {
 			strcpy(strLog,(char *)"Language code too long:");
 			strcat(strLog,ptrLanguage);
 			logException(33,strLog,LOG_ONLY);			
 			ret = -1;
-		} else if (!ptrMessageList) {
-			strcpy(strLog,(char *)"No comma in profile entry. Language:");
-			strcat(strLog,ptrLanguage);
-			logException(33,strLog,LOG_ONLY);			
-			ret = -1;
-		}
-		
+		} 			
 		ptrControlTrack = strchr(ptrMessageList, ',');
 		if(ptrControlTrack) {
 			*ptrControlTrack++ = 0;
@@ -761,6 +772,8 @@ extern int loadProfileNames(char *path, ProfileData *pd) {
 			}
 			pd->ptrProfileControlTracks[pd->intTotalProfiles] = pd->heapControlTracks[i];
 			}
+		LBstrncpy(pd->heapProfileNames[pd->intTotalProfiles],ptrName,MAX_PROFILE_NAME_LENGTH);
+		pd->ptrProfileNames[pd->intTotalProfiles] = pd->heapProfileNames[pd->intTotalProfiles];
 		pd->intTotalProfiles++;
 	} 
 	close(handle);
@@ -811,4 +824,16 @@ extern int prevProfile() {
 
 extern ProfileData *getProfiles(void) {
 	return &profiles;	
+}
+
+extern int totalProfiles() {
+	return profiles.intTotalProfiles;
+}
+
+extern char *getProfileName(int id) {
+	return profiles.ptrProfileNames[id];
+}
+
+extern char *currentProfileName() {
+	return getProfileName(currentProfile());
 }

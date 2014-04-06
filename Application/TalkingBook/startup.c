@@ -268,7 +268,7 @@ void startUp(unsigned int bootType) {
 	char buffer[400];
 	char strCounts[32];
 	char filename[FILE_LENGTH];
-	int key, ret, callPushPull = 0,callProcessInbox = 0;
+	int key, ret, callPushPull = 0;//callProcessInbox = 0;
 	int configExists = 0, normal_shutdown=1;
 	int inspect = 0, firmwareWasUpdated = 0;
 	extern unsigned long rtc_fired;
@@ -579,17 +579,18 @@ void startUp(unsigned int bootType) {
 	strcat (buffer,(char *)"  (");
 	longToDecimalString((4096-FindFirstFlashOffset()), (char *)(buffer+strlen(buffer)), 4);
 	strcat (buffer,(char *)" words remaining)");
-	strcat(buffer,(char *)"\x0d\x0a" "Package:");
-	strcat(buffer,getPackageName());
+	strcat(buffer,(char *)"\x0d\x0a" "Image:");
+	strcat(buffer,getImageName());
 	strcat(buffer,(char *)"\x0d\x0a" "Update:");
 	strcat(buffer,getUpdateNumber());
-	strcat(buffer,(char *)"  Cycle:");
+	logStringRTCOptional(buffer,BUFFER,LOG_ALWAYS,0);
+	strcpy(buffer,(char *)"Cycle:");
 	longToDecimalString(getPowerups(),(char *)(buffer+strlen(buffer)),4);
-	strcat(buffer,(char *)"  Rotation:");
+	strcat(buffer,(char *)"\x0d\x0a" "Rotation:");
 	longToDecimalString(getRotation(), (char *)(buffer+strlen(buffer)), 1);
-	strcat(buffer,(char *)"  Period:");
+	strcat(buffer,(char *)"\x0d\x0a" "Period:");
 	longToDecimalString(getPeriod(), (char *)(buffer+strlen(buffer)), 4);
-	strcat(buffer,(char *)"  Cumulative Days:");
+	strcat(buffer,(char *)"\x0d\x0a" "Cumulative Days:");
 	longToDecimalString(getCumulativeDays(), (char *)(buffer+strlen(buffer)), 4);
 	strcat(buffer,"\x0d\x0a" "Debug:");
 	switch (DEBUG_MODE) {
@@ -610,14 +611,14 @@ void startUp(unsigned int bootType) {
 			strcat(buffer,(char *)"\x0d\x0a" "Restored configuration from config.bin successfully");
 		}
 	} else {
-		strcat(buffer,(char *)"\x0d\x0a" "Apparently ABNORMAL shutdown (no or corrupt config.bin)");
+		strcat(buffer,(char *)"\x0d\x0a" "ABNORMAL shutdown (no config.bin)");
 	}
 	checkVoltage();  
 	logStringRTCOptional(buffer,BUFFER,LOG_ALWAYS,0);
 	dumpSystemDataToLog(ptrsCounts.systemData);
 	strcpy(buffer,"Init volt:");
 	longToDecimalString(vCur_1,buffer+strlen(buffer),3);
-	logString(buffer,BUFFER,LOG_NORMAL);	
+	logStringRTCOptional(buffer,BUFFER,LOG_NORMAL,0);	
 		
 	unlink ((LPSTR) (STAT_DIR SNCSV));
 	strcpy(buffer,getDeviceSN());
@@ -637,14 +638,16 @@ void startUp(unsigned int bootType) {
 		}
 	}
 
+	//signal end of log header
+	logStringRTCOptional("===================================================",BUFFER,LOG_ALWAYS,0);
 	initializeProfiles(); 
 	if (inspect)
 		unlink((LPSTR)SELF_INSPECT_TRIGGER_FILE);	
-	if (inspect || callProcessInbox) {
+	//if (inspect || callProcessInbox) {
 		//commenting out the call to processInbox() for now since TBs are currently using device-to-device copying
 		//checkVoltage();  
 		//processInbox();
-	}
+	//}
 	if (callPushPull) { // copy outbox files to connecting device, get stats and audio feedback
 		checkVoltage();  
 		pushContentGetFeedback();
@@ -661,7 +664,6 @@ void startUp(unsigned int bootType) {
 	adjustSpeed(NORMAL_SPEED,FALSE);
 	checkVoltage();  
 	loadPackage(PKG_SYS,currentProfileLanguage());
-	logString("call mainLoop",BUFFER,LOG_DETAIL);
 	SetSystemClockRate(CLOCK_RATE); // either set in config file or the default 48 MHz set at beginning of startUp()
 	checkInactivity(TRUE); //reset the inactivity timer
 	checkVoltage();  

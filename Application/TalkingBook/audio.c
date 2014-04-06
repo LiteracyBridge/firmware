@@ -659,7 +659,7 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 	 		addField(handle,LB_DATE_RECORDED,temp,1);       
 	        metadata_numfields += 1;
 
-			strcpy(temp,getPackageName());
+			strcpy(temp,getUpdateNumber());
 			strcat(temp,(char *)":");
 			longToDecimalString(getPowerups(),(char *)(temp+strlen(temp)),4);
 			addField(handle,LB_TIMING,temp,1);
@@ -872,7 +872,8 @@ int addField(int handle, unsigned int field_id, char *field_value, int numfieldv
 }
 
 void setStatsHeader(struct ondisk_filestats *stats, char *msgId) {
-	stats->headerCode = 0x12358D15;
+	stats->version = 0;
+	LBstrncpy(stats->tbSRN,getSerialNumber(),SRN_MAX_LENGTH);
 	LBstrncpy(stats->msgId,msgId,MAX_MESSAGE_ID_LENGTH); 
 }
 
@@ -940,7 +941,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 				}
 				wrk = lseek(SACMFileHandle, 0L, SEEK_CUR);
 				strcpy(statpath, STAT_DIR);
-				strcat(statpath, getPackageName()); 
+				strcat(statpath, getProfileName(currentProfile())); 
 				strcat(statpath, (char *)"-");
 				strcat(statpath, STAT_FN);
 				strcat(statpath, (char *)".stat"); 
@@ -981,7 +982,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 		STAT_FN[strlen(STAT_FN) - 4] = 0; //chop off ".a18"
 		
 		strcpy(statpath, STAT_DIR);
-		strcat(statpath, getPackageName()); 
+		strcat(statpath, getProfileName(currentProfile())); 
 		strcat(statpath, (char *)"-");
 		strcat(statpath, STAT_FN);
 		strcat(statpath, (char *)".stat"); 
@@ -1011,7 +1012,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 
 	case STAT_SURVEY1:
 		strcpy(statpath, STAT_DIR);
-		strcat(statpath, getPackageName()); 
+		strcat(statpath, getProfileName(currentProfile())); 
 		strcat(statpath, (char *)"-");
 		strcat(statpath, STAT_FN);
 		strcat(statpath, (char *)".stat"); 
@@ -1028,7 +1029,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 	
 	case STAT_APPLY:
 		strcpy(statpath, STAT_DIR);
-		strcat(statpath, getPackageName()); 
+		strcat(statpath, getProfileName(currentProfile())); 
 		strcat(statpath, (char *)"-");
 		strcat(statpath, STAT_FN);
 		strcat(statpath, (char *)".stat"); 
@@ -1054,9 +1055,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 		
 	case STAT_USELESS:
 		strcpy(statpath, STAT_DIR);
-	//		strcat(statpath, getDeviceSN(0));
-	//		strcat(statpath, "~");
-		strcat(statpath, getPackageName()); 
+		strcat(statpath, getProfileName(currentProfile())); 
 		strcat(statpath, (char *)"-");
 		strcat(statpath, STAT_FN); 
 		strcat(statpath, (char *)".stat"); 

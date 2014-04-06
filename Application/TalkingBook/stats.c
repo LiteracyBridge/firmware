@@ -8,12 +8,13 @@
 #include "Include/files.h"
 #include "Include/app_exception.h"
 #include "Include/sys_counters.h"
+#include "Include/containers.h"
 #include "Include/filestats.h"
 
 APP_IRAM int offsetMsgNames[MAX_TRACKED_MESSAGES];
 static void rebuildNORmsgMap(struct NORmsgMap *);
 static void rebuildNORmsgStats(struct NORallMsgStats *);
-static int saveFlashStats(struct SystemData *, struct SystemCounts2 *, struct NORmsgMap *, struct NORallMsgStats *);
+static int saveFlashStats(struct SystemData *, struct SystemCounts2 *, struct NORmsgMap *, struct NORallMsgStatsAllProfiles*);
 static void *FindNextFlashSameStruct(void *); 
 static void rebuildFlash(int);
 static int ptrSizeOfNORStruct(void *);
@@ -98,14 +99,17 @@ rebuildFlash(int rewriteFlash) {
 	struct SystemData sd;
 	struct SystemCounts2 sc;
 	struct NORmsgMap msgMap;
-	struct NORallMsgStats stats;
+	struct NORallMsgStatsAllProfiles stats;
 	struct NORrotation *rotation;
 	struct SystemData *ptrSD;
-	int ret, m, r, size, totalSize;	
-	
-	for (m=0;m < MAX_TRACKED_MESSAGES;m++) {
-		for (r=0;r < MAX_ROTATIONS; r++) {
-			stats.stats[m][r].structType = -2;
+	int ret, i, m, r, size, totalSize;	
+
+	for (i=0;i<totalProfiles();i++) {
+		stats.profileStats[i].structType = NOR_STRUCT_ID_ALL_MSGS;
+		for (m=0;m < MAX_TRACKED_MESSAGES;m++) {
+			for (r=0;r < MAX_ROTATIONS; r++) {
+				stats.profileStats[i].stats[m][r].structType = -2; // -1 is xFF and that is unwritten memory
+			}
 		}
 	}
 	ptrSD = (struct SystemData *)FindFirstFlashStruct(NOR_STRUCT_ID_SYSTEM);
@@ -127,7 +131,9 @@ rebuildFlash(int rewriteFlash) {
 		rotation = (struct NORrotation *)FindNextFlashSameStruct(rotation);
 	}
 	rebuildNORmsgMap(&msgMap);
-	rebuildNORmsgStats(&stats);
+	for (i=0; i<totalProfiles(); i++) {
+		rebuildNORmsgStats(&stats.profileStats[i]);
+	}
 
 	ret = saveFlashStats(&sd, &sc, &msgMap, &stats);
 	if (rewriteFlash) {
@@ -164,11 +170,13 @@ rebuildFlash(int rewriteFlash) {
 			createMsgNameOffsetsFromMap();
 
 			size = sizeof(struct NORmsgStats);		
-			for (r=0; r < stats.totalRotations;r++) {
-				for (m=0; m < stats.totalMessages; m++) {
-					if (stats.stats[m][r].structType == NOR_STRUCT_ID_MESSAGE_STATS) {
-						write_app_flash((int *)&stats.stats[m][r], size,totalSize);
-						totalSize += size;
+			for (i=0; i<totalProfiles(); i++) {
+				for (r=0; r < stats.profileStats[i].totalRotations;r++) {
+					for (m=0; m < stats.profileStats[i].totalMessages; m++) {
+						if (stats.profileStats[i].stats[m][r].structType == NOR_STRUCT_ID_MESSAGE_STATS) {
+							write_app_flash((int *)&stats.profileStats[i].stats[m][r], size,totalSize);
+							totalSize += size;
+						}
 					}
 				}
 			}
@@ -307,8 +315,13 @@ void rebuildNORmsgStats(struct NORallMsgStats *allStats) {
 	while (fp != NULL) {
 		//TODO: This code would be much faster if looked for NORstatEvent in parallel with scan for NORmsgStats
 		struct NORmsgStats *msgStats = (struct NORmsgStats *)fp;
-		int indexMsg = msgStats->indexMsg;
-		int rotation = msgStats->numberRotation;
+		int indexMsg;
+		int rotation;
+
+		if (msgStats->numberProfile != allStats->profileOrder)
+			continue;
+		indexMsg = msgStats->indexMsg;
+		rotation = msgStats->numberRotation;
 		if (indexMsg > highestMessage)
 			highestMessage = indexMsg;
 		if (rotation > highestRotation)
@@ -344,7 +357,9 @@ void rebuildNORmsgStats(struct NORallMsgStats *allStats) {
 		int indexMsg = event->indexMsg;
 		int rotation = event->rotation;
 		struct NORmsgStats *msgStats = &allStats->stats[indexMsg][rotation];
-		
+
+		if (event->profile != allStats->profileOrder)
+			continue;		
 		log[0] = 0;
 		if (indexMsg > MAX_TRACKED_MESSAGES) {
 			strcpy(log,(char *)"NORstatEvent had bad msg #");
@@ -443,6 +458,7 @@ void writeMsgEventToFlash (char *strMessageID, int msgEvent, unsigned int second
 	statEvent.statType = msgEvent;
 	statEvent.rotation = getRotation();
 	statEvent.secondsOfPlay = secondsPlayed;
+	statEvent.profile = currentProfile();
 	AppendStructToFlash(&statEvent);
 }	
 
@@ -505,15 +521,17 @@ exportFlashStats(void) {
 	confirmLocationonDisk();
 }
 
-static int saveFlashStats(struct SystemData *sd, struct SystemCounts2 *sc, struct NORmsgMap *msgMap, struct NORallMsgStats *stats) {
-	int handle, ret;
+static int saveFlashStats(struct SystemData *sd, struct SystemCounts2 *sc, struct NORmsgMap *msgMap, struct NORallMsgStatsAllProfiles *stats) {
+	int handle, ret, i;
 	
 	handle = tbOpen((LPSTR)(SYS_DATA_STATS_PATH),O_CREAT|O_TRUNC|O_RDWR);
 	if (handle != -1) {
 		ret = write(handle, (unsigned long)sd<<1, sizeof(struct SystemData)<<1);
 		ret = write(handle, (unsigned long)sc<<1, sizeof(struct SystemCounts2)<<1);
 		ret = write(handle, (unsigned long)msgMap<<1, sizeof(struct NORmsgMap)<<1);
-		ret = write(handle, (unsigned long)stats<<1, sizeof(struct NORallMsgStats)<<1);
+		for (i=0;i<totalProfiles();i++) {
+			ret = write(handle, (unsigned long)&stats->profileStats[i]<<1, sizeof(struct NORallMsgStats)<<1);
+		}
 		close(handle);
 	} else
 		logString((char *)"failed to write system data and stats to " SYS_DATA_STATS_PATH,BUFFER,LOG_ALWAYS);

@@ -38,7 +38,7 @@ APP_IRAM unsigned long tCur_1;
 APP_IRAM int vThresh_1;
 APP_IRAM int shuttingDown;
 APP_IRAM int inUSBHostMode;
-APP_IRAM static unsigned long lastTime=0;
+APP_IRAM unsigned long lastTime=0;
 
 APP_IRAM static int v_high = 0;
 APP_IRAM static int v_low = 0xFC;
@@ -138,7 +138,7 @@ extern void appendHiLoVoltage(char *string) {
 }
 
 extern void getRTC(char * str) {
-	unsigned long r,c,p,d,h,m,s;
+	unsigned long f,r,c,p,d,h,m,s;
 	char time[RTC_STRING_LENGTH];
 	
 	h = (unsigned long) *P_Hour;	
@@ -149,32 +149,38 @@ extern void getRTC(char * str) {
 		setRTC(h,m,s);
 		incrementCumulativeDays();
 	}
+	f = (long)currentProfile();
 	r = (long)getRotation();
 	c = (long)getPowerups();
 	p = (long)getPeriod();  
 	d = (long)getCumulativeDays();
 
-	if (r >= 0)
-		time[0] = r + '0';
+	if (f >= 0 && f < MAX_PROFILES)
+		time[0] = f + '0';
 	else
 		time[0] = '_';
-	time[1] = 'r';
-	longToDecimalString(c,time+2,4);
-	time[6] = 'c';
-	if (p >= 0)
-		longToDecimalString(p,time+7,3);
+	time[1] = 'p';
+	if (r >= 0)
+		time[2] = r + '0';
 	else
-		strcpy(time+7,(char *)"___");
-	time[10] = 'p';
-	longToDecimalString(d,time+11,3);
-	time[14] = 'd';
-	longToDecimalString(h,time+15,2);
-	time[17] = 'h';
-	longToDecimalString(m,time+18,2);
-	time[20] = 'm';
-	longToDecimalString(s,time+21,2);
-	time[23] = 's';
-	time[24] = 0;
+		time[2] = '_';
+	time[3] = 'r';
+	longToDecimalString(c,time+4,4);
+	time[8] = 'c';
+	if (p >= 0)
+		longToDecimalString(p,time+9,3);
+	else
+		strcpy(time+9,(char *)"___");
+	time[12] = 'p';
+	longToDecimalString(d,time+13,3);
+	time[16] = 'd';
+	longToDecimalString(h,time+17,2);
+	time[19] = 'h';
+	longToDecimalString(m,time+20,2);
+	time[22] = 'm';
+	longToDecimalString(s,time+23,2);
+	time[25] = 's';
+	time[26] = 0;
 	strcpy(str,time);
 }
 	
@@ -1166,7 +1172,7 @@ extern void confirmPackageNameonDisk(void) {
 	else 
 		strcpy(sysPath,DEFAULT_SYSTEM_PATH);
 	strcpy(filePkg,sysPath);
-	strcat(filePkg, (char *)getPackageName());
+	strcat(filePkg, (char *)getImageName());
 	strcat(filePkg, (char *)PACKAGE_EXT);
 	exists = fileExists((LPSTR) filePkg);
 	if (!exists) {

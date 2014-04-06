@@ -1,6 +1,8 @@
 #ifndef	__FILESTATS_h__
 #define	__FILESTATS_h__
 
+#include "containers.h"
+
 #define STAT_OPEN       0
 #define STAT_CLOSE      1
 #define STAT_TIMEPLAYED 2
@@ -20,17 +22,19 @@
 #define REFLASH_STATS_FILE		((LPSTR)"a:/update.txt")
 #define REFLASH_STATS_FILE_ARCHIVE 	((LPSTR) DEFAULT_SYSTEM_PATH "update.txt")
 #define SNCSV "SN.csv"
+#define SRN_MAX_LENGTH	12  // this should match the define in sys_counters.h
 
 void recordStats(char *filename, unsigned long handle, unsigned int why, unsigned long data);
 
 #define MAX_MESSAGE_ID_LENGTH	20
-#define MAX_TRACKED_MESSAGES		20
+#define MAX_TRACKED_MESSAGES		40
 #define MAX_ROTATIONS					5
 
 extern void write_app_flash(int *, int, int);
 
 struct ondisk_filestats {
-	unsigned long headerCode;
+	unsigned long version;
+	char tbSRN[SRN_MAX_LENGTH];
 	char msgId[MAX_MESSAGE_ID_LENGTH];
 	unsigned long stat_num_opens;
 	unsigned long stat_num_completions;
@@ -50,11 +54,12 @@ struct NORmsgMap {
 };
 
 // Rebuild:UPDATE
-#define NOR_STRUCT_ID_MESSAGE_STATS	2
+#define NOR_STRUCT_ID_MESSAGE_STATS	13
 // 10 words x 20 msgs x 5 rotations = 1000 words
 struct NORmsgStats {
 	char structType;	// used to identify data structure
 	char indexMsg;
+	char numberProfile;
 	char numberRotation;
 	char countStarted;
 	char countQuarter;
@@ -74,21 +79,30 @@ struct NORmsgStats {
 // with current text ids for msgs having a max of 20 characters, 10 words, means a 400-word array for the map
 // 200+400=600 words + 36 = 696, leaving 3400 words, or 85 words per msg, or 42 updates per msg
 
+#define NOR_STRUCT_ID_ALL_MSGS	10
 struct NORallMsgStats {
+	char structType;
+	char profileOrder;
+	char profileName[20];
 	char totalMessages;
 	char totalRotations;
 	struct NORmsgStats stats[MAX_TRACKED_MESSAGES][MAX_ROTATIONS];
 };
 
+struct NORallMsgStatsAllProfiles {
+	struct NORallMsgStats profileStats[MAX_PROFILES];
+};
+
 
 // Rebuild:MAP
-#define NOR_STRUCT_ID_STAT_EVENT	3
+#define NOR_STRUCT_ID_STAT_EVENT	12
 // 2 word
 struct NORstatEvent {
 	char structType;
 	char indexMsg;	// array index for message
 	char statType; // 0:10sec,1:25%,2:50%,3:75%,4:100%,5:survey:applied,6:survey useless
 	char rotation;
+	char profile;
 	unsigned int secondsOfPlay;
 };
 
