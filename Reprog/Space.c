@@ -122,7 +122,7 @@ str_USB_Lun_Info USB_Lun_Define[] =
 	{0x00, LunType_SDCardReader	, 0L,	0L, 	LunStatus_Normal, 0L},
 	//RHM
 	{0x01, LunType_RAM	, 0L,	(long)(30 * 1024), 	LunStatus_Normal, 0L},
-	{0x02, LunType_NOR  , 0x30000L, (long)(128 * 1024), LunStatus_Normal, 0L},
+	{0x02, LunType_NOR  , 0x30000L, (long)(128 * 1024L), LunStatus_Normal, 0L},
 	//RHM
 }; 
 str_USB_Lun_Info 	*FP_USB_Lun_Define[N_USB_LUN];
