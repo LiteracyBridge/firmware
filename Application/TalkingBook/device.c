@@ -223,7 +223,7 @@ long getRTCinSeconds(void) {
 	noDays = getRTCinSecondsWithoutDays();
 	secD = (unsigned long)getCumulativeDays() * 24L * 3600L;
 	ret = noDays + secD;
-	while (ret < lastTime) {
+	while (ret < lastTime && ((ret + 24L * 3600L) > lastTime)) {
 		// new day must have occured 
 		secD = (unsigned long)incrementCumulativeDays() * 24L * 3600L;
 		ret = noDays + secD;
@@ -1005,7 +1005,7 @@ void setNextAlarm() {
 	unsigned int i, hour, minute, second;
 	unsigned long newAlarm;
 	unsigned long curRTC   = getRTCinSecondsWithoutDays();
-	char buf[64], strbuf[12];
+	//char buf[64], strbuf[12];
 	
 	curAlarmSet = 0;
 

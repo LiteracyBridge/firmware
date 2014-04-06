@@ -3,6 +3,7 @@
 // Contact: info@literacybridge.org
 #include "Include/talkingbook.h"
 #include "Include/parsing.h"
+#include "Include/startup.h"
 #include "Include/containers.h"
 #include "Include/files.h"
 #include ".\Component\Include\FS\vfs.h"
@@ -647,6 +648,17 @@ extern void logProfile() {
 	strcat(strLog,",");
 	strcat(strLog,currentProfileControlTrack());
 	logString(strLog,BUFFER,LOG_ALWAYS);	
+}
+
+extern int initializeProfilesBeforeConfig() {
+	char profileOrderFile[PATH_LENGTH];
+	int ret;
+	
+	strcpy(profileOrderFile,DEFAULT_SYSTEM_PATH);
+	strcat(profileOrderFile,DEFAULT_PROFILE_ORDER_FILE);	
+	strcat(profileOrderFile,".txt"); //todo: move to config file	
+	ret = loadProfileNames(profileOrderFile,&profiles);
+	return ret;
 }
 
 extern int initializeProfiles() {

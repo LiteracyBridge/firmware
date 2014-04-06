@@ -305,6 +305,7 @@ void startUp(unsigned int bootType) {
 			if (ptrsCounts.systemData->structType == NOR_STRUCT_ID_SYSTEM) {
 				initSystemData();
 				createMsgNameOffsets();
+				initializeProfilesBeforeConfig(); 
 				exportFlashStats();
 			}
 		}

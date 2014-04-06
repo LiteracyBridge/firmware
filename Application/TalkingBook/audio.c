@@ -942,7 +942,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 				wrk = lseek(SACMFileHandle, 0L, SEEK_CUR);
 				strcpy(statpath, STAT_DIR);
 				strcat(statpath, getProfileName(currentProfile())); 
-				strcat(statpath, (char *)"-");
+				strcat(statpath, (char *)"^");
 				strcat(statpath, STAT_FN);
 				strcat(statpath, (char *)".stat"); 
 				
@@ -983,7 +983,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 		
 		strcpy(statpath, STAT_DIR);
 		strcat(statpath, getProfileName(currentProfile())); 
-		strcat(statpath, (char *)"-");
+		strcat(statpath, (char *)"^");
 		strcat(statpath, STAT_FN);
 		strcat(statpath, (char *)".stat"); 
 		
@@ -1013,7 +1013,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 	case STAT_SURVEY1:
 		strcpy(statpath, STAT_DIR);
 		strcat(statpath, getProfileName(currentProfile())); 
-		strcat(statpath, (char *)"-");
+		strcat(statpath, (char *)"^");
 		strcat(statpath, STAT_FN);
 		strcat(statpath, (char *)".stat"); 
 		stathandle = tbOpen((LPSTR)statpath, O_CREAT|O_RDWR);
@@ -1030,7 +1030,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 	case STAT_APPLY:
 		strcpy(statpath, STAT_DIR);
 		strcat(statpath, getProfileName(currentProfile())); 
-		strcat(statpath, (char *)"-");
+		strcat(statpath, (char *)"^");
 		strcat(statpath, STAT_FN);
 		strcat(statpath, (char *)".stat"); 
 		
@@ -1056,7 +1056,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 	case STAT_USELESS:
 		strcpy(statpath, STAT_DIR);
 		strcat(statpath, getProfileName(currentProfile())); 
-		strcat(statpath, (char *)"-");
+		strcat(statpath, (char *)"^");
 		strcat(statpath, STAT_FN); 
 		strcat(statpath, (char *)".stat"); 
 		

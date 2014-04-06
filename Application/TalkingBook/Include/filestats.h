@@ -83,7 +83,7 @@ struct NORmsgStats {
 struct NORallMsgStats {
 	char structType;
 	char profileOrder;
-	char profileName[20];
+	char profileName[MAX_PROFILE_NAME_LENGTH];
 	char totalMessages;
 	char totalRotations;
 	struct NORmsgStats stats[MAX_TRACKED_MESSAGES][MAX_ROTATIONS];

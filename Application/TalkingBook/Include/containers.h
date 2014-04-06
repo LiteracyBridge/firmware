@@ -15,10 +15,10 @@
 #define MAX_CONTROL_TRACK_CODE_LENGTH 8
 #define MAX_PROFILE_NAME_LENGTH	20
 
-#define MAX_FILES		112
-#define MAX_BLOCKS		112
+#define MAX_FILES		100
+#define MAX_BLOCKS		100
 #define MAX_STATES		(2 * MAX_BLOCKS)   // should always be 2 x MAX_BLOCKS
-#define MAX_ACTIONS		170   // a little more than 2 actions per block (in addition to start/end actions)
+#define MAX_ACTIONS		120   // a little more than 2 actions per block (in addition to start/end actions)
 #define MAX_LISTS		3  		// includes 2 regular lists (list of lists and list of packages) and translation list
 #define MAX_BLOCK_OVERLAP	2   // allows for a file-wide block, a page, and a hyperlink
 #define PKG_HEAP_SIZE	500  // enough for ~5 chars per struct file/filename and per ListItem filename
@@ -274,6 +274,7 @@ extern void resetPackage(CtnrPackage *);
 extern void loadDefaultUserPackage(const char *);
 extern void logProfile(void);
 extern int initializeProfiles(void);
+extern int initializeProfilesBeforeConfig(void);
 extern int loadProfileNames(char *, ProfileData *);
 extern char *currentProfileMessageList(void);
 extern char *currentProfileLanguage(void);

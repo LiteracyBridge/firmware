@@ -106,6 +106,8 @@ rebuildFlash(int rewriteFlash) {
 
 	for (i=0;i<totalProfiles();i++) {
 		stats.profileStats[i].structType = NOR_STRUCT_ID_ALL_MSGS;
+		stats.profileStats[i].profileOrder = i;
+		strcpy(stats.profileStats[i].profileName,getProfileName(i));
 		for (m=0;m < MAX_TRACKED_MESSAGES;m++) {
 			for (r=0;r < MAX_ROTATIONS; r++) {
 				stats.profileStats[i].stats[m][r].structType = -2; // -1 is xFF and that is unwritten memory
@@ -356,9 +358,10 @@ void rebuildNORmsgStats(struct NORallMsgStats *allStats) {
 		struct NORstatEvent *event = (struct NORstatEvent *)fp;
 		int indexMsg = event->indexMsg;
 		int rotation = event->rotation;
+		int profile = event->profile;
 		struct NORmsgStats *msgStats = &allStats->stats[indexMsg][rotation];
 
-		if (event->profile != allStats->profileOrder)
+		if (profile != allStats->profileOrder)
 			continue;		
 		log[0] = 0;
 		if (indexMsg > MAX_TRACKED_MESSAGES) {
@@ -383,6 +386,7 @@ void rebuildNORmsgStats(struct NORallMsgStats *allStats) {
 		msgStats->structType = NOR_STRUCT_ID_MESSAGE_STATS;
 		msgStats->indexMsg = indexMsg;
 		msgStats->numberRotation = rotation;
+		msgStats->numberProfile = profile;
 		msgStats->totalSecondsPlayed += event->secondsOfPlay;
 		switch(event->statType) {
 			case 0:
