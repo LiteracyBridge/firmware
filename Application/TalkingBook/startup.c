@@ -376,7 +376,7 @@ void startUp(unsigned int bootType) {
 	strcpy(buffer,"\x0d\x0a" "---------------------------------------------------\x0d\x0a" "Serial#:");		
 	LBstrncat(buffer,getDeviceSN(),STARTUP_BUFFER_SIZE);
 	logStringRTCOptional(buffer, ASAP, LOG_ALWAYS,0);  // calling this before config means we rely on default location
-	LBstrncat(buffer,"Clock:",STARTUP_BUFFER_SIZE);
+	strcpy(buffer,"Clock:");
 	getRTC(buffer+strlen(buffer));
 	logStringRTCOptional(buffer, ASAP, LOG_ALWAYS,0);
 	checkVoltage();
@@ -448,6 +448,8 @@ void startUp(unsigned int bootType) {
 
 #ifdef HALT_ON_COLD_START
 		if (!wasReset) { // don't halt if reset for firmware reflashing or if an error caused a reset
+			SACM_Volume(1);
+			playDing();
 			logStringRTCOptional((char *)"Halting after cold start",ASAP,LOG_NORMAL,0);
 			setLED(LED_ALL,FALSE);  
 			//setOperationalMode((int)P_HALT);  //DEVICE-90 - does too much fs activity
