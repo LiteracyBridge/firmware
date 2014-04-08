@@ -44,6 +44,15 @@ APP_IRAM static int v_high = 0;
 APP_IRAM static int v_low = 0xFC;
 APP_IRAM static long lowestStackAddress = 0xFFFF;
 
+APP_IRAM int TRIP1_VOLTAGE_RANGE;
+APP_IRAM int TRIP1_PLAY_RATE;
+APP_IRAM int TRIP2_VOLTAGE_RANGE;
+APP_IRAM int TRIP2_PLAY_RATE;
+APP_IRAM int TRIP_OTHER_PLAY_RATE;
+APP_IRAM int TRIP1_PAUSED_RATE;
+APP_IRAM int TRIP2_PAUSED_RATE;
+APP_IRAM int TRIP_OTHER_PAUSED_RATE;
+
 // data stored between 0 and &rtc_fired+2 is not initialized by startup_Data.asm
 //    data stored here survives going into and returning from HALT mode
 //    it is initialized in startup.c for a cold reset bootType
@@ -408,19 +417,19 @@ checkVoltage() {
 */			logString(log,BUFFER, LOG_ALWAYS);
 					
 			if (isPlaying) {
-				if (vCur_1 < 220) 
-					tripRate = 75;
-				else if (vCur_1 < 320)
-					tripRate = 200;
+				if (vCur_1 < TRIP1_VOLTAGE_RANGE) // 	220 
+					tripRate = TRIP1_PLAY_RATE; // 	75
+				else if (vCur_1 < TRIP2_VOLTAGE_RANGE)  //  320
+					tripRate = TRIP2_PLAY_RATE;	//  200
 				else 
-					tripRate = 300;
+					tripRate = TRIP_OTHER_PLAY_RATE; // 300
 			} else {
-				if (vCur_1 < 220) 
-					tripRate = 20;
-				else if (vCur_1 < 320)
-					tripRate = 75;
+				if (vCur_1 < TRIP1_VOLTAGE_RANGE) 
+					tripRate = TRIP1_PAUSED_RATE; // 	20
+				else if (vCur_1 < TRIP2_VOLTAGE_RANGE)
+					tripRate = TRIP2_PAUSED_RATE; //  200
 				else 
-					tripRate = 150;
+					tripRate = TRIP_OTHER_PAUSED_RATE; // 150
 			}
 						
 			if (voltageDropRateStatic >= tripRate && v < 350) { 
