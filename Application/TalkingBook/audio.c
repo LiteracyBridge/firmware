@@ -131,6 +131,7 @@ int gotoFrame(unsigned long frameDest) {
 	// unless the .a18 file was just opened.  It may have to do with going backwards.
 	// The previous version of this function (r874) seemed to work better with backwards when file already open
 	// but this one works fine when re-opening file (as done now in loopClip()).
+	checkStackMemory();
 	pause();
 	wordsPerFrame = SACM_A1800_Mode / 800;
 	bytesPerFrame = wordsPerFrame<<1;
@@ -218,6 +219,7 @@ static int getFileHandle (CtnrFile *newFile) {
 	char sTemp[PATH_LENGTH];
 	CtnrPackage *pkg;
 		
+	checkStackMemory();
 	pkg = getPackageFromFile(newFile); // get package that applied to file, rather than context package
 	// This is necessary for user packages inserting system sounds.
 
@@ -291,6 +293,7 @@ static int getFileHandle (CtnrFile *newFile) {
 void play(CtnrFile *file, unsigned int startingPoint) {
 	unsigned long l;
 	
+	checkStackMemory();
 	l = extractTime(startingPoint, context.package->timePrecision);
 	playLongInt(file,l);
 }
@@ -304,6 +307,7 @@ static void playLongInt(CtnrFile *file, unsigned long lTimeNew) {
 	long lDifference;
 	unsigned long ulDifference;
 
+	checkStackMemory();
 	// TODO: The code below will not get used when scanning forward in the same track because
 	//       the playBip() is called to represent the scan move, and that causes SACM_Status()==0 as the bip ends.
 	//       The other problem is that getCurrentMsec appears to also be affected by playBip() even though it is in NOR flash.
@@ -358,6 +362,7 @@ void insertSound(CtnrFile *file, CtnrBlock *block, BOOL wait) {
 	int isPlayerStopped = !SACM_Status();
 	BOOL wasPaused;
 	
+	checkStackMemory();
 	wasPaused = context.isPaused;
 	lastFilePlayed = context.file;
 	context.file = file;
@@ -451,6 +456,7 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 	unsigned long rand1;
 	long previousBitRate;
 	
+	checkStackMemory();
 	previousBitRate = BIT_RATE; // set to return BIT_RATE to orig value at end of fct, in case BIT_RATE is changed below
 	rand1 = getAvailRand();		// pick random value to identify this recording
     unsignedlongToHexString((long)rand1,digits);
@@ -723,6 +729,7 @@ int createRecording(char *pkgName, int fromHeadphone, char *listName, BOOL relat
 	           //headphone amp audio driver input source select
 	ListItem *list; 
 	
+	checkStackMemory();
 	markEndPlay(getRTCinSeconds());
 		
 	if (fromHeadphone) {
@@ -766,6 +773,7 @@ void markEndPlay(long timeNow) {
 	long timeDiff;
 	char log[80];
 
+	checkStackMemory();
 	updateVolumeProfile(getVolume(),timeNow);
 	if (context.packageStartTime) {
 		saveVolumeProfile();
@@ -799,6 +807,7 @@ void markStartPlay(long timeNow, const char * name) {
 	const int LOG_LENGTH = PATH_LENGTH + 20;
 	char log[LOG_LENGTH];
 	
+	checkStackMemory();
 	updateVolumeProfile(0,timeNow); // assume no audio playing since last start/stop
 	
 	if (context.queuedPackageType != PKG_SYS) {
@@ -825,6 +834,8 @@ int writeLE32(int handle, long value, long offset) {
 	int ret = 0;
 	unsigned long wrkl;
     long curpos = lseek(handle, 0, SEEK_CUR);
+
+	checkStackMemory();
     if(offset != CURRENT_POS) {
         wrkl = lseek(handle, offset, SEEK_SET);
     }
@@ -841,6 +852,8 @@ int writeLE16(int handle, unsigned int value, long offset) {
 	int ret = 0;
 	unsigned long wrkl;
 	long curpos = lseek(handle, 0, SEEK_CUR);
+
+	checkStackMemory();
 	if(offset != CURRENT_POS) {
 		wrkl = lseek(handle, offset, SEEK_SET);
 	}
@@ -856,6 +869,8 @@ int addField(int handle, unsigned int field_id, char *field_value, int numfieldv
     int i;
 	int ret = 0;
     long field_length = strlen(field_value);
+
+	checkStackMemory();
     ret = writeLE16(handle, field_id, CURRENT_POS);
     field_length += 3;
     ret += writeLE32(handle, field_length, CURRENT_POS);
@@ -872,6 +887,8 @@ int addField(int handle, unsigned int field_id, char *field_value, int numfieldv
 }
 
 void setStatsHeader(struct ondisk_filestats *stats, char *msgId) {
+
+	checkStackMemory();
 	stats->version = 0;
 	LBstrncpy(stats->tbSRN,getSerialNumber(),SRN_MAX_LENGTH);
 	LBstrncpy(stats->msgId,msgId,MAX_MESSAGE_ID_LENGTH); 
@@ -886,6 +903,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 	unsigned long wrk, msgTime;
 	struct ondisk_filestats tmp_file_stats = {0};
 	
+	checkStackMemory();
 	ret = ret1 = 0;
 		
 	switch(why) {
@@ -1083,6 +1101,7 @@ void recordStats(char *filename, unsigned long handle, unsigned int why, unsigne
 // for now a uid is available if no stat file is present for that id
 unsigned long getAvailRand() {
 	unsigned long uid;
+	checkStackMemory();
 
 	uid = rand();
 
@@ -1109,6 +1128,8 @@ int readLE32(int handle, long value, long offset) {
 	int ret = 0;
 	unsigned long wrkl;
     long curpos = lseek(handle, 0, SEEK_CUR);
+
+	checkStackMemory();
     if(offset != CURRENT_POS) {
         wrkl = lseek(handle, offset, SEEK_SET);
     }
@@ -1125,6 +1146,8 @@ int readLE16(int handle, long value, long offset) {
 	int ret = 0;
 	unsigned long wrkl;
 	long curpos = lseek(handle, 0, SEEK_CUR);
+
+	checkStackMemory();
 	if(offset != CURRENT_POS) {
 		wrkl = lseek(handle, offset, SEEK_SET);
 	}
@@ -1143,6 +1166,7 @@ int metaRead(int fd, unsigned int field_id, unsigned int *buf) {
 	unsigned char tmpbuf[128];
 //	char msg[128], digits[16];;
 
+	checkStackMemory();
 	savpos = lseek(fd, 0, SEEK_CUR);  // save current position
 	
 	wrk = lseek(fd, SACM_A1800_Bytes + 4, SEEK_SET);
@@ -1195,6 +1219,7 @@ foundit:
 int convertTwoByteToSingleChar(unsigned int *buf, const unsigned int *tmpbuf, int count) {
 	unsigned int j, wrk, *cp;
 	
+	checkStackMemory();
 	cp = (unsigned int*)tmpbuf;
 	for(j=0; j<count; ) {
 		wrk = *cp++;
@@ -1287,9 +1312,9 @@ set_voltmaxvolume(BOOL forceLower)
 	const int MIN_VOLUME_VOLTAGE = 190;
 	const int HIGH_VOLUME_VOLT_PER_VOLUME = (MAX_ALLOWED_VOLUME_MIN_VOLTAGE - MAX_MODERATE_VOLUME_MIN_VOLTAGE) / (MAX_ALLOWED_VOLUME - MAX_MODERATE_VOLUME);
 	const int LOW_VOLUME_VOLT_PER_VOLUME = (MAX_MODERATE_VOLUME_MIN_VOLTAGE - MIN_VOLUME_VOLTAGE) / (MAX_MODERATE_VOLUME - 1);
-	
 	int vol, maxVol, ret = 0;
 	
+	checkStackMemory();
 	vol = getVolume();
 	if (vCur_1 == V_EXTERNAL_VOLTAGE || (vCur_1 >= MAX_ALLOWED_VOLUME_MIN_VOLTAGE))
 		return ret;
@@ -1359,6 +1384,7 @@ extern void logVoltageProfile(void) {
 	char log[200];
 	long time, sum = 0;
 	
+	checkStackMemory();
 	if (DEBUG_MODE < LOG_DETAIL)
 		return; // not worth logging, according to config file
 	flushLog(); //  clear buffer
@@ -1399,6 +1425,7 @@ extern void saveVolumeProfile(void) {
 	int handle, ret;
 	char filename[PATH_LENGTH];
  	
+	checkStackMemory();
 	getVolumeProfileFilename(filename);	
 //	ret = unlink((LPSTR)(filename));
 	handle = tbOpen((LPSTR)(filename),O_CREAT|O_TRUNC|O_RDWR);
@@ -1413,6 +1440,7 @@ extern void loadVolumeProfile(void) {
 	int handle, ret;
 	char filename[PATH_LENGTH];
 
+	checkStackMemory();
 	getVolumeProfileFilename(filename);	
 	handle = tbOpen((LPSTR)(filename),O_RDONLY);
 	if (handle != -1) {

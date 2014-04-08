@@ -19,7 +19,9 @@ void logException(unsigned int errorCode, const char * pStrError, int takeAction
 	char errorString[160];
 	char filePath[PATH_LENGTH];
 	static int logExceptionStack = 0;
-
+	
+	checkStackMemory();
+	logLowestStack();
 	// prevent infinite recursion of log calling open calling log...	
 	if (logExceptionStack++) {
 		 if (logExceptionStack == 2) {

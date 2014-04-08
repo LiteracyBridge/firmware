@@ -26,6 +26,7 @@ int
 FindFirstFlashOffset() {
 	unsigned int *fp = (unsigned int *) TB_SERIAL_NUMBER_ADDR;
 	
+	checkStackMemory();
 	while((*((int *)fp) != 0xffff) && ((long)fp < ((long)(TB_SERIAL_NUMBER_ADDR + TB_FLASH_SIZE)))) {
 		fp += ptrSizeOfNORStruct(fp);
 	}	
@@ -38,6 +39,7 @@ ptrSizeOfNORStruct(void *structType) {
 	int msgCount;
 	struct NORmsgMap *map;
 	
+	checkStackMemory();
 	switch (*(char *)structType) {
 		case NOR_STRUCT_ID_SYSTEM:
 			ret = sizeof(struct SystemData);
@@ -104,6 +106,7 @@ rebuildFlash(int rewriteFlash) {
 	struct SystemData *ptrSD;
 	int ret, i, m, r, size, totalSize;	
 
+	checkStackMemory();
 	for (i=0;i<totalProfiles();i++) {
 		stats.profileStats[i].structType = NOR_STRUCT_ID_ALL_MSGS;
 		stats.profileStats[i].profileOrder = i;
@@ -134,7 +137,7 @@ rebuildFlash(int rewriteFlash) {
 	}
 	rebuildNORmsgMap(&msgMap);
 	for (i=0; i<totalProfiles(); i++) {
-		rebuildNORmsgStats(&stats.profileStats[i]);
+		rebuildNORmsgStats(&stats.profileStats);
 	}
 
 	ret = saveFlashStats(&sd, &sc, &msgMap, &stats);
@@ -201,6 +204,7 @@ AppendStructToFlash(void *newStruct) {
 	int navail = TB_FLASH_SIZE - firstavail;
 	int needed = ptrSizeOfNORStruct(newStruct);
 	
+	checkStackMemory();
 	if(navail < needed) {
 		// not enough room for this new value, erase SN flash and reflash current items & newstring
 		rebuildFlash(1);
@@ -212,12 +216,16 @@ AppendStructToFlash(void *newStruct) {
 
 extern void * FindFirstFlashStruct(char structType) {
 	void *ret;
+
+	checkStackMemory();
 	ret = FindFlashStruct(structType,1);
 	return ret;
 }
 
 void * FindLastFlashStruct(char structType) {
 	void *ret;
+
+	checkStackMemory();
 	ret = FindFlashStruct(structType,0);
 	return ret;
 }
@@ -227,6 +235,7 @@ void * FindFlashStruct(char structType, int first) {
 	void *ret = NULL;	
 	void *fp = (void *) TB_SERIAL_NUMBER_ADDR;
 	
+	checkStackMemory();
 	while((*((int *)fp) != 0xffff) && (fp < (void *)(TB_SERIAL_NUMBER_ADDR + TB_FLASH_SIZE))) {
 		if((*(char *)fp)==structType) {
 			ret = fp;
@@ -244,6 +253,7 @@ FindNextFlashSameStruct(void *fp) {
 	char structType = *(char *)fp;
 	char *ret = NULL;	
 
+	checkStackMemory();
 	fp += ptrSizeOfNORStruct(fp);
 	while(fp >= (void *)TB_SERIAL_NUMBER_ADDR  && (fp < (void *)(TB_SERIAL_NUMBER_ADDR + TB_FLASH_SIZE)) &&  (*((int *)fp) != 0xffff) )  {  
 		if((*(char *)fp)==structType) {
@@ -259,6 +269,7 @@ FindNextFlashSameStruct(void *fp) {
 void * FindNextFlashStruct(void *fp, char structType) {
 	char *ret = NULL;	
 
+	checkStackMemory();
 	while(fp >= (void *)TB_SERIAL_NUMBER_ADDR  && (fp < (void *)(TB_SERIAL_NUMBER_ADDR + TB_FLASH_SIZE)) &&  (*((int *)fp) != 0xffff) )  {  
 		if((*(char *)fp)==structType) {
 			ret = fp;
@@ -273,6 +284,7 @@ static
 void rebuildNORmsgMap(struct NORmsgMap *msgMap) {
 	int i;
 	
+	checkStackMemory();
 	msgMap->structType = NOR_STRUCT_ID_MSG_MAP;
 	for (i=0; i < MAX_TRACKED_MESSAGES && offsetMsgNames[i]; i++) {
 		strcpy(msgMap->msgIdMap[i],(char *)(TB_SERIAL_NUMBER_ADDR + offsetMsgNames[i]));
@@ -287,6 +299,8 @@ void rebuildNORmsgStats(struct NORallMsgStats *allStats) {
 	int highestMessage=-1, highestRotation=-1;
 	struct NORmsgStats *msgStats;
 	int m,r;
+
+	checkStackMemory();
 	//initialize all counters to 0
 	for (m=0; m < MAX_TRACKED_MESSAGES; m++) {
 		for (r=0; r < MAX_ROTATIONS; r++) {
@@ -387,28 +401,38 @@ void rebuildNORmsgStats(struct NORallMsgStats *allStats) {
 		msgStats->indexMsg = indexMsg;
 		msgStats->numberRotation = rotation;
 		msgStats->numberProfile = profile;
-		msgStats->totalSecondsPlayed += event->secondsOfPlay;
+		if (msgStats->totalSecondsPlayed + event->secondsOfPlay <= 0xffff)
+			msgStats->totalSecondsPlayed += event->secondsOfPlay;
+		else 
+			msgStats->totalSecondsPlayed = 0xffff;
 		switch(event->statType) {
 			case 0:
-				msgStats->countStarted++;
+				if (msgStats->countStarted < 0xff) // to fit in char
+					msgStats->countStarted++;
 				break;	
 			case 1:
-				msgStats->countQuarter++;
+				if (msgStats->countQuarter < 0xff) // to fit in char
+					msgStats->countQuarter++;
 				break;	
 			case 2:
-				msgStats->countHalf++;
+				if (msgStats->countHalf < 0xff) // to fit in char
+					msgStats->countHalf++;
 				break;	
 			case 3:
-				msgStats->countThreequarters++;
+				if (msgStats->countThreequarters < 0xff) // to fit in char
+					msgStats->countThreequarters++;
 				break;	
 			case 4:
-				msgStats->countCompleted++;
+				if (msgStats->countCompleted < 0xff) // to fit in char
+					msgStats->countCompleted++;
 				break;	
 			case 5:
-				msgStats->countApplied++;
+				if (msgStats->countApplied < 0xff) // to fit in char
+					msgStats->countApplied++;
 				break;	
 			case 6:
-				msgStats->countUseless++;
+				if (msgStats->countUseless < 0xff) // to fit in char
+					msgStats->countUseless++;
 				break;	
 		}
 		fp = FindNextFlashSameStruct(fp);
@@ -422,6 +446,7 @@ char getMsgIndex (char * strMessageID) {
 	char ret=-1;
 	int i;
 	// check APP_IRAM array of int offsetMsgNames[40]
+	checkStackMemory();
 	for (i=0; offsetMsgNames[i] && i < MAX_TRACKED_MESSAGES; i++) {
 		if (!strcmp((char *)(TB_SERIAL_NUMBER_ADDR+offsetMsgNames[i]),strMessageID)) {
 			ret = (char)i;
@@ -527,14 +552,18 @@ exportFlashStats(void) {
 
 static int saveFlashStats(struct SystemData *sd, struct SystemCounts2 *sc, struct NORmsgMap *msgMap, struct NORallMsgStatsAllProfiles *stats) {
 	int handle, ret, i;
-	
+	long size;
 	handle = tbOpen((LPSTR)(SYS_DATA_STATS_PATH),O_CREAT|O_TRUNC|O_RDWR);
 	if (handle != -1) {
-		ret = write(handle, (unsigned long)sd<<1, sizeof(struct SystemData)<<1);
-		ret = write(handle, (unsigned long)sc<<1, sizeof(struct SystemCounts2)<<1);
-		ret = write(handle, (unsigned long)msgMap<<1, sizeof(struct NORmsgMap)<<1);
+		size = sizeof(struct SystemData)<<1;
+		ret = write(handle, (unsigned long)sd<<1, size);
+		size = sizeof(struct SystemCounts2)<<1;
+		ret = write(handle, (unsigned long)sc<<1, size);
+		size = sizeof(struct NORmsgMap)<<1;
+		ret = write(handle, (unsigned long)msgMap<<1, size);
+		size = sizeof(struct NORallMsgStats)<<1;
 		for (i=0;i<totalProfiles();i++) {
-			ret = write(handle, (unsigned long)&stats->profileStats[i]<<1, sizeof(struct NORallMsgStats)<<1);
+			ret = write(handle, (unsigned long)&stats->profileStats<<1, size);
 		}
 		close(handle);
 	} else

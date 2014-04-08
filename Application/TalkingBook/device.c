@@ -42,6 +42,7 @@ APP_IRAM unsigned long lastTime=0;
 
 APP_IRAM static int v_high = 0;
 APP_IRAM static int v_low = 0xFC;
+APP_IRAM static long lowestStackAddress = 0xFFFF;
 
 // data stored between 0 and &rtc_fired+2 is not initialized by startup_Data.asm
 //    data stored here survives going into and returning from HALT mode
@@ -220,6 +221,7 @@ long getRTCinSecondsWithoutDays() {
 long getRTCinSeconds(void) {
 	unsigned long ret, secD, noDays;
 	
+	checkStackMemory();
 	noDays = getRTCinSecondsWithoutDays();
 	secD = (unsigned long)getCumulativeDays() * 24L * 3600L;
 	ret = noDays + secD;
@@ -248,6 +250,7 @@ void setLED(unsigned int color, BOOL on) {
 		unsigned int nDrv;
 	};
 	struct GPIO *LEDPort = (struct GPIO *)P_IOB_Data;
+	checkStackMemory();
 	// on = FALSE;
 	if (on) {
  		LEDPort->nDir 	 |= color;
@@ -258,6 +261,7 @@ void setLED(unsigned int color, BOOL on) {
 }
 
 void setUSBDevice (BOOL set) {		
+	checkStackMemory();
 	if (set) {
 		Snd_Stop();
 		flushLog();
@@ -275,6 +279,7 @@ unsigned int
 getCurVoltageSample() {	
 	unsigned sample;
 
+	checkStackMemory();
 	do {
 		*P_ADC_Setup |= 0x4000;
 		*P_MADC_Ctrl |= 0x40; // set STRCNV, starting the voltage sample
@@ -307,6 +312,7 @@ checkVoltage() {
 	char log[80];
 	int isPlaying;
 
+	checkStackMemory();
 	v = getCurVoltageSample();
 	isPlaying = (SACM_Status() && !context.isPaused);
 	currentTimeInSec = getRTCinSeconds();
@@ -439,6 +445,7 @@ int keyCheck(int longCheck) {
 	unsigned int curkey;
 	static int keydown = 0;
 
+	checkStackMemory();
 	if(keydown) {	// we are waiting for key up or long timer to expire
 		
 		curkey = GetCurKey();
@@ -507,6 +514,7 @@ int keyCheck(int longCheck) {
 int waitForButton(int targetedButton) {
 	int pressedButton;
 	
+	checkStackMemory();
 	do 
 		pressedButton = keyCheck(0);
 	while (!(pressedButton > 0 && ((pressedButton == targetedButton) || (targetedButton == 0))));
@@ -521,6 +529,8 @@ void wait(int t) { //t=time in msec
 	const unsigned int cyclesPerVoltCheck = cyclesPerNOP * 300; // cycles for each no-operation instruction
 //	const unsigned int NOPsPerMilliSecond = cyclesPerMilliSecond / cyclesPerNOP; // loop count per millisecond
 	const unsigned int VChecksPerMilliSecond = cyclesPerMilliSecond / cyclesPerVoltCheck; // loop count per millisecond
+
+	checkStackMemory();
 	for (i = 0; i < t; i++) 
 		for (j = 0; j < VChecksPerMilliSecond; j++) {
 //			asm("nop\n");  // a CPU no-op instruction to pass the time
@@ -542,6 +552,8 @@ int waitAndCheckKeys(int t) { //t=time in msec
 	unsigned long int cyclesPerMilliSecond = (long)(*P_PLLN & 0x3f) * 1000L;  // 96000 at 96MHz	
 	const unsigned int cyclesPerKeyCheck = 400; // cycles for each no-operation instruction
 	const unsigned int KeyChecksPerMilliSecond = cyclesPerMilliSecond / cyclesPerKeyCheck; // loop count per millisecond
+
+	checkStackMemory();
 	for (i = 0; i < t; i++) {
 		for (j = 0; j < KeyChecksPerMilliSecond; j++) {
 			key = keyCheck(0);
@@ -557,6 +569,7 @@ int waitAndCheckKeys(int t) { //t=time in msec
 void resetSystem(void) {
 	// set watchdog timer to reset device; 0x780A (Watchdog Reset Control Register)
 	// see GPL Programmer's Manual (V1.0 Dec 20,2006), Section 3.5, page 18
+	checkStackMemory();
 	checkVoltage();  // USB may have been supplying sole power -- need to check if voltage dropping fast
 	stop(); 
 	if (PLEASE_WAIT_IDX && context.package) {  // prevents trying to insert this sound before config & control files are loaded.
@@ -586,6 +599,7 @@ static void logKeystroke(int intKey) {
 	int i;
 	char str[20];
 
+	checkStackMemory();
 	if (LOG_KEYS) {
 		longToDecimalString(keydown_counter,str,4);
 		if(intKey & 0x8000) {   // key up
@@ -616,6 +630,8 @@ static void logKeystroke(int intKey) {
 
 void housekeeping() {
 		// give visual feedback of shutting down (aural feedback when user causes shutdown in takeAction())
+	checkStackMemory();
+	logLowestStack();
 	setLED(LED_ALL,TRUE);
 	saveVolumeProfile();
 	exportFlashStats();
@@ -708,6 +724,18 @@ int logLongHex(unsigned long data) {
 	return ret;
 }
 
+extern void 
+assignDefaultLEDValues () {
+	if(!strncmp(getSerialNumber(),(char *)"a-",2)) { // haven't run startup, no sound possible
+		LED_GREEN = DEFAULT_LED_RED;
+		LED_RED = DEFAULT_LED_GREEN;
+	} else {
+		LED_GREEN = DEFAULT_LED_GREEN;
+		LED_RED = DEFAULT_LED_RED;
+	}	
+	LED_ALL = LED_GREEN | LED_RED;
+}
+
 
 void
 refuse_lowvoltage(int die)
@@ -715,9 +743,7 @@ refuse_lowvoltage(int die)
 	extern void playBip(void);
 	int no_startup_done = ((LED_GREEN == 0) && (LED_RED == 0));
 	if(no_startup_done == 1) { // haven't run startup, no sound possible
-		LED_GREEN = DEFAULT_LED_GREEN;
-		LED_RED = DEFAULT_LED_RED;
-		LED_ALL = LED_GREEN | LED_RED;
+		assignDefaultLEDValues(); 
 	} else {	
 		playBips(2);
 	}
@@ -788,6 +814,7 @@ void writeVersionToDisk(char *path) {
 	int handle, ret;
 	struct f_info file_info;
 		
+	checkStackMemory();
 	strcpy(fileVersion,path);
 	strcat(fileVersion,SVN_REVISION  FILE_REVISION_EXT);
 	if (!fileExists((LPSTR)fileVersion)) {
@@ -887,6 +914,7 @@ void rtcAlarmFired(unsigned long alarm) {
 	void removeAlarm(unsigned long);
 	APP_IRAM static unsigned long lastActivity;
 	
+	checkStackMemory();
 	strcpy(buffer,"rtcAlarmFired() alarm=");
 	unsignedlongToHexString((long)alarm, (char *)wrk);
 	strcat(buffer, wrk);
@@ -937,6 +965,7 @@ long getTimeinSeconds(unsigned int hour, unsigned int minute, unsigned int secon
 	unsigned long ret, secH;
 	unsigned int secM;
 	
+	checkStackMemory();
 	secM = (unsigned int)minute * 60;
 	secH = (unsigned long)hour * 3600;
 	ret = second + secM + secH;
@@ -1104,6 +1133,7 @@ extern void confirmSNonDisk(void) {
 	char sysPath[PATH_LENGTH];	
 	struct f_info file_info;
 	
+	checkStackMemory();
 //	if (!SNexists())
 //		return; // no serial number - don't write to disk
 	if (SYSTEM_PATH)
@@ -1134,6 +1164,7 @@ extern void confirmLocationonDisk(void) {
 	char sysPath[PATH_LENGTH];	
 	struct f_info file_info;
 	
+	checkStackMemory();
 //	if (!SNexists())
 //		return; // no serial number - don't write to disk
 	if (SYSTEM_PATH)
@@ -1165,6 +1196,7 @@ extern void confirmPackageNameonDisk(void) {
 	char sysPath[PATH_LENGTH];	
 	struct f_info file_info;
 	
+	checkStackMemory();
 //	if (!SNexists())
 //		return; // no serial number - don't write to disk
 	if (SYSTEM_PATH)
@@ -1192,4 +1224,40 @@ extern void confirmPackageNameonDisk(void) {
 extern
 void alertCorruption(void) {
 	playBips(3);
+}
+
+extern
+void checkStackMemory(void) {
+	int x;
+	long a;
+	a = (long)&x;
+	
+	if (a < 0x5acf) {
+		flushLog();
+		logString((char *)"********STACK MEMORY OVERFLOW**********",ASAP,LOG_ALWAYS);
+		playBip();
+		playDing();
+		playBip();
+		playDing();
+		playBips(3);
+	}
+	if (a < lowestStackAddress) {
+		if ((lowestStackAddress - a) > 100)
+			x=1;  // big jump
+		lowestStackAddress = a;
+	}
+	else
+		x=1; // just want to see when we get here
+} 
+
+extern
+void logLowestStack(void) {
+	char strAddress[32];
+	int iAddress;
+	
+	iAddress = (int)lowestStackAddress;
+	
+	strcpy(strAddress,(char *)"LOW STACK: 0x");
+	longToHexString(iAddress,strAddress+strlen(strAddress),1);
+	logString(strAddress,BUFFER,LOG_NORMAL);
 }

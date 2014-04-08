@@ -37,6 +37,7 @@ struct SystemData {
 	//
 	// IMPORTANT: MUST SYNCH WITH JAVA CLASS THAT READS THIS STRUCT IN TB LOADER
 	//
+	//97 or 0x61 words 
 	char structType;  // can act as versioning field (next version could be == 23)
 	unsigned int countReflashes;
 	// updated just once

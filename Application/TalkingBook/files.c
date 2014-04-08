@@ -25,6 +25,8 @@ static int copyfiles(char *, char *);
 extern 	int convertTwoByteToSingleChar(unsigned int *, const unsigned int *, int);
 extern int SystemIntoUDisk(unsigned int);
 
+static int mkpath(LPSTR);
+
 BOOL nextNameValuePair (int handle, char *buffer, char delimiter, char **name, char **value) {
 	BOOL ret;
 	char *cursor;
@@ -86,6 +88,7 @@ extern void logStringRTCOptional(char *string, int whenToWrite, int logPriority,
 	int len;
 	char newString[256];
 	
+	checkStackMemory();
 	if (logPriority > DEBUG_MODE)
 		return; // not worth logging, according to config file
 	if (LOG_FILE) {
@@ -166,6 +169,7 @@ saveLogFile(int noteCorruption) {
 	char newlogname[128], strwrk[8];
 	int i;
 
+	checkStackMemory();
 	if (!LOG_FILE)
 		return;
 	
@@ -201,6 +205,7 @@ int insertStringInFile(const char * filename, char * strText, long posInsert) {
 	char tempLine[80];
 	int MAX_BYTES = 2 * READ_LENGTH;
 
+	checkStackMemory();
 	if(vCur_1 < V_MIN_SDWRITE_VOLTAGE) {
 		refuse_lowvoltage(0);
 		return -1;
@@ -278,6 +283,8 @@ int appendStringToFile(const char * filename, char * strText) {
 	
 	int handle, ret;
 	unsigned int bytesToWrite;
+
+	checkStackMemory();
 //	char strCharText[READ_LENGTH+1];
 
 /*	if (strlen(strText) > READ_LENGTH) {
@@ -315,6 +322,7 @@ int convertDoubleToSingleChar(char * out, const char * in, BOOL addCRLF) {
 	int bytesToWrite, i;
 	char low, high;  
 	
+	checkStackMemory();
 	for (i=0, high = 1; (low=*(in+i*2)) && high; i++) {
 		high = *(in + i*2 + 1);
 		*(out + i) = high<<8 | low;
@@ -343,6 +351,7 @@ int findDeleteStringFromFile(char *path, char *filename, const char * string, BO
 	int unequal;
 	char find[PATH_LENGTH];
 	
+	checkStackMemory();
 	if(vCur_1 < V_MIN_SDWRITE_VOLTAGE) {
 		refuse_lowvoltage(0);
 		return -1;
@@ -415,6 +424,7 @@ void trimFile(char * filePath, unsigned long frameStart, unsigned long frameEnd)
 	unsigned long wordStart, wordsNewSize,wordsRemaining, origLengthBytes;
 	int ret, loop, ledStatus;
 		
+	checkStackMemory();
 	pBuffer = bufferBig;
 	pSize = (unsigned long *)&header;
 	pBitRate = header + 2;
@@ -468,6 +478,7 @@ BOOL readBuffer(int handle, char *buffer, int bytesToRead) {
 	int i, bytesRead, wordsRead;
 	BOOL ret;
 	
+	checkStackMemory();
 	bytesRead = read(handle, (unsigned long)buffer<<1,bytesToRead);
 	wordsRead = bytesRead / 2;
 	
@@ -499,6 +510,7 @@ char * getLine (int fileHandle, char *buffer) {
 	BOOL lastLine, needBuffer;
 	int rewind;
 
+	checkStackMemory();
 	lastLine = FALSE;
 	needBuffer = FALSE;
 		
@@ -565,6 +577,7 @@ INT16 tbOpen(LPSTR path, INT16 open_flag) {
 	char *ptr, *pPath;
 	APP_IRAM static int openLogStack = 0;
 
+	checkStackMemory();
 	// prevent infinite recursion of log calling open calling log...	
 	if (!strcmp((char *)path,(char *)LOG_FILE)) {
 		openLogStack++;
@@ -639,6 +652,7 @@ INT16 tbChdir(LPSTR path) {
 	INT16 ret;
 	//todo: move number of attempts into config file, but have fall back number in define (since config has to be open)
 
+	checkStackMemory();
 	for (i = 0; i < RETRIES; i++) { 
 		ret = chdir(path);
 		if (ret < 0)
@@ -683,6 +697,7 @@ int fileCopy(char * from, char * to) {
 	int wHandle, rHandle, ret;
 	unsigned int loopCount;
 	
+	checkStackMemory();
 	ret = 0;	
 	rHandle = tbOpen((LPSTR)from,O_RDONLY);
 	wHandle = tbOpen((LPSTR)to,O_CREAT|O_TRUNC|O_WRONLY);
@@ -724,6 +739,7 @@ void dirCopy(char *fromdir, char *todir, BOOL overwrite) {
 	unsigned int i, k;
 	struct f_info fi;
 	
+	checkStackMemory();
 	strcpy(from, fromdir);
 	len_from = strlen(from);
 	
@@ -782,6 +798,7 @@ void copyAllFiles(char *fromdir, char *todir, BOOL overwrite)
 	char from[80], to[80];
 	struct f_info fi;
 	
+	checkStackMemory();
 	strcpy(from, fromdir);
 	
 	len_from = strlen(from);
@@ -834,6 +851,7 @@ void deleteAllFiles(char *fromdir)
 	struct f_info fi;
 	
 	
+	checkStackMemory();
 	logString("deleteAllFiles",BUFFER,LOG_NORMAL);
 	logString(fromdir, BUFFER,LOG_NORMAL);
 	
@@ -874,6 +892,7 @@ void moveAudioFiles(char *fromdir, char *todir)
 	char from[80], to[80];
 	struct f_info fi;
 	
+	checkStackMemory();
 	strcpy(from, fromdir);
 	
 	len_from = strlen(from);
@@ -927,6 +946,7 @@ loadLanglisttoMemory(char *masterlist,  MLENTRY mla[], unsigned int mla_size)
 	char buffer[READ_LENGTH+1];
 	MLENTRY *mlp;
 	
+	checkStackMemory();
 	mlfd = tbOpen((LPSTR)masterlist, O_RDONLY);
 	if(mlfd < 0) {
 		return(ret);
@@ -951,6 +971,7 @@ categoryStringtoLong(char *cat, MLENTRY *mlp)
 	unsigned int i;
 	unsigned long l = 0;
 	
+	checkStackMemory();
 	for(i=24, base=cat; i>=0; i-=8) {
 		cp = strchr(base, '-');
 		if (cp) {
@@ -974,6 +995,7 @@ categoryLongtoString(char *cat, MLENTRY *mlp)
 	char tmp[8], *cp;
 	
 	
+	checkStackMemory();
 	wrk = (*mlp & 0xff000000) >> 24;
 	unsignedlongToDecimalString(wrk, tmp, 3);
 	cp = tmp;
@@ -1021,6 +1043,7 @@ static int copyfiles(char *fromdir, char *todir)
 	char from[80], to[80];
 	struct f_info fi;
 	
+	checkStackMemory();
 	fret = 0;
 	
 	strcpy(from, fromdir);
@@ -1082,6 +1105,7 @@ copyMovedir(char *fromdir, char *todir) {
 
 	struct f_info fi;
 	
+	checkStackMemory();
 	fret = 0;
 	
 	strcpy(from, fromdir);
@@ -1146,6 +1170,7 @@ int concatFiles(int tofd, LPSTR fromname) {
 	char strLog[PATH_LENGTH * 2], buf[1024];
 	int fromfd, ret = 0, wrk, wrk1, ends_with_lf;
 	
+	checkStackMemory();
 	wrk = sizeof(buf);
 	
 	fromfd = tbOpen(fromname, O_RDONLY);
@@ -1187,6 +1212,7 @@ buildExchgOstats() {
 	int expandOstatFile(char *);
 
 	
+	checkStackMemory();
 	strcpy(delim,DELIM);
 	delim_len = convertDoubleToSingleChar(delim,delim,FALSE);
 	
@@ -1276,6 +1302,7 @@ expandOstatFile(char *filename) {
 	int fromfd, ret, checkfd, len, state = FIND_SRN, bytestowrite;
 	signed long newver, diskver;
 	
+	checkStackMemory();
 	buffer[READ_LENGTH] = '\0';
 	strcpy(from, filename);
 	
@@ -1391,6 +1418,7 @@ replaceFromBackup(char *path)
 	char * wrkpath;
 	char msg[128];
 	
+	checkStackMemory();
 	return -1;	
 	strcpy(msg,"Attempting replace ");
 	strcat(msg,path);
@@ -1468,6 +1496,7 @@ extern void logStat(char * filePath) {
 	
 	struct stat_t dirStat;
 	
+	checkStackMemory();
 	ret = stat((LPSTR)filePath,&dirStat);
 	
 	strcpy(logPath,filePath);
@@ -1486,6 +1515,7 @@ extern int isCorrupted(char * filePath) {
 	int ret;
 	int foundCorruption = 0;
 	
+	checkStackMemory();
 	if (!dirExists((LPSTR)filePath)) {
 		foundCorruption = 1;	
 	} else {
@@ -1554,7 +1584,8 @@ check_burn_TB_SERIAL_NUMBER_ADDR() {
 	INT16 handle, ret, i, offset = 0, nwrite;
 	int buffer[READ_LENGTH];
 	
-	if(!fileExists(FLASH_37000)) {
+	checkStackMemory();
+	if(!fileExists((LPSTR)FLASH_37000)) {
 		return;
 	}
 	handle = tbOpen((LPSTR) FLASH_37000, O_RDONLY);
@@ -1583,19 +1614,20 @@ check_burn_TB_SERIAL_NUMBER_ADDR() {
 	close(handle);
 	
 done:
-	unlink(OLD_FLASH_37000);
+	unlink((LPSTR)OLD_FLASH_37000);
 	ret = rename((LPSTR) FLASH_37000, (LPSTR) OLD_FLASH_37000);
 }
 
 // make a complete path
 // return 0 if fail, non-zero if success
-int mkpath(LPSTR path)
+static int mkpath(LPSTR path)
 {
   int c = 0, ret;
   char *lastslash = 0, *p;
   char tmppath[LONG_FILE_LENGTH];
   
-  strcpy(tmppath, path);
+	checkStackMemory();
+  strcpy(tmppath, (char *)path);
   p = tmppath;
   c = strlen(p);
   if(*(p+c-1) == '/') {
@@ -1627,7 +1659,7 @@ int mkpath(LPSTR path)
   while (1) {  // try to make entire directory path
     if (lastslash) {
       *lastslash = 0;
-      ret = mkdir(p);
+      ret = mkdir((LPSTR)p);
     }
     if (!lastslash) {
     	 break;

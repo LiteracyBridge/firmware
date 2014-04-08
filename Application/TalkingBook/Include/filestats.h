@@ -46,7 +46,7 @@ struct ondisk_filestats {
 
 // Rebuild:UPDATE
 #define NOR_STRUCT_ID_MSG_MAP	1
-// 40 msgs x 20 chars = 800 bytes = 400 words + 1 word
+// 40 msgs x 20 chars + 2 = 802 words or 0x322 words  
 struct NORmsgMap {
 	char structType;
 	char totalMessages;
@@ -79,7 +79,7 @@ struct NORmsgStats {
 // with current text ids for msgs having a max of 20 characters, 10 words, means a 400-word array for the map
 // 200+400=600 words + 36 = 696, leaving 3400 words, or 85 words per msg, or 42 updates per msg
 
-#define NOR_STRUCT_ID_ALL_MSGS	10
+#define NOR_STRUCT_ID_ALL_MSGS	14
 struct NORallMsgStats {
 	char structType;
 	char profileOrder;

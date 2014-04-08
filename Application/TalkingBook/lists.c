@@ -158,7 +158,7 @@ BOOL getNextTransList(TranslationList *transList, BOOL advance, CtnrPackage *pkg
 }
 
 char *getNextList(ListItem *list, BOOL shouldAdvance) {
-	char *ret, *cp;
+	char *ret;
 	char buffer[READ_LENGTH+1];
 	int fileHandle;
 	char *line, *tempCursor;
@@ -234,7 +234,7 @@ char *getNextList(ListItem *list, BOOL shouldAdvance) {
 } 	
 
 char *getPreviousList(ListItem *list) {
-	char *ret, *cp;
+	char *ret;
 	char buffer[READ_LENGTH+1];
 	int fileHandle;
 	char *line, *tempCursor;

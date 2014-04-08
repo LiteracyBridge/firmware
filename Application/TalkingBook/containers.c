@@ -3,6 +3,7 @@
 // Contact: info@literacybridge.org
 #include "Include/talkingbook.h"
 #include "Include/parsing.h"
+#include "Include/device.h"
 #include "Include/startup.h"
 #include "Include/containers.h"
 #include "Include/files.h"
@@ -12,7 +13,7 @@
 static const int REWIND[] = {0,500,1000,1500,2000,3000,5000,10000};
 APP_IRAM Context context;
 APP_IRAM CtnrPackage pkgSystem, pkgUser;
-APP_IRAM static ProfileData profiles; 
+APP_IRAM ProfileData profiles; 
 
 typedef struct StackFrame StackFrame;
 struct StackFrame {
@@ -141,6 +142,7 @@ struct CtnrBlock *getStartInsert(int actionStartEnd, int idxFirstAction) {
 	CtnrBlock *ret;
 	Action *actions, *action;
 	int idxBlock;
+	checkStackMemory();
 	
 	ret = 0;
 	if (actionStartEnd & 0x08) { // check INSERT_SOUND bit is set
@@ -166,6 +168,7 @@ struct CtnrBlock *getEndInsert(int actionStartEnd, int idxFirstAction) {
 	Action *actions,*action;
 	int idxBlock;
 	
+	checkStackMemory();
 	ret = 0;
 	if (actionStartEnd & 0x0800) { // check INSERT_SOUND bit is set
 		actions = context.package->actions;
@@ -258,6 +261,7 @@ CtnrPackage* getPackageFromFile (CtnrFile *file) {
 	int i;
 	char path[PATH_LENGTH];
 	
+	checkStackMemory();
 	if (file >= pkgSystem.files && file < (pkgSystem.files + pkgSystem.countFiles))
 		ret = &pkgSystem;
 //	else if (file >= pkgDefault.files && file < (pkgDefault.files + pkgDefault.countFiles))
@@ -286,6 +290,7 @@ CtnrFile* getFileFromBlock (CtnrBlock *block) {
 	int idxBlock;
 	int filesInPackage;
 	
+	checkStackMemory();
 	filesInPackage = context.package->countFiles;	
 	idxBlock = block - context.package->blocks;
 	
@@ -689,6 +694,7 @@ extern int loadProfileNames(char *path, ProfileData *pd) {
 	char buffer[READ_LENGTH+1];
 	char strLog[80];
 	
+	checkStackMemory();
 	handle = tbOpen((LPSTR)path,O_RDONLY);
 	if (handle == -1) {
 		logException(33,path,LOG_ONLY);

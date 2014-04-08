@@ -75,6 +75,7 @@ extern void turnAmpOn(void);
 extern char* getDeviceSN(void);
 extern int SNexists(void);
 extern void writeVersionToDisk(char *);
+void assignDefaultLEDValues (void);
 
 #define RTC_ALARM_INTERRUPT_ENABLE 0x0400
 #define RTC_ALARM_FUNCTION_ENABLE  0x0400
@@ -92,6 +93,8 @@ extern void confirmSNonDisk(void);
 extern void alertCorruption(void);
 extern void	confirmPackageNameonDisk(void);
 extern void confirmLocationonDisk(void);
+extern void checkStackMemory(void);
+extern void logLowestStack(void);
 #define N_RTC_ALARMS 6
 #define N_RTC_INIT   N_RTC_ALARMS+1
 

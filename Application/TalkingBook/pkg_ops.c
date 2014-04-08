@@ -111,7 +111,7 @@ int deletePackage(char * packageName) {
 	struct f_info file_info;
 	BOOL shouldDelete = TRUE;
 	const int MAX_RETRIES = 3;
-	long timeNow;
+	//long timeNow;
 
 	if (shouldDelete) {
 		stop();

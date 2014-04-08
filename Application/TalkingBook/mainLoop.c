@@ -57,6 +57,7 @@ static EnumAction getStartEndCodeFromTimeframe(int idxTimeframe, EnumBorderCross
 	BOOL skipHyperlinkedBlock;
 	CtnrBlock *blocks = context.package->blocks;
 
+	checkStackMemory();
 	if (approach == FORWARD_JUMPING) {
 		do {
 			skipHyperlinkedBlock = FALSE;
@@ -123,6 +124,7 @@ static void processBlockEnterExit (CtnrBlock *block, EnumEnterOrExit enteringOrE
 	BOOL red, green, onoff, fliponoff;
 	APP_IRAM static unsigned int enteringVolume;
 
+	checkStackMemory();
 	code = block->actionEnterExit;
 	if (enteringOrExiting == ENTERING) {
 		code &= 0x00FF;
@@ -206,6 +208,7 @@ static void processTimelineJump (int idxFromTimeline, int idxToTimeline) {
 	// It is not used for playback or BLOCK_FWD, BLOCK_BACK.
 	int idxActiveBlock, idxBlock;
 	
+	checkStackMemory();
 	if (idxFromTimeline != idxToTimeline) {
 		if (idxFromTimeline != -1)
 			for (idxActiveBlock=MAX_BLOCK_OVERLAP-1;idxActiveBlock >= 0; idxActiveBlock--) {
@@ -231,6 +234,7 @@ static void enterOrExitAllBlocks (int idxTimeline, EnumEnterOrExit enteringOrExi
 	// used when entering or backing out of package or changing files
 	int idxActiveBlockList, idxBlock;
 	
+	checkStackMemory();
 	if (idxTimeline != -1) {	
 		idxActiveBlockList = 0;
 		do {
@@ -252,6 +256,7 @@ static Action *getMatchingAction (EnumEvent eventType) {
 	int *activeBlocks;
 	iAction = NULL;
 	
+	checkStackMemory();
     // FIND ACTION FOR EVENT
 	if (eventType > BUTTON_MARKER) {  // marker separates button events from following start/event event codes
 		arrayIndex = context.idxTimeframe;  // relies on main loop and TakeAction() keeping this updated
@@ -301,6 +306,7 @@ static void processButtonEvent(int eventType) {
 	Action *action = NULL;
 	EnumAction actionCode;
 	
+	checkStackMemory();
 	if (context.idxActiveList != -1) {
 		if (context.idxActiveList == MAX_LISTS) 
 			action = getTransListActions(&context.package->transList);
@@ -335,6 +341,7 @@ static void processStartBlock(int idxBlock) {
 	int idxAction;
 	CtnrBlock *block, *insertBlock;
 
+	checkStackMemory();
 	block = &context.package->blocks[idxBlock];
 	insertBlock = getStartInsert(block->actionStartEnd, block->idxFirstAction);
 	if (insertBlock)
@@ -353,6 +360,7 @@ static void processIntoBlock(int idxBlock) {
 	CtnrBlock *block;
 	block = &context.package->blocks[idxBlock];
 	
+	checkStackMemory();
 	processBlockEnterExit(block,ENTERING);
 	processStartBlock(idxBlock);
 }
@@ -393,6 +401,7 @@ static void endOfTimeframe(int idxTimeframe, BOOL isPlayerStopped) {
 	int idxStart = -1, idxEnd = -1;
 	EnumAction endAction = EOL_MARKER;  // to show whether changed, since 0=NOP
 	
+	checkStackMemory();
 	startOrEnd = getTimelineDiff(idxTimeframe+1,&idxStart,&idxEnd);
 	if (context.idxPausedOnBorder != idxEnd && (startOrEnd == ENDING || startOrEnd == BOTH)) 
 		endAction = processEndBlock(idxEnd);
@@ -420,6 +429,7 @@ static void keyResponse(void) {
 	int keystroke;
 	int longKeystroke;
 	
+	checkStackMemory();
 	if (context.keystroke) {
 		keystroke = context.keystroke;
 		context.keystroke = 0;
@@ -458,6 +468,7 @@ extern void checkInactivity(BOOL resetTimer) {
 	APP_IRAM static unsigned long lastActivity;
 	APP_IRAM static unsigned long lastUSBCheck;
 	
+	checkStackMemory();
 	currentTime = getRTCinSeconds();	
 	
 	if (resetTimer) {
@@ -498,6 +509,7 @@ processAlarm(unsigned long alarm) {
 	// the arg alarm is the return value from addAlarm
 	char buffer[48], alm[12];
 	
+	checkStackMemory();
 	strcpy(buffer,"mainloop: RTC alarm has fired ");
 	unsignedlongToHexString((long)alarm, (char *)alm);
  	strcat(buffer, alm);
@@ -524,8 +536,8 @@ void mainLoop (void) {
 	TranslationList *transList;
 	int inactivityCheckCounter = 0;
 	//extern unsigned long rtc_fired;
-	APP_IRAM static unsigned long lastActivity;
 	//void processAlarm();
+	checkStackMemory();
 
 	while(1) {
 				
@@ -875,6 +887,7 @@ static void takeAction (Action *action, EnumAction actionCode) {
 	CtnrFile *replayFile;
 	char tempBuffer[100];
 		
+	checkStackMemory();
 	replayFile = NULL;
 	list = NULL;
 	transList = NULL;
@@ -1995,6 +2008,7 @@ void loadPackage(int pkgType, const char * pkgName) {
 	long timeNow;
 	char *temp;
 		
+	checkStackMemory();
 	flagParse = 0;
 	stop();  // better to stop audio playback before file ops  -- also flushes log buffer
 	setLED(LED_RED,FALSE);

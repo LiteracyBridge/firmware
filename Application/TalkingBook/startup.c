@@ -110,7 +110,6 @@ void setDefaults(void) {
 		KEY_SELECT = V0_DEFAULT_KEY_SELECT;
 		KEY_HOME   = V0_DEFAULT_KEY_HOME;
 	}
-	
 	LED_GREEN        = DEFAULT_LED_GREEN;
 	LED_RED          = DEFAULT_LED_RED;
 	MAX_SPEED        = DEFAULT_MAX_SPEED;
@@ -265,7 +264,8 @@ void initAlarmData()
 }
 
 void startUp(unsigned int bootType) {
-	char buffer[400];
+	#define STARTUP_BUFFER_SIZE 	100
+	char buffer[STARTUP_BUFFER_SIZE];
 	char strCounts[32];
 	char filename[FILE_LENGTH];
 	int key, ret, callPushPull = 0;//callProcessInbox = 0;
@@ -281,6 +281,7 @@ void startUp(unsigned int bootType) {
 	// confirm systemData structure in NORFlash matches latest version in this firmware (NOR_STRUCT_ID_SYSTEM should increment for any change in struct)
 	// setSystemData() puts the struct SystemData first at TB_SERIAL_NUMBER_ADDR
 	ptrsCounts.systemData = (struct SystemData *)TB_SERIAL_NUMBER_ADDR;
+	assignDefaultLEDValues(); 	// depends on SRN prefix to indicate which PCB is used
 
 	if(rtc_fired == 0xff000000) {	
 		rtc_fired = 0;
@@ -373,11 +374,12 @@ void startUp(unsigned int bootType) {
 	}
 
 	strcpy(buffer,"\x0d\x0a" "---------------------------------------------------\x0d\x0a" "Serial#:");		
-	strcat(buffer,getDeviceSN());
-	strcat(buffer,"\x0d\x0a" "Clock:");
-	getRTC(buffer+strlen(buffer));
-	checkVoltage();
+	LBstrncat(buffer,getDeviceSN(),STARTUP_BUFFER_SIZE);
 	logStringRTCOptional(buffer, ASAP, LOG_ALWAYS,0);  // calling this before config means we rely on default location
+	LBstrncat(buffer,"Clock:",STARTUP_BUFFER_SIZE);
+	getRTC(buffer+strlen(buffer));
+	logStringRTCOptional(buffer, ASAP, LOG_ALWAYS,0);
+	checkVoltage();
 	logDate();
 	initAlarmData(); // Calling this with every startup should get rid of all alarms other than the midnight alarm, which should now consistently work.
 
@@ -489,18 +491,6 @@ void startUp(unsigned int bootType) {
 	
 	*/
 
-/*	NEED TO REPLACE SNexists() with a fct to check current expected bytes in the same Flash sector 
-	if (!SNexists()) {
-		// This will update the version when the device has just been programmed with probe,
-		// which wipes out the serial number.
-		updateSN(DEFAULT_SYSTEM_PATH);  // use the srn file that might be left from pre-firmware update
-		writeVersionToDisk(DEFAULT_SYSTEM_PATH);	
-		strcpy(buffer,"Probe Firmware Update:");
-		firmwareWasUpdated = 1;
-		strcat(buffer,VERSION);
-		logStringRTCOptional(buffer,ASAP,LOG_NORMAL,0);
-	}
-*/
 // try to load a saved config.bin if present
 	configExists = (restore_config_bin() == -1?0:1);
 	/*
@@ -540,7 +530,7 @@ void startUp(unsigned int bootType) {
 			ret = tbOpen((LPSTR)FIRMWARE_UPDATE_NOTIF_FILE,O_CREAT|O_RDWR|O_TRUNC);
 			close(ret);
 			strcpy(buffer,"Found new firmware:");
-			strcat(buffer,filename);
+			LBstrncat(buffer,filename,STARTUP_BUFFER_SIZE);
 			logStringRTCOptional((char *)buffer,ASAP,LOG_NORMAL,0);
 			// inspect file will still be there since fw update will prevent this function from reaching the end.
 			// where the unlink is.
@@ -560,59 +550,62 @@ void startUp(unsigned int bootType) {
 			setRTCFromText(buffer);
 			strcpy(buffer,"Set Clock:");
 			getRTC(buffer+strlen(buffer));
-			strcat(buffer," (time and/or date reset by *.rtc file)");
+			LBstrncat(buffer," (time and/or date reset by *.rtc file)",STARTUP_BUFFER_SIZE);
 			logStringRTCOptional(buffer,BUFFER,LOG_ALWAYS,0);	
 		}
 	}
 	if (!getLocation() || !strncmp(getLocation(),(char *)"Non-",4))
 		playDings(2);
 	strcpy(buffer,"Location:");
-	strcat(buffer,getLocation());
-	strcat(buffer,(const char *)"\x0d\x0a" "Version:" VERSION);
+	LBstrncat(buffer,getLocation(),STARTUP_BUFFER_SIZE);
+	logStringRTCOptional(buffer,BUFFER,LOG_ALWAYS,0);
+	strcpy(buffer,(const char *)"Version:" VERSION);
 	if (firmwareWasUpdated) {
-		strcat(buffer," (New firmware)");
+		LBstrncat(buffer," (New firmware)",STARTUP_BUFFER_SIZE);
 		unlink((LPSTR)FIRMWARE_UPDATE_NOTIF_FILE);
 		// check if using old SRN. prefix in flash; if so; need to erase block and rewrite SRN and then write new data
 		initAlarmData();
 	}
-	strcat(buffer,(char *)"\x0d\x0a" "Reflashes:");
+	LBstrncat(buffer,(char *)"\x0d\x0a" "Reflashes:",STARTUP_BUFFER_SIZE);
 	longToDecimalString(getReflashCount(),(char *)(buffer+strlen(buffer)),4);
-	strcat (buffer,(char *)"  (");
+	LBstrncat (buffer,(char *)"  (",STARTUP_BUFFER_SIZE);
 	longToDecimalString((4096-FindFirstFlashOffset()), (char *)(buffer+strlen(buffer)), 4);
-	strcat (buffer,(char *)" words remaining)");
-	strcat(buffer,(char *)"\x0d\x0a" "Image:");
-	strcat(buffer,getImageName());
-	strcat(buffer,(char *)"\x0d\x0a" "Update:");
-	strcat(buffer,getUpdateNumber());
+	LBstrncat (buffer,(char *)" words remaining)",STARTUP_BUFFER_SIZE);
+	logStringRTCOptional(buffer,BUFFER,LOG_ALWAYS,0);
+	strcpy(buffer,(char *)"Image:");
+	LBstrncat(buffer,getImageName(),STARTUP_BUFFER_SIZE);
+	LBstrncat(buffer,(char *)"\x0d\x0a" "Update:",STARTUP_BUFFER_SIZE);
+	LBstrncat(buffer,getUpdateNumber(),STARTUP_BUFFER_SIZE);
 	logStringRTCOptional(buffer,BUFFER,LOG_ALWAYS,0);
 	strcpy(buffer,(char *)"Cycle:");
 	longToDecimalString(getPowerups(),(char *)(buffer+strlen(buffer)),4);
-	strcat(buffer,(char *)"\x0d\x0a" "Rotation:");
+	LBstrncat(buffer,(char *)"\x0d\x0a" "Rotation:",STARTUP_BUFFER_SIZE);
 	longToDecimalString(getRotation(), (char *)(buffer+strlen(buffer)), 1);
-	strcat(buffer,(char *)"\x0d\x0a" "Period:");
+	LBstrncat(buffer,(char *)"\x0d\x0a" "Period:",STARTUP_BUFFER_SIZE);
 	longToDecimalString(getPeriod(), (char *)(buffer+strlen(buffer)), 4);
-	strcat(buffer,(char *)"\x0d\x0a" "Cumulative Days:");
+	logStringRTCOptional(buffer,BUFFER,LOG_ALWAYS,0);
+	strncpy(buffer,(char *)"Cumulative Days:",STARTUP_BUFFER_SIZE);
 	longToDecimalString(getCumulativeDays(), (char *)(buffer+strlen(buffer)), 4);
-	strcat(buffer,"\x0d\x0a" "Debug:");
+	LBstrncat(buffer,"\x0d\x0a" "Debug:",STARTUP_BUFFER_SIZE);
 	switch (DEBUG_MODE) {
 		case 0:
-			strcat(buffer,"Minimal"); 
+			LBstrncat(buffer,"Minimal",STARTUP_BUFFER_SIZE); 
 			break;
 		case 1:
-			strcat(buffer,"Normal"); 
+			LBstrncat(buffer,"Normal",STARTUP_BUFFER_SIZE); 
 			break;
 		default:
-			strcat(buffer,"Detail"); 
+			LBstrncat(buffer,"Detail",STARTUP_BUFFER_SIZE); 
 			break;
 	}
 	if (inspect)
-		strcat(buffer,"\x0d\x0a" "Inspect triggered");
+		LBstrncat(buffer,"\x0d\x0a" "Inspect triggered",STARTUP_BUFFER_SIZE);
 	if(normal_shutdown) {
 		if (DEBUG_MODE == LOG_DETAIL) {
-			strcat(buffer,(char *)"\x0d\x0a" "Restored configuration from config.bin successfully");
+			strcpy(buffer,(char *)"Restored configuration from config.bin successfully");
 		}
 	} else {
-		strcat(buffer,(char *)"\x0d\x0a" "ABNORMAL shutdown (no config.bin)");
+		strcpy(buffer,(char *)"ABNORMAL shutdown (no config.bin)");
 	}
 	checkVoltage();  
 	logStringRTCOptional(buffer,BUFFER,LOG_ALWAYS,0);
@@ -623,9 +616,9 @@ void startUp(unsigned int bootType) {
 		
 	unlink ((LPSTR) (STAT_DIR SNCSV));
 	strcpy(buffer,getDeviceSN());
-	strcat(buffer, ",");
+	LBstrncat(buffer, ",",STARTUP_BUFFER_SIZE);
 	longToDecimalString(getPowerups(), strCounts, 4); 
-	strcat(buffer, strCounts);
+	LBstrncat(buffer, strCounts,STARTUP_BUFFER_SIZE);
 	
 	{
 		int ret, bytesToWrite;

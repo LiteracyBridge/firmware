@@ -6,7 +6,7 @@
 
 #include "lists.h"
 
-#define MAX_PROFILES	5
+#define MAX_PROFILES	2
 #define MAX_LANGUAGES 	3
 #define MAX_MESSAGE_LISTS	5
 #define MAX_CONTROL_TRACKS 3
