@@ -19,8 +19,9 @@
 #define SYS_DATA_STATS_PATH_DEBUG_POST		STAT_DIR "dump-postflash.bin"
 #define CLI_STAT_DIR "b:/statistics/stats/" 
 #define CLI_OSTAT_DIR "b:/statistics/ostats/"
-#define REFLASH_STATS_FILE		((LPSTR)"a:/update.txt")
-#define REFLASH_STATS_FILE_ARCHIVE 	((LPSTR) DEFAULT_SYSTEM_PATH "update.txt")
+#define REFLASH_STATS_FILE_NAME				"sysdata.txt"
+#define REFLASH_STATS_FILE					((LPSTR)"a:/" REFLASH_STATS_FILE_NAME)
+#define REFLASH_STATS_FILE_ARCHIVE 	((LPSTR) DEFAULT_SYSTEM_PATH REFLASH_STATS_FILE_NAME)
 #define SNCSV "SN.csv"
 #define SRN_MAX_LENGTH	12  // this should match the define in sys_counters.h
 

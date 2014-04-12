@@ -31,7 +31,7 @@ struct SystemCounts {
 
 extern SystemCounts systemCounts;
 
-#define NOR_STRUCT_ID_SYSTEM	255  // this should be higher than all other NOR_STRUCT_ID_ ..
+#define NOR_STRUCT_ID_SYSTEM	254  // this should be higher than all other NOR_STRUCT_ID_ ..BUT IT SHOULD NOT BE 255 (0xff) since that is unwritten memory
 // 0x4b / 75d words 
 struct SystemData {
 	//

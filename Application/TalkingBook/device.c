@@ -44,6 +44,15 @@ APP_IRAM static int v_high = 0;
 APP_IRAM static int v_low = 0xFC;
 APP_IRAM static long lowestStackAddress = 0xFFFF;
 
+APP_IRAM int TRIP1_VOLTAGE_RANGE;
+APP_IRAM int TRIP1_PLAY_RATE;
+APP_IRAM int TRIP2_VOLTAGE_RANGE;
+APP_IRAM int TRIP2_PLAY_RATE;
+APP_IRAM int TRIP_OTHER_PLAY_RATE;
+APP_IRAM int TRIP1_PAUSED_RATE;
+APP_IRAM int TRIP2_PAUSED_RATE;
+APP_IRAM int TRIP_OTHER_PAUSED_RATE;
+
 // data stored between 0 and &rtc_fired+2 is not initialized by startup_Data.asm
 //    data stored here survives going into and returning from HALT mode
 //    it is initialized in startup.c for a cold reset bootType
@@ -334,22 +343,24 @@ checkVoltage() {
 		timePaused = currentTimeInSec;
 		voltageAvgPaused = voltagePaused = v;
 		readingsPaused = 1;
-	} else if (!isPlaying && timePaused) {
+	}
+	 else if (!isPlaying && timePaused) {
 		readingsPaused++;
-		if (readingsPaused >= 50 && ((v+10) < voltageAvgPaused)) {
+		if (readingsPaused >= 50 && ((v+20) < voltageAvgPaused)) {
 			forceflushLog();  // to ensure the log msg below is not beyond buffer
-			strcpy(log,(char *)"SHUTTING DOWN - Paused v:");
+			strcpy(log,(char *)"WOULD BE SHUTTING DOWN - Paused v:");
 			longToDecimalString(v,log+strlen(log),3);
 			strcat(log,(char *)" Avg:");
 			longToDecimalString(voltageAvgPaused,log+strlen(log),3);
 			strcat(log,(char *)" R:");
 			longToDecimalString(readingsPaused,log+strlen(log),5);
 			logString(log , BUFFER, LOG_ALWAYS);
-			voltageShutdown();
+			//voltageShutdown();
 		} 
 		voltageAvgPaused = ((long)voltageAvgPaused * (long)(readingsPaused-1) + v) / readingsPaused;
 		voltagePaused = v;
 	}
+
 	
 	if (v > v_high)
 		v_high = v;
@@ -408,19 +419,19 @@ checkVoltage() {
 */			logString(log,BUFFER, LOG_ALWAYS);
 					
 			if (isPlaying) {
-				if (vCur_1 < 220) 
-					tripRate = 75;
-				else if (vCur_1 < 320)
-					tripRate = 200;
+				if (vCur_1 < 220) //TRIP1_VOLTAGE_RANGE) // 	220 
+					tripRate = 75; //TRIP1_PLAY_RATE; // 	75
+				else if (vCur_1 < 320) //TRIP2_VOLTAGE_RANGE)  //  320
+					tripRate = 200; //TRIP2_PLAY_RATE;	//  200
 				else 
-					tripRate = 300;
+					tripRate = 300; //TRIP_OTHER_PLAY_RATE; // 300
 			} else {
-				if (vCur_1 < 220) 
-					tripRate = 20;
-				else if (vCur_1 < 320)
-					tripRate = 75;
+				if (vCur_1 < 220) //TRIP1_VOLTAGE_RANGE) 
+					tripRate = 20; //TRIP1_PAUSED_RATE; // 	20
+				else if (vCur_1 < 320) //TRIP2_VOLTAGE_RANGE)
+					tripRate = 75; //TRIP2_PAUSED_RATE; //  200
 				else 
-					tripRate = 150;
+					tripRate = 150;  //TRIP_OTHER_PAUSED_RATE; // 150
 			}
 						
 			if (voltageDropRateStatic >= tripRate && v < 350) { 
