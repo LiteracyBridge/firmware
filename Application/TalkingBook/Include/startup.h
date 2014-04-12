@@ -232,14 +232,6 @@ typedef struct config_bin {
 				int V_FAST_VOLTAGE_DROP_TIME_SEC;
 				int V_VOLTAGE_DROP_CHECK_INTERVAL;
 				int LONG_KEYPRESS_COUNTER;
-				int TRIP1_VOLTAGE_RANGE;
-				int TRIP1_PLAY_RATE;
-				int TRIP1_PAUSED_RATE;
-				int TRIP2_VOLTAGE_RANGE;
-				int TRIP2_PLAY_RATE;
-				int TRIP2_PAUSED_RATE;
-				int TRIP_OTHER_PLAY_RATE;
-				int TRIP_OTHER_PAUSED_RATE;
 				int len_string_buf;
 } CONFIG_BIN;
 

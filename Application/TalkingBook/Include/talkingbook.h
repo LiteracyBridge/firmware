@@ -4,7 +4,7 @@
 #define	__TALKINGBOOK_h__
 
 #define MAJOR_VERSION	"v1.85"  // stats in flash version
-#define SVN_REVISION	"r1171"
+#define SVN_REVISION	"r1168"
 #define VERSION			MAJOR_VERSION SVN_REVISION
 #define TB_CAN_WAKE  // hardware that allows wake from sleep/halt
 //IMPORTANT: changes to TB_CAN_WAKE must also be made to system_head.inc!!!
@@ -171,12 +171,4 @@ extern char *MACRO_FILE;
 extern int VOLTAGE_SAMPLE_FREQ_SEC, USB_CLIENT_POLL_INTERVAL;
 extern int DEBUG_MODE, LOG_KEYS;
 extern unsigned int V_FAST_VOLTAGE_DROP_TIME_SEC,V_VOLTAGE_DROP_CHECK_INTERVAL;
-extern int TRIP1_VOLTAGE_RANGE;
-extern int TRIP1_PLAY_RATE;
-extern int TRIP2_VOLTAGE_RANGE;
-extern int TRIP2_PLAY_RATE;
-extern int TRIP_OTHER_PLAY_RATE;
-extern int TRIP1_PAUSED_RATE;
-extern int TRIP2_PAUSED_RATE;
-extern int TRIP_OTHER_PAUSED_RATE;
 #endif

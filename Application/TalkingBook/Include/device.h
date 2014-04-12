@@ -28,16 +28,6 @@
 //used when powered externally to ensure all voltage checks pass (hundredths of volts)
 #define V_EXTERNAL_VOLTAGE 400 		// higher than possible with batteries -- used to indicate running on external power
 
-#define DEFAULT_TRIP1_VOLTAGE_RANGE	220 
-#define DEFAULT_TRIP1_PLAY_RATE	75
-#define DEFAULT_TRIP2_VOLTAGE_RANGE	320
-#define DEFAULT_TRIP2_PLAY_RATE	200
-#define DEFAULT_TRIP_OTHER_PLAY_RATE	300
-#define DEFAULT_TRIP1_PAUSED_RATE	20
-#define DEFAULT_TRIP2_PAUSED_RATE	200
-#define DEFAULT_TRIP_OTHER_PAUSED_RATE	150
-
-
 #define TB_SERIAL_NUMBER_ADDR  		0x37000
 #define TB_SERIAL_NUMBER_ADDR_TEXT	"0x37000" //must match TB_SERIAL_NUMBER_ADDR
 #define TB_FLASH_SIZE               0x1000    // 4096
