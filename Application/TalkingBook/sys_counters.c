@@ -474,6 +474,8 @@ setSystemData(struct SystemData *sd) {
 	sc.rotations[0].rotationNumber = 0;
 	sc.rotations[0].periodNumber = 0;
 	sc.rotations[0].hoursAfterLastUpdate = 0;
+	checkVoltage();
+	sc.rotations[0].initVoltage = vCur_1;
 	for (i=1; i< MAX_ROTATIONS; i++) {
 		sc.rotations[i].structType = -2; // -1 is bad since FF is unwritten memory
 	}
