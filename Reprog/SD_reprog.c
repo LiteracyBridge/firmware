@@ -270,11 +270,20 @@ ReprogFailed(flash *fp)
 int check_new_sd_flash(char * filename) {
 	struct f_info file_info;
 	int ret;
+	char filepath[PATH_LENGTH];
 			
 	ret =_findfirst((LPSTR)UPDATE_FP UPDATE_FN, &file_info, D_FILE);
 	if (ret >= 0) {
-		strcpy(filename, file_info.f_name);
-		ret = 1;
+		// don't load firmware that matches current firmware's revision
+		if (strncmp((char *)SVN_REVISION,filename,strlen((char *)SVN_REVISION))) {
+			strcpy(filename, file_info.f_name);
+			ret = 1;
+		} else {
+			strcpy((char *)filepath,(char *)UPDATE_FP);
+			strcat((char *)filepath,(char *)file_info.f_name);
+			unlink((LPSTR)filepath);
+			ret = 0;
+		}
 	} else
 		ret = 0;
 	return ret;
