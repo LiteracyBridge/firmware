@@ -1176,9 +1176,12 @@ static int restore_config_bin () {
 		SET_CONFIG_STRING(CUSTOM_PKG_PREFIX);				
 		SET_CONFIG_STRING(AUDIO_FILE_EXT);
 		SET_CONFIG_STRING(USER_CONTROL_TEMPLATE);
-		SET_CONFIG_STRING(MACRO_FILE);
 		if(*MACRO_FILE) {
+			SET_CONFIG_STRING(MACRO_FILE);
 			MACRO_FILE_SAVE = addTextToSystemHeap(MACRO_FILE);
+		} else {
+			MACRO_FILE=addTextToSystemHeap((char*)"");
+			MACRO_FILE_SAVE=addTextToSystemHeap((char*)"");
 		}
 	}
 	
