@@ -275,7 +275,7 @@ int check_new_sd_flash(char * filename) {
 	ret =_findfirst((LPSTR)UPDATE_FP UPDATE_FN, &file_info, D_FILE);
 	if (ret >= 0) {
 		// don't load firmware that matches current firmware's revision
-		if (strncmp((char *)SVN_REVISION,filename,strlen((char *)SVN_REVISION))) {
+		if (strncmp((char *)SVN_REVISION,file_info.f_name,strlen((char *)SVN_REVISION))) {
 			strcpy(filename, file_info.f_name);
 			ret = 1;
 		} else {

@@ -360,8 +360,10 @@ void startUp(unsigned int bootType) {
 	checkVoltage();  
 //	ret = loadSystemCounts();  // calling this before config means we rely on the default location for system-vars
 	//systemCounts.powerUpNumber++; 
-	if (inspect)
-		firmwareWasUpdated = fileExists((LPSTR)FIRMWARE_UPDATE_NOTIF_FILE);
+	if (inspect && fileExists((LPSTR)FIRMWARE_UPDATE_NOTIF_FILE)) {
+		firmwareWasUpdated = 1;
+		unlink((LPSTR)FIRMWARE_UPDATE_NOTIF_FILE);
+	}
 //	if (ret == -1 || inspect)
 //		setLocation(systemCounts.location);
 	checkVoltage();  
@@ -564,7 +566,6 @@ void startUp(unsigned int bootType) {
 	strcpy(buffer,(const char *)"Version:" VERSION);
 	if (firmwareWasUpdated) {
 		LBstrncat(buffer," (New firmware)",STARTUP_BUFFER_SIZE);
-		unlink((LPSTR)FIRMWARE_UPDATE_NOTIF_FILE);
 		// check if using old SRN. prefix in flash; if so; need to erase block and rewrite SRN and then write new data
 		initAlarmData();
 	}
