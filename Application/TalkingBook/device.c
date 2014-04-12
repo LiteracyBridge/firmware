@@ -236,7 +236,7 @@ long getRTCinSeconds(void) {
 	ret = noDays + secD;
 	while (ret < lastTime && ((ret + 24L * 3600L) > lastTime)) {
 		// new day must have occured 
-		secD = (unsigned long)incrementCumulativeDays() * 24L * 3600L;
+		secD = ((unsigned long)incrementCumulativeDays()) * 24L * 3600L;
 		ret = noDays + secD;
 	}
 	if (rtc_fired && ((rtc_fired & 0x00ffffffL) == 0)) {
