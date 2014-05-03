@@ -30,6 +30,14 @@ extern APP_IRAM unsigned long lastTime;
 
 
 int ReprogFlash(flash *);
+int curstate;
+
+void SwitchLED() {
+	setLED(LED_ALL, FALSE);
+	setLED(LED_GREEN, curstate);
+	curstate ^= TRUE;
+//	setLED(curled, TRUE);
+}
 
 void Try_SD_reprog(flash *fp) {
 	
@@ -44,6 +52,7 @@ FlashReprogHimem(flash *fp) {
 	long pos;
 	extern void FlashReprogLomem();
 	unsigned long offset;
+	curstate = FALSE;
 	
 	// see if high mem flash reprogramming code is in file
 	pos = lseek(fp->fileHandle, REPROG_STAND_ALONE * 2, SEEK_SET);
@@ -59,16 +68,19 @@ FlashReprogHimem(flash *fp) {
 		
 	if(fp->Flash_type == MX_MID) {		
 		for(fp->pflash = REPROG_STAND_ALONE; fp->pflash < 0xb0000; fp->pflash += FLASH_ERASE_SIZE) {
+			SwitchLED();
 			fp->erasesector(fp);
 		}
 	} else {  // SST memory
 		for(fp->pflash = REPROG_STAND_ALONE; fp->pflash < 0xb0000; fp->pflash += FLASH_LOW_SECTOR_SIZE) {
+			SwitchLED();
 			fp->erasesector(fp);
 		}
 	}
 	
 	offset = 0;
 	for (addr = (void *)REPROG_STAND_ALONE; (unsigned long)addr < (unsigned long)ENDADDR; addr += 2048) {
+		SwitchLED();
 		nbytes = read(fp->fileHandle, (unsigned long)buf<<1, 2048<<1);
 		if(nbytes <= 0)
 			break;
@@ -86,6 +98,12 @@ FlashReprogHimem(flash *fp) {
 	
 	
 prog_himem:
+
+
+	setLED(LED_ALL,FALSE);
+	wait(150);
+	setLED(LED_GREEN, TRUE);
+
 	FlashReprogLomem(fp, buf);	
 
 }
