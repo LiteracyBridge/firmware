@@ -161,7 +161,7 @@ EXPORT=3
 # End Source File
 # End Group
 # Begin Source File
-SOURCE=System\System.asm
+SOURCE=..\firmware\Driver\IOKey\IOKeyScan.asm
 USEPARAM=FALSE
 PARAM=
 ID=
