@@ -158,6 +158,8 @@ L_Wakeup:
 //	pop r1,r1 from [sp]   // pop boot type
 //  we pushed boottype above, leave it on the stack as the arg to main
 	call _main
+	.dw 0xaaaa
+	.dw 0x5555
 .endp
 //------------------------------------------------------------------------------
 .DEBUG
