@@ -645,7 +645,7 @@ void housekeeping() {
 	logLowestStack();
 	setLED(LED_ALL,TRUE);
 	saveVolumeProfile();
-	exportFlashStats();
+	//exportFlashStats();
 	write_config_bin();  // build a config.bin
 	//checkDoubleSRNprefix(); // this can be removed once the dup serial number prefixes are fixed
 	//confirmSNonDisk(); // make sure the serial number file is correct 
