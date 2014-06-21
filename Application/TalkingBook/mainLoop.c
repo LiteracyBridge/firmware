@@ -484,24 +484,22 @@ extern void checkInactivity(BOOL resetTimer) {
 			setOperationalMode((int)P_SLEEP); // shut down completely if will require power sw recycle to turn on
 			// Might want to go back to the audio alert since old hardware uses much more current in sleep than new hw
 		}
-	}	
-	if(USB_CLIENT_POLL_INTERVAL && ((currentTime - lastUSBCheck) > USB_CLIENT_POLL_INTERVAL)) {
-		int usbret;
-
-		lastUSBCheck = currentTime;
-		usbret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY);
-		while(usbret == 1) {
-			usbret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_ONCE);
-		}
-		if (!usbret) { //USB connection was made
-			fastShutdown();
-//			checkVoltage();  // USB may have been supplying sole power -- need to check if voltage dropping fast
-//			SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
-//			lastActivity = currentTime; //	count being in usb as active
-//			processInbox();
-//			checkVoltage();  // USB may have been supplying sole power -- need to check if voltage dropping fast
-		} 
 	}
+
+//	Commenting out USB client check code since we aren't currently doing d2d copying, and we don't save stats before doing this.
+//  This means the only method of going into USB mode is now to hold * during start up.	
+//	if(USB_CLIENT_POLL_INTERVAL && ((currentTime - lastUSBCheck) > USB_CLIENT_POLL_INTERVAL)) {
+//		int usbret;
+//
+//		lastUSBCheck = currentTime;
+//		usbret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY);
+//		while(usbret == 1) {
+//			usbret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_ONCE);
+//		}
+//		if (!usbret) { //USB connection was made
+//			fastShutdown();
+//		} 
+//	}
 }
 // process an alarm that has fired fired here
 void
