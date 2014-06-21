@@ -8,9 +8,9 @@
 #define LIST_ITEM_LENGTH	FILE_LENGTH
 #define MAX_TRANSLATE_FILE  120
 #define TRANSLATE_TEMP_DIR  "translate_temp"
-#define OTHER_CATEGORY		"0"
+#define OTHER_CATEGORY		"0-0"
 #define FAVORITES_CATEGORY	"0-2"
-#define FEEDBACK_CATEGORY	"9"
+#define FEEDBACK_CATEGORY	"9-0"
 #define TB_CATEGORY			"$0-1"
 
 typedef struct ListItem ListItem;

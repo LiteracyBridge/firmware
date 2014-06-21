@@ -618,24 +618,7 @@ static int recordAudio(char *pkgName, char *cursor, BOOL relatedToLastPlayed) {
 	        if(cp != NULL) {
 				if(*cp >= '0' && *cp <= '9') {
 		        	strcpy(category, cursor);
-				} else if(!strncmp(cp, "AGR", 3))
-		        	strcpy(category, CAT_AGRICULTURE);
-	        	else if(!strncmp(cp, "HEA", 3))
-	        		strcpy(category, CAT_HEALTH);
-	        	else if(!strncmp(cp, "EDU", 3))
-	        		strcpy(category, CAT_EDUCATION);
-	        	else if(!strncmp(cp, "STO", 3))
-	        		strcpy(category, CAT_STORIES);
-	        	else if(!strncmp(cp, "BUS", 3))
-	        		strcpy(category, CAT_BUSINESS);
-	        	else if(!strncmp(cp, "GOV", 3))
-	        		strcpy(category, CAT_GOVERNANCE);
-	        	else if(!strncmp(cp, "MUS", 3))
-	        		strcpy(category, CAT_MUSIC);
-	        	else if(!strncmp(cp, "DIA", 3))
-	        		strcpy(category, CAT_DIARY);
-	        	else
-	        		strcpy(category, CAT_OTHER);
+				} 
 			}
 	        
 	       	addField(handle, DC_CATEGORY, category, 1);

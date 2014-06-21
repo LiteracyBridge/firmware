@@ -4,7 +4,7 @@
 #define	__TALKINGBOOK_h__
 
 #define MAJOR_VERSION	"v1.86"  // new safer reprogramming process
-#define SVN_REVISION	"r1204"
+#define SVN_REVISION	"r1206"
 #define VERSION			MAJOR_VERSION SVN_REVISION
 #define TB_CAN_WAKE  // hardware that allows wake from sleep/halt
 //IMPORTANT: changes to TB_CAN_WAKE must also be made to system_head.inc!!!

@@ -26,15 +26,4 @@ int writeLE16(int handle, unsigned int value, long offset);
 int addField(int handle, unsigned int field_id, char *field_value, int numfiledvalues);
 int metacat(char *filename, char *category);
 
-#define CAT_OTHER       "0" 
-#define CAT_AGRICULTURE "1"
-#define CAT_HEALTH      "2"  
-#define CAT_EDUCATION   "3"
-#define CAT_STORIES     "4"
-#define CAT_BUSINESS    "5"
-#define CAT_GOVERNANCE  "6"
-#define CAT_MUSIC       "7"
-#define CAT_DIARY       "8" 
-#define CAT_FEEDBACK	"9"
-
 #endif    
