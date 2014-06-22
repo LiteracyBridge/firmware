@@ -15,23 +15,24 @@
 #include "Include/d2d_copy.h"
 
 extern APP_IRAM SystemCounts systemCounts;
-static APP_IRAM char connectedSN[16];
-static APP_IRAM char connectedCycleNumber[8];
+//static APP_IRAM char connectedSN[16];
+//static APP_IRAM char connectedCycleNumber[8];
 
 static char * longToDecimalStringZ(long l, char * string, int numberOfDigits);
 
 extern int setUSBHost(BOOL enter);
-static void getAudioFeedback(void);
+//static void getAudioFeedback(void);
 static int copyApplicationOrMessage(char * packageName, char *newPkgPath);
 static int copyApplication(char * packageName, char *newPkgPath);
 static int copyMessage(char * packageName, char *newPkgPath);
 static void copyListAudio(const char * listName);
-static void exchangeStatsCSV(void);
+//static void exchangeStatsCSV(void);
 static int copyfilesFiltered(char *fromdir, char *todir);
-static void getStats(void);
-static int getOtherSNandCycle(char *, char *);
-static void getLogs(void);
+//static void getStats(void);
+//static int getOtherSNandCycle(char *, char *);
+//static void getLogs(void);
  
+#if 0
 static void getAudioFeedback(void) {
 	ProfileData profiles;
 	char path[PATH_LENGTH];
@@ -116,9 +117,11 @@ static void getAudioFeedback(void) {
 	} while (i > 0);
 }
 
+#endif
+
 int d2dCopy(const char * packageName,const char * filenameList) {
 	int retCopy;
-	char newPkgPath[PATH_LENGTH], strLog[PATH_LENGTH];
+	char newPkgPath[PATH_LENGTH];
 //	int maxTrials = 5;
 	long timeNow;
 	ListItem *list;
@@ -155,7 +158,7 @@ int d2dCopy(const char * packageName,const char * filenameList) {
 			copyListAudio(filenameList);
 //   built in device.c setOperationalMode when device halts or sleeps
 //		  	buildMyStatsCSV();
-			exchangeStatsCSV();
+//			exchangeStatsCSV();
 			setLED(LED_RED,FALSE);
 		}
 		setUSBHost(FALSE);
@@ -428,6 +431,8 @@ buildMyStatsCSV() {
 
 	close(mystats);
 }
+
+#if 0
 //static
 void exchangeStatsCSV() {
 //
@@ -575,6 +580,8 @@ getStats(void) {
 	logString(strLog, BUFFER,LOG_DETAIL); 
 
 }
+#endif
+
 
 // supress leading zeros from longToDecimalString
 //
@@ -803,9 +810,9 @@ cloneDir(char *fromdir, char *todir) {
 		if(!strcmp(from, STAT_DIR)) {
 			continue;
 		}
-		if(!strcmp(from, OSTAT_DIR)) {
-			continue;
-		}
+//		if(!strcmp(from, OSTAT_DIR)) {
+//			continue;
+//		}
 		if(!strcmp(from, LOG_ARCHIVE_PATH)) {
 			continue;
 		}
@@ -901,6 +908,7 @@ static int copyfilesFiltered(char *fromdir, char *todir)
 	return(fret);
 }
 
+#if 0
 static void
 getLogs() {
 	char myPath[PATH_LENGTH], theirPath[PATH_LENGTH];
@@ -943,12 +951,12 @@ pushContentGetFeedback() {
 			copyMovedir(OUTBOX_PATH, bInbox);
 		} else
 			logString((char *)"no outbox folder",ASAP,LOG_ALWAYS);
-		if (getOtherSNandCycle(connectedSN,connectedCycleNumber) != -1) {
-			logString(connectedSN,ASAP,LOG_DETAIL);
-			logString(connectedCycleNumber,ASAP,LOG_DETAIL);
-			getLogs();
-			exchangeStatsCSV();  //grab all connected device's stats
-		}
+//		if (getOtherSNandCycle(connectedSN,connectedCycleNumber) != -1) {
+//			logString(connectedSN,ASAP,LOG_DETAIL);
+//			logString(connectedCycleNumber,ASAP,LOG_DETAIL);
+//			getLogs();
+//			exchangeStatsCSV();  //grab all connected device's stats
+//		}
 		playBip();
 		getAudioFeedback();  //grab all connected device's messages in User Feedback category
 		playDing();
@@ -956,3 +964,4 @@ pushContentGetFeedback() {
 	} else
 		playBips(3);
 }
+#endif

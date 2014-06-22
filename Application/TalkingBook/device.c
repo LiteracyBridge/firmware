@@ -650,7 +650,7 @@ void housekeeping() {
 	//checkDoubleSRNprefix(); // this can be removed once the dup serial number prefixes are fixed
 	//confirmSNonDisk(); // make sure the serial number file is correct 
 	buildMyStatsCSV();
-	buildExchgOstats();
+	//buildExchgOstats();  // we aren't have devices exchange stats right now
 	clearDeleteQueue();
 	saveLogFile(0);	
 }

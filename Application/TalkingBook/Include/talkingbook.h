@@ -4,7 +4,7 @@
 #define	__TALKINGBOOK_h__
 
 #define MAJOR_VERSION	"v1.87"  // removed USB polling during running -- only * at startup will cause USB client mode
-#define SVN_REVISION	"r1211"
+#define SVN_REVISION	"r1212"
 #define VERSION			MAJOR_VERSION SVN_REVISION
 #define TB_CAN_WAKE  // hardware that allows wake from sleep/halt
 //IMPORTANT: changes to TB_CAN_WAKE must also be made to system_head.inc!!!

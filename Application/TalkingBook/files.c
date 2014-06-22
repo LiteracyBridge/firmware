@@ -1204,6 +1204,8 @@ int concatFiles(int tofd, LPSTR fromname) {
 
 	return(ends_with_lf);
 }
+
+#if 0
 int
 buildExchgOstats() {
 	char strLog[PATH_LENGTH * 2], to[PATH_LENGTH], filename[PATH_LENGTH], delim[20];
@@ -1407,6 +1409,7 @@ expandOstatFile(char *filename) {
 	
 	return(0);
 }
+#endif
 
 int 
 replaceFromBackup(char *path)
