@@ -268,7 +268,7 @@ void startUp(unsigned int bootType) {
 	char buffer[STARTUP_BUFFER_SIZE];
 	char strCounts[32];
 	char filename[FILE_LENGTH];
-	int key, ret, callPushPull = 0;//callProcessInbox = 0;
+	int key, ret; //, callPushPull = 0;//callProcessInbox = 0;
 	int configExists = 0, normal_shutdown=1;
 	int inspect = 0, firmwareWasUpdated = 0;
 	extern unsigned long rtc_fired;
@@ -637,6 +637,11 @@ void startUp(unsigned int bootType) {
 
 	//signal end of log header
 	logStringRTCOptional("===================================================",BUFFER,LOG_ALWAYS,0);
+	if (firmwareWasUpdated) {
+		// TODO: There's a strange bug after reprogramming that causes the wake up keys to not work during operation.  
+		//       It also continues to wake after going to sleep.  The quick fix is to resetSystem after reprogramming, and everything seems to be fine.		
+		resetSystem();  
+	}
 	initializeProfiles(); 
 	if (inspect)
 		unlink((LPSTR)SELF_INSPECT_TRIGGER_FILE);	
@@ -645,11 +650,13 @@ void startUp(unsigned int bootType) {
 		//checkVoltage();  
 		//processInbox();
 	//}
+#if 0
 	if (callPushPull) { // copy outbox files to connecting device, get stats and audio feedback
 		checkVoltage();  
 		pushContentGetFeedback();
 		resetSystem();  //TODO:not sure this is still necessary 
 	}
+#endif
 	SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
 
 	ret = *P_RTC_INT_Status;	
