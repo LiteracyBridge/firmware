@@ -11,13 +11,13 @@
 #define STAT_APPLY		5
 #define STAT_USELESS	6
 
-#define STAT_DIR  "a:/statistics" 
+#define STAT_DIR  "a:/statistics/" 
 #define OSTAT_DIR "a:/statistics/ostats/"
 #define SYS_DATA_STATS_FILE		"flashData.bin"
 #define SYS_DATA_STATS_PATH		STAT_DIR SYS_DATA_STATS_FILE
 #define SYS_DATA_STATS_PATH_DEBUG_PRE		STAT_DIR "dump-preflash.bin"
 #define SYS_DATA_STATS_PATH_DEBUG_POST		STAT_DIR "dump-postflash.bin"
-#define CLI_STAT_DIR "b:/statistics" 
+#define CLI_STAT_DIR "b:/statistics/" 
 #define CLI_OSTAT_DIR "b:/statistics/ostats/"
 #define REFLASH_STATS_FILE_NAME				"sysdata.txt"
 #define REFLASH_STATS_FILE					((LPSTR)"a:/" REFLASH_STATS_FILE_NAME)
