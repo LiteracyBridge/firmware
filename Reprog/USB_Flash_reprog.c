@@ -170,7 +170,9 @@ void write_app_flash(int *bufp, int len, int startoffset)
 	(flash *)newfp = &FL;
 	
 	if(len < 1 || (startoffset + len) > TB_FLASH_SIZE) {
+		#ifndef HIMEM
 		logException(99,(const char *)"Attempted to write beyond flash boundary",0);
+		#endif
 		return;
 	}
 	
