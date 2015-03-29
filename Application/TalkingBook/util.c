@@ -96,14 +96,38 @@ int strToInt (char *str) {
 }
 
 void longToDecimalString(long l, char * string, int numberOfDigits) {
-	int digit; 
+	int digit, i, numdig; 
 	long divisor;
 	long num;
 	char * cursor = string;
+	char buffer[72], wrk[12];
 	
 	num = l;
-	for (divisor=1;numberOfDigits>1;numberOfDigits--)
+	numdig = numberOfDigits;
+	for (divisor=1;numberOfDigits>1;numberOfDigits--) {
 		divisor *= 10;
+	}
+	
+	if(num >= (divisor * 10)) {  //more digits required to show l 
+		for (i=numdig; i>0; i--) {
+			*cursor++ = '*';
+		}
+		*cursor = 0;
+		
+		if((num & 0xffff0000) != 0) {
+			i = 1;
+		}
+		
+		strcpy(buffer,"longToDecimalString arg=0x");
+		unsignedlongToHexString(l, (char *)wrk);
+		strcat(buffer, wrk);
+		strcat(buffer, " num digits=0x");
+		unsignedlongToHexString((unsigned long)numdig, (char *)wrk);
+		strcat(buffer, wrk);
+		logString(buffer,ASAP,LOG_ALWAYS);
+		return;
+	}
+	
 	if (num < 0)
 		*cursor++ = '-';
 	for (;divisor >= 10;divisor /= 10) {
@@ -115,14 +139,37 @@ void longToDecimalString(long l, char * string, int numberOfDigits) {
 	*cursor = 0;	
 }
 void unsignedlongToDecimalString(unsigned long l, char * string, int numberOfDigits) {
-	int digit; 
+	int digit, i, numdig; 
 	long divisor;
 	unsigned long num;
 	char * cursor = string;
+	char buffer[72], wrk[12];
 	
 	num = l;
+	numdig = numberOfDigits;
 	for (divisor=1;numberOfDigits>1;numberOfDigits--)
 		divisor *= 10;
+	
+	if(num >= (divisor * 10)) {  //more digits required to show l 
+		for (i=numdig; i>0; i--) {
+			*cursor++ = '*';
+		}
+		*cursor = 0;
+		
+		if((num & 0xffff0000) != 0) {
+			i = 1;
+		}
+		
+		strcpy(buffer,"unsignedlongToDecimalString arg=0x");
+		unsignedlongToHexString(l, (char *)wrk);
+		strcat(buffer, wrk);
+		strcat(buffer, " num digits=0x");
+		unsignedlongToHexString((unsigned long)numdig, (char *)wrk);
+		strcat(buffer, wrk);
+		logString(buffer,ASAP,LOG_ALWAYS);
+		return;
+	}
+
 	for (;divisor >= 10;divisor /= 10) {
 		digit = num/divisor;
 		num -= (digit * divisor);
