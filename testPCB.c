@@ -600,12 +600,18 @@ int audioTests(void) {
  * If the voltage drops too low, this function will never return.
  */
 int waitForKey(int mask) {
+    long now = getRTCinSeconds();
     int key = 0;
 
     do {
         key = 0;
         while (!key) {
             checkVoltage();
+            if (now != getRTCinSeconds()) {
+                // If the second has changed, play a bit. 
+                playBip();
+                now = getRTCinSeconds();
+            }
             key = keyCheck(0);
         }
         if ((key & mask) == 0) {
