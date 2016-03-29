@@ -175,7 +175,10 @@ void saveSelfTestStatus(SelfTestStep step, SelfTestResult result) {
  * Verifies that we can write to and then read from NOR flash.
  */
 SelfTestResult selfTestNORFlash() {
-    char buffer[30];
+    long addrNOR;      // An address in the NOR flash
+    unsigned char fromNOR[20];
+    unsigned char *pFromNOR;
+    char buffer[60];
     struct NORselfTestStatus *st;
     SelfTestResult ret;
     // This test simply tries to write that it passed. If the write works, it did pass, and flash is correct. If the write
@@ -184,6 +187,16 @@ SelfTestResult selfTestNORFlash() {
     st = (struct NORselfTestStatus *)FindLastFlashStruct(NOR_STRUCT_ID_SELF_STATE_STATUS);
     ret = (st != NULL && st->step == SELF_TEST_STEP_FLASH && st->result == SELF_TEST_RESULT_SUCCESS) ? SELF_TEST_RESULT_SUCCESS
                                                                                                      : SELF_TEST_RESULT_FAILURE;
+    // Start at the base address of the NOR flash. fetch one byte.  turn on the least-significant 0-bit. repeat.
+    addrNOR = BASEADDR;
+    pFromNOR = fromNOR;
+    do {
+        *pFromNOR++ = *(unsigned char*) addrNOR;
+        addrNOR = (addrNOR + 1) | addrNOR; // 0x30000 -> 0x30001 -> 0x30003 -> 0x30007 -> 0x3000f -> 0x3001f ... 0x7ffff
+    } while (addrNOR < ENDADDR);
+    *pFromNOR++ = *(unsigned char*)ENDADDR;
+    unsignedCharsToHex(fromNOR, buffer, pFromNOR-fromNOR);  // 30000 - 3ffff is 16, 7ffff, affff
+    logStringRTCOptional(buffer, ASAP, LOG_ALWAYS, 0);
 
     strcpy(buffer, "Self test NOR flash: ");
     strcat(buffer, (ret == SELF_TEST_RESULT_SUCCESS) ? "success" : "failure");
@@ -608,8 +621,10 @@ int waitForKey(int mask) {
         while (!key) {
             checkVoltage();
             if (now != getRTCinSeconds()) {
-                // If the second has changed, play a bit. 
-                playBip();
+                // Play a bip every other second.
+                if (now & 1) {
+                    playBip();
+                }
                 now = getRTCinSeconds();
             }
             key = keyCheck(0);
