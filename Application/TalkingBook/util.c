@@ -265,18 +265,18 @@ void unsignedlongToHexString(unsigned long l, char * string) {
 	*cursor = 0;	
 }
 void unsignedCharsToHex(unsigned char *chars, char *string, int len) {
-	unsigned char byte;
-	unsigned char nibble;
-	while (len > 0) {
-		byte = *chars++;
-		nibble = (byte >> 4) & 0x0f;
-		*string++ = nibble > 9 ? nibble-10+'a' : nibble+'0';
-		nibble = byte & 0x0f;
-		*string++ = nibble > 9 ? nibble-10+'a' : nibble+'0';
-		*string++ = ' ';
-		len--;
-	}
-	*string = 0;
+    unsigned char byte;
+    unsigned char nibble;
+    while (len > 0) {
+        byte = *chars++;
+        nibble = (byte >> 4) & 0x0f;
+        *string++ = nibble > 9 ? nibble-10+'a' : nibble+'0';
+        nibble = byte & 0x0f;
+        *string++ = nibble > 9 ? nibble-10+'a' : nibble+'0';
+        *string++ = ' ';
+        len--;
+    }
+    *string = 0;
 }
 
 void intToBinaryString(int i, char * string) {

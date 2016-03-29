@@ -11,6 +11,9 @@
 #include "./Application/TalkingBook/Include/startup.h"
 #include "./Application/TalkingBook/Include/filestats.h"
 
+// Special build for A'Tech, always runs self test procedure.
+#define ALWAYS_SELF_TEST
+
 #define NUM_STARTUP_DINGS	1
 
 #define RECORD_TIME_MS		4000
@@ -103,10 +106,18 @@ void selfTest() {
 
     keyCheck(1);    // to get rid of wake-up button press
     logHistory();
+#ifdef ALWAYS_SELF_TEST
+    step = SELF_TEST_STEP_FIRST;
+    result = SELF_TEST_RESULT_SUCCESS;
+#else
     // Already passed. Nothing to do.
     if (step == SELF_TEST_PASSED) {
         return;
     }
+#endif
+    adjustVolume(NORMAL_VOLUME,FALSE,FALSE);
+    writeVersionToDisk(DEFAULT_SYSTEM_PATH);  // being in this function usually means that the PCB was just reprogrammed (with a new version)
+
     logStringRTCOptional("Starting self tests...", ASAP, LOG_ALWAYS, 0);
 
     setLED(LED_RED, FALSE);
@@ -175,10 +186,12 @@ void saveSelfTestStatus(SelfTestStep step, SelfTestResult result) {
  * Verifies that we can write to and then read from NOR flash.
  */
 SelfTestResult selfTestNORFlash() {
+#ifdef SCAN_NOR_FLASH
     long addrNOR;      // An address in the NOR flash
     unsigned char fromNOR[20];
     unsigned char *pFromNOR;
     char buffer[60];
+#endif
     struct NORselfTestStatus *st;
     SelfTestResult ret;
     // This test simply tries to write that it passed. If the write works, it did pass, and flash is correct. If the write
@@ -187,6 +200,11 @@ SelfTestResult selfTestNORFlash() {
     st = (struct NORselfTestStatus *)FindLastFlashStruct(NOR_STRUCT_ID_SELF_STATE_STATUS);
     ret = (st != NULL && st->step == SELF_TEST_STEP_FLASH && st->result == SELF_TEST_RESULT_SUCCESS) ? SELF_TEST_RESULT_SUCCESS
                                                                                                      : SELF_TEST_RESULT_FAILURE;
+#ifdef SCAN_NOR_FLASH
+    // Now we've read some bytes from NOR flash, how we determine if NOR is working? It is pretty tricky, but the fact that
+    // this code is running does mean that NOR works pretty well. So we'll just trust that running code + write/read status
+    // means working NOR flash.
+
     // Start at the base address of the NOR flash. fetch one byte.  turn on the least-significant 0-bit. repeat.
     addrNOR = BASEADDR;
     pFromNOR = fromNOR;
@@ -197,10 +215,9 @@ SelfTestResult selfTestNORFlash() {
     *pFromNOR++ = *(unsigned char*)ENDADDR;
     unsignedCharsToHex(fromNOR, buffer, pFromNOR-fromNOR);  // 30000 - 3ffff is 16, 7ffff, affff
     logStringRTCOptional(buffer, ASAP, LOG_ALWAYS, 0);
+#endif
 
-    strcpy(buffer, "Self test NOR flash: ");
-    strcat(buffer, (ret == SELF_TEST_RESULT_SUCCESS) ? "success" : "failure");
-    logStringRTCOptional(buffer, ASAP, LOG_ALWAYS, 0);
+    logStep("Self test NOR flash: ", SELF_TEST_STEP_FLASH, ret);
 
     return ret;
 }
@@ -286,9 +303,7 @@ SelfTestResult selfTestKeypad() {
     }
     ret = (keyIx < endIx) ? SELF_TEST_RESULT_FAILURE : SELF_TEST_RESULT_SUCCESS;
 
-    strcpy(buffer, "Self test keypad: ");
-    strcat(buffer, (ret == SELF_TEST_RESULT_SUCCESS) ? "success" : "failure");
-    logStringRTCOptional(buffer, ASAP, LOG_ALWAYS, 0);
+    logStep("Self test keypad: ", SELF_TEST_STEP_KEYPAD, ret);
 
     return ret;
 }
@@ -329,25 +344,20 @@ SelfTestResult selfTestAudio() {
  * Verifies writing and reading the SD card.
  */
 SelfTestResult selfTestSD() {
-    char buffer[35];
     SelfTestResult ret = SELF_TEST_RESULT_SUCCESS;
     int fileResult;
 
-    strcpy(buffer, "Self test SD: ");
     fileResult = createTestFile(256);
     if (fileResult < 0) {
         ret = SELF_TEST_RESULT_SD_WRITE_FAILURE;
-        strcat(buffer, "write failure");
     } else {
         fileResult = readTestFile();
         if (fileResult < 0) {
             ret = SELF_TEST_RESULT_SD_READ_FAILURE;
-            strcat(buffer, "read failure");
         } else {
-            strcat(buffer, "success");
+            logStep("Self test SD write/read: ", SELF_TEST_STEP_SD_WRITE_READ, ret);
         }
     }
-    logStringRTCOptional(buffer, ASAP, LOG_ALWAYS, 0);
 
     return ret;
 }
@@ -364,13 +374,13 @@ void deliverSelfTestResults(SelfTestStep step, SelfTestResult result) {
         // Success, so turn on the green light and wait for the table.
         setLED(LED_RED, FALSE);
         setLED(LED_GREEN, TRUE);
-        waitForKey(KEY_DOWN);
-    } else {
+        key = waitForKey(KEY_DOWN | KEY_HOME);
+        } else {
         // If failure, turn on the red light and wait for the table or the right hand. If table, announce error.
         setLED(LED_GREEN, FALSE);
         setLED(LED_RED, TRUE);
         do {
-            key = waitForKey(KEY_DOWN | KEY_RIGHT | KEY_UP);
+            key = waitForKey(KEY_DOWN | KEY_RIGHT | KEY_UP | KEY_HOME);
             if (key == KEY_DOWN) {
                 // TODO: Speak error, not steps.
                 playDings(step);
@@ -379,10 +389,14 @@ void deliverSelfTestResults(SelfTestStep step, SelfTestResult result) {
                 logStringRTCOptional("Invoking classic testPCB.", ASAP, LOG_ALWAYS, 0);
                 testPCB();
             }
-        } while (key != KEY_RIGHT);
+        } while (key != KEY_RIGHT && key != KEY_HOME);
     }
     setLED(LED_ALL, FALSE);
-    setOperationalMode((int)P_SLEEP);  // sleep; wake from center, home, or black button
+    if (key == KEY_HOME) {
+        // Home key -- attempt normal operation.
+        setLED(LED_ALL, FALSE);
+        return;
+    }    setOperationalMode((int)P_SLEEP);  // sleep; wake from center, home, or black button
 }
 
 int testPCB(void) {

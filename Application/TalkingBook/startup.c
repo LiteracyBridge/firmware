@@ -548,31 +548,17 @@ void startUp(unsigned int bootType) {
 		}
 	}
 
-    if (fileExists((LPSTR)"a:/testpcb.pcb")) {
-        testPCB();
-    } else if (!fileExists((LPSTR)"a:/notest.pcb")) {
+    if (!fileExists((LPSTR)"a:/notest.pcb")) {
         if (fileExists((LPSTR) "a:/retest.pcb")) {
             unlink((LPSTR)"a:/retest.pcb");
             resetSelfTestStatus();
         }
         if (fileExists((LPSTR) "a:/tested.pcb")) {
             setSelfTestPassed();
-            // Uncomment next line when done testing.
-            // unlink((LPSTR)"a:/tested.pcb");
+            unlink((LPSTR)"a:/tested.pcb");
         }
         selfTest();
     }
-
-    // Remove these lines when done testing.
-//	if (!SNexists() && !strcmp(NO_SRN,getSerialNumber())) {  // NO_SRN was used in prior flash/SRN layout when a SRN was erased and not replaced
-//		logException(32,(const char *)"no serial number",LOG_ONLY);
-//		testPCB();
-//	}
-//
-//	if (!fileExists((LPSTR)"a:/tested.pcb")) { // Test until this file is installed.
-//	    logStringRTCOptional((char *)"No file tested.pcb: running tests", ASAP, LOG_ALWAYS, 0);
-//		testPCB();
-//	}
 
 	if (inspect) {
 		checkVoltage();  
