@@ -533,28 +533,25 @@ int waitForButton(int targetedButton) {
 }
 
 void wait(int t) { //t=time in msec
-	unsigned int i;
-	unsigned long j, k;
-	unsigned long int cyclesPerMilliSecond = (long)(*P_PLLN & 0x3f) * 1000L;  // 96000 at 96MHz	
-	const unsigned int cyclesPerNOP = 70; // cycles for each no-operation instruction
-	const unsigned int cyclesPerVoltCheck = cyclesPerNOP * 300; // cycles for each no-operation instruction
+    unsigned long j, k;
+    unsigned long int cyclesPerMilliSecond = (long)(*P_PLLN & 0x3f) * 1000L;  // 96000 at 96MHz
+    const unsigned int cyclesPerNOP = 70; // cycles for each no-operation instruction
+    const unsigned int cyclesPerVoltCheck = cyclesPerNOP * 300; // cycles for each no-operation instruction
 //	const unsigned int NOPsPerMilliSecond = cyclesPerMilliSecond / cyclesPerNOP; // loop count per millisecond
-	const unsigned int VChecksPerMilliSecond = cyclesPerMilliSecond / cyclesPerVoltCheck; // loop count per millisecond
+    const unsigned int VChecksPerMilliSecond = cyclesPerMilliSecond / cyclesPerVoltCheck; // loop count per millisecond
 
-    unsigned int loopcount = (cyclesPerMilliSecond * t) / cyclesPerVoltCheck;
+    unsigned long loopcount = (cyclesPerMilliSecond * t) / cyclesPerVoltCheck;
     
-	checkStackMemory();
-	//for (i = 0; i < t; i++) 
-		for (j = 0; j < loopcount/*VChecksPerMilliSecond*/; j++) {
-//			asm("nop\n");  // a CPU no-op instruction to pass the time
-			if (!shuttingDown) {
-				checkVoltage();
-			} else {  // shutting down - don't check voltage - instead use NOPs
-				for (k=0; k< (cyclesPerVoltCheck/cyclesPerNOP);k++) {
-					asm("nop\n");		 				
-				}
-			}
-		} 
+    checkStackMemory();
+    for (j = 0; j < loopcount; j++) {
+        if (!shuttingDown) {
+            checkVoltage();
+        } else {  // shutting down - don't check voltage - instead use NOPs
+            for (k=0; k< (cyclesPerVoltCheck/cyclesPerNOP);k++) {
+                asm("nop\n");
+            }
+        }
+    }
 }
 
 
