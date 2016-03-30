@@ -5,6 +5,7 @@
 #include "typedef.h"
 #include <string.h>
 #include <ctype.h>
+#include <Application/TalkingBook/Include/util.h>
 #include "./System/Include/System/GPL162002.h"
 #include "Include/device.h"
 #include "Include/files.h"
@@ -93,6 +94,33 @@ int strToInt (char *str) {
 		for (i = 0; isdigit(*str); str++) 
 			i = 10 * i + (*str - '0');
 	return i * sign;
+}
+
+void ulongToStr(unsigned long number, char *dest) {
+    int digit;
+    char *pDigit = dest, tmp;
+    // Convert the number, lsb first; fixed below.
+    do {
+        digit = number % 10;
+        number = number / 10;
+        *pDigit++ = '0' + digit;
+    } while (number > 0);
+    // Add the terminator, then back up the the last actual character.
+    *pDigit-- = 0;
+    // Reverse it in place. pDigit walks back, dest forward, until they meet in the middle.
+    while (pDigit > dest) {
+        tmp = *pDigit;
+        *pDigit-- = *dest;
+        *dest++ = tmp;
+    }
+}
+
+void longToStr(long number, char *dest) {
+    if (number<0) {
+        number = -number;
+        *dest++ = '-';
+    }
+    ulongToStr(number, dest);
 }
 
 void longToDecimalString(long l, char * string, int numberOfDigits) {

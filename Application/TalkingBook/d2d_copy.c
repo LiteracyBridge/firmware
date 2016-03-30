@@ -607,27 +607,27 @@ void buildCSVline(char *to, char *filename, struct ondisk_filestats *tmpstats)
 	strcpy(to, filename);
 	strcat(to, ",");
 	strout = &num[0];
-	zstrout = longToDecimalStringZ((long) tmpstats->stat_num_opens, strout, 6);
+	zstrout = longToDecimalStringZ((long) tmpstats->stat_num_opens, strout, 7);
 	strcat(to, zstrout);
 	strcat(to, ",");
 	strout = &num[0];
-	zstrout = longToDecimalStringZ((long) tmpstats->stat_num_completions, strout, 6);
+	zstrout = longToDecimalStringZ((long) tmpstats->stat_num_completions, strout, 7);
 	strcat(to, zstrout);
 	strcat(to, ",");
 	strout = &num[0];
-	zstrout = longToDecimalStringZ((long) tmpstats->stat_num_copies, strout, 6);
+	zstrout = longToDecimalStringZ((long) tmpstats->stat_num_copies, strout, 7);
 	strcat(to, zstrout);
 	strcat(to, ",");
 	strout = &num[0];
-	zstrout = longToDecimalStringZ((long) tmpstats->stat_num_survey1, strout, 6);
+	zstrout = longToDecimalStringZ((long) tmpstats->stat_num_survey1, strout, 7);
 	strcat(to, zstrout);
 	strcat(to, ",");
 	strout = &num[0];
-	zstrout = longToDecimalStringZ((long) tmpstats->stat_num_apply, strout, 6);
+	zstrout = longToDecimalStringZ((long) tmpstats->stat_num_apply, strout, 7);
 	strcat(to, zstrout);
 	strcat(to, ",");
 	strout = &num[0];
-	zstrout = longToDecimalStringZ((long) tmpstats->stat_num_useless, strout, 6);
+	zstrout = longToDecimalStringZ((long) tmpstats->stat_num_useless, strout, 7);
 	strcat(to, zstrout);			
 }
 

@@ -1,0 +1,30 @@
+- Connect the Talking Book to test fixture, which connects power, speaker, keys, and SD card, U-Disk.
+    -> The board will make a tiny beep and flash when it sees power.
+
+- Press the HOUSE key to boot the Talking Book and start the test.
+    -> The Talking Book will boot up, flash the red LED, then the green LED, and beep.
+    -> The Talking Book verifies that the flash can be written and correctly read, and that the SD card can be written and correctly read.
+    -> (IF WE ARE ABLE) The Talking Book then enters USB Host mode, and verifies writing and reading to and from U-Disk.
+    -> The Talking Book then enters the key test:
+- Press each key in a determined sequence.
+    -> For each correct key press, the Talking Book will flash the green LED.
+    -> For any incorrect key press (out of sequence, repeated, etc), the Talking Book will flash the red LED.
+
+    -> After all keys are pressed, the Talking Book will turn on the red LED and start recording, for 2 or 3 seconds.
+- The person makes whatever sound they want to record
+    -> After recording for 2 or 3 seconds, Talking Book turns off red LED, turns on green LED and plays the sound at three different levels, quiet, medium, loud.
+
+    -> The Talking Book then enters a "semi-idle" state, beeping periodically.
+- The person sets supply voltage to low voltage mode.
+    -> When the capacitor drains, the Talking Book will detect low voltage, and will sleep.
+
+- The person verifies low current drain in sleep.
+
+    -> In "semi-idle" state, the Talking Book is also listening to keys.
+- Press a specific key to terminate the test. (This is the "test shutdown key")
+    -> The Talking Book shuts down.
+
+    -> If any of the tests fail, the Talking Book records (internally) the failing test, and turns on the red LED, and waits for a key.
+- Press the "test shutdown key" to hear the Talking Book speak the specific error. (Repeat as many times as needed.)
+- Press a specific "failing test acknowledgement key" to terminate the test.
+    -> The Talking Book shuts down.

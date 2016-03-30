@@ -541,9 +541,11 @@ void wait(int t) { //t=time in msec
 //	const unsigned int NOPsPerMilliSecond = cyclesPerMilliSecond / cyclesPerNOP; // loop count per millisecond
 	const unsigned int VChecksPerMilliSecond = cyclesPerMilliSecond / cyclesPerVoltCheck; // loop count per millisecond
 
+    unsigned int loopcount = (cyclesPerMilliSecond * t) / cyclesPerVoltCheck;
+    
 	checkStackMemory();
-	for (i = 0; i < t; i++) 
-		for (j = 0; j < VChecksPerMilliSecond; j++) {
+	//for (i = 0; i < t; i++) 
+		for (j = 0; j < loopcount/*VChecksPerMilliSecond*/; j++) {
 //			asm("nop\n");  // a CPU no-op instruction to pass the time
 			if (!shuttingDown) {
 				checkVoltage();

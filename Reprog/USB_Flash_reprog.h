@@ -5,7 +5,6 @@
 #define	SST_MID			0xBF
 #define MX_MID          0xc2
 
-void EraseSector();
 void EndFlashProg();
 void NanoPause();
 void EraseSector();
@@ -31,7 +30,7 @@ unsigned int Nor_FlashID();
 #define FLASH_SD_READ_SIZE 0x800 // read 2 k at a time onto stack
 #define FLASH_SD_READS_PER_ERASE (FLASH_ERASE_SIZE / FLASH_SD_READ_SIZE)
 
-typedef struct  {
+typedef struct {
 		int fileHandle;
 		int bytesAvail;
 /*		int slen;

@@ -166,7 +166,8 @@ void forceflushLog(void) {
 }
 void
 saveLogFile(int noteCorruption) {
-	char newlogname[128], strwrk[8];
+	char newlogname[128], *pUniqueifier, strwrk[8];
+	int uniqueCount = 1;
 	int i;
 
 	checkStackMemory();
@@ -186,8 +187,18 @@ saveLogFile(int noteCorruption) {
 	strcat(newlogname, (char *)strwrk);
 	if (noteCorruption)
 		strcat(newlogname,(char *)"-CORRUPTION");
+	// We may need to add a _1, _2, ... here, for uniqueness.
+	pUniqueifier = newlogname + strlen(newlogname);
 	strcat(newlogname, (char *)LOG_EXTENSION);
-	
+
+	// Don't clobber old files.
+	while (fileExists((LPSTR)newlogname)) {
+		strwrk[0] = '_';
+		longToStr(uniqueCount++, strwrk+1);
+		strcpy(pUniqueifier, strwrk);
+		strcat(pUniqueifier, LOG_EXTENSION);
+	}
+
 //	logString(newlogname,BUFFER,LOG_ALWAYS);
 	forceflushLog();
 	

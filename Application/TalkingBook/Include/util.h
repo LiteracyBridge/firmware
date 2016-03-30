@@ -24,6 +24,8 @@ extern signed long extractSignedTime (signed int, int);
 extern unsigned int compressTime (unsigned long, int);
 extern int lower (int);
 extern int strToInt (char *);
+extern void longToStr(long, char*);
+extern void ulongToStr(unsigned long, char*);
 extern void longToDecimalString(long, char *, int);
 extern void unsignedlongToDecimalString(unsigned long, char *, int);
 extern void longToHexString(long, char *, int);

@@ -53,59 +53,11 @@ struct NORmsgMap {
 	char msgIdMap[MAX_TRACKED_MESSAGES][MAX_MESSAGE_ID_LENGTH]; 	// map of id number for flash storage to full ID of audio messages 
 };
 
-// Rebuild:UPDATE
-#define NOR_STRUCT_ID_MESSAGE_STATS	13
-// 10 words x 20 msgs x 5 rotations = 1000 words
-struct NORmsgStats {
-	char structType;	// used to identify data structure
-	char indexMsg;
-	char numberProfile;
-	char numberRotation;
-	char countStarted;
-	char countQuarter;
-	char countHalf;
-	char countThreequarters;
-	char countCompleted;
-	char countApplied;
-	char countUseless;
-	unsigned int totalSecondsPlayed;
-};
-// If we have 40 messages at 5 words each, that's 200 words out of 4096 words.
-// But we also need a map for the 40 messages.  At 4 words per id, that's a 160-word array.
-// 200+160=360 words, + 36 words for serial number and other system data, would be 396 words.
-// leaving 3700 words for updates in a day
-// With 40 messages, that would be 90 words per msg, at 2 words per update, that would be 45 updates per msg 
+// Not currently used; do not use.
+// #define NOR_STRUCT_ID_UNUSED		2
 
-// with current text ids for msgs having a max of 20 characters, 10 words, means a 400-word array for the map
-// 200+400=600 words + 36 = 696, leaving 3400 words, or 85 words per msg, or 42 updates per msg
-
-#define NOR_STRUCT_ID_ALL_MSGS	14
-struct NORallMsgStats {
-	char structType;
-	char profileOrder;
-	char profileName[MAX_PROFILE_NAME_LENGTH];
-	char totalMessages;
-	char totalRotations;
-	struct NORmsgStats stats[MAX_TRACKED_MESSAGES][MAX_ROTATIONS];
-};
-
-struct NORallMsgStatsAllProfiles {
-	struct NORallMsgStats profileStats[MAX_PROFILES];
-};
-
-
-// Rebuild:MAP
-#define NOR_STRUCT_ID_STAT_EVENT	12
-// 2 word
-struct NORstatEvent {
-	char structType;
-	char indexMsg;	// array index for message
-	char statType; // 0:10sec,1:25%,2:50%,3:75%,4:100%,5:survey:applied,6:survey useless
-	char rotation;
-	char profile;
-	unsigned int secondsOfPlay;
-};
-
+// Not currently used; do not use.
+// #define NOR_STRUCT_ID_UNUSED		3
 
 // Rebuild:MAP
 #define NOR_STRUCT_ID_NEW_MSG	4
@@ -158,12 +110,112 @@ struct NORrotation {
 	int initVoltage;
 };
 
+// In file sys_counters.h:
+// #define NOR_STRUCT_ID_COUNTS	10
+
+// Not currently used; do not use.
+// #define NOR_STRUCT_ID_UNUSED		11
+
+// Rebuild:MAP
+#define NOR_STRUCT_ID_STAT_EVENT	12
+// 2 word
+struct NORstatEvent {
+	char structType;
+	char indexMsg;	// array index for message
+	char statType; // 0:10sec,1:25%,2:50%,3:75%,4:100%,5:survey:applied,6:survey useless
+	char rotation;
+	char profile;
+	unsigned int secondsOfPlay;
+};
+
+// Rebuild:UPDATE
+#define NOR_STRUCT_ID_MESSAGE_STATS	13
+// 10 words x 20 msgs x 5 rotations = 1000 words
+struct NORmsgStats {
+	char structType;	// used to identify data structure
+	char indexMsg;
+	char numberProfile;
+	char numberRotation;
+	char countStarted;
+	char countQuarter;
+	char countHalf;
+	char countThreequarters;
+	char countCompleted;
+	char countApplied;
+	char countUseless;
+	unsigned int totalSecondsPlayed;
+};
+
+// If we have 40 messages at 5 words each, that's 200 words out of 4096 words.
+// But we also need a map for the 40 messages.  At 4 words per id, that's a 160-word array.
+// 200+160=360 words, + 36 words for serial number and other system data, would be 396 words.
+// leaving 3700 words for updates in a day
+// With 40 messages, that would be 90 words per msg, at 2 words per update, that would be 45 updates per msg
+
+// with current text ids for msgs having a max of 20 characters, 10 words, means a 400-word array for the map
+// 200+400=600 words + 36 = 696, leaving 3400 words, or 85 words per msg, or 42 updates per msg
+
+#define NOR_STRUCT_ID_ALL_MSGS	14
+struct NORallMsgStats {
+	char structType;
+	char profileOrder;
+	char profileName[MAX_PROFILE_NAME_LENGTH];
+	char totalMessages;
+	char totalRotations;
+	struct NORmsgStats stats[MAX_TRACKED_MESSAGES][MAX_ROTATIONS];
+};
+
+struct NORallMsgStatsAllProfiles {
+	struct NORallMsgStats profileStats[MAX_PROFILES];
+};
+
+// Rebuild:KEEP-LAST
+// 1 word
+// Used to keep track of self-test progress and pass/fail status. Keeps track of the farthest step completed,
+// and the result of that step (0=pass, non-0=fail).
+#define NOR_STRUCT_ID_SELF_STATE_STATUS 15
+struct NORselfTestStatus {
+    char strucType;
+    char step;      // SelfTestStep
+    char result;    // SelfTestResult
+};
+typedef enum {
+    // this is so we can refer to "the first test, whatever that is".
+    SELF_TEST_STEP_FIRST = 0,
+    // Non-interactive tests
+    SELF_TEST_STEP_FLASH = SELF_TEST_STEP_FIRST,
+    SELF_TEST_STEP_SD_WRITE_READ,
+    SELF_TEST_STEP_USB_HOST_MODE,
+
+    // Interactive tests
+    SELF_TEST_STEP_LEDS,
+    SELF_TEST_STEP_KEYPAD,
+    SELF_TEST_STEP_AUDIO,
+
+    // keep this one last
+    SELF_TEST_STEP_END,
+    // this means that all of the then-active tests passed at some time.
+    SELF_TEST_PASSED = 126 // largest signed char such that it+1 is also a signed char
+} SelfTestStep;
+typedef enum {
+    SELF_TEST_RESULT_SUCCESS = 0,
+
+    SELF_TEST_RESULT_FAILURE = 1,
+
+    SELF_TEST_RESULT_SD_WRITE_FAILURE,
+    SELF_TEST_RESULT_SD_READ_FAILURE,
+    SELF_TEST_RESULT_AUDIO_RECORD_FAILURE,
+    SELF_TEST_RESULT_AUDIO_PLAYBACK_FAILURE
+} SelfTestResult;
+
+
 #define STATSIZE (sizeof(struct ondisk_filestats) << 1) 
 
 extern void *FindLastFlashStruct(char);
 extern void *FindFlashStruct(char, int);
 extern void exportFlashStats(void);
 extern void *FindFirstFlashStruct(char);
+extern void *FindNextFlashSameStruct(void *fp);
 extern void *AppendStructToFlash(void *);
 extern void writeMsgEventToFlash (char *, int, unsigned int);
 extern void warmStartNORStats(void);

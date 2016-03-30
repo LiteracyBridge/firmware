@@ -1,2 +1,4 @@
 CMakeLists.txt
+*.tmp
 .idea/
+Debug/

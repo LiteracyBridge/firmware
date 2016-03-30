@@ -15,7 +15,6 @@ APP_IRAM int offsetMsgNames[MAX_TRACKED_MESSAGES];
 static void rebuildNORmsgMap(struct NORmsgMap *);
 static void rebuildNORmsgStats(struct NORallMsgStats *);
 static int saveFlashStats(struct SystemData *, struct SystemCounts2 *, struct NORmsgMap *, struct NORallMsgStatsAllProfiles*);
-static void *FindNextFlashSameStruct(void *); 
 static void rebuildFlash(int);
 static int ptrSizeOfNORStruct(void *);
 static void createMsgNameOffsetsFromMap(void);
@@ -82,6 +81,9 @@ ptrSizeOfNORStruct(void *structType) {
 		case NOR_STRUCT_ID_ROTATION:
 			ret = sizeof(struct NORrotation);
 			break;
+		case NOR_STRUCT_ID_SELF_STATE_STATUS:
+			ret = sizeof(struct NORselfTestStatus);
+			break;
 		default:
 			logException(98,(const char *)"unknown NOR struct type",0);
 			// this could be a trigger that we have an old rev 
@@ -104,6 +106,7 @@ rebuildFlash(int rewriteFlash) {
 	struct NORallMsgStatsAllProfiles stats;
 	struct NORrotation *rotation;
 	struct SystemData *ptrSD;
+	struct NORselfTestStatus *selfTest;
 	int ret, i, m, r, size, totalSize;	
 
 	checkStackMemory();
@@ -139,6 +142,7 @@ rebuildFlash(int rewriteFlash) {
 	for (i=0; i<totalProfiles(); i++) {
 		rebuildNORmsgStats(&stats.profileStats);
 	}
+	selfTest = (struct NORselfTestStatus*)FindLastFlashStruct(NOR_STRUCT_ID_SELF_STATE_STATUS);
 
 	ret = saveFlashStats(&sd, &sc, &msgMap, &stats);
 	if (rewriteFlash) {
@@ -184,6 +188,12 @@ rebuildFlash(int rewriteFlash) {
 						}
 					}
 				}
+			}
+			// Copy self test if it exists.
+			if (selfTest) {
+				size = sizeof(struct NORselfTestStatus);
+				write_app_flash((int*)selfTest, size, totalSize);
+				totalSize += size;
 			}
 			//FOR DEBUGGING PURPOSES, dump entire memory block to disk before and after reflash
 			handle = tbOpen((LPSTR)(SYS_DATA_STATS_PATH_DEBUG_POST),O_CREAT|O_TRUNC|O_RDWR);
@@ -248,8 +258,7 @@ void * FindFlashStruct(char structType, int first) {
 }
 
 // find next struct in flash
-static void * 
-FindNextFlashSameStruct(void *fp) {
+void * FindNextFlashSameStruct(void *fp) {
 	char structType = *(char *)fp;
 	char *ret = NULL;	
 

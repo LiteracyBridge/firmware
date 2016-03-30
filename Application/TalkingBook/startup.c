@@ -20,6 +20,9 @@
 #include "Include/mainLoop.h"
 #include <ctype.h>
 
+extern void selfTest(void);
+extern void resetSelfTestStatus(void);
+extern void setSelfTestPassed(void);
 extern int testPCB(void);
 extern unsigned int SetSystemClockRate(unsigned int);
 extern int SystemIntoUDisk(unsigned int);
@@ -273,7 +276,7 @@ void startUp(unsigned int bootType) {
 	int inspect = 0, firmwareWasUpdated = 0;
 	extern unsigned long rtc_fired;
 
-	// set temporary valid date for file ops (like logging) until system variables are read 
+	// set temporary valid date for file ops (like logging) until system variables are read
 	systemCounts.month = 1;
 	systemCounts.monthday = 1;
 	systemCounts.year = FILE_YEAR_MIN;
@@ -328,8 +331,10 @@ void startUp(unsigned int bootType) {
 
 	//confirming SN is important to address corruption removing the SN file and then stats are unclear
 	checkVoltage();  
-	if(fileExists((LPSTR)"a:/system.img"))
-		startUpdate((char *)"a:/system.img");
+	if(fileExists((LPSTR)"a:/system.img")) {
+		logStringRTCOptional((char *)"Starting update from image.", ASAP,LOG_ALWAYS,0);
+		startUpdate((char *) "a:/system.img");
+	}
 
 	// confirm systemData structure in NORFlash matches latest version in this firmware (NOR_STRUCT_ID_SYSTEM should increment for any change in struct)
 	if (ptrsCounts.systemData->structType != NOR_STRUCT_ID_SYSTEM) {
@@ -438,6 +443,7 @@ void startUp(unsigned int bootType) {
 		checkVoltage();  
 		forceflushLog();
 		if (hasCorruption) {
+			logStringRTCOptional((char *)"Found corruption!", ASAP,LOG_ALWAYS,0);
 			setCorruptionDay(getCumulativeDays());
 			ret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY);		
 			while(ret == 1) {
@@ -541,12 +547,33 @@ void startUp(unsigned int bootType) {
 			startUpdate(filename);
 		}
 	}
-	
-	if (!SNexists() && !strcmp(NO_SRN,getSerialNumber())) {  // NO_SRN was used in prior flash/SRN layout when a SRN was erased and not replaced
-		logException(32,(const char *)"no serial number",LOG_ONLY);
-		testPCB();	
-	}
-	
+
+    if (fileExists((LPSTR)"a:/testpcb.pcb")) {
+        testPCB();
+    } else if (!fileExists((LPSTR)"a:/notest.pcb")) {
+        if (fileExists((LPSTR) "a:/retest.pcb")) {
+            unlink((LPSTR)"a:/retest.pcb");
+            resetSelfTestStatus();
+        }
+        if (fileExists((LPSTR) "a:/tested.pcb")) {
+            setSelfTestPassed();
+            // Uncomment next line when done testing.
+            // unlink((LPSTR)"a:/tested.pcb");
+        }
+        selfTest();
+    }
+
+    // Remove these lines when done testing.
+//	if (!SNexists() && !strcmp(NO_SRN,getSerialNumber())) {  // NO_SRN was used in prior flash/SRN layout when a SRN was erased and not replaced
+//		logException(32,(const char *)"no serial number",LOG_ONLY);
+//		testPCB();
+//	}
+//
+//	if (!fileExists((LPSTR)"a:/tested.pcb")) { // Test until this file is installed.
+//	    logStringRTCOptional((char *)"No file tested.pcb: running tests", ASAP, LOG_ALWAYS, 0);
+//		testPCB();
+//	}
+
 	if (inspect) {
 		checkVoltage();  
 		ret = checkRTCFile(buffer);

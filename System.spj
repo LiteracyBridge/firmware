@@ -740,13 +740,6 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=System\include\system\GPL162002.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
 SOURCE=System\Include\System\GPL162002.inc
 USEPARAM=FALSE
 PARAM=
@@ -754,154 +747,7 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Reprog\USBD_Define.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Reprog\USBD.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Component\FS\usb_host\USB_Host_Constant.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Component\FS\usb_host\USBHostMSDC.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
 SOURCE=system\include\system_head.inc
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=System\include\system\GPL162001ISR.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=System\include\system\SysException.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=System\include\system\Sys_GV.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=System\include\WaitMode\SysWaitMode.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=System\include\Message\Message.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=System\include\ExtMem\unExtMem.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=System\include\buddy\ucBS.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=system\include\system\unSPMACRO.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=driver\include\SD\SDCDriver.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=driver\include\NandDriver\Nand2_Oper.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=driver\include\NandDriver\nanddriver.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Component\Include\speech\algorithm.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Component\Include\speech\sacm_API.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Component\Include\speech\MP3.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Component\Include\speech\SACM_GV.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Driver\Include\USB\USBD_Define.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Driver\Include\USB\USBD.h
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -969,6 +815,34 @@ USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Component\Include\FS\DriverLayer.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Component/Include/Component_head.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=0
+# End Source File
+# Begin Source File
+SOURCE=.\Application/TalkingBook/Include/device.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=0
+# End Source File
+# Begin Source File
+SOURCE=.\application/talkingbook/include/talkingbook.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=0
 # End Source File
 # End Group
 # End SubItem
@@ -1120,6 +994,13 @@ EXPORT=3
 # End Source File
 # Begin Source File
 SOURCE=Application\TalkingBook\edit.c
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Application\TalkingBook\stats.c
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -1700,13 +1581,6 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=System\include\system\GPL162002.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
 SOURCE=System\Include\System\GPL162002.inc
 USEPARAM=FALSE
 PARAM=
@@ -1714,154 +1588,7 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=Reprog\USBD_Define.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Reprog\USBD.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Component\FS\usb_host\USB_Host_Constant.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Component\FS\usb_host\USBHostMSDC.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
 SOURCE=system\include\system_head.inc
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=System\include\system\GPL162001ISR.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=System\include\system\SysException.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=System\include\system\Sys_GV.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=System\include\WaitMode\SysWaitMode.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=System\include\Message\Message.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=System\include\ExtMem\unExtMem.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=System\include\buddy\ucBS.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=system\include\system\unSPMACRO.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=driver\include\SD\SDCDriver.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=driver\include\NandDriver\Nand2_Oper.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=driver\include\NandDriver\nanddriver.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Component\Include\speech\algorithm.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Component\Include\speech\sacm_API.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Component\Include\speech\MP3.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Component\Include\speech\SACM_GV.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Driver\Include\USB\USBD_Define.h
-USEPARAM=FALSE
-PARAM=
-ID=
-EXPORT=3
-# End Source File
-# Begin Source File
-SOURCE=Driver\Include\USB\USBD.h
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -1929,6 +1656,34 @@ USEPARAM=FALSE
 PARAM=
 ID=
 EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=Component\Include\FS\DriverLayer.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Component/Include/Component_head.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=0
+# End Source File
+# Begin Source File
+SOURCE=.\Application/TalkingBook/Include/device.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=0
+# End Source File
+# Begin Source File
+SOURCE=.\application/talkingbook/include/talkingbook.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=0
 # End Source File
 # End Group
 # End SubItem

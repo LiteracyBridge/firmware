@@ -285,6 +285,7 @@ void USB_Insert_TimeOut(void)
 int setUSBHost(BOOL enter) {
 	int trials, x;
 	const int maxTrials = 20;
+	int whichLED = LED_RED;
 	
 	if(vCur_1 < V_MIN_USB_VOLTAGE) {
 		refuse_lowvoltage(0);
@@ -293,19 +294,25 @@ int setUSBHost(BOOL enter) {
 	
 	if (enter){		
 		SetSystemClockRate(48);  //48MHz for Host mode
-		setLED(LED_GREEN,FALSE);
+		//setLED(LED_GREEN,FALSE);
+		setLED(LED_ALL, FALSE);
 		for (trials = 0; trials < maxTrials; trials++) {
-			setLED(LED_RED,TRUE);
+			setLED(whichLED,TRUE);
 			x = _devicemount(1); 
-			setLED(LED_RED,FALSE);
+			setLED(whichLED,FALSE);
 			if (x == C_USBDevicesmountOK)
 				break;
+			whichLED = (whichLED == LED_RED) ? LED_GREEN : LED_RED;
 			wait (1000);			
 		}
 		if (trials < maxTrials) {
+			setLED(LED_RED, FALSE);
 			setLED(LED_GREEN,TRUE);
 			wait(1000);
 			USBHost_Flag = C_USBDevicesmountOK;
+		} else {
+			setLED(LED_GREEN,FALSE);
+			setLED(LED_RED, TRUE);
 		}
 		inUSBHostMode = 1;
 	} else {

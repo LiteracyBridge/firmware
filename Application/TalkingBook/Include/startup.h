@@ -36,7 +36,7 @@ extern void cleanUpOldRevs(void);
 #define V1_DEFAULT_KEY_UP 		0x0010
 #define V1_DEFAULT_KEY_MINUS 	0x0020
 #define V1_DEFAULT_KEY_PLUS 	0x0040
-#define V1_DEFAULT_KEY_PLAY	0x0080
+#define V1_DEFAULT_KEY_PLAY	    0x0080
 #define V1_DEFAULT_KEY_SELECT 	0x0100
 #define V1_DEFAULT_KEY_HOME 	0x0200
 
