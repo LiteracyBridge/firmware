@@ -1,8 +1,8 @@
 //==============================================
 //include head file
 //==============================================
-#include "Component\Include\Component_head.h"
-#include ".\System\Include\System_head.h"
+#include "Component/Include/Component_head.h"
+#include "./System/Include/System_head.h"
 #include "Application/Talkingbook/Include/filestats.h"
 
 #include "math.h"

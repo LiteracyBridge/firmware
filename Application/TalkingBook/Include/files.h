@@ -4,7 +4,7 @@
 #ifndef	__FILES_h__
 #define	__FILES_h__
 
-#include ".\Component\Include\FS\vfs.h"
+#include "./Component/Include/FS/vfs.h"
 #include "./Application/TalkingBook/Include/lists.h"
 
 #define LOG_BUFFER_SIZE		1024

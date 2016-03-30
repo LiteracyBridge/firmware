@@ -5,7 +5,7 @@
 #include "typedef.h"
 #include <string.h>
 #include <ctype.h>
-#include ".\System\Include\System\GPL162002.h"
+#include "./System/Include/System/GPL162002.h"
 #include "Include/device.h"
 #include "Include/files.h"
 

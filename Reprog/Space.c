@@ -184,8 +184,8 @@ unsigned long MP3FATReadBuffer;		//从文件系统中读取数据暂时到Buffer中
 
 // from FS_user_nos.c
 
-#include ".\System\include\system\GPL162002.h"
-#include ".\Component\Include\FS\typedef.h"  // for BOOL
+#include "./System/include/system/GPL162002.h"
+#include "./Component/Include/FS/typedef.h"  // for BOOL
 
 #define	C_SEEK_SPEEDUP_SUPPORT
 
@@ -211,6 +211,6 @@ _DeviceVersionInfo:
 	.dw		0x10	//Day
 _DeviceVersionInfo_End:
 */
-#include "application\talkingbook\include\talkingbook.h"
+#include "application/talkingbook/include/talkingbook.h"
 __attribute__((section(".code"))) char DeviceVersionInfo[11] = VERSION;
 #endif //USBRP

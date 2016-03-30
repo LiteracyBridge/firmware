@@ -1,6 +1,6 @@
-#include ".\Component\FS\usb_host\USB_Host_Constant.h"
-#include ".\Component\FS\usb_host\USBHostMSDC.h"
-#include ".\System\Include\System\GPL162002.h"
+#include "./Component/FS/usb_host/USB_Host_Constant.h"
+#include "./Component/FS/usb_host/USBHostMSDC.h"
+#include "./System/Include/System/GPL162002.h"
 #include "./component/include/component_head.h"
 
 void USBHLongDelay(unsigned int delay);

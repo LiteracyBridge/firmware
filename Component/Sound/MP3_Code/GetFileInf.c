@@ -1,6 +1,6 @@
 
-#include ".\Component\Include\Component_head.h"
-#include ".\System\Include\System_head.h"
+#include "./Component/Include/Component_head.h"
+#include "./System/Include/System_head.h"
 
 #define ID3HEAD			"ID3"
 #define ID3HEADLEN 		10

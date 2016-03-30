@@ -2,7 +2,7 @@
 
 #include	"typedef.h"
 #include	"DriverLayer.h"
-#include	".\Driver\Include\NandDriver\Nand2_Oper.h"
+#include	"./Driver/Include/NandDriver/Nand2_Oper.h"
 
 
 extern INT16	bNandInit;

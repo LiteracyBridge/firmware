@@ -3,7 +3,7 @@
 #ifndef	__DEVICE_h__
 #define	__DEVICE_h__
 
-#include ".\Component\Include\component_head.h"
+#include "./Component/Include/component_head.h"
 
 //refuse to go into usb mode if voltage below this value
 #define V_MIN_USB_VOLTAGE 0 // 190

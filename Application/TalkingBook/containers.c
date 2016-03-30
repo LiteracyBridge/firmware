@@ -7,7 +7,7 @@
 #include "Include/startup.h"
 #include "Include/containers.h"
 #include "Include/files.h"
-#include ".\Component\Include\FS\vfs.h"
+#include "./Component/Include/FS/vfs.h"
 #include <ctype.h>
 
 static const int REWIND[] = {0,500,1000,1500,2000,3000,5000,10000};

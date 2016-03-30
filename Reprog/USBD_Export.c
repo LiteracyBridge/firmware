@@ -2,16 +2,16 @@
 // CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
 // Contact: info@literacybridge.org
 
-#include ".\System\Include\System\GPL162002.h"
+#include "./System/Include/System/GPL162002.h"
 #ifdef USBRP
-#include ".\Reprog\USBD_Define.h"
-#include ".\Reprog\USBD.h"
+#include "./Reprog/USBD_Define.h"
+#include "./Reprog/USBD.h"
 #else
-#include ".\Driver\Include\USB\USBD_Define.h"
-#include ".\Driver\Include\USB\USBD.h"
+#include "./Driver/Include/USB/USBD_Define.h"
+#include "./Driver/Include/USB/USBD.h"
 #endif
 
-#include ".\Reprog\USB_Flash_reprog.h"
+#include "./Reprog/USB_Flash_reprog.h"
 
 //#define OS_vension   
 #define SD_Used

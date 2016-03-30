@@ -1,5 +1,5 @@
-#include ".\Component\Include\Component_head.h"
-#include ".\System\Include\System_head.h"
+#include "./Component/Include/Component_head.h"
+#include "./System/Include/System_head.h"
 
 #ifdef MP3_FATREADBUFFER
 extern unsigned long MP3FATReadBuffer;		//从文件系统中读取数据暂时到Buffer中

@@ -1,7 +1,7 @@
 // Copyright 2009 Literacy Bridge
 // CONFIDENTIAL -- Do not share without Literacy Bridge Non-Disclosure Agreement
 // Contact: info@literacybridge.org
-#include ".\Component\Include\component_head.h"			
+#include "./Component/Include/component_head.h"			
 #include "Include/talkingbook.h"
 //#include "Include/device.h"
 #include "Include/files.h"

@@ -9,10 +9,10 @@
 #ifndef	__DRVIVER_HEAD_H__
 #define	__DRVIVER_HEAD_H__
 //SD
-#include ".\driver\include\SD\SDCDriver.h"
+#include "./driver/include/SD/SDCDriver.h"
 
 //Nand
-#include ".\driver\include\NandDriver\Nand2_Oper.h"
-#include ".\driver\include\NandDriver\nanddriver.h"
+#include "./driver/include/NandDriver/Nand2_Oper.h"
+#include "./driver/include/NandDriver/nanddriver.h"
 
 #endif

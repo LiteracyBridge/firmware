@@ -1,7 +1,7 @@
 
-#include ".\System\Include\System\GPL162002.h"
-#include ".\Driver\Include\USB\USBD_Define.h"
-#include ".\Driver\Include\USB\USBD.h"
+#include "./System/Include/System/GPL162002.h"
+#include "./Driver/Include/USB/USBD_Define.h"
+#include "./Driver/Include/USB/USBD.h"
 
 //#define OS_vension   
 #define SD_Used

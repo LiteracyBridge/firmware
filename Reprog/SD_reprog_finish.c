@@ -6,8 +6,8 @@
 #include "./component/include/component_head.h"
 #include "./component/include/fs/vfs.h"
 #include "./Reprog/USB_Flash_reprog.h"
-#include "./Application\TalkingBook\Include\SD_reprog.h"
-//#include "./Application\TalkingBook\Include\util.h"
+#include "./Application/TalkingBook/Include/SD_reprog.h"
+//#include "./Application/TalkingBook/Include/util.h"
 
 
 #define HIMEM_LED_GREEN 0x0040

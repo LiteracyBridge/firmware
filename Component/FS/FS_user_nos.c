@@ -1,6 +1,6 @@
-#include ".\System\include\system\GPL162002.h"
-#include ".\Component\Include\FS\typedef.h"  // for BOOL
-#include ".\Application\TalkingBook\Include\sys_counters.h"
+#include "./System/include/system/GPL162002.h"
+#include "./Component/Include/FS/typedef.h"  // for BOOL
+#include "./Application/TalkingBook/Include/sys_counters.h"
 
 #define	C_SEEK_SPEEDUP_SUPPORT
 

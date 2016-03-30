@@ -3,11 +3,11 @@
 // Contact: info@literacybridge.org
 #include "GPL162002.h"
 #ifdef USBRP
-#include ".\reprog\USBD_Define.h"
-#include ".\reprog\USBD.h"
+#include "./reprog/USBD_Define.h"
+#include "./reprog/USBD.h"
 #else
-#include ".\Driver\Include\USB\USBD_Define.h"
-#include ".\Driver\Include\USB\USBD.h"
+#include "./Driver/Include/USB/USBD_Define.h"
+#include "./Driver/Include/USB/USBD.h"
 #endif
 
 #ifdef USBRP

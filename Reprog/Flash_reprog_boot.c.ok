@@ -1,7 +1,7 @@
 
 #include "GPL162002.h"
-#include ".\Driver\Include\USB\USBD_Define.h"
-#include ".\Driver\Include\USB\USBD.h"
+#include "./Driver/Include/USB/USBD_Define.h"
+#include "./Driver/Include/USB/USBD.h"
 //RHM#include "USBD_Define.h"
 //RHM#include "USBD.h"
 

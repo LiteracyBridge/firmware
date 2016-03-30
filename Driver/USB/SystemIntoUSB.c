@@ -10,16 +10,16 @@
 //for USB head file
 #include "./system/include/system_head.h"
 #include "./component/include/component_head.h"
-#include ".\Reprog\USBD_Define.h"
-#include ".\Reprog\USBD.h"
-#include ".\Reprog\USB_Flash_reprog.h"
+#include "./Reprog/USBD_Define.h"
+#include "./Reprog/USBD.h"
+#include "./Reprog/USB_Flash_reprog.h"
 
-#include ".\Component\FS\usb_host\USB_Host_Constant.h"
-#include ".\Component\FS\usb_host\USBHostMSDC.h"
-#include ".\Application\Talkingbook\Include\talkingbook.h"
-#include ".\Application\Talkingbook\Include\device.h"
-#include ".\Application\Talkingbook\Include\containers.h"
-#include ".\Application\Talkingbook\Include\files.h"
+#include "./Component/FS/usb_host/USB_Host_Constant.h"
+#include "./Component/FS/usb_host/USBHostMSDC.h"
+#include "./Application/Talkingbook/Include/talkingbook.h"
+#include "./Application/Talkingbook/Include/device.h"
+#include "./Application/Talkingbook/Include/containers.h"
+#include "./Application/Talkingbook/Include/files.h"
 
 //unsigned int R_Write_protect = 0;//add by haoyu for no err
 extern unsigned int	_Nand_ErasePhysicalBlock(unsigned long BlockAddr);
@@ -60,7 +60,7 @@ extern unsigned int R_USB_DisplayTime;
 unsigned long  usb_time_out;
 #endif
 /////////////////////////////User setting initial value start//////////////////////////////////////////
-//ÒªÓëmain.cÖÐÅäÖÃÏàÍ¬  
+//Òªï¿½ï¿½main.cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¬  
 //#define USB_Nand_Part0_Offset	0x00002800
 //#define USB_Nand_Part0_Size 	0x0000C800
 //#define USB_Nand_Part1_Offset	0x0002F000
@@ -69,7 +69,7 @@ unsigned long  usb_time_out;
 //#define USB_Nand_Part2_Size 	0x00000000
 
 
-//ÒªÓëmain.cÖÐÅäÖÃÏàÍ¬
+//Òªï¿½ï¿½main.cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¬
 #define USB_Nand_Part0_Offset	0x00000000
 #define USB_Nand_Part0_Size 	0x0003C000
 #define USB_Nand_Part1_Offset	0x0003C000
@@ -97,8 +97,8 @@ typedef enum
 
 #ifdef USBRP
 extern USBHostType  USBHost_Flag;
-#include "Application\TalkingBook\Include\device.h"
-#include "Reprog\USBD_Define.h"
+#include "Application/TalkingBook/Include/device.h"
+#include "Reprog/USBD_Define.h"
 /*
 str_USB_Lun_Info USB_Lun_Define[] =
 {

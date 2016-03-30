@@ -12,8 +12,8 @@
 // Header File Included Area
 //*****************************************************************************
 //*****************************************************************************
-#include ".\Component\Include\Component_head.h"
-#include ".\Component\Include\Speech\ETTSv2.h"
+#include "./Component/Include/Component_head.h"
+#include "./Component/Include/Speech/ETTSv2.h"
 
 
 //*****************************************************************************

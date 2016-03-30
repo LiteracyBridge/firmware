@@ -4,11 +4,11 @@
 #define const
 
 #include "GPL162002.h"
-#include ".\Reprog\USBD_Define.h"
-#include ".\Reprog\USBD.h"
+#include "./Reprog/USBD_Define.h"
+#include "./Reprog/USBD.h"
 
 #include "USB_Flash_reprog.h"
-#include "..\application\talkingbook\include\device.h"
+#include "../application/talkingbook/include/device.h"
 
 extern int SetVenderID();
 extern unsigned int R_CBW_PKT[31];
