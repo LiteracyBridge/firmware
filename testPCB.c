@@ -12,7 +12,7 @@
 #include "./Application/TalkingBook/Include/filestats.h"
 
 // Special build for A'Tech, always runs self test procedure.
-#define ALWAYS_SELF_TEST
+//#define ALWAYS_SELF_TEST
 
 #define NUM_STARTUP_DINGS	1
 
