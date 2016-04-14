@@ -12,7 +12,7 @@
 #include "./Application/TalkingBook/Include/filestats.h"
 
 // Special build for A'Tech, always runs self test procedure.
-//#define ALWAYS_SELF_TEST
+#define ALWAYS_SELF_TEST
 
 #define NUM_STARTUP_DINGS	1
 
@@ -27,6 +27,15 @@
 
 #define SELF_TEST_KEYPAD_TIMEOUT 20 // seconds to wait for a broken keypad
 
+char *SelfTestNames[] = {
+    "Nor Flash",
+    "SD w/r",
+    "LEDs",
+    "Keys",
+    "Audio",
+    "USB Device",
+    "All Tests"
+};
 
 void saveSelfTestStatus(SelfTestStep step, SelfTestResult result);
 SelfTestResult selfTestNORFlash();
@@ -36,7 +45,7 @@ SelfTestResult selfTestAudio();
 SelfTestResult selfTestSD();
 SelfTestResult selfTestEnd();
 
-void deliverSelfTestResults(SelfTestStep status, SelfTestResult param);
+void deliverSelfTestResults(SelfTestStep failureStepIfAny, SelfTestResult param);
 
 
 
@@ -72,12 +81,18 @@ static void playStartupSound() {
 void logStep(char *msg, SelfTestStep step, SelfTestResult result) {
     char buffer[100];
     strcpy(buffer, msg);
-    longToStr(step, buffer+strlen(buffer));
-    if (result) {
-        strcat(buffer, ": ");
+    strcat(buffer, " '");
+    if (step <= SELF_TEST_STEP_END) {
+        strcat(buffer, (step <= SELF_TEST_STEP_END) ? SelfTestNames[step] : "Complete");
+    }
+
+    if (result == SELF_TEST_RESULT_SUCCESS) {
+        strcat(buffer, "': Success");
+    } else if (result == SELF_TEST_RESULT_NOTHING) {
+        strcat(buffer, "'");
+    } else if (result) {
+        strcat(buffer, "': error ");
         longToStr(result, buffer+strlen(buffer));
-    } else {
-        strcat(buffer, ": success");
     }
     logStringRTCOptional(buffer, ASAP, LOG_ALWAYS, 0);
 }
@@ -85,10 +100,11 @@ void logHistory() {
     char buffer [10];
     int ix=0;
     struct NORselfTestStatus *status = (struct NORselfTestStatus *)FindLastFlashStruct(NOR_STRUCT_ID_SELF_STATE_STATUS);
+    logStringRTCOptional("Self test history:", ASAP, LOG_ALWAYS, 0);
     buffer[0] = '@';
     while (status) {
         longToStr(ix++, buffer+1);
-        strcat(buffer, ": ");
+        strcat(buffer, ":");
         logStep(buffer, status->step, status->result);
         status = (struct NORselfTestStatus *)FindNextFlashSameStruct(status);
     }
@@ -125,16 +141,13 @@ void selfTest() {
 
     // Run through any uncompleted steps, then deliver the results.
     while (step != SELF_TEST_PASSED && result == SELF_TEST_RESULT_SUCCESS) {
-        logStep("Starting self test step ", step, 0);
+        logStep("Starting", step, SELF_TEST_RESULT_NOTHING);
         switch (step) {
-            case SELF_TEST_STEP_FLASH:
+            case SELF_TEST_STEP_NOR_FLASH:
                 result = selfTestNORFlash();
                 break;
             case SELF_TEST_STEP_SD_WRITE_READ:
                 result = selfTestSD();
-                break;
-            case SELF_TEST_STEP_USB_HOST_MODE:
-                // We can't currently do this, so just pass it.
                 break;
 
             case SELF_TEST_STEP_LEDS:
@@ -145,6 +158,10 @@ void selfTest() {
                 break;
             case SELF_TEST_STEP_AUDIO:
                 result = selfTestAudio();
+                break;
+
+            case SELF_TEST_STEP_USB_DEVICE_MODE:
+                result = selfTestUsbDevice();
                 break;
 
             default:
@@ -162,7 +179,7 @@ void selfTest() {
         } else {
             // Some tests also need to record good results. They're responsible for those. Any failures recorded here.
             saveSelfTestStatus(step, result);
-            logStep("Self test failed in step ", step, result);
+            logStep("Self test failed", step, result);
         }
     }
     deliverSelfTestResults(step, result);
@@ -196,9 +213,9 @@ SelfTestResult selfTestNORFlash() {
     SelfTestResult ret;
     // This test simply tries to write that it passed. If the write works, it did pass, and flash is correct. If the write
     // fails, flash is still correct because it won't say that the write worked.
-    saveSelfTestStatus(SELF_TEST_STEP_FLASH, SELF_TEST_RESULT_SUCCESS);
+    saveSelfTestStatus(SELF_TEST_STEP_NOR_FLASH, SELF_TEST_RESULT_SUCCESS);
     st = (struct NORselfTestStatus *)FindLastFlashStruct(NOR_STRUCT_ID_SELF_STATE_STATUS);
-    ret = (st != NULL && st->step == SELF_TEST_STEP_FLASH && st->result == SELF_TEST_RESULT_SUCCESS) ? SELF_TEST_RESULT_SUCCESS
+    ret = (st != NULL && st->step == SELF_TEST_STEP_NOR_FLASH && st->result == SELF_TEST_RESULT_SUCCESS) ? SELF_TEST_RESULT_SUCCESS
                                                                                                      : SELF_TEST_RESULT_FAILURE;
 #ifdef SCAN_NOR_FLASH
     // Now we've read some bytes from NOR flash, how we determine if NOR is working? It is pretty tricky, but the fact that
@@ -217,7 +234,29 @@ SelfTestResult selfTestNORFlash() {
     logStringRTCOptional(buffer, ASAP, LOG_ALWAYS, 0);
 #endif
 
-    logStep("Self test NOR flash: ", SELF_TEST_STEP_FLASH, ret);
+    logStep("Completed", SELF_TEST_STEP_NOR_FLASH, ret);
+
+    return ret;
+}
+
+/**
+ * Verifies writing and reading the SD card.
+ */
+SelfTestResult selfTestSD() {
+    SelfTestResult ret = SELF_TEST_RESULT_SUCCESS;
+    int fileResult;
+
+    fileResult = createTestFile(256);
+    if (fileResult < 0) {
+        ret = SELF_TEST_RESULT_SD_WRITE_FAILURE;
+    } else {
+        fileResult = readTestFile();
+        if (fileResult < 0) {
+            ret = SELF_TEST_RESULT_SD_READ_FAILURE;
+        } else {
+            logStep("Completed", SELF_TEST_STEP_SD_WRITE_READ, ret);
+        }
+    }
 
     return ret;
 }
@@ -237,6 +276,8 @@ SelfTestResult selfTestLEDs() {
         wait(500);
         setLED(LED_GREEN, FALSE);
     }
+
+    logStep("Completed", SELF_TEST_STEP_LEDS, SELF_TEST_RESULT_SUCCESS);
 
     return SELF_TEST_RESULT_SUCCESS;
 }
@@ -303,7 +344,7 @@ SelfTestResult selfTestKeypad() {
     }
     ret = (keyIx < endIx) ? SELF_TEST_RESULT_FAILURE : SELF_TEST_RESULT_SUCCESS;
 
-    logStep("Self test keypad: ", SELF_TEST_STEP_KEYPAD, ret);
+    logStep("Completed", SELF_TEST_STEP_KEYPAD, ret);
 
     return ret;
 }
@@ -321,14 +362,14 @@ SelfTestResult selfTestAudio() {
     setLED(LED_RED, TRUE);
     playBip();
     ret = (audioTestRecord(SELF_TEST_AUDIO_MS, 0 /*no key break*/) == 0) ? SELF_TEST_RESULT_SUCCESS : SELF_TEST_RESULT_AUDIO_RECORD_FAILURE;
-    logStep("Self test audio record finished ", SELF_TEST_STEP_AUDIO, ret);
+    logStep("Recording", SELF_TEST_STEP_AUDIO, ret);
     setLED(LED_RED, FALSE);
     // If we think we recorded, play it back.
     if (ret == SELF_TEST_RESULT_SUCCESS) {
         setLED(LED_GREEN, TRUE);
         playBips(2);
         ret = (audioTestPlayback(SELF_TEST_AUDIO_MS, 2 /*volume steps*/, 1 /*key break*/) == 0) ? SELF_TEST_RESULT_SUCCESS : SELF_TEST_RESULT_AUDIO_PLAYBACK_FAILURE;
-        logStep("Self test audio playback finished ", SELF_TEST_STEP_AUDIO, ret);
+        logStep("Playback", SELF_TEST_STEP_AUDIO, ret);
         setLED(LED_GREEN, FALSE);
     }
     // If we think it worked, beep.
@@ -341,62 +382,91 @@ SelfTestResult selfTestAudio() {
 }
 
 /**
- * Verifies writing and reading the SD card.
+ * Verifies that we can enter into USB Device mode.
  */
-SelfTestResult selfTestSD() {
-    SelfTestResult ret = SELF_TEST_RESULT_SUCCESS;
-    int fileResult;
+SelfTestResult selfTestUsbDevice() {
+    int usbret;
+    long now = getRTCinSeconds();
+    int ledIsOn = 0;
+    int ledColor = LED_RED;
+    int ret = SELF_TEST_RESULT_FAILURE;
 
-    fileResult = createTestFile(256);
-    if (fileResult < 0) {
-        ret = SELF_TEST_RESULT_SD_WRITE_FAILURE;
-    } else {
-        fileResult = readTestFile();
-        if (fileResult < 0) {
-            ret = SELF_TEST_RESULT_SD_READ_FAILURE;
-        } else {
-            logStep("Self test SD write/read: ", SELF_TEST_STEP_SD_WRITE_READ, ret);
+    setLED(LED_RED, TRUE);
+    setLED(LED_GREEN, FALSE);
+    playDing();
+    wait(1000);
+    setLED(LED_RED, FALSE);
+    setLED(LED_GREEN, TRUE);
+    playDing();
+    wait(1000);
+    setLED(LED_GREEN, FALSE);
+
+    usbret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY); // always returns 1
+    while(usbret == 1) {
+        usbret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_ONCE);
+        // If the second has changed...
+        if (now != getRTCinSeconds()) {
+            now = getRTCinSeconds();
+            // ... toggle the LED...
+            ledIsOn = !ledIsOn;
+            setLED(ledColor, ledIsOn);
+            // ... and if we turned it off, switch the color for next time.
+            if (!ledIsOn) {
+                ledColor = (ledColor==LED_RED) ? LED_GREEN : LED_RED;
+            }
         }
     }
+    if (!usbret) { //USB connection was made
+        SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
+        ret = SELF_TEST_RESULT_SUCCESS;
+    }
+
+    logStep("Completed", SELF_TEST_STEP_USB_DEVICE_MODE, ret);
 
     return ret;
 }
 
 SelfTestResult selfTestEnd() {
     saveSelfTestStatus(SELF_TEST_PASSED, SELF_TEST_RESULT_SUCCESS);
-    logStep("Self test passed ", SELF_TEST_PASSED, SELF_TEST_RESULT_SUCCESS);
+    logStep("Completed", SELF_TEST_PASSED, SELF_TEST_RESULT_SUCCESS);
     return SELF_TEST_RESULT_SUCCESS;
 }
 
-void deliverSelfTestResults(SelfTestStep step, SelfTestResult result) {
+void deliverSelfTestResults(SelfTestStep failureStepIfAny, SelfTestResult result) {
     int key;
+    int acceptedKeys = KEY_DOWN | KEY_HOME | KEY_UP;
+    int announceKey = KEY_RIGHT;
+    logStringRTCOptional("Self test results.", ASAP, LOG_ALWAYS, 0);
     if (result == SELF_TEST_RESULT_SUCCESS) {
-        // Success, so turn on the green light and wait for the table.
+        // Success, so turn on the green light.
         setLED(LED_RED, FALSE);
         setLED(LED_GREEN, TRUE);
-        key = waitForKey(KEY_DOWN | KEY_HOME);
-        } else {
-        // If failure, turn on the red light and wait for the table or the right hand. If table, announce error.
+        key = waitForKey(KEY_DOWN | KEY_HOME | KEY_UP);
+    } else {
+        // If failure, turn on the red light. Also wait for the right hand.
         setLED(LED_GREEN, FALSE);
         setLED(LED_RED, TRUE);
-        do {
-            key = waitForKey(KEY_DOWN | KEY_RIGHT | KEY_UP | KEY_HOME);
-            if (key == KEY_DOWN) {
-                // TODO: Speak error, not steps.
-                playDings(step);
-            } else if (key == KEY_UP) {
-                // Never returns.
-                logStringRTCOptional("Invoking classic testPCB.", ASAP, LOG_ALWAYS, 0);
-                testPCB();
-            }
-        } while (key != KEY_RIGHT && key != KEY_HOME);
+        acceptedKeys |= announceKey;
     }
     setLED(LED_ALL, FALSE);
+    // Wait for one of our "accepted" keys.
+    do {
+        key = waitForKey(acceptedKeys);
+        // If the key was the right hand, announce the error, and wait again.
+        if (key == announceKey) {
+            playDings(failureStepIfAny);
+            continue;
+        }
+    } while (FALSE);
     if (key == KEY_HOME) {
         // Home key -- attempt normal operation.
-        setLED(LED_ALL, FALSE);
         return;
-    }    setOperationalMode((int)P_SLEEP);  // sleep; wake from center, home, or black button
+    } else if (key == KEY_UP) {
+        // Original self-test. Never returns.
+        logStringRTCOptional("Invoking classic testPCB.", ASAP, LOG_ALWAYS, 0);
+        testPCB();
+    }
+    setOperationalMode((int) P_SLEEP);  // sleep; wake from center, home, or black button
 }
 
 int testPCB(void) {
@@ -585,7 +655,7 @@ int audioTestPlayback(int playTimeMs, int numSteps, int allowKeyBreak) {
     SACMGet_A1800FAT_Mode(handle, 0);
     Snd_SACM_PlayFAT(handle, C_CODEC_AUDIO1800);
     for (i=0; i < numSteps; i++) {
-        volume = MIN_VOLUME + (MAX_VOLUME - MIN_VOLUME) * i / numSteps;
+        volume = MIN_VOLUME + (MAX_VOLUME - MIN_VOLUME - VOLUME_INCREMENT) * i / numSteps;
         adjustVolume(volume, FALSE, FALSE);
         do {
             checkVoltage();
@@ -627,6 +697,8 @@ int audioTests(void) {
  * If the voltage drops too low, this function will never return.
  */
 int waitForKey(int mask) {
+    int ledIsOn = FALSE;
+    int ledColor = LED_RED;
     long now = getRTCinSeconds();
     int key = 0;
 
@@ -634,20 +706,26 @@ int waitForKey(int mask) {
         key = 0;
         while (!key) {
             checkVoltage();
+            // If the second has changed...
             if (now != getRTCinSeconds()) {
-                // Play a bip every other second.
-                if (now & 1) {
-                    playBip();
-                }
                 now = getRTCinSeconds();
+                // ... toggle the LED...
+                ledIsOn = !ledIsOn;
+                setLED(ledColor, ledIsOn);
+                // ... and if we turned it off, switch the color for next time.
+                if (!ledIsOn) {
+                    ledColor = (ledColor==LED_RED) ? LED_GREEN : LED_RED;
+                }
             }
             key = keyCheck(0);
         }
         if ((key & mask) == 0) {
             playBip();
-            flashRed();
         }
     } while ((key & mask) == 0);
+    if (ledIsOn) {
+        setLED(ledColor, FALSE);
+    }
     return key;
 }
 

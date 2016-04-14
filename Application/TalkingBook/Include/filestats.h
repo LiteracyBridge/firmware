@@ -182,15 +182,17 @@ struct NORselfTestStatus {
 typedef enum {
     // this is so we can refer to "the first test, whatever that is".
     SELF_TEST_STEP_FIRST = 0,
+
     // Non-interactive tests
-    SELF_TEST_STEP_FLASH = SELF_TEST_STEP_FIRST,
+    SELF_TEST_STEP_NOR_FLASH = SELF_TEST_STEP_FIRST,
     SELF_TEST_STEP_SD_WRITE_READ,
-    SELF_TEST_STEP_USB_HOST_MODE,
 
     // Interactive tests
     SELF_TEST_STEP_LEDS,
     SELF_TEST_STEP_KEYPAD,
     SELF_TEST_STEP_AUDIO,
+
+    SELF_TEST_STEP_USB_DEVICE_MODE,
 
     // keep this one last
     SELF_TEST_STEP_END,
@@ -205,9 +207,11 @@ typedef enum {
     SELF_TEST_RESULT_SD_WRITE_FAILURE,
     SELF_TEST_RESULT_SD_READ_FAILURE,
     SELF_TEST_RESULT_AUDIO_RECORD_FAILURE,
-    SELF_TEST_RESULT_AUDIO_PLAYBACK_FAILURE
-} SelfTestResult;
+    SELF_TEST_RESULT_AUDIO_PLAYBACK_FAILURE,
 
+    SELF_TEST_RESULT_NOTHING = 126
+} SelfTestResult;
+extern char *SelfTestNames[];
 
 #define STATSIZE (sizeof(struct ondisk_filestats) << 1) 
 

@@ -169,7 +169,7 @@ int SystemIntoUDisk(unsigned int serviceloop)
 	SysDisableWaitMode(3);
 	SetSystemClockRate(48);
 
-	if(serviceloop) {
+	if(serviceloop != USB_CLIENT_SVC_LOOP_ONCE) {
 		R_NAND_Present=0;
 		MaxLUN = 0;
 		R_SDC_Present=1;
@@ -184,7 +184,7 @@ int SystemIntoUDisk(unsigned int serviceloop)
 		}
 	}
 	
-	if(!serviceloop) {
+	if(serviceloop == USB_CLIENT_SVC_LOOP_ONCE) {
 		int tmp;
 		long j;
 		tmp = R_USB_State_Machine;
