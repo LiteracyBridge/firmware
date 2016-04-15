@@ -82,9 +82,7 @@ void logStep(char *msg, SelfTestStep step, SelfTestResult result) {
     char buffer[100];
     strcpy(buffer, msg);
     strcat(buffer, " '");
-    if (step <= SELF_TEST_STEP_END) {
-        strcat(buffer, (step <= SELF_TEST_STEP_END) ? SelfTestNames[step] : "Complete");
-    }
+    strcat(buffer, (step <= SELF_TEST_STEP_END) ? SelfTestNames[step] : "All Tests");
 
     if (result == SELF_TEST_RESULT_SUCCESS) {
         strcat(buffer, "': Success");
@@ -384,26 +382,10 @@ SelfTestResult selfTestAudio() {
  */
 SelfTestResult selfTestUsbDevice() {
     int usbret;
-    long now = getRTCinSeconds();
-    int ledIsOn = 0;
-    int ledColor = LED_RED;
     int ret = SELF_TEST_RESULT_FAILURE;
 
-    usbret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY); // always returns 1
-    while(usbret == 1) {
-        usbret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_ONCE);
-        // If the second has changed...
-        if (now != getRTCinSeconds()) {
-            now = getRTCinSeconds();
-            // ... toggle the LED...
-            ledIsOn = !ledIsOn;
-            setLED(ledColor, ledIsOn);
-            // ... and if we turned it off, switch the color for next time.
-            if (!ledIsOn) {
-                ledColor = (ledColor==LED_RED) ? LED_GREEN : LED_RED;
-            }
-        }
-    }
+    SystemIntoUDisk(SYSTEM_UDISK_INITIALIZE); // SIUD(SETUP_ONLY) always returns 1
+    usbret = SystemIntoUDisk(SYSTEM_UDISK_TRY_CLIENT_MODE);
     if (!usbret) { //USB connection was made
         SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
         ret = SELF_TEST_RESULT_SUCCESS;
@@ -516,7 +498,7 @@ int testPCB(void) {
 	
 	//rhm
 //	while (1) {
-//		SystemIntoUDisk(1);	
+//		SystemIntoUDisk(USB_CLIENT_SVC_LOOP_CONTINUOUS);
 //		playDing();
 //		reprogram(); // this will not return
 //	}
@@ -574,9 +556,9 @@ int testPCB(void) {
 
 static void checkUSB() {
 	int usbret;
-	usbret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY);
+	usbret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY);    // Always returns 1
 	while(usbret == 1) {
-		usbret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_ONCE);
+		usbret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_WITH_TIMEOUT);
 	}
 	if (!usbret) { //USB connection was made
 		SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
@@ -763,7 +745,7 @@ int receiveCopy(void) {
 	int ret;
 	
 	setLED(LED_RED,TRUE);
-	SystemIntoUDisk(1);	
+	SystemIntoUDisk(USB_CLIENT_SVC_LOOP_CONTINUOUS);
 	SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
 	// test microSD read and writes -- assumes microSD card is FAT formatted
 	setLED(LED_RED,TRUE); // gets turned off within SystemIntoUDisk

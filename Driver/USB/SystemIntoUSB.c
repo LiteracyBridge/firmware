@@ -140,10 +140,29 @@ str_USB_Lun_Info USB_Lun_Define[]=
 str_USB_Lun_Info 	*FP_USB_Lun_Define[N_USB_LUN];
 #endif
 
-int SystemIntoUDisk(unsigned int serviceloop)
+/**
+ * This tries to enter Device mode, ie, "system into usb-disk'.
+ *  functionMask - a bitmask of the functions to be performed.
+ *      0x0001 (SYSTEM_UDISK_INITIALIZE) Run the initialization code. If this is the only bit, return 1 after initialization.
+ *      0x0002 (SYSTEM_UDISK_TRY_CLIENT_MODE) Try to enter USB mode, but time out if not entered in ~5 seconds.
+ *      0x0004 (SYSTEM_UDISK_RUNLOOP) Try forever to enter USB mode, and remain in USB mode forever.  The timeout attempt
+ *        happens first, so if both TRY_CLIENT_MODE and RUNLOOP are passed, a timeout is still possible.
+ *
+ * There are some convenience defines that match historical usage of this function:
+ *      2 (USB_CLIENT_SETUP_ONLY) initialize usb hardware & software to become a client but return without running usb serviceloop
+ *      1 (USB_CLIENT_SVC_LOOP_CONTINUOUS) run usb serviceloop continuously until usb is inactive
+ *      0 (USB_CLIENT_SVC_LOOP_WITH_TIMEOUT) check for timeout, then run serviceloop continuously until usb is inactive
+ *
+ * Returns:
+ *  0 - entered, then exited USB device mode. The only return value if USB_CLIENT_LOOP_CONTINUOUS is passed
+ *  1 - called with USB_CLIENT_SETUP_ONLY, or with LOOP_WITH_TIMEOUT, and a key was pressed
+ *  2 - a timeout or state machine error occurred
+ */
+int SystemIntoUDisk(unsigned int functionMask)
 {
 	extern flash *RHM_FlashPtr; //RHM , *FP_RHM_FlashPtr;
-	int i;
+	int i, serviceLoopCount=0;
+    long serviceLoopEntryTime, serviceLoopExitTime;
 	char strLog[60];
 #ifdef USBRP
 	int fl_size = USB_Flash_init((flash *)0, 0);
@@ -155,7 +174,7 @@ int SystemIntoUDisk(unsigned int serviceloop)
 		refuse_lowvoltage(0);
 		return(2);
 	}
-	
+
 	for(i=0; i<N_USB_LUN; i++) {
 		FP_USB_Lun_Define[i] = &USB_Lun_Define[i];
 		if( USB_Lun_Define[i].unLunType == LunType_NOR) {
@@ -164,35 +183,37 @@ int SystemIntoUDisk(unsigned int serviceloop)
 	}
 	FL.flash_exe_buf = (void *) &flash_execution_buf[0];
 	USB_Flash_init(&FL, 1);
-	
+
 #endif
 	SysDisableWaitMode(3);
 	SetSystemClockRate(48);
 
-	if(serviceloop != USB_CLIENT_SVC_LOOP_ONCE) {
+	if(functionMask & SYSTEM_UDISK_INITIALIZE) {
+        logString("USB CLient setup; unmount SD", ASAP, LOG_ALWAYS);
 		R_NAND_Present=0;
 		MaxLUN = 0;
 		R_SDC_Present=1;
 		_deviceunmount(0);
-	
-		USB_TimeOut_Enable();		
+
+		USB_TimeOut_Enable();
 		USB_Initial();
 		USB_Reset();
-		
-		if(serviceloop == USB_CLIENT_SETUP_ONLY) {
+
+		if(functionMask == SYSTEM_UDISK_INITIALIZE) {
 			return(1);
 		}
 	}
-	
-	if(serviceloop == USB_CLIENT_SVC_LOOP_ONCE) {
+
+	if(functionMask & SYSTEM_UDISK_TRY_CLIENT_MODE) {
 		int tmp;
 		long j;
 		tmp = R_USB_State_Machine;
+        serviceLoopEntryTime = getRTCinSeconds();
 		for(j=0; j<100000; j++) {
-
-
-			USB_ServiceLoop(0);
+            serviceLoopCount++;
+			USB_ServiceLoop(0); // 0 -> no loop
 			if(R_USB_State_Machine > 0 && R_USB_State_Machine <= SCSI_CSW_Stage) {
+                serviceLoopExitTime = getRTCinSeconds();
 				goto xxx;
 			} else {
 				KeyScan_ServiceLoop();
@@ -203,18 +224,24 @@ int SystemIntoUDisk(unsigned int serviceloop)
 				}
 			}
 		}
-		if (tmp == 0 && R_USB_State_Machine == 0) {
+		if (tmp == 0 && R_USB_State_Machine == 0) { // Timeout.
 			SetSystemClockRate(CLOCK_RATE);
 			_devicemount(0);
+            logString("USB CLient state = 0; remounted SD", ASAP, LOG_ALWAYS);
 			return(2);
 		}
 
-		if(R_USB_State_Machine == 0xf5f5) {
+		if(R_USB_State_Machine == 0xf5f5) { // Undocumented (and random looking!) USB machine state. Error?
 			SetSystemClockRate(CLOCK_RATE);
 			_devicemount(0);
+            logString("USB CLient state = f5f5; remounted SD", ASAP, LOG_ALWAYS);
 			return(2);
 		}
 		if(!(R_USB_State_Machine > 0 && R_USB_State_Machine <= SCSI_CSW_Stage)) {
+            // This initialization will set R_USB_State_Machine to 0, so tmp *should* be 0. If the machine state is 0, then,
+            // we should have taken the timeout branch above. If the state is > SCSI_CSW_Stage, it is an undocumented
+            // state (but then, so is 0xf5f5), so we still shouldn't be here. Possibly a vestige of some earlier logic
+            // that was mooted when the 100,000 loop, above, was added??
 			SysEnableWaitMode(3);
 			RHM_FlashPtr = 0;
 			SetSystemClockRate(CLOCK_RATE);
@@ -225,32 +252,44 @@ xxx:
 	if (LED_GREEN)
 		setLED(LED_GREEN,FALSE);
 	else // for USB before reading config file, or if config corrupted
-		setLED(0x040,FALSE);		
+		setLED(0x040,FALSE);
 	if (LED_RED)
 		setLED(LED_RED,TRUE);
 	else // for USB before reading config file, or if config corrupted
-		setLED(0x200,TRUE);		
-		
-	USB_ServiceLoop(1);
+		setLED(0x200,TRUE);
+
+    if (functionMask & SYSTEM_UDISK_RUNLOOP) {
+        USB_ServiceLoop(1);  // 1 -> loop until USB suspend
+    }
 
 	*P_USBD_Config=0x00;
-	*P_USBD_INTEN=0x00;	
+	*P_USBD_INTEN=0x00;
 
     if(1 == R_SDC_Present)
     {
 	    _devicemount(0);
+        logString("USB CLient exit; remounted SD", ASAP, LOG_ALWAYS);
 	}
 	SysEnableWaitMode( 3 );
-	
+
 	RHM_FlashPtr = 0;
-	
-	strcpy(strLog, "returned from USB Device Mode");	
-	logString(strLog, ASAP, LOG_NORMAL);
-	
+
+	strcpy(strLog, "returned from USB Device Mode");
+    if (serviceLoopCount > 0) {
+        strcat(strLog, ", loop count: ");
+        longToStr(serviceLoopCount, strLog+strlen(strLog));
+        strcat(strLog, "(");
+        longToStr(serviceLoopEntryTime, strLog+strlen(strLog));
+        strcat(strLog, "-");
+        longToStr(serviceLoopExitTime, strLog+strlen(strLog));
+        strcat(strLog, ")");
+    }
+    logString(strLog, ASAP, LOG_ALWAYS);
+
 	if (LED_RED)
 		setLED(LED_RED,FALSE);
 	else // for USB before reading config file, or if config corrupted
-		setLED(0x200,FALSE);		
+		setLED(0x200,FALSE);
 	SetSystemClockRate(CLOCK_RATE);
 	return 0;
 }
@@ -271,9 +310,9 @@ void USB_Insert_TimeOut(void)
 	*P_TimeBaseA_Ctrl=temp;	//clear timerA int flag	
 	
 	if( usb_time_out > USB_TIME_OUT ) {
-		if(USBHost_Flag == C_USBDiskPlugIn){			
-		   USBHost_Flag = C_USBPlugInTimeOut;					
-		}else if (!USBD_PlugIn){		//Check USB plug in		
+		if(USBHost_Flag == C_USBDiskPlugIn){
+		   USBHost_Flag = C_USBPlugInTimeOut;
+		}else if (!USBD_PlugIn){		//Check USB plug in
 			R_USB_Suspend = 1;
 		}
 	*P_TimeBaseA_Ctrl = 0x0000;

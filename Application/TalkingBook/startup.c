@@ -313,7 +313,7 @@ void startUp(unsigned int bootType) {
 				exportFlashStats();
 			}
 		}
-		SystemIntoUDisk(1);	
+		SystemIntoUDisk(USB_CLIENT_SVC_LOOP_CONTINUOUS);
 		fastShutdown();
 		//callProcessInbox = 1;
 	} 
@@ -445,9 +445,9 @@ void startUp(unsigned int bootType) {
 		if (hasCorruption) {
 			logStringRTCOptional((char *)"Found corruption!", ASAP,LOG_ALWAYS,0);
 			setCorruptionDay(getCumulativeDays());
-			ret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY);		
+			ret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY); // Always returns 1
 			while(ret == 1) {
-				ret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_ONCE);
+				ret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_WITH_TIMEOUT);
 			}
 			if (!ret) { //USB connection was made
 				fastShutdown();

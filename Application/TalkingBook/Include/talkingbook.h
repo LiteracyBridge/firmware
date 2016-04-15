@@ -123,12 +123,21 @@ asm("APP_IRAM: .SECTION .IRAM");  // , .ADDR = 0x5000
 // try to become a usb client after USB_CLIENT_POLL_INTERVAL seconds of inactivity
 // moved to config.txt: #define USB_CLIENT_POLL_INTERVAL       5
 
+// Flags to SystemIntoUDisk
+enum {
+    SYSTEM_UDISK_INITIALIZE            = 0x0001,
+    SYSTEM_UDISK_TRY_CLIENT_MODE       = 0x0002,
+    SYSTEM_UDISK_RUNLOOP               = 0x0004
+};
+
+// Convenience defines to pass combinations of flags.
+
 // initialize usb hardware & software to become a client but return without running usb serviceloop
-#define USB_CLIENT_SETUP_ONLY          2
-// run usb serviceloop continuously until usb is inactiove
-#define USB_CLIENT_SVC_LOOP_CONTINUOUS 1
-// run usb serviceloop[ once and return
-#define USB_CLIENT_SVC_LOOP_ONCE       0
+#define USB_CLIENT_SETUP_ONLY               (SYSTEM_UDISK_INITIALIZE)
+// run usb serviceloop continuously until usb is inactive
+#define USB_CLIENT_SVC_LOOP_CONTINUOUS      (SYSTEM_UDISK_INITIALIZE | SYSTEM_UDISK_RUNLOOP)
+// check for timeout, then run serviceloop continuously until usb is inactive
+#define USB_CLIENT_SVC_LOOP_WITH_TIMEOUT    (SYSTEM_UDISK_TRY_CLIENT_MODE | SYSTEM_UDISK_RUNLOOP)
 
 // These definitions are used with rotating system langauges. 
 // They have to be < 0 since >0 is used as a pointer to a text heap for named system packages

@@ -87,7 +87,7 @@ void logException(unsigned int errorCode, const char * pStrError, int takeAction
 				wait(500);
 			}
 		if (takeAction == USB_MODE) { // can't load config
-			SystemIntoUDisk(1);	
+			SystemIntoUDisk(USB_CLIENT_SVC_LOOP_CONTINUOUS);
 			resetSystem();
 		}
 		else if (takeAction == RESET)

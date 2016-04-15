@@ -146,9 +146,9 @@ void flushLog(void) {
 		int ret;
 		alertCorruption();
 		setCorruptionDay(getCumulativeDays());
-		ret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY);		
+		ret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY); // Always returns 1
 		while(ret == 1) {
-			ret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_ONCE);
+			ret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_WITH_TIMEOUT);
 		}
 		if (!ret) { //USB connection was made
 			fastShutdown();

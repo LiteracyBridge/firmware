@@ -492,9 +492,9 @@ extern void checkInactivity(BOOL resetTimer) {
 //		int usbret;
 //
 //		lastUSBCheck = currentTime;
-//		usbret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY);
+//		usbret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY); // Always returns 1
 //		while(usbret == 1) {
-//			usbret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_ONCE);
+//			usbret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_WITH_TIMEOUT);
 //		}
 //		if (!usbret) { //USB connection was made
 //			fastShutdown();
