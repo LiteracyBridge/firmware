@@ -266,7 +266,6 @@ SelfTestResult selfTestSD() {
  */
 SelfTestResult selfTestLEDs() {
     int i;
-    logStringRTCOptional("Self test LEDs", ASAP, LOG_ALWAYS, 0);
     setLED(LED_GREEN, FALSE);
     for (i=0; i<2; i++) {
         setLED(LED_RED, TRUE);
@@ -357,7 +356,6 @@ SelfTestResult selfTestAudio() {
     int ret;
     int key;
 
-    logStringRTCOptional("Self test audio record", ASAP, LOG_ALWAYS, 0);
     // Turn on red light, record for a 3-4 seconds.
     setLED(LED_RED, TRUE);
     playBip();
@@ -391,16 +389,6 @@ SelfTestResult selfTestUsbDevice() {
     int ledColor = LED_RED;
     int ret = SELF_TEST_RESULT_FAILURE;
 
-    setLED(LED_RED, TRUE);
-    setLED(LED_GREEN, FALSE);
-    playDing();
-    wait(1000);
-    setLED(LED_RED, FALSE);
-    setLED(LED_GREEN, TRUE);
-    playDing();
-    wait(1000);
-    setLED(LED_GREEN, FALSE);
-
     usbret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY); // always returns 1
     while(usbret == 1) {
         usbret = SystemIntoUDisk(USB_CLIENT_SVC_LOOP_ONCE);
@@ -433,31 +421,26 @@ SelfTestResult selfTestEnd() {
 }
 
 void deliverSelfTestResults(SelfTestStep failureStepIfAny, SelfTestResult result) {
+    int led = (result == SELF_TEST_RESULT_SUCCESS) ? LED_GREEN : LED_RED;
     int key;
     int acceptedKeys = KEY_DOWN | KEY_HOME | KEY_UP;
     int announceKey = KEY_RIGHT;
-    logStringRTCOptional("Self test results.", ASAP, LOG_ALWAYS, 0);
-    if (result == SELF_TEST_RESULT_SUCCESS) {
-        // Success, so turn on the green light.
-        setLED(LED_RED, FALSE);
-        setLED(LED_GREEN, TRUE);
-        key = waitForKey(KEY_DOWN | KEY_HOME | KEY_UP);
-    } else {
-        // If failure, turn on the red light. Also wait for the right hand.
-        setLED(LED_GREEN, FALSE);
-        setLED(LED_RED, TRUE);
+
+    playBips(4);
+
+    setLED(LED_ALL, FALSE);
+    setLED(led, TRUE);
+    if (result != SELF_TEST_RESULT_SUCCESS) {
         acceptedKeys |= announceKey;
     }
-    setLED(LED_ALL, FALSE);
     // Wait for one of our "accepted" keys.
     do {
-        key = waitForKey(acceptedKeys);
+        key = waitForKey(acceptedKeys, led);
         // If the key was the right hand, announce the error, and wait again.
         if (key == announceKey) {
             playDings(failureStepIfAny);
-            continue;
         }
-    } while (FALSE);
+    } while ((key == announceKey));
     if (key == KEY_HOME) {
         // Home key -- attempt normal operation.
         return;
@@ -467,6 +450,37 @@ void deliverSelfTestResults(SelfTestStep failureStepIfAny, SelfTestResult result
         testPCB();
     }
     setOperationalMode((int) P_SLEEP);  // sleep; wake from center, home, or black button
+}
+
+/**
+ * Waits for a key, with a mask of acceptable keys.
+ * Returns the key actually pressed.
+ * If the voltage drops too low, this function will never return.
+ */
+int waitForKey(int mask, int ledColor) {
+    int ledIsOn = FALSE;
+    long now = getRTCinSeconds();
+    int key = 0;
+
+    do {
+        key = 0;
+        while (!key) {
+            checkVoltage();
+            // If the second has changed...
+            if (now != getRTCinSeconds()) {
+                now = getRTCinSeconds();
+                // ... toggle the LED...
+                ledIsOn = !ledIsOn;
+                setLED(ledColor, ledIsOn);
+            }
+            key = keyCheck(0);
+        }
+        if ((key & mask) == 0) {
+            playBip();
+        }
+    } while ((key & mask) == 0);
+    setLED(ledColor, TRUE);
+    return key;
 }
 
 int testPCB(void) {
@@ -633,7 +647,6 @@ int audioTestRecord(int recordTimeMs, int allowKeyBreak) {
  * If playback finishes normally, returns 0.
  */
 int audioTestPlayback(int playTimeMs, int numSteps, int allowKeyBreak) {
-    char buffer[30];
     int handle;
     int key = 0;
     int i;
@@ -645,11 +658,6 @@ int audioTestPlayback(int playTimeMs, int numSteps, int allowKeyBreak) {
     if (handle < 0) {
         return handle;
     }
-
-    // If this works, it's the actual recording length.
-    strcpy(buffer, "audio len: ");
-    longToStr(playTimeMs, buffer + strlen(buffer));
-    logStringRTCOptional(buffer, ASAP, LOG_ALWAYS, 0);
 
     keyCheck(1); 	// to get rid of wake-up button press
     SACMGet_A1800FAT_Mode(handle, 0);
@@ -689,44 +697,6 @@ int audioTests(void) {
         }
     }
     return 0;
-}
-
-/**
- * Waits for a key, with a mask of acceptable keys.
- * Returns the key actually pressed.
- * If the voltage drops too low, this function will never return.
- */
-int waitForKey(int mask) {
-    int ledIsOn = FALSE;
-    int ledColor = LED_RED;
-    long now = getRTCinSeconds();
-    int key = 0;
-
-    do {
-        key = 0;
-        while (!key) {
-            checkVoltage();
-            // If the second has changed...
-            if (now != getRTCinSeconds()) {
-                now = getRTCinSeconds();
-                // ... toggle the LED...
-                ledIsOn = !ledIsOn;
-                setLED(ledColor, ledIsOn);
-                // ... and if we turned it off, switch the color for next time.
-                if (!ledIsOn) {
-                    ledColor = (ledColor==LED_RED) ? LED_GREEN : LED_RED;
-                }
-            }
-            key = keyCheck(0);
-        }
-        if ((key & mask) == 0) {
-            playBip();
-        }
-    } while ((key & mask) == 0);
-    if (ledIsOn) {
-        setLED(ledColor, FALSE);
-    }
-    return key;
 }
 
 int keyTests(int keys) {
