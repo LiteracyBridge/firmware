@@ -25,15 +25,15 @@
 #define REMOTE_TEST_FILENAME "b:/"TEST_FILENAME
 #define TEST_AUDIO_FILENAME	 "a:/test.a18"
 
-#define SELF_TEST_KEYPAD_TIMEOUT 20 // seconds to wait for a broken keypad
+#define SELF_TEST_KEYPAD_TIMEOUT 15 // seconds to wait for a broken keypad
 
 char *SelfTestNames[] = {
+    "LEDs",
     "Nor Flash",
     "SD w/r",
-    "LEDs",
+    "USB Device",
     "Keys",
     "Audio",
-    "USB Device",
     "All Tests"
 };
 
@@ -147,6 +147,10 @@ void selfTest() {
             case SELF_TEST_STEP_SD_WRITE_READ:
                 result = selfTestSD();
                 break;
+            case SELF_TEST_STEP_USB_DEVICE_MODE:
+                result = selfTestUsbDevice();
+                break;
+
 
             case SELF_TEST_STEP_LEDS:
                 result = selfTestLEDs();
@@ -156,10 +160,6 @@ void selfTest() {
                 break;
             case SELF_TEST_STEP_AUDIO:
                 result = selfTestAudio();
-                break;
-
-            case SELF_TEST_STEP_USB_DEVICE_MODE:
-                result = selfTestUsbDevice();
                 break;
 
             default:
@@ -195,6 +195,26 @@ void setSelfTestPassed() {
 void saveSelfTestStatus(SelfTestStep step, SelfTestResult result) {
     struct NORselfTestStatus status = {NOR_STRUCT_ID_SELF_STATE_STATUS, step, result};
     AppendStructToFlash(&status);
+}
+
+/**
+ * Lets the operator visually see that the LEDs are working.
+ */
+SelfTestResult selfTestLEDs() {
+    int i;
+    setLED(LED_GREEN, FALSE);
+    for (i=0; i<4; i++) {
+        setLED(LED_RED, TRUE);
+        wait(800);
+        setLED(LED_RED, FALSE);
+        setLED(LED_GREEN, TRUE);
+        wait(800);
+        setLED(LED_GREEN, FALSE);
+    }
+
+    logStep("Completed", SELF_TEST_STEP_LEDS, SELF_TEST_RESULT_SUCCESS);
+
+    return SELF_TEST_RESULT_SUCCESS;
 }
 
 /**
@@ -260,23 +280,22 @@ SelfTestResult selfTestSD() {
 }
 
 /**
- * Lets the operator visually see that the LEDs are working.
+ * Verifies that we can enter into USB Device mode.
  */
-SelfTestResult selfTestLEDs() {
-    int i;
-    setLED(LED_GREEN, FALSE);
-    for (i=0; i<2; i++) {
-        setLED(LED_RED, TRUE);
-        wait(500);
-        setLED(LED_RED, FALSE);
-        setLED(LED_GREEN, TRUE);
-        wait(500);
-        setLED(LED_GREEN, FALSE);
+SelfTestResult selfTestUsbDevice() {
+    int usbret;
+    int ret = SELF_TEST_RESULT_FAILURE;
+
+    SystemIntoUDisk(SYSTEM_UDISK_INITIALIZE); // SIUD(SETUP_ONLY) always returns 1
+    usbret = SystemIntoUDisk(SYSTEM_UDISK_TRY_CLIENT_MODE);
+    if (!usbret) { //USB connection was made
+        SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
+        ret = SELF_TEST_RESULT_SUCCESS;
     }
 
-    logStep("Completed", SELF_TEST_STEP_LEDS, SELF_TEST_RESULT_SUCCESS);
+    logStep("Completed", SELF_TEST_STEP_USB_DEVICE_MODE, ret);
 
-    return SELF_TEST_RESULT_SUCCESS;
+    return ret;
 }
 
 /**
@@ -291,18 +310,19 @@ SelfTestResult selfTestKeypad() {
     int keyIx = 0;
     int endIx = sizeof(list) / sizeof(list[0]);
     long keyWaitStartTime;
-    SelfTestResult ret;
+    SelfTestResult ret = SELF_TEST_RESULT_SUCCESS;
 
     playBips(3);
     // test keypad input and RED LED
     // each button has to be pushed once to conclude test
-    while (keyIx != endIx) {
+    while (keyIx != endIx && ret == SELF_TEST_RESULT_SUCCESS) {
         key = 0;
         keyWaitStartTime = getRTCinSeconds();
         while (!key) {
             checkVoltage();
             key = keyCheck(0);
             if ((getRTCinSeconds() - keyWaitStartTime) > SELF_TEST_KEYPAD_TIMEOUT) {
+                ret = SELF_TEST_RESULT_FAILURE;
                 break;
             }
         }
@@ -371,27 +391,7 @@ SelfTestResult selfTestAudio() {
     // If we think it worked, beep.
     if (ret == SELF_TEST_RESULT_SUCCESS) {
         unlink((LPSTR)TEST_AUDIO_FILENAME);
-        playBips(3);
     }
-
-    return ret;
-}
-
-/**
- * Verifies that we can enter into USB Device mode.
- */
-SelfTestResult selfTestUsbDevice() {
-    int usbret;
-    int ret = SELF_TEST_RESULT_FAILURE;
-
-    SystemIntoUDisk(SYSTEM_UDISK_INITIALIZE); // SIUD(SETUP_ONLY) always returns 1
-    usbret = SystemIntoUDisk(SYSTEM_UDISK_TRY_CLIENT_MODE);
-    if (!usbret) { //USB connection was made
-        SD_Initial();  // recordings are bad after USB device connection without this line (todo: figure out why)
-        ret = SELF_TEST_RESULT_SUCCESS;
-    }
-
-    logStep("Completed", SELF_TEST_STEP_USB_DEVICE_MODE, ret);
 
     return ret;
 }
@@ -408,7 +408,7 @@ void deliverSelfTestResults(SelfTestStep failureStepIfAny, SelfTestResult result
     int acceptedKeys = KEY_DOWN | KEY_HOME | KEY_UP;
     int announceKey = KEY_RIGHT;
 
-    playBips(4);
+    playBips(3);
 
     setLED(LED_ALL, FALSE);
     setLED(led, TRUE);
