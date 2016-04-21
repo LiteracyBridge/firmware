@@ -136,7 +136,7 @@ void setRTC(unsigned int h, unsigned int m, unsigned int s) {
 	}
 }
 
-extern void appendHiLoVoltage(char *string) {
+void appendHiLoVoltage(char *string) {
 	longToDecimalString(v_high,string+strlen(string),3);
 	strcat(string,"/");
 	longToDecimalString(vCur_1,string+strlen(string),3);
@@ -147,7 +147,7 @@ extern void appendHiLoVoltage(char *string) {
 	v_low = vCur_1;
 }
 
-extern void getRTC(char * str) {
+void getRTC(char * str) {
 	unsigned long f,r,c,p,d,h,m,s;
 	char time[RTC_STRING_LENGTH];
 	
@@ -734,7 +734,7 @@ int logLongHex(unsigned long data) {
 	return ret;
 }
 
-extern void 
+void
 assignDefaultLEDValues () {
 	if(!strncmp(getSerialNumber(),(char *)"a-",2)) { // haven't run startup, no sound possible
 		LED_GREEN = DEFAULT_LED_RED;

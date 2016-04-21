@@ -79,7 +79,7 @@ static int daysInMonth(int month) {
 	return ret;
 }
 
-extern void
+void
 fixBadDate(SystemCounts *sc) {
 	int maxDays;
 	
@@ -131,7 +131,6 @@ int loadSystemCounts() {
 */
 
 
-extern
 void initSystemData() {
 	ptrsCounts.systemData = (struct SystemData *)FindFirstFlashStruct(NOR_STRUCT_ID_SYSTEM);
 	ptrsCounts.systemCounts = (struct SystemCounts2 *)FindFirstFlashStruct(NOR_STRUCT_ID_COUNTS);
@@ -159,7 +158,7 @@ getPeriod() {
 	return ret;
 }
 
-extern int
+int
 incrementPeriod(void) {
 	struct NORperiod period;
 	int currentPeriod = getPeriod() + 1;
@@ -182,7 +181,7 @@ getCumulativeDays() {
 	return ret;
 }
 
-extern void 
+void
 logDate() {
 	char buffer[100];
 	
@@ -195,7 +194,7 @@ logDate() {
 	logStringRTCOptional(buffer, BUFFER, LOG_ALWAYS,0);  
 }
 
-extern int
+int
 incrementCumulativeDays(void) {
 	struct NORcumulativeDays cumulativeDays;
 	int currentDays;
@@ -225,7 +224,7 @@ getCorruptionDay() {
 	return ret;
 }
 
-extern void
+void
 setCorruptionDay(char day) {
 	struct NORcorruption corruption;
 	
@@ -259,7 +258,7 @@ getPowerups() {
 	return ret;
 }
 
-extern void
+void
 setPowerups(unsigned int powerupNumber) {
 	struct NORpowerups powerups;
 	int currentPowerups = getPowerups();
@@ -273,7 +272,7 @@ setPowerups(unsigned int powerupNumber) {
 	}
 }
 
-extern
+
 struct NORrotation *getLatestRotationStruct() {
 	struct NORrotation *ret = NULL;
 	int r;
@@ -296,7 +295,7 @@ char getRotation() {
 	return ret;
 }
 
-extern int
+int
 rotate(void) {
 	int rotation = getRotation() + 1;
 	if (rotation >= MAX_ROTATIONS)  // TODO: Should we use this to indicate the last rotation is now complete?  Maybe if agents are clearing feedback msgs anyway
@@ -308,7 +307,7 @@ rotate(void) {
 	return rotation;
 }
 
-extern void
+void
 setRotation(char rotationNumber, char period, unsigned int hours, int voltage) {
 	struct NORrotation rotation;
 	char currentRotationNumber = getRotation();
@@ -325,7 +324,7 @@ setRotation(char rotationNumber, char period, unsigned int hours, int voltage) {
 	}
 }
 
-extern void 
+void
 importNewSystemData (LPSTR importFile) {
 	struct SystemData sd;
 	int handle;
@@ -355,7 +354,7 @@ importNewSystemData (LPSTR importFile) {
 }
 	
 /*
-extern void 
+void
 transitionOldToNewFlash(void) {
 	struct SystemData sd;
 	
@@ -373,7 +372,7 @@ transitionOldToNewFlash(void) {
 }
 */
 
-extern void 
+void
 dumpSystemDataToLog(struct SystemData *sd) {
 	char dump[sizeof(struct SystemData)+100];
 	
@@ -420,7 +419,7 @@ dumpSystemDataToLog(struct SystemData *sd) {
 }
 
 
-extern void 
+void
 setSystemData(struct SystemData *sd) {
 	struct SystemCounts2 sc;
 	int size, totalSize, i, reflashes;
@@ -497,7 +496,7 @@ setSystemData(struct SystemData *sd) {
 	ptrsCounts.latestRotation = NULL;
 }
 
-extern char *
+char *
 getSerialNumber(void) {
 	char *ret;
 
@@ -505,7 +504,7 @@ getSerialNumber(void) {
 	return ret;
 }
 
-extern char *
+char *
 getLocation(void) {
 	char *ret;
 	
@@ -513,7 +512,7 @@ getLocation(void) {
 	return ret;
 }
 
-extern char *
+char *
 getImageName(void) {
 	char *ret;
 	
@@ -521,7 +520,7 @@ getImageName(void) {
 	return ret;
 }
 
-extern char *
+char *
 getUpdateNumber(void) {
 	char *ret;
 	
@@ -529,7 +528,7 @@ getUpdateNumber(void) {
 	return ret;
 }
 	
-extern char
+char
 getReflashCount(void) {
 	char ret;
 	
@@ -537,7 +536,7 @@ getReflashCount(void) {
 	return ret;
 }
 
-extern char
+char
 getUpdateDate(void) {
 	char ret;
 	
@@ -545,7 +544,7 @@ getUpdateDate(void) {
 	return ret;
 }
 
-extern char
+char
 getUpdateMonth(void) {
 	char ret;
 	
@@ -553,7 +552,7 @@ getUpdateMonth(void) {
 	return ret;
 }
 
-extern int
+int
 getUpdateYear(void) {
 	char ret;
 	

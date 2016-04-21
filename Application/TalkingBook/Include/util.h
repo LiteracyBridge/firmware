@@ -40,5 +40,6 @@ extern int LBstrncat (char *, const char *, int);
 extern char* trim(char *);
 
 extern unsigned long rand(void);
+extern void initRandomNG(void);
 
 #endif

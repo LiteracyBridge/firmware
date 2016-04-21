@@ -15,6 +15,7 @@
 #define FIRMWARE_UPDATE_NOTIF_FILE	"a:/fwupdate"
 #define LOCATION_FILE_EXTENSION	".loc"
 #define LOCATION_FILE_PATTERN	"*" LOCATION_FILE_EXTENSION
+#define SUPPRESS_SELF_TEST_MARKER_FILE "a:/system/notest.pcb"
 #define SET_RTC_FILE_PATTERN	"a:/*.rtc"
 
 // set BAD_MEMBRANE_SW for the old membrane switch that A-Tech has

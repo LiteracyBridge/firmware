@@ -208,7 +208,7 @@ rebuildFlash(int rewriteFlash) {
 
 
 // append a string to SN flash, if SN flash is full erase it and rewrite SN + current location, content id, content date
-extern void *
+void *
 AppendStructToFlash(void *newStruct) {
 	int firstavail = FindFirstFlashOffset();
 	int navail = TB_FLASH_SIZE - firstavail;
@@ -224,7 +224,7 @@ AppendStructToFlash(void *newStruct) {
 	return (void *)(TB_SERIAL_NUMBER_ADDR + firstavail);
 }
 
-extern void * FindFirstFlashStruct(char structType) {
+void * FindFirstFlashStruct(char structType) {
 	void *ret;
 
 	checkStackMemory();
@@ -483,7 +483,7 @@ char addNewMsgToMap (char *strMessageID) {
 	return i;
 }
 
-extern
+
 void writeMsgEventToFlash (char *strMessageID, int msgEvent, unsigned int secondsPlayed) {
 	char msgIndex = getMsgIndex(strMessageID);
 	struct NORstatEvent statEvent;
@@ -532,7 +532,7 @@ void createMsgNameOffsets() {
 	}
 }
 
-extern
+
 void warmStartNORStats(void) {
 	unsigned int powerUps;
 	
@@ -541,14 +541,14 @@ void warmStartNORStats(void) {
 	setPowerups(powerUps);
 }
 
-extern
+
 void coldStartNORStats(void) {
 	
 	incrementPeriod();
 }
 
 
-extern void 
+void
 exportFlashStats(void) {
 	//export all flash stats
 	rebuildFlash(0);	

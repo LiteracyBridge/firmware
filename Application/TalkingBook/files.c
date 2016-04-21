@@ -83,7 +83,7 @@ void logNumber(long l, int digits, int whenToWrite, int logPriority) {
 	logString(strLong,whenToWrite,logPriority);	
 }
 
-extern void logStringRTCOptional(char *string, int whenToWrite, int logPriority, int shouldRTC) { 
+void logStringRTCOptional(char *string, int whenToWrite, int logPriority, int shouldRTC) {
 	#define AVAILABLE	(LOG_BUFFER_SIZE - idxLogBuffer - 3)
 	int len;
 	char newString[256];
@@ -1523,7 +1523,7 @@ extern void logStat(char * filePath) {
 }
 
 
-extern int isCorrupted(char * filePath) {
+int isCorrupted(char * filePath) {
 	struct f_info fi;
 	char filter[PATH_LENGTH];
 	int ret;
@@ -1546,9 +1546,7 @@ extern int isCorrupted(char * filePath) {
 		ret = _findnext(&fi);		
 	}
 	}
-	if (foundCorruption)
-		alertCorruption();
-	return foundCorruption;		
+	return foundCorruption;
 }
 
 extern void

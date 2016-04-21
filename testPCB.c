@@ -11,9 +11,6 @@
 #include "./Application/TalkingBook/Include/startup.h"
 #include "./Application/TalkingBook/Include/filestats.h"
 
-// Special build for A'Tech, always runs self test procedure.
-#define ALWAYS_SELF_TEST
-
 #define NUM_STARTUP_DINGS	1
 
 #define RECORD_TIME_MS		4000
@@ -38,16 +35,18 @@ char *SelfTestNames[] = {
 };
 
 void saveSelfTestStatus(SelfTestStep step, SelfTestResult result);
-SelfTestResult selfTestNORFlash();
 SelfTestResult selfTestLEDs();
+SelfTestResult selfTestNORFlash();
+SelfTestResult selfTestSD();
+SelfTestResult selfTestUsbDevice();
 SelfTestResult selfTestKeypad();
 SelfTestResult selfTestAudio();
-SelfTestResult selfTestSD();
 SelfTestResult selfTestEnd();
 
 void deliverSelfTestResults(SelfTestStep failureStepIfAny, SelfTestResult param);
 
 
+int testPCB(void);
 
 int sendCopy(void);
 int pullCopy(void); 
@@ -56,12 +55,13 @@ int audioTestRecord(int recordTimeMs, int keyBreakAllowed);
 int audioTestPlayback(int playTimeMs, int numSteps, int keyBreakAllowed);
 int audioTests(void);
 int keyTests(int);
-void logPeriod();
 int reprogram(void);
 int createTestFile(unsigned int);
 int readTestFile(void);
 void exception(void);
+int waitForKey(int mask, int ledColor);
 static void flashRed(void);
+static void flashGreen(void);
 static void checkUSB(void);
 
 extern void _SystemOnOff(void);
@@ -78,6 +78,9 @@ static void playStartupSound() {
 	}	
 }
 
+/**
+ *  Logs one self test result.
+ */
 void logStep(char *msg, SelfTestStep step, SelfTestResult result) {
     char buffer[100];
     strcpy(buffer, msg);
@@ -94,6 +97,10 @@ void logStep(char *msg, SelfTestStep step, SelfTestResult result) {
     }
     logStringRTCOptional(buffer, ASAP, LOG_ALWAYS, 0);
 }
+
+/**
+ * Prints the self-test history to the log.
+ */
 void logHistory() {
     char buffer [10];
     int ix=0;
@@ -113,22 +120,12 @@ void logHistory() {
  * the current state kept in NOR flash.
  */
 void selfTest() {
-    void IOKey_Initial();
-    struct NORselfTestStatus *status = (struct NORselfTestStatus *)FindLastFlashStruct(NOR_STRUCT_ID_SELF_STATE_STATUS);
-    SelfTestStep step = status ? status->step : SELF_TEST_STEP_FIRST; // First test happens to be FLASH
-    SelfTestResult result = status ? status->result : SELF_TEST_RESULT_SUCCESS;
+    SelfTestStep step = SELF_TEST_STEP_FIRST; // First test happens to be LED
+    SelfTestResult result = SELF_TEST_RESULT_SUCCESS;
 
     keyCheck(1);    // to get rid of wake-up button press
     logHistory();
-#ifdef ALWAYS_SELF_TEST
-    step = SELF_TEST_STEP_FIRST;
-    result = SELF_TEST_RESULT_SUCCESS;
-#else
-    // Already passed. Nothing to do.
-    if (step == SELF_TEST_PASSED) {
-        return;
-    }
-#endif
+
     adjustVolume(NORMAL_VOLUME,FALSE,FALSE);
     writeVersionToDisk(DEFAULT_SYSTEM_PATH);  // being in this function usually means that the PCB was just reprogrammed (with a new version)
 
@@ -367,12 +364,11 @@ SelfTestResult selfTestKeypad() {
 }
 
 /**
- * Records then plays some sound, at multiple levels. The operator then presses a key to signify
- * success or failure.
+ * Records then plays some sound, at multiple levels. Does not actually listen to the playback, so it is up
+ * to the operator to note that recording / playback failed.
  */
 SelfTestResult selfTestAudio() {
     int ret;
-    int key;
 
     // Turn on red light, record for a 3-4 seconds.
     setLED(LED_RED, TRUE);
@@ -396,17 +392,41 @@ SelfTestResult selfTestAudio() {
     return ret;
 }
 
+/**
+ * Marks the self tests as having all passed.
+ */
 SelfTestResult selfTestEnd() {
     saveSelfTestStatus(SELF_TEST_PASSED, SELF_TEST_RESULT_SUCCESS);
     logStep("Completed", SELF_TEST_PASSED, SELF_TEST_RESULT_SUCCESS);
     return SELF_TEST_RESULT_SUCCESS;
 }
 
+/**
+ * Delivers the results to the operator. Will blink flash the LED 1 second on, 1 second off.
+ * If reporting success, use the green LED, if failure, use the RED.
+ *
+ * For failures, press the RIGHT key, to play a sequence of N beeps, where N represents
+ * the failing test:
+ * 1: NOR Flash
+ * 2: SD write/read
+ * 3: USB device mode
+ * 4: Keyboard
+ * 5: Audio
+ *
+ * Press the DOWN key to sleep, the HOME key to attempt to enter normal operation. Of course,
+ * if the self test has failed, normal operation may not be possible.
+ *
+ * Press the UP key to create a notest.pcb file, to suppress future tests.
+ *
+ * failureStepIfAny - if the result is not success, what was the failure?
+ * result - the success or failure being reported
+ */
 void deliverSelfTestResults(SelfTestStep failureStepIfAny, SelfTestResult result) {
     int led = (result == SELF_TEST_RESULT_SUCCESS) ? LED_GREEN : LED_RED;
     int key;
     int acceptedKeys = KEY_DOWN | KEY_HOME | KEY_UP;
     int announceKey = KEY_RIGHT;
+    int ret;
 
     playBips(3);
 
@@ -427,17 +447,21 @@ void deliverSelfTestResults(SelfTestStep failureStepIfAny, SelfTestResult result
         // Home key -- attempt normal operation.
         return;
     } else if (key == KEY_UP) {
-        // Original self-test. Never returns.
-        logStringRTCOptional("Invoking classic testPCB.", ASAP, LOG_ALWAYS, 0);
-        testPCB();
+        // No more self tests.
+        logStringRTCOptional("Creating notest.pcb to suppress future tests.", ASAP, LOG_ALWAYS, 0);
+        ret = tbOpen((LPSTR)SUPPRESS_SELF_TEST_MARKER_FILE, O_CREAT|O_RDWR|O_TRUNC);
+        close(ret);
     }
     setOperationalMode((int) P_SLEEP);  // sleep; wake from center, home, or black button
 }
 
 /**
- * Waits for a key, with a mask of acceptable keys.
+ * Waits for a key, with a mask of acceptable keys. Flash the LED 1 second on, 1 second off.
  * Returns the key actually pressed.
  * If the voltage drops too low, this function will never return.
+ *
+ * mask - the keys to wait for. If any other key is pressed, plays a bip, but otherwise ignores the key.
+ * ledColor - the LED color to flash.
  */
 int waitForKey(int mask, int ledColor) {
     int ledIsOn = FALSE;
@@ -493,9 +517,7 @@ int testPCB(void) {
 	playStartupSound();
 	writeVersionToDisk(DEFAULT_SYSTEM_PATH);  // being in this function usually means that the PCB was just reprogrammed (with a new version)
 	key = keyCheck(1); 	// to get rid of wake-up button press
-	
-	logPeriod();
-	
+
 	//rhm
 //	while (1) {
 //		SystemIntoUDisk(USB_CLIENT_SVC_LOOP_CONTINUOUS);
@@ -720,25 +742,6 @@ int keyTests(int keys) {
 	}
 	playBips(3);
 	return 0;
-}
-
-void logPeriod() {
-	char buffer[30];
-	void *ptr;
-	struct  NORperiod *period = (struct  NORperiod *)FindLastFlashStruct(NOR_STRUCT_ID_PERIOD);	
-    strcpy(buffer, "period: ");
-    unsignedlongToHexString((long)period, buffer+strlen(buffer));
-    logStringRTCOptional(buffer, ASAP, LOG_ALWAYS, 0);
-    
-    ptr = (void *)(TB_SERIAL_NUMBER_ADDR + FindFirstFlashOffset());
-    strcpy(buffer, "available: ");
-    unsignedlongToHexString((unsigned long)ptr, buffer+strlen(buffer));
-    logStringRTCOptional(buffer, ASAP, LOG_ALWAYS, 0);
-    
-    ptr = (void *)logPeriod;
-    strcpy(buffer, "fn: ");
-    unsignedlongToHexString((unsigned long)ptr, buffer+strlen(buffer));
-    logStringRTCOptional(buffer, ASAP, LOG_ALWAYS, 0);
 }
 
 int receiveCopy(void) {

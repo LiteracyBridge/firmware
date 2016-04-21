@@ -15,6 +15,7 @@
 #include "./Application/TalkingBook/Include/startup.h"
 #include "./Application/TalkingBook/Include/files.h"
 #include "./Application/TalkingBook/Include/device.h"
+#include "./Application/TalkingBook/Include/util.h"
 #include "./Reprog/USB_Flash_reprog.h"
 
 extern long USB_ISR_PTR;
@@ -86,12 +87,10 @@ backfromRTC()
 	char buf[64];
 	unsigned int hr, min, sec;
 	unsigned long ul;
-	
 // If we are here we are back from RTC int, and we have not initialized ram
 //  - the RTC continued to run
 //  Anything done in SysIntoHaltMode to cut power consumption needs to be reversed here
 	
-#define ASAP 0
 
 	fixRegs();
 	hr = *P_Hour;

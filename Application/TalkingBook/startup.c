@@ -5,6 +5,7 @@
 #include "./system/include/system_head.h"
 #include "Include/talkingbook.h"
 #include "Include/files.h"
+#include "Include/filestats.h"
 #include "Include/device.h"
 #include "Include/containers.h"
 #include "Include/parsing.h"
@@ -274,6 +275,7 @@ void startUp(unsigned int bootType) {
 	int key, ret; //, callPushPull = 0;//callProcessInbox = 0;
 	int configExists = 0, normal_shutdown=1;
 	int inspect = 0, firmwareWasUpdated = 0;
+    int performSelfTests = 0;
 	extern unsigned long rtc_fired;
 
 	// set temporary valid date for file ops (like logging) until system variables are read
@@ -325,16 +327,20 @@ void startUp(unsigned int bootType) {
 //      this seems like the right place
 //	check_burn_TB_SERIAL_NUMBER_ADDR();
 	
-	
 	// make essential directories
 	//makeEssentialDirs();  -- commenting out for now: instead using mkpath() to create directories on the fly from tbOpen()
 
 	//confirming SN is important to address corruption removing the SN file and then stats are unclear
 	checkVoltage();  
 	if(fileExists((LPSTR)"a:/system.img")) {
-		logStringRTCOptional((char *)"Starting update from image.", ASAP,LOG_ALWAYS,0);
+		logStringRTCOptional((char *)"Starting update from image.", ASAP, LOG_ALWAYS, 0);
 		startUpdate((char *) "a:/system.img");
 	}
+
+    if (!fileExists((LPSTR)SUPPRESS_SELF_TEST_MARKER_FILE)) {
+        logStringRTCOptional((char *)"Will perform self tests.", ASAP, LOG_ALWAYS, 0);
+        performSelfTests = 1;
+    }
 
 	// confirm systemData structure in NORFlash matches latest version in this firmware (NOR_STRUCT_ID_SYSTEM should increment for any change in struct)
 	if (ptrsCounts.systemData->structType != NOR_STRUCT_ID_SYSTEM) {
@@ -393,6 +399,7 @@ void startUp(unsigned int bootType) {
 	if(bootType == BOOT_TYPE_COLD_RESET) {
 		int wasReset = 0;
 		int hasCorruption = 0;
+        int missingDirectories = 0;
 
 		if ((*P_Reset_Flag & 0x0001))
 			logStringRTCOptional((char *)"LVR RESET!", ASAP,LOG_ALWAYS,0);
@@ -411,38 +418,48 @@ void startUp(unsigned int bootType) {
 			logStringRTCOptional(buffer, ASAP, LOG_ALWAYS,0);
 		}
 		if (isCorrupted((char *)"a:/system")) {
+            missingDirectories++;
 			logString((char *)"Corruption: system",BUFFER,LOG_NORMAL);
 			hasCorruption = 1;
 			//replaceFromBackup("a:/system");
 		}
 		if (isCorrupted((char *)"a:/log-archive")) {
+            missingDirectories++;
 			logString((char *)"Corruption: log-archive",BUFFER,LOG_NORMAL);
 			hasCorruption = 1;
 			//replaceFromBackup("a:/log-archive");
 		}
 		if (isCorrupted((char *)"a:/log")) {
+            missingDirectories++;
 			replaceFromBackup("a:/log");
 			hasCorruption = 1;
 			//logString((char *)"Corruption: log",BUFFER,LOG_NORMAL);
 		}
 		if (isCorrupted((char *)"a:/languages")) {
-			logString((char *)"Corruption: languages",BUFFER,LOG_NORMAL);			
+            missingDirectories++;
+			logString((char *)"Corruption: languages",BUFFER,LOG_NORMAL);
 			hasCorruption = 1;
 			//replaceFromBackup("a:/languages");
 		}
 		if (isCorrupted((char *)"a:/statistics")) {
-			logString((char *)"Corruption: statistics",BUFFER,LOG_NORMAL);			
+            missingDirectories++;
+			logString((char *)"Corruption: statistics",BUFFER,LOG_NORMAL);
 			hasCorruption = 1;
 			//replaceFromBackup("a:/statistics");
 		}
 		if (isCorrupted((char *)"a:/messages")) {
-			logString((char *)"Corruption: messages",BUFFER,LOG_NORMAL);						
+            missingDirectories++;
+			logString((char *)"Corruption: messages",BUFFER,LOG_NORMAL);
 			hasCorruption = 1;
 			//replaceFromBackup("a:/messages");
 		}
 		checkVoltage();  
 		forceflushLog();
-		if (hasCorruption) {
+		if (hasCorruption && !performSelfTests) {
+            // More dings for worse corruption.
+            while (missingDirectories-- > 0) {
+                alertCorruption();
+            }
 			logStringRTCOptional((char *)"Found corruption!", ASAP,LOG_ALWAYS,0);
 			setCorruptionDay(getCumulativeDays());
 			ret = SystemIntoUDisk(USB_CLIENT_SETUP_ONLY); // Always returns 1
@@ -548,15 +565,8 @@ void startUp(unsigned int bootType) {
 		}
 	}
 
-    if (!fileExists((LPSTR)"a:/notest.pcb")) {
-        if (fileExists((LPSTR) "a:/retest.pcb")) {
-            unlink((LPSTR)"a:/retest.pcb");
-            resetSelfTestStatus();
-        }
-        if (fileExists((LPSTR) "a:/tested.pcb")) {
-            setSelfTestPassed();
-            unlink((LPSTR)"a:/tested.pcb");
-        }
+    // The TB-Loader will create this file, turning off self tests. Delete it to force a retest.
+    if (performSelfTests) {
         selfTest();
     }
 
