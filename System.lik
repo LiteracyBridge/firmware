@@ -1,74 +1,76 @@
+Version: 3.0
 Options: m37
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\RESOURCE.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\APP_EXCEPTION.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\AUDIO.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\CONTAINERS.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\D2D_COPY.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\DEVICE.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\FILES.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\INBOX.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\LISTS.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\MACRO.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\MAINLOOP.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\PARSING.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\PKG_OPS.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\STARTUP.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\SYS_COUNTERS.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\TIMELINE.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\UTIL.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\QUIZ.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\EDIT.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\STATS.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\SD.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\FS_USER_NOS.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\NLS_ASCII.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\DRVSTRUCT.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\NLS_CODEPAGE.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\MEMPACKCOPY.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\USB.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\FS_DS.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\SCSI_TABLE.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\SYSTEMINTOUSB.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\IOKEYSCAN.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\STARTUP_DATA.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\ISR.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\SERVICELOOP.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\SYSWAITMODE.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\SYSON2OFFHOOK.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\SYSINTOHIGHSPEED.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\SYSINTORWAITMODE.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\SYSOFF2ONHOOK.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\SYSINTOHALTMODE.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\SYSEXCEPTION.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\EXTMEMOPER.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\UCBS_HOOK.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\POWERONOFF.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\MAIN.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\BODYINIT.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\LIBGLOSS.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\USBD.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\USBD_DRV.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\USB_ID.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\USB_FLASH_REPROG.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\FLASH_REPROG_DRV.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\FLASH_REPROG_BOOT.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\SD_REPROG.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\SD_REPROG_FINISH.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\USBD_EXPORT.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\SPACE.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\TESTPCB.OBJ"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\BIP_A18.RES"
-Obj: "C:\USERS\BILL\WORKSPACE\FIRMWARE\DEBUG\DING_A18.RES"
-Lib: "C:\GENERALPLUS\UNSPIDE 3.0.5\LIBRARY\CLIB32\LIB\CLIB1232.LIB"
-Lib: "C:\USERS\BILL\WORKSPACE\FIRMWARE\.\COMPONENT\LIB\GLB_GP-FS_02030405L_FS_3.0.1.LIB"
-Lib: "C:\USERS\BILL\WORKSPACE\FIRMWARE\.\COMPONENT\LIB\GPL162002_RECORDPEN_V001.LIB"
-Lib: "C:\GENERALPLUS\UNSPIDE 3.0.5\LIBRARY\CMACRO\CMACRO1232.LIB"
-Lib: "C:\USERS\BILL\WORKSPACE\FIRMWARE\.\DRIVER\LIB\GLB_GP-F_0203L_SD_0.0.2_TEST.LIB"
-Lib: "C:\USERS\BILL\WORKSPACE\FIRMWARE\.\DRIVER\USB_HOST_MSDC\2002_USBH_NOS_FAR_V6_11.LIB"
-Lib: "C:\USERS\BILL\WORKSPACE\FIRMWARE\.\SYSTEM\LIB\UCBSBUDOCC0.0.9.LIB"
-Locate: CODE in "SD_reprog_finish.obj" at AE000 
+Obj: "C:\Users\bill\workspace\firmware\Debug\Resource.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\app_exception.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\audio.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\containers.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\d2d_copy.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\device.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\files.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\Inbox.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\lists.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\macro.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\mainLoop.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\parsing.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\pkg_ops.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\startup.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\sys_counters.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\timeline.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\util.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\quiz.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\edit.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\stats.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\SD.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\FS_user_nos.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\nls_ascii.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\DrvStruct.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\nls_codepage.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\MemPackCopy.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\USB.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\FS_DS.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\SCSI_Table.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\SystemIntoUSB.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\IOKeyScan.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\startup_Data.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\isr.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\ServiceLoop.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\SysWaitMode.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\SysOn2OffHook.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\SysIntoHighSpeed.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\SysIntorWaitMode.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\SysOff2OnHook.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\SysIntoHaltMode.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\SysException.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\ExtMemOper.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\ucBS_Hook.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\PowerOnOff.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\main.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\BodyInit.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\libgloss.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\USBD.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\USBD_Drv.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\USB_ID.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\USB_Flash_reprog.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\Flash_reprog_Drv.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\Flash_reprog_boot.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\SD_reprog.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\SD_reprog_finish.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\USBD_Export.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\Space.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\testPCB.obj"
+Obj: "C:\Users\bill\workspace\firmware\Debug\bip_a18.res"
+Obj: "C:\Users\bill\workspace\firmware\Debug\ding_a18.res"
+Lib: "C:\Generalplus\unSPIDE 3.0.5\library\CLib32\lib\CLib1232.lib"
+Lib: "C:\Users\bill\workspace\firmware\.\Component\Lib\GLB_GP-FS_02030405L_FS_3.0.1.lib"
+Lib: "C:\Users\bill\workspace\firmware\.\Component\Lib\GPL162002_RecordPen_v001.lib"
+Lib: "C:\Generalplus\unSPIDE 3.0.5\library\CMacro\CMacro1232.lib"
+Lib: "C:\Users\bill\workspace\firmware\.\Driver\Lib\GLB_GP-F_0203L_SD_0.0.2_test.lib"
+Lib: "C:\Users\bill\workspace\firmware\.\Driver\USB_Host_MSDC\2002_USBH_NOS_FAR_V6_11.lib"
+Lib: "C:\Users\bill\workspace\firmware\.\System\Lib\ucBSBudocc0.0.9.lib"
+Output: "C:\Users\bill\workspace\firmware\Debug\System.S37"
+Locate: CODE in "SD_reprog_finish.obj" at AE000
 ;Align: CODE in "SD_reprog_finish.obj" with 0 
-Locate: CODE in "Flash_reprog_boot.obj" at A0000 
+Locate: CODE in "Flash_reprog_boot.obj" at A0000
 ;Align: CODE in "Flash_reprog_boot.obj" with 0 
 ;Locate: APP_RTCALARM in "device.obj" at 0 
 ;Align: APP_RTCALARM in "device.obj" with 0 
@@ -96,715 +98,716 @@ Locate: CODE in "Flash_reprog_boot.obj" at A0000
 ;Align: OVERLAP_SACM_RAM_BLOCK in "SACM_Decode" of "GPL162002_RecordPen_v001.lib" with 0 
 ;Locate: LB_OSIRQ in "isr.obj" at F881 
 ;Align: LB_OSIRQ in "isr.obj" with 0 
-;Locate: APP_IRAM in "containers.obj" at 6312E linkat 3081 
+;Locate: APP_IRAM in "containers.obj" at 63B44  linkat 3081 
 ;Align: APP_IRAM in "containers.obj" with 0 
-;Locate: APP_IRAM in "files.obj" at 6452D linkat 4480 
+;Locate: APP_IRAM in "files.obj" at 64F43  linkat 4480 
 ;Align: APP_IRAM in "files.obj" with 0 
-;Locate: APP_IRAM in "timeline.obj" at 64936 linkat 4889 
+;Locate: APP_IRAM in "timeline.obj" at 6534C  linkat 4889 
 ;Align: APP_IRAM in "timeline.obj" with 0 
-;Locate: APP_IRAM in "macro.obj" at 64C56 linkat 4BA9 
+;Locate: APP_IRAM in "macro.obj" at 6566C  linkat 4BA9 
 ;Align: APP_IRAM in "macro.obj" with 0 
-;Locate: APP_IRAM in "main.obj" at 64DA5 linkat 4CF8 
+;Locate: APP_IRAM in "main.obj" at 657BB  linkat 4CF8 
 ;Align: APP_IRAM in "main.obj" with 0 
-;Locate: APP_IRAM in "audio.obj" at 64EA7 linkat 4DFA 
+;Locate: APP_IRAM in "audio.obj" at 658BD  linkat 4DFA 
 ;Align: APP_IRAM in "audio.obj" with 0 
-;Locate: APP_IRAM in "sys_counters.obj" at 64F50 linkat 4EA3 
+;Locate: APP_IRAM in "sys_counters.obj" at 65966  linkat 4EA3 
 ;Align: APP_IRAM in "sys_counters.obj" with 0 
-;Locate: APP_IRAM in "startup.obj" at 64FE3 linkat 4F36 
+;Locate: APP_IRAM in "startup.obj" at 659F9  linkat 4F36 
 ;Align: APP_IRAM in "startup.obj" with 0 
-;Locate: APP_IRAM in "edit.obj" at 65051 linkat 4FA4 
+;Locate: APP_IRAM in "edit.obj" at 65A67  linkat 4FA4 
 ;Align: APP_IRAM in "edit.obj" with 0 
-;Locate: APP_IRAM in "stats.obj" at 650A8 linkat 4FFB 
+;Locate: APP_IRAM in "stats.obj" at 65ABE  linkat 4FFB 
 ;Align: APP_IRAM in "stats.obj" with 0 
-;Locate: APP_IRAM in "device.obj" at 650D0 linkat 5023 
+;Locate: APP_IRAM in "device.obj" at 65AE6  linkat 5023 
 ;Align: APP_IRAM in "device.obj" with 0 
-;Locate: APP_IRAM in "mainLoop.obj" at 650F1 linkat 5044 
+;Locate: APP_IRAM in "mainLoop.obj" at 65B07  linkat 5044 
 ;Align: APP_IRAM in "mainLoop.obj" with 0 
-;Locate: USB_RAM_Section in "USBD_Drv.obj" at 65917 linkat 586A 
+;Locate: IRAM in "Space.obj" at 65B0C  linkat 5049 
+;Align: IRAM in "Space.obj" with 0 
+;Locate: IRAM in "audio.obj" at 662E1  linkat 581E 
+;Align: IRAM in "audio.obj" with 0 
+;Locate: IRAM in "Inbox.obj" at 66309  linkat 5846 
+;Align: IRAM in "Inbox.obj" with 0 
+;Locate: IRAM in "testPCB.obj" at 66318  linkat 5855 
+;Align: IRAM in "testPCB.obj" with 0 
+;Locate: IRAM in "OS_USB_Host_SCSI_Data" of "2002_USBH_NOS_FAR_V6_11.lib"  at 66326  linkat 5863 
+;Align: IRAM in "OS_USB_Host_SCSI_Data" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: IRAM in "DrvUSBHMSDCInitial" of "2002_USBH_NOS_FAR_V6_11.lib"  at 6632F  linkat 586C 
+;Align: IRAM in "DrvUSBHMSDCInitial" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: IRAM in "DrvUSBHLUNInit" of "2002_USBH_NOS_FAR_V6_11.lib"  at 66334  linkat 5871 
+;Align: IRAM in "DrvUSBHLUNInit" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: IRAM in "device.obj" at 66335  linkat 5872 
+;Align: IRAM in "device.obj" with 0 
+;Locate: IRAM in "SD_reprog_finish.obj" at 66336  linkat 5873 
+;Align: IRAM in "SD_reprog_finish.obj" with 0 
+;Locate: IRAM in "app_exception.obj" at 66337  linkat 5874 
+;Align: IRAM in "app_exception.obj" with 0 
+;Locate: IRAM in "DrvSDCInitial" of "GLB_GP-F_0203L_SD_0.0.2_test.lib"  at 66338  linkat 5875 
+;Align: IRAM in "DrvSDCInitial" of "GLB_GP-F_0203L_SD_0.0.2_test.lib"  with 0 
+;Locate: IRAM in "SD_reprog.obj" at 66339  linkat 5876 
+;Align: IRAM in "SD_reprog.obj" with 0 
+;Locate: IRAM in "OS_USB_Host_Control" of "2002_USBH_NOS_FAR_V6_11.lib"  at 6633A  linkat 5877 
+;Align: IRAM in "OS_USB_Host_Control" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: USB_RAM_Section in "USBD_Drv.obj" at 6633B  linkat 5878 
 ;Align: USB_RAM_Section in "USBD_Drv.obj" with 0 
 ;Locate: GLOBAL_System_SRAM in "IOKeyScan.obj" at 16 
 ;Align: GLOBAL_System_SRAM in "IOKeyScan.obj" with 0 
-;Locate: MP3_Var_RAM in "SACM_API" of "GPL162002_RecordPen_v001.lib" at 1A 
-;Align: MP3_Var_RAM in "SACM_API" of "GPL162002_RecordPen_v001.lib" with 0 
-;Locate: MSG_Var_RAM in "SACM_API" of "GPL162002_RecordPen_v001.lib" at 1F 
-;Align: MSG_Var_RAM in "SACM_API" of "GPL162002_RecordPen_v001.lib" with 0 
-;Locate: SDC_RAM in "SDC_DRV" of "GLB_GP-F_0203L_SD_0.0.2_test.lib" at 27 
-;Align: SDC_RAM in "SDC_DRV" of "GLB_GP-F_0203L_SD_0.0.2_test.lib" with 0 
-;Locate: SD_GlobalValue in "DrvSDCInitial" of "GLB_GP-F_0203L_SD_0.0.2_test.lib" at 12 
-;Align: SD_GlobalValue in "DrvSDCInitial" of "GLB_GP-F_0203L_SD_0.0.2_test.lib" with 0 
-;Locate: __sn_section_RES_BIP_A18 in "bip_a18.res" at 6870F 
+;Locate: MP3_Var_RAM in "SACM_API" of "GPL162002_RecordPen_v001.lib"  at 1A 
+;Align: MP3_Var_RAM in "SACM_API" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: MSG_Var_RAM in "SACM_API" of "GPL162002_RecordPen_v001.lib"  at 1F 
+;Align: MSG_Var_RAM in "SACM_API" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: RAM in "fsglobalvar" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 1AB0 
+;Align: RAM in "fsglobalvar" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: RAM in "user_sacm" of "GPL162002_RecordPen_v001.lib"  at 20 
+;Align: RAM in "user_sacm" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: RAM in "lbl_truename" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 25 
+;Align: RAM in "lbl_truename" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: RAM in "MemPackCopy.obj" at 26 
+;Align: RAM in "MemPackCopy.obj" with 0 
+;Locate: SDC_RAM in "SDC_DRV" of "GLB_GP-F_0203L_SD_0.0.2_test.lib"  at 27 
+;Align: SDC_RAM in "SDC_DRV" of "GLB_GP-F_0203L_SD_0.0.2_test.lib"  with 0 
+;Locate: SD_GlobalValue in "DrvSDCInitial" of "GLB_GP-F_0203L_SD_0.0.2_test.lib"  at 12 
+;Align: SD_GlobalValue in "DrvSDCInitial" of "GLB_GP-F_0203L_SD_0.0.2_test.lib"  with 0 
+;Locate: __sn_section_RES_BIP_A18 in "bip_a18.res" at 69305 
 ;Align: __sn_section_RES_BIP_A18 in "bip_a18.res" with 0 
-;Locate: __sn_section_RES_DING_A18 in "ding_a18.res" at 68302 
+;Locate: __sn_section_RES_DING_A18 in "ding_a18.res" at 68EF8 
 ;Align: __sn_section_RES_DING_A18 in "ding_a18.res" with 0 
 ;Locate: CODE in "mainLoop.obj" at 30000 
 ;Align: CODE in "mainLoop.obj" with 0 
 ;Locate: CODE in "startup.obj" at 38000 
 ;Align: CODE in "startup.obj" with 0 
-;Locate: CODE in "parsing.obj" at 3B321 
+;Locate: CODE in "parsing.obj" at 3B367 
 ;Align: CODE in "parsing.obj" with 0 
 ;Locate: CODE in "audio.obj" at 3423B 
 ;Align: CODE in "audio.obj" with 0 
 ;Locate: CODE in "files.obj" at 40000 
 ;Align: CODE in "files.obj" with 0 
-;Locate: CODE in "device.obj" at 42869 
+;Locate: CODE in "device.obj" at 428D0 
 ;Align: CODE in "device.obj" with 0 
-;Locate: CODE in "containers.obj" at 3E1A3 
+;Locate: CODE in "containers.obj" at 3E1E9 
 ;Align: CODE in "containers.obj" with 0 
-;Locate: CODE in "./libm/e_pow" of "CLib1232.lib" at 444C9 
-;Align: CODE in "./libm/e_pow" of "CLib1232.lib" with 0 
-;Locate: CODE in "Inbox.obj" at 45A54 
+;Locate: CODE in "./libm/e_pow" of "CLib1232.lib"  at 44531 
+;Align: CODE in "./libm/e_pow" of "CLib1232.lib"  with 0 
+;Locate: CODE in "Inbox.obj" at 45ABC 
 ;Align: CODE in "Inbox.obj" with 0 
-;Locate: CODE in "d2d_copy.obj" at 46F8E 
+;Locate: CODE in "d2d_copy.obj" at 46FF6 
 ;Align: CODE in "d2d_copy.obj" with 0 
-;Locate: CODE in "USBD.obj" at 4844F 
-;Align: CODE in "USBD.obj" with 0 
-;Locate: CODE in "lists.obj" at 49594 
-;Align: CODE in "lists.obj" with 0 
-;Locate: CODE in "stats.obj" at 4A5B9 
-;Align: CODE in "stats.obj" with 0 
-;Locate: CODE in "./libm/ef_pow" of "CLib1232.lib" at 4B479 
-;Align: CODE in "./libm/ef_pow" of "CLib1232.lib" with 0 
-;Locate: CODE in "FS_DS.obj" at 4C291 
-;Align: CODE in "FS_DS.obj" with 0 
-;Locate: CODE in "sys_counters.obj" at 4D005 
-;Align: CODE in "sys_counters.obj" with 0 
-;Locate: CODE in "testPCB.obj" at 4DB7B 
+;Locate: CODE in "testPCB.obj" at 484B7 
 ;Align: CODE in "testPCB.obj" with 0 
-;Locate: CODE in "api_fs_speedup" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 4E680 
-;Align: CODE in "api_fs_speedup" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "DrvUSBHLUNInit" of "2002_USBH_NOS_FAR_V6_11.lib" at 50000 
-;Align: CODE in "DrvUSBHLUNInit" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-;Locate: CODE in "util.obj" at 50931 
+;Locate: CODE in "USBD.obj" at 496C4 
+;Align: CODE in "USBD.obj" with 0 
+;Locate: CODE in "lists.obj" at 4A809 
+;Align: CODE in "lists.obj" with 0 
+;Locate: CODE in "stats.obj" at 4B82E 
+;Align: CODE in "stats.obj" with 0 
+;Locate: CODE in "./libm/ef_pow" of "CLib1232.lib"  at 4C73B 
+;Align: CODE in "./libm/ef_pow" of "CLib1232.lib"  with 0 
+;Locate: CODE in "FS_DS.obj" at 4D553 
+;Align: CODE in "FS_DS.obj" with 0 
+;Locate: CODE in "sys_counters.obj" at 4E2C7 
+;Align: CODE in "sys_counters.obj" with 0 
+;Locate: CODE in "util.obj" at 4EE3D 
 ;Align: CODE in "util.obj" with 0 
-;Locate: CODE in "api_fat_format" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 51217 
-;Align: CODE in "api_fat_format" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "macro.obj" at 51A9F 
+;Locate: CODE in "api_fs_speedup" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 50000 
+;Align: CODE in "api_fs_speedup" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "DrvUSBHLUNInit" of "2002_USBH_NOS_FAR_V6_11.lib"  at 5133A 
+;Align: CODE in "DrvUSBHLUNInit" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: CODE in "api_fat_format" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 51C6B 
+;Align: CODE in "api_fat_format" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "macro.obj" at 524F3 
 ;Align: CODE in "macro.obj" with 0 
-;Locate: CODE in "OS_USB_Host_Control" of "2002_USBH_NOS_FAR_V6_11.lib" at 5321D 
-;Align: CODE in "OS_USB_Host_Control" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-;Locate: CODE in "./../../debug/ucBS_List" of "ucBSBudocc0.0.9.lib" at 538B7 
-;Align: CODE in "./../../debug/ucBS_List" of "ucBSBudocc0.0.9.lib" with 0 
-;Locate: CODE in "USB.obj" at 4F9BA 
+;Locate: CODE in "OS_USB_Host_Control" of "2002_USBH_NOS_FAR_V6_11.lib"  at 534D8 
+;Align: CODE in "OS_USB_Host_Control" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: CODE in "./../../debug/ucBS_List" of "ucBSBudocc0.0.9.lib"  at 53B72 
+;Align: CODE in "./../../debug/ucBS_List" of "ucBSBudocc0.0.9.lib"  with 0 
+;Locate: CODE in "USB.obj" at 541EE 
 ;Align: CODE in "USB.obj" with 0 
-;Locate: CODE in "USBD_Export.obj" at 5455F 
+;Locate: CODE in "USBD_Export.obj" at 54E4B 
 ;Align: CODE in "USBD_Export.obj" with 0 
-;Locate: CODE in "pkg_ops.obj" at 54B3B 
+;Locate: CODE in "pkg_ops.obj" at 55427 
 ;Align: CODE in "pkg_ops.obj" with 0 
-;Locate: CODE in "api_fs_LoadFatTable" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 55115 
-;Align: CODE in "api_fs_LoadFatTable" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "SD_reprog.obj" at 55693 
+;Locate: CODE in "api_fs_LoadFatTable" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 55A01 
+;Align: CODE in "api_fs_LoadFatTable" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "SD_reprog.obj" at 55F7F 
 ;Align: CODE in "SD_reprog.obj" with 0 
-;Locate: CODE in "DrvSDCInitial" of "GLB_GP-F_0203L_SD_0.0.2_test.lib" at 55C00 
-;Align: CODE in "DrvSDCInitial" of "GLB_GP-F_0203L_SD_0.0.2_test.lib" with 0 
-;Locate: CODE in "swapbyte" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 56158 
-;Align: CODE in "swapbyte" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "timeline.obj" at 5668B 
-;Align: CODE in "timeline.obj" with 0 
-;Locate: CODE in "fsl_link_fat" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 56B64 
-;Align: CODE in "fsl_link_fat" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "lfn_readdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5703B 
-;Align: CODE in "lfn_readdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "fsl_find_fat_free" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 574EF 
-;Align: CODE in "fsl_find_fat_free" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "SystemIntoUSB.obj" at 579A3 
+;Locate: CODE in "SystemIntoUSB.obj" at 564EC 
 ;Align: CODE in "SystemIntoUSB.obj" with 0 
-;Locate: CODE in "fsl_map_cluster" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 57DEE 
-;Align: CODE in "fsl_map_cluster" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./../../debug/ucBS" of "ucBSBudocc0.0.9.lib" at 5822A 
-;Align: CODE in "./../../debug/ucBS" of "ucBSBudocc0.0.9.lib" with 0 
-;Locate: CODE in "api_fs_lfnmkdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 585FE 
-;Align: CODE in "api_fs_lfnmkdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "fsl_ReadDBR" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 58D68 
-;Align: CODE in "fsl_ReadDBR" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "api_fs_lfnopen" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 59484 
-;Align: CODE in "api_fs_lfnopen" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "api_fs_lfnfindnext" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 59801 
-;Align: CODE in "api_fs_lfnfindnext" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "fsl_rwblock" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 59B63 
-;Align: CODE in "fsl_rwblock" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "USB_Flash_reprog.obj" at 59EB5 
+;Locate: CODE in "DrvSDCInitial" of "GLB_GP-F_0203L_SD_0.0.2_test.lib"  at 56A54 
+;Align: CODE in "DrvSDCInitial" of "GLB_GP-F_0203L_SD_0.0.2_test.lib"  with 0 
+;Locate: CODE in "swapbyte" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 56FAC 
+;Align: CODE in "swapbyte" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "timeline.obj" at 574DF 
+;Align: CODE in "timeline.obj" with 0 
+;Locate: CODE in "fsl_link_fat" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 579B8 
+;Align: CODE in "fsl_link_fat" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "lfn_readdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 57E8F 
+;Align: CODE in "lfn_readdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "fsl_find_fat_free" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 58343 
+;Align: CODE in "fsl_find_fat_free" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "fsl_map_cluster" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 587F7 
+;Align: CODE in "fsl_map_cluster" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./../../debug/ucBS" of "ucBSBudocc0.0.9.lib"  at 58C33 
+;Align: CODE in "./../../debug/ucBS" of "ucBSBudocc0.0.9.lib"  with 0 
+;Locate: CODE in "api_fs_lfnmkdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 59007 
+;Align: CODE in "api_fs_lfnmkdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "fsl_ReadDBR" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 59771 
+;Align: CODE in "fsl_ReadDBR" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "api_fs_lfnopen" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 59E8D 
+;Align: CODE in "api_fs_lfnopen" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "api_fs_lfnfindnext" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5A20A 
+;Align: CODE in "api_fs_lfnfindnext" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "fsl_rwblock" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5A56C 
+;Align: CODE in "fsl_rwblock" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "USB_Flash_reprog.obj" at 5A8BE 
 ;Align: CODE in "USB_Flash_reprog.obj" with 0 
-;Locate: CODE in "OS_USB_Host_SCSI" of "2002_USBH_NOS_FAR_V6_11.lib" at FCCF 
-;Align: CODE in "OS_USB_Host_SCSI" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-;Locate: CODE in "api_fs_lfncd" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5A205 
-;Align: CODE in "api_fs_lfncd" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "lbl_truename" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5A515 
-;Align: CODE in "lbl_truename" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./libm/e_sqrt" of "CLib1232.lib" at 5A80E 
-;Align: CODE in "./libm/e_sqrt" of "CLib1232.lib" with 0 
-;Locate: CODE in "api_fs_lfnrename" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5AAEC 
-;Align: CODE in "api_fs_lfnrename" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "api_fs_sfnchangedir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5ADC5 
-;Align: CODE in "api_fs_sfnchangedir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "lfn_fd32_gen_short_fname" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5B35E 
-;Align: CODE in "lfn_fd32_gen_short_fname" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "app_exception.obj" at 5B629 
+;Locate: CODE in "OS_USB_Host_SCSI" of "2002_USBH_NOS_FAR_V6_11.lib"  at FCCF 
+;Align: CODE in "OS_USB_Host_SCSI" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: CODE in "api_fs_lfncd" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5AC0E 
+;Align: CODE in "api_fs_lfncd" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "lbl_truename" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5AF1E 
+;Align: CODE in "lbl_truename" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./libm/e_sqrt" of "CLib1232.lib"  at 5B217 
+;Align: CODE in "./libm/e_sqrt" of "CLib1232.lib"  with 0 
+;Locate: CODE in "api_fs_lfnrename" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5B4F5 
+;Align: CODE in "api_fs_lfnrename" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "api_fs_sfnchangedir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5B7CE 
+;Align: CODE in "api_fs_sfnchangedir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "lfn_fd32_gen_short_fname" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5BD67 
+;Align: CODE in "lfn_fd32_gen_short_fname" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "app_exception.obj" at 5C032 
 ;Align: CODE in "app_exception.obj" with 0 
-;Locate: CODE in "edit.obj" at 5B8E9 
+;Locate: CODE in "edit.obj" at 5C2F2 
 ;Align: CODE in "edit.obj" with 0 
-;Locate: CODE in "DrvUSBHWriteMultiSector" of "2002_USBH_NOS_FAR_V6_11.lib" at 5BE56 
-;Align: CODE in "DrvUSBHWriteMultiSector" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-;Locate: CODE in "DrvUSBHReadMultiSector" of "2002_USBH_NOS_FAR_V6_11.lib" at F9A3 
-;Align: CODE in "DrvUSBHReadMultiSector" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-;Locate: CODE in "fsl_bpb_to_dpb" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5C108 
-;Align: CODE in "fsl_bpb_to_dpb" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "lfn_dir_lfnwrite" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5C37A 
-;Align: CODE in "lfn_dir_lfnwrite" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "lbl_misc" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5C5CE 
-;Align: CODE in "lbl_misc" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "api_fs_lfnrmdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5C80D 
-;Align: CODE in "api_fs_lfnrmdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "lfn_fd32_build_fcb_name" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5CC70 
-;Align: CODE in "lfn_fd32_build_fcb_name" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./addsubd4" of "CMacro1232.lib" at 5CE8A 
-;Align: CODE in "./addsubd4" of "CMacro1232.lib" with 0 
-;Locate: CODE in "lfn_descend_path" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5D09F 
-;Align: CODE in "lfn_descend_path" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "api_fs_init" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5D2A9 
-;Align: CODE in "api_fs_init" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "api_fs_lfndel" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5D488 
-;Align: CODE in "api_fs_lfndel" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "USB_ID.obj" at 5D666 
+;Locate: CODE in "DrvUSBHWriteMultiSector" of "2002_USBH_NOS_FAR_V6_11.lib"  at 5C85F 
+;Align: CODE in "DrvUSBHWriteMultiSector" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: CODE in "DrvUSBHReadMultiSector" of "2002_USBH_NOS_FAR_V6_11.lib"  at F9A3 
+;Align: CODE in "DrvUSBHReadMultiSector" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: CODE in "fsl_bpb_to_dpb" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5CB11 
+;Align: CODE in "fsl_bpb_to_dpb" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "lfn_dir_lfnwrite" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5CD83 
+;Align: CODE in "lfn_dir_lfnwrite" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "lbl_misc" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5CFD7 
+;Align: CODE in "lbl_misc" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "api_fs_lfnrmdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5D216 
+;Align: CODE in "api_fs_lfnrmdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "lfn_fd32_build_fcb_name" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5D679 
+;Align: CODE in "lfn_fd32_build_fcb_name" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./addsubd4" of "CMacro1232.lib"  at 5D893 
+;Align: CODE in "./addsubd4" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "lfn_descend_path" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5DAA8 
+;Align: CODE in "lfn_descend_path" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "api_fs_init" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5DCB2 
+;Align: CODE in "api_fs_init" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "api_fs_lfndel" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5DE91 
+;Align: CODE in "api_fs_lfndel" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "USB_ID.obj" at 5E06F 
 ;Align: CODE in "USB_ID.obj" with 0 
-;Locate: CODE in "lfn_split_lfn" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5D837 
-;Align: CODE in "lfn_split_lfn" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "lfn_fetch_lfn" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5D9FE 
-;Align: CODE in "lfn_fetch_lfn" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./muld4" of "CMacro1232.lib" at 5DBC4 
-;Align: CODE in "./muld4" of "CMacro1232.lib" with 0 
-;Locate: CODE in "./divd4" of "CMacro1232.lib" at 5DD53 
-;Align: CODE in "./divd4" of "CMacro1232.lib" with 0 
-;Locate: CODE in "OS_USB_Host_EP0_CMD" of "2002_USBH_NOS_FAR_V6_11.lib" at 5DEDD 
-;Align: CODE in "OS_USB_Host_EP0_CMD" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-;Locate: CODE in "main.obj" at 5E050 
+;Locate: CODE in "lfn_split_lfn" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5E240 
+;Align: CODE in "lfn_split_lfn" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "lfn_fetch_lfn" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5E407 
+;Align: CODE in "lfn_fetch_lfn" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./muld4" of "CMacro1232.lib"  at 5E5CD 
+;Align: CODE in "./muld4" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./divd4" of "CMacro1232.lib"  at 5E75C 
+;Align: CODE in "./divd4" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "OS_USB_Host_EP0_CMD" of "2002_USBH_NOS_FAR_V6_11.lib"  at 5E8E6 
+;Align: CODE in "OS_USB_Host_EP0_CMD" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: CODE in "main.obj" at 5EA59 
 ;Align: CODE in "main.obj" with 0 
-;Locate: CODE in "./addsubf2" of "CMacro1232.lib" at 5E1C1 
-;Align: CODE in "./addsubf2" of "CMacro1232.lib" with 0 
-;Locate: CODE in "uni_case" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5E321 
-;Align: CODE in "uni_case" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "DrvUSBHMSDCInitial" of "2002_USBH_NOS_FAR_V6_11.lib" at 5E475 
-;Align: CODE in "DrvUSBHMSDCInitial" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-;Locate: CODE in "./libm/ef_sqrt" of "CLib1232.lib" at 5E70A 
-;Align: CODE in "./libm/ef_sqrt" of "CLib1232.lib" with 0 
-;Locate: CODE in "api_fs_lfnfindfirst" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5E850 
-;Align: CODE in "api_fs_lfnfindfirst" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./../../debug/ucBS_Record" of "ucBSBudocc0.0.9.lib" at 5E98F 
-;Align: CODE in "./../../debug/ucBS_Record" of "ucBSBudocc0.0.9.lib" with 0 
-;Locate: CODE in "uni_utf8_to_oemcp" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5EACD 
-;Align: CODE in "uni_utf8_to_oemcp" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "api_fs_mount" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5EC09 
-;Align: CODE in "api_fs_mount" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./mulf2" of "CMacro1232.lib" at 5ED44 
-;Align: CODE in "./mulf2" of "CMacro1232.lib" with 0 
-;Locate: CODE in "uni_fd32_utf8to32" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 36EC7 
-;Align: CODE in "uni_fd32_utf8to32" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "lfn_allocate_lfn_dir_entries" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5EE7E 
-;Align: CODE in "lfn_allocate_lfn_dir_entries" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./libm/s_scalbn" of "CLib1232.lib" at 5EFB2 
-;Align: CODE in "./libm/s_scalbn" of "CLib1232.lib" with 0 
-;Locate: CODE in "uni_nls_base" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5F0E6 
-;Align: CODE in "uni_nls_base" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "fsl_extend" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5F216 
-;Align: CODE in "fsl_extend" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "lfn_gen_short_fname" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5F346 
-;Align: CODE in "lfn_gen_short_fname" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./divf2" of "CMacro1232.lib" at 5F472 
-;Align: CODE in "./divf2" of "CMacro1232.lib" with 0 
-;Locate: CODE in "copy" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5F595 
-;Align: CODE in "copy" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "lfn_dir_lfnread" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5F6B7 
-;Align: CODE in "lfn_dir_lfnread" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "SysWaitMode.obj" at 5F7D8 
+;Locate: CODE in "./addsubf2" of "CMacro1232.lib"  at 5EBCA 
+;Align: CODE in "./addsubf2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "uni_case" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5ED2A 
+;Align: CODE in "uni_case" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "DrvUSBHMSDCInitial" of "2002_USBH_NOS_FAR_V6_11.lib"  at 5EE7E 
+;Align: CODE in "DrvUSBHMSDCInitial" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: CODE in "./libm/ef_sqrt" of "CLib1232.lib"  at 5F113 
+;Align: CODE in "./libm/ef_sqrt" of "CLib1232.lib"  with 0 
+;Locate: CODE in "api_fs_lfnfindfirst" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5F259 
+;Align: CODE in "api_fs_lfnfindfirst" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./../../debug/ucBS_Record" of "ucBSBudocc0.0.9.lib"  at 5F398 
+;Align: CODE in "./../../debug/ucBS_Record" of "ucBSBudocc0.0.9.lib"  with 0 
+;Locate: CODE in "uni_utf8_to_oemcp" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5F4D6 
+;Align: CODE in "uni_utf8_to_oemcp" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "api_fs_mount" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5F612 
+;Align: CODE in "api_fs_mount" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./mulf2" of "CMacro1232.lib"  at 5F74D 
+;Align: CODE in "./mulf2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "uni_fd32_utf8to32" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 36EC7 
+;Align: CODE in "uni_fd32_utf8to32" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "lfn_allocate_lfn_dir_entries" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5F887 
+;Align: CODE in "lfn_allocate_lfn_dir_entries" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./libm/s_scalbn" of "CLib1232.lib"  at 5F9BB 
+;Align: CODE in "./libm/s_scalbn" of "CLib1232.lib"  with 0 
+;Locate: CODE in "uni_nls_base" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5FAEF 
+;Align: CODE in "uni_nls_base" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "fsl_extend" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5FC1F 
+;Align: CODE in "fsl_extend" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "lfn_gen_short_fname" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5FD4F 
+;Align: CODE in "lfn_gen_short_fname" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./divf2" of "CMacro1232.lib"  at 5FE7B 
+;Align: CODE in "./divf2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "copy" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 60000 
+;Align: CODE in "copy" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "lfn_dir_lfnread" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 60122 
+;Align: CODE in "lfn_dir_lfnread" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "SysWaitMode.obj" at 60243 
 ;Align: CODE in "SysWaitMode.obj" with 0 
-;Locate: CODE in "fsl_dir_read" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5F8F0 
-;Align: CODE in "fsl_dir_read" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./libm/sf_scalbn" of "CLib1232.lib" at 5FA05 
-;Align: CODE in "./libm/sf_scalbn" of "CLib1232.lib" with 0 
-;Locate: CODE in "./../../debug/ucBS_Assert" of "ucBSBudocc0.0.9.lib" at 5FB09 
-;Align: CODE in "./../../debug/ucBS_Assert" of "ucBSBudocc0.0.9.lib" with 0 
-;Locate: CODE in "fsl_searchblock" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5FC02 
-;Align: CODE in "fsl_searchblock" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "api_fs_unmount" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5FED3 
-;Align: CODE in "api_fs_unmount" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "uni_fd32_utf16to8" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 60000 
-;Align: CODE in "uni_fd32_utf16to8" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "fsl_ParseDosName" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 600DC 
-;Align: CODE in "fsl_ParseDosName" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "lfn_fd32_expand_fcb_name" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 601AA 
-;Align: CODE in "lfn_fd32_expand_fcb_name" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "lbl_flush1" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 6026B 
-;Align: CODE in "lbl_flush1" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "PowerOnOff.obj" at 6032B 
+;Locate: CODE in "fsl_dir_read" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 6035B 
+;Align: CODE in "fsl_dir_read" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./libm/sf_scalbn" of "CLib1232.lib"  at 60470 
+;Align: CODE in "./libm/sf_scalbn" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./../../debug/ucBS_Assert" of "ucBSBudocc0.0.9.lib"  at 60574 
+;Align: CODE in "./../../debug/ucBS_Assert" of "ucBSBudocc0.0.9.lib"  with 0 
+;Locate: CODE in "fsl_searchblock" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 6066D 
+;Align: CODE in "fsl_searchblock" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "api_fs_unmount" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 6093E 
+;Align: CODE in "api_fs_unmount" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "uni_fd32_utf16to8" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 60A24 
+;Align: CODE in "uni_fd32_utf16to8" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "fsl_ParseDosName" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 60B00 
+;Align: CODE in "fsl_ParseDosName" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "lfn_fd32_expand_fcb_name" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 60BCE 
+;Align: CODE in "lfn_fd32_expand_fcb_name" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "lbl_flush1" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 60C8F 
+;Align: CODE in "lbl_flush1" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "PowerOnOff.obj" at 60D4F 
 ;Align: CODE in "PowerOnOff.obj" with 0 
-;Locate: CODE in "stat" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 603E0 
-;Align: CODE in "stat" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "lbl_wipe_out_clusters" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 60492 
-;Align: CODE in "lbl_wipe_out_clusters" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "lbl_dskxfer" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 60541 
-;Align: CODE in "lbl_dskxfer" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "lbl_flush_buffers" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 605EB 
-;Align: CODE in "lbl_flush_buffers" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "api_fs_fseek" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 60694 
-;Align: CODE in "api_fs_fseek" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "uni_fd32_utf32to8" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 6073D 
-;Align: CODE in "uni_fd32_utf32to8" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "uni_utf8_strupr" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 607E4 
-;Align: CODE in "uni_utf8_strupr" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "SysIntoHaltMode.obj" at 60888 
+;Locate: CODE in "stat" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 60E04 
+;Align: CODE in "stat" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "lbl_wipe_out_clusters" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 60EB6 
+;Align: CODE in "lbl_wipe_out_clusters" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "lbl_dskxfer" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 60F65 
+;Align: CODE in "lbl_dskxfer" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "lbl_flush_buffers" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 6100F 
+;Align: CODE in "lbl_flush_buffers" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "api_fs_fseek" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 610B8 
+;Align: CODE in "api_fs_fseek" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "uni_fd32_utf32to8" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 61161 
+;Align: CODE in "uni_fd32_utf32to8" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "uni_utf8_strupr" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 61208 
+;Align: CODE in "uni_utf8_strupr" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "SysIntoHaltMode.obj" at 612AC 
 ;Align: CODE in "SysIntoHaltMode.obj" with 0 
-;Locate: CODE in "./divi2" of "CMacro1232.lib" at 60929 
-;Align: CODE in "./divi2" of "CMacro1232.lib" with 0 
-;Locate: CODE in "./modi2" of "CMacro1232.lib" at 609C8 
-;Align: CODE in "./modi2" of "CMacro1232.lib" with 0 
-;Locate: CODE in "lfn_split_path_LFN" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 60A65 
-;Align: CODE in "lfn_split_path_LFN" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "lfn_fat_find" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 60B01 
-;Align: CODE in "lfn_fat_find" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "fsl_remove_lfn_entries" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 60B9A 
-;Align: CODE in "fsl_remove_lfn_entries" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "getcwd" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 60C31 
-;Align: CODE in "getcwd" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "lfn_itoa" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 60CC6 
-;Align: CODE in "lfn_itoa" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./__mul_u32_u128" of "CMacro1232.lib" at 60D59 
-;Align: CODE in "./__mul_u32_u128" of "CMacro1232.lib" with 0 
-;Locate: CODE in "fsl_init_direntry" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 60DEC 
-;Align: CODE in "fsl_init_direntry" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "ExtMemOper.obj" at 60E77 
+;Locate: CODE in "./divi2" of "CMacro1232.lib"  at 6134D 
+;Align: CODE in "./divi2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./modi2" of "CMacro1232.lib"  at 613EC 
+;Align: CODE in "./modi2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "lfn_split_path_LFN" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 61489 
+;Align: CODE in "lfn_split_path_LFN" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "lfn_fat_find" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 61525 
+;Align: CODE in "lfn_fat_find" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "fsl_remove_lfn_entries" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 615BE 
+;Align: CODE in "fsl_remove_lfn_entries" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "getcwd" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 61655 
+;Align: CODE in "getcwd" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "lfn_itoa" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 616EA 
+;Align: CODE in "lfn_itoa" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./__mul_u32_u128" of "CMacro1232.lib"  at 6177D 
+;Align: CODE in "./__mul_u32_u128" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "fsl_init_direntry" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 61810 
+;Align: CODE in "fsl_init_direntry" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "ExtMemOper.obj" at 6189B 
 ;Align: CODE in "ExtMemOper.obj" with 0 
-;Locate: CODE in "api_fs_safexit" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 60EF9 
-;Align: CODE in "api_fs_safexit" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./ltsf2" of "CMacro1232.lib" at 60F7B 
-;Align: CODE in "./ltsf2" of "CMacro1232.lib" with 0 
-;Locate: CODE in "./gtsf2" of "CMacro1232.lib" at 60FFC 
-;Align: CODE in "./gtsf2" of "CMacro1232.lib" with 0 
-;Locate: CODE in "fsl_write_fsinfo" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 6107D 
-;Align: CODE in "fsl_write_fsinfo" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "fsl_getFATblock" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 610FA 
-;Align: CODE in "fsl_getFATblock" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "FS_user_nos.obj" at 61176 
+;Locate: CODE in "api_fs_safexit" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 6191D 
+;Align: CODE in "api_fs_safexit" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./ltsf2" of "CMacro1232.lib"  at 6199F 
+;Align: CODE in "./ltsf2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./gtsf2" of "CMacro1232.lib"  at 61A20 
+;Align: CODE in "./gtsf2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "fsl_write_fsinfo" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 61AA1 
+;Align: CODE in "fsl_write_fsinfo" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "fsl_getFATblock" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 61B1E 
+;Align: CODE in "fsl_getFATblock" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "FS_user_nos.obj" at 61B9A 
 ;Align: CODE in "FS_user_nos.obj" with 0 
-;Locate: CODE in "lfn_find_empty_dir_entries" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 611F2 
-;Align: CODE in "lfn_find_empty_dir_entries" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./divu2" of "CMacro1232.lib" at 6126D 
-;Align: CODE in "./divu2" of "CMacro1232.lib" with 0 
-;Locate: CODE in "fsl_delete_dir_entry" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 612E4 
-;Align: CODE in "fsl_delete_dir_entry" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./modu2" of "CMacro1232.lib" at 6135A 
-;Align: CODE in "./modu2" of "CMacro1232.lib" with 0 
-;Locate: CODE in "write" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 613D0 
-;Align: CODE in "write" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./modi1" of "CMacro1232.lib" at 61445 
-;Align: CODE in "./modi1" of "CMacro1232.lib" with 0 
-;Locate: CODE in "read" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 614BA 
-;Align: CODE in "read" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./cvi2f2" of "CMacro1232.lib" at 6152F 
-;Align: CODE in "./cvi2f2" of "CMacro1232.lib" with 0 
-;Locate: CODE in "fsl_DeleteBlockInBufferCache" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 615A2 
-;Align: CODE in "fsl_DeleteBlockInBufferCache" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "api_fs_fclose" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 61615 
-;Align: CODE in "api_fs_fclose" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "lfn_checksum" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 61687 
-;Align: CODE in "lfn_checksum" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "fsl_getblk" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 616F8 
-;Align: CODE in "fsl_getblk" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "uni_toupper" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 61769 
-;Align: CODE in "uni_toupper" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./divi1" of "CMacro1232.lib" at 617D9 
-;Align: CODE in "./divi1" of "CMacro1232.lib" with 0 
-;Locate: CODE in "./string/strstr" of "CLib1232.lib" at 61848 
-;Align: CODE in "./string/strstr" of "CLib1232.lib" with 0 
-;Locate: CODE in "fsl_clus2phys" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 618B6 
-;Align: CODE in "fsl_clus2phys" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "api_fs_sfnreaddir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 61924 
-;Align: CODE in "api_fs_sfnreaddir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "fsl_dir_close" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 61AD0 
-;Align: CODE in "fsl_dir_close" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "MemPackCopy.obj" at 619FE 
+;Locate: CODE in "lfn_find_empty_dir_entries" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 61C16 
+;Align: CODE in "lfn_find_empty_dir_entries" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./divu2" of "CMacro1232.lib"  at 61C91 
+;Align: CODE in "./divu2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "fsl_delete_dir_entry" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 61D08 
+;Align: CODE in "fsl_delete_dir_entry" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./modu2" of "CMacro1232.lib"  at 61D7E 
+;Align: CODE in "./modu2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "write" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 61DF4 
+;Align: CODE in "write" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./modi1" of "CMacro1232.lib"  at 61E69 
+;Align: CODE in "./modi1" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "read" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 61EDE 
+;Align: CODE in "read" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./cvi2f2" of "CMacro1232.lib"  at 61F53 
+;Align: CODE in "./cvi2f2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "fsl_DeleteBlockInBufferCache" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 61FC6 
+;Align: CODE in "fsl_DeleteBlockInBufferCache" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "api_fs_fclose" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 62039 
+;Align: CODE in "api_fs_fclose" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "lfn_checksum" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 620AB 
+;Align: CODE in "lfn_checksum" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "fsl_getblk" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 6211C 
+;Align: CODE in "fsl_getblk" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "uni_toupper" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 6218D 
+;Align: CODE in "uni_toupper" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./divi1" of "CMacro1232.lib"  at 621FD 
+;Align: CODE in "./divi1" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./string/strstr" of "CLib1232.lib"  at 6226C 
+;Align: CODE in "./string/strstr" of "CLib1232.lib"  with 0 
+;Locate: CODE in "fsl_clus2phys" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 622DA 
+;Align: CODE in "fsl_clus2phys" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "api_fs_sfnreaddir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 62348 
+;Align: CODE in "api_fs_sfnreaddir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "fsl_dir_close" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 624F4 
+;Align: CODE in "fsl_dir_close" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "MemPackCopy.obj" at 62422 
 ;Align: CODE in "MemPackCopy.obj" with 0 
-;Locate: CODE in "fsl_get_cds" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 61A67 
-;Align: CODE in "fsl_get_cds" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "rename" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 61B39 
-;Align: CODE in "rename" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./__divi64_i64_53" of "CMacro1232.lib" at 61BA1 
-;Align: CODE in "./__divi64_i64_53" of "CMacro1232.lib" with 0 
-;Locate: CODE in "fsl_get_f_node" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 61C07 
-;Align: CODE in "fsl_get_f_node" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "api_fs_getcwd" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 61C6C 
-;Align: CODE in "api_fs_getcwd" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "uni_fd32_utf8to16" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 61CCF 
-;Align: CODE in "uni_fd32_utf8to16" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "uni_utf8_stricmp" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 61D31 
-;Align: CODE in "uni_utf8_stricmp" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./lthf2" of "CMacro1232.lib" at 61E50 
-;Align: CODE in "./lthf2" of "CMacro1232.lib" with 0 
-;Locate: CODE in "lfn_fat_creat" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 61EAF 
-;Align: CODE in "lfn_fat_creat" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./string/strncpy" of "CLib1232.lib" at 61F0E 
-;Align: CODE in "./string/strncpy" of "CLib1232.lib" with 0 
-;Locate: CODE in "SD.obj" at 61D92 
+;Locate: CODE in "fsl_get_cds" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 6248B 
+;Align: CODE in "fsl_get_cds" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "rename" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 6255D 
+;Align: CODE in "rename" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./__divi64_i64_53" of "CMacro1232.lib"  at 625C5 
+;Align: CODE in "./__divi64_i64_53" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "fsl_get_f_node" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 6262B 
+;Align: CODE in "fsl_get_f_node" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "api_fs_getcwd" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 62690 
+;Align: CODE in "api_fs_getcwd" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "uni_fd32_utf8to16" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5FF9E 
+;Align: CODE in "uni_fd32_utf8to16" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "uni_utf8_stricmp" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 626F3 
+;Align: CODE in "uni_utf8_stricmp" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./lthf2" of "CMacro1232.lib"  at 62812 
+;Align: CODE in "./lthf2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "lfn_fat_creat" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 62871 
+;Align: CODE in "lfn_fat_creat" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./string/strncpy" of "CLib1232.lib"  at 628D0 
+;Align: CODE in "./string/strncpy" of "CLib1232.lib"  with 0 
+;Locate: CODE in "SD.obj" at 62754 
 ;Align: CODE in "SD.obj" with 0 
-;Locate: CODE in "./gthf2" of "CMacro1232.lib" at 61DF1 
-;Align: CODE in "./gthf2" of "CMacro1232.lib" with 0 
-;Locate: CODE in "./modu1" of "CMacro1232.lib" at 61F6D 
-;Align: CODE in "./modu1" of "CMacro1232.lib" with 0 
-;Locate: CODE in "./string/strncat" of "CLib1232.lib" at 61FCA 
-;Align: CODE in "./string/strncat" of "CLib1232.lib" with 0 
-;Locate: CODE in "fsl_dir_init_fnode" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62026 
-;Align: CODE in "fsl_dir_init_fnode" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "fsl_getblock_from_off" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 6207E 
-;Align: CODE in "fsl_getblock_from_off" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "fsl_release_f_node" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62178 
-;Align: CODE in "fsl_release_f_node" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./divu1" of "CMacro1232.lib" at 620D2 
-;Align: CODE in "./divu1" of "CMacro1232.lib" with 0 
-;Locate: CODE in "deviceunmount" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62125 
-;Align: CODE in "deviceunmount" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "lbl_move_buffer" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 6226D 
-;Align: CODE in "lbl_move_buffer" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "uni_oemcp_to_utf8" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 3F7AF 
-;Align: CODE in "uni_oemcp_to_utf8" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "open" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 621CB 
-;Align: CODE in "open" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./cvu2f2" of "CMacro1232.lib" at 6221C 
-;Align: CODE in "./cvu2f2" of "CMacro1232.lib" with 0 
-;Locate: CODE in "./cvi2d4" of "CMacro1232.lib" at 6230E 
-;Align: CODE in "./cvi2d4" of "CMacro1232.lib" with 0 
-;Locate: CODE in "./string/strcspn" of "CLib1232.lib" at 622BE 
-;Align: CODE in "./string/strcspn" of "CLib1232.lib" with 0 
-;Locate: CODE in "findfirst" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 6235E 
-;Align: CODE in "findfirst" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./cvf2d4" of "CMacro1232.lib" at 623AD 
-;Align: CODE in "./cvf2d4" of "CMacro1232.lib" with 0 
-;Locate: CODE in "lfn_allocate_sfn_dir_entry" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 623FB 
-;Align: CODE in "lfn_allocate_sfn_dir_entry" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "uni_fd32_utf16to32" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62448 
-;Align: CODE in "uni_fd32_utf16to32" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./__rshu4_r" of "CMacro1232.lib" at 62492 
-;Align: CODE in "./__rshu4_r" of "CMacro1232.lib" with 0 
-;Locate: CODE in "./string/strncmp" of "CLib1232.lib" at 5FFB9 
-;Align: CODE in "./string/strncmp" of "CLib1232.lib" with 0 
-;Locate: CODE in "Flash_reprog_Drv.obj" at 624DB 
+;Locate: CODE in "./gthf2" of "CMacro1232.lib"  at 627B3 
+;Align: CODE in "./gthf2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./modu1" of "CMacro1232.lib"  at 6292F 
+;Align: CODE in "./modu1" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./string/strncat" of "CLib1232.lib"  at 6298C 
+;Align: CODE in "./string/strncat" of "CLib1232.lib"  with 0 
+;Locate: CODE in "fsl_dir_init_fnode" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 629E8 
+;Align: CODE in "fsl_dir_init_fnode" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "fsl_getblock_from_off" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 62A40 
+;Align: CODE in "fsl_getblock_from_off" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "fsl_release_f_node" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 62B3A 
+;Align: CODE in "fsl_release_f_node" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./divu1" of "CMacro1232.lib"  at 62A94 
+;Align: CODE in "./divu1" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "deviceunmount" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 62AE7 
+;Align: CODE in "deviceunmount" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "lbl_move_buffer" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 62C80 
+;Align: CODE in "lbl_move_buffer" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "uni_oemcp_to_utf8" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 62B8D 
+;Align: CODE in "uni_oemcp_to_utf8" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "open" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 62BDE 
+;Align: CODE in "open" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./cvu2f2" of "CMacro1232.lib"  at 62C2F 
+;Align: CODE in "./cvu2f2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./cvi2d4" of "CMacro1232.lib"  at 62D21 
+;Align: CODE in "./cvi2d4" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./string/strcspn" of "CLib1232.lib"  at 62CD1 
+;Align: CODE in "./string/strcspn" of "CLib1232.lib"  with 0 
+;Locate: CODE in "findfirst" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 62D71 
+;Align: CODE in "findfirst" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./cvf2d4" of "CMacro1232.lib"  at 4FFB2 
+;Align: CODE in "./cvf2d4" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "lfn_allocate_sfn_dir_entry" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 62DC0 
+;Align: CODE in "lfn_allocate_sfn_dir_entry" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "uni_fd32_utf16to32" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 62E0D 
+;Align: CODE in "uni_fd32_utf16to32" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./__rshu4_r" of "CMacro1232.lib"  at 62E57 
+;Align: CODE in "./__rshu4_r" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./string/strncmp" of "CLib1232.lib"  at 62EA0 
+;Align: CODE in "./string/strncmp" of "CLib1232.lib"  with 0 
+;Locate: CODE in "Flash_reprog_Drv.obj" at 62EE7 
 ;Align: CODE in "Flash_reprog_Drv.obj" with 0 
-;Locate: CODE in "fsl_dos_extend" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 6251F 
-;Align: CODE in "fsl_dos_extend" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "chdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 625E6 
-;Align: CODE in "chdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "rmdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62628 
-;Align: CODE in "rmdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "api_fs_getfsize" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 6266A 
-;Align: CODE in "api_fs_getfsize" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "mkdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62562 
-;Align: CODE in "mkdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "unlink" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 625A4 
-;Align: CODE in "unlink" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "nls_codepage.obj" at 626EC 
+;Locate: CODE in "fsl_dos_extend" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 62F2B 
+;Align: CODE in "fsl_dos_extend" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "chdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 62FF2 
+;Align: CODE in "chdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "rmdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 63034 
+;Align: CODE in "rmdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "api_fs_getfsize" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 63076 
+;Align: CODE in "api_fs_getfsize" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "mkdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 62F6E 
+;Align: CODE in "mkdir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "unlink" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 62FB0 
+;Align: CODE in "unlink" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "nls_codepage.obj" at 630F8 
 ;Align: CODE in "nls_codepage.obj" with 0 
-;Locate: CODE in "api_fs_fwrite" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 626AC 
-;Align: CODE in "api_fs_fwrite" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./__divi32_i32_27" of "CMacro1232.lib" at 6272C 
-;Align: CODE in "./__divi32_i32_27" of "CMacro1232.lib" with 0 
-;Locate: CODE in "lfn_copy_char_in_lfn_slot" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at FC16 
-;Align: CODE in "lfn_copy_char_in_lfn_slot" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./string/strcat" of "CLib1232.lib" at 627A8 
-;Align: CODE in "./string/strcat" of "CLib1232.lib" with 0 
-;Locate: CODE in "uni_fd32_utf32to16" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 6276B 
-;Align: CODE in "uni_fd32_utf32to16" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "nls_ascii.obj" at 627E5 
+;Locate: CODE in "api_fs_fwrite" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 630B8 
+;Align: CODE in "api_fs_fwrite" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./__divi32_i32_27" of "CMacro1232.lib"  at 63138 
+;Align: CODE in "./__divi32_i32_27" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "lfn_copy_char_in_lfn_slot" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at FC16 
+;Align: CODE in "lfn_copy_char_in_lfn_slot" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./string/strcat" of "CLib1232.lib"  at 631B4 
+;Align: CODE in "./string/strcat" of "CLib1232.lib"  with 0 
+;Locate: CODE in "uni_fd32_utf32to16" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 63177 
+;Align: CODE in "uni_fd32_utf32to16" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "nls_ascii.obj" at 631F1 
 ;Align: CODE in "nls_ascii.obj" with 0 
-;Locate: CODE in "./string/strrchr" of "CLib1232.lib" at 62821 
-;Align: CODE in "./string/strrchr" of "CLib1232.lib" with 0 
-;Locate: CODE in "lbl_dos_getdate" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62894 
-;Align: CODE in "lbl_dos_getdate" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./lshiu4" of "CMacro1232.lib" at 6285B 
-;Align: CODE in "./lshiu4" of "CMacro1232.lib" with 0 
-;Locate: CODE in "api_fs_fread" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 6293D 
-;Align: CODE in "api_fs_fread" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./cvf2u2" of "CMacro1232.lib" at 628CD 
-;Align: CODE in "./cvf2u2" of "CMacro1232.lib" with 0 
-;Locate: CODE in "ServiceLoop.obj" at 62905 
+;Locate: CODE in "./string/strrchr" of "CLib1232.lib"  at 6322D 
+;Align: CODE in "./string/strrchr" of "CLib1232.lib"  with 0 
+;Locate: CODE in "lbl_dos_getdate" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 632A0 
+;Align: CODE in "lbl_dos_getdate" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./lshiu4" of "CMacro1232.lib"  at 63267 
+;Align: CODE in "./lshiu4" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "api_fs_fread" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 63349 
+;Align: CODE in "api_fs_fread" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./cvf2u2" of "CMacro1232.lib"  at 632D9 
+;Align: CODE in "./cvf2u2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "ServiceLoop.obj" at 63311 
 ;Align: CODE in "ServiceLoop.obj" with 0 
-;Locate: CODE in "./rshu4" of "CMacro1232.lib" at 629AB 
-;Align: CODE in "./rshu4" of "CMacro1232.lib" with 0 
-;Locate: CODE in "format" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62975 
-;Align: CODE in "format" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "lseek" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62A14 
-;Align: CODE in "lseek" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "lbl_dos_gettime" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 629E1 
-;Align: CODE in "lbl_dos_gettime" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./cvu2d4" of "CMacro1232.lib" at 62A79 
-;Align: CODE in "./cvu2d4" of "CMacro1232.lib" with 0 
-;Locate: CODE in "lfn_fd32_compare_fcb_names" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62A47 
-;Align: CODE in "lfn_fd32_compare_fcb_names" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./cvd4u2" of "CMacro1232.lib" at 62ADC 
-;Align: CODE in "./cvd4u2" of "CMacro1232.lib" with 0 
-;Locate: CODE in "./cvi1d4" of "CMacro1232.lib" at 62AAB 
-;Align: CODE in "./cvi1d4" of "CMacro1232.lib" with 0 
-;Locate: CODE in "./string/strspn" of "CLib1232.lib" at 62B3C 
-;Align: CODE in "./string/strspn" of "CLib1232.lib" with 0 
-;Locate: CODE in "./string/memcpy" of "CLib1232.lib" at 62B0D 
-;Align: CODE in "./string/memcpy" of "CLib1232.lib" with 0 
-;Locate: CODE in "api_fs_getftime" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62B6B 
-;Align: CODE in "api_fs_getftime" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "OS_USB_Host_ISR" of "2002_USBH_NOS_FAR_V6_11.lib" at 62C1D 
-;Align: CODE in "OS_USB_Host_ISR" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-;Locate: CODE in "api_fs_changedsk" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62B99 
-;Align: CODE in "api_fs_changedsk" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./string/strpbrk" of "CLib1232.lib" at 62BC5 
-;Align: CODE in "./string/strpbrk" of "CLib1232.lib" with 0 
-;Locate: CODE in "./__modi32_n" of "CMacro1232.lib" at 62BF1 
-;Align: CODE in "./__modi32_n" of "CMacro1232.lib" with 0 
-;Locate: CODE in "./__divi32_n" of "CMacro1232.lib" at 62C49 
-;Align: CODE in "./__divi32_n" of "CMacro1232.lib" with 0 
-;Locate: CODE in "SysOn2OffHook.obj" at 62C71 
+;Locate: CODE in "./rshu4" of "CMacro1232.lib"  at 633B7 
+;Align: CODE in "./rshu4" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "format" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 63381 
+;Align: CODE in "format" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "lseek" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 63420 
+;Align: CODE in "lseek" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "lbl_dos_gettime" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 633ED 
+;Align: CODE in "lbl_dos_gettime" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./cvu2d4" of "CMacro1232.lib"  at 63485 
+;Align: CODE in "./cvu2d4" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "lfn_fd32_compare_fcb_names" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 63453 
+;Align: CODE in "lfn_fd32_compare_fcb_names" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./cvd4u2" of "CMacro1232.lib"  at 634E8 
+;Align: CODE in "./cvd4u2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./cvi1d4" of "CMacro1232.lib"  at 634B7 
+;Align: CODE in "./cvi1d4" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./string/strspn" of "CLib1232.lib"  at 63548 
+;Align: CODE in "./string/strspn" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./string/memcpy" of "CLib1232.lib"  at 63519 
+;Align: CODE in "./string/memcpy" of "CLib1232.lib"  with 0 
+;Locate: CODE in "api_fs_getftime" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 63577 
+;Align: CODE in "api_fs_getftime" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "OS_USB_Host_ISR" of "2002_USBH_NOS_FAR_V6_11.lib"  at 63629 
+;Align: CODE in "OS_USB_Host_ISR" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: CODE in "api_fs_changedsk" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 635A5 
+;Align: CODE in "api_fs_changedsk" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./string/strpbrk" of "CLib1232.lib"  at 635D1 
+;Align: CODE in "./string/strpbrk" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./__modi32_n" of "CMacro1232.lib"  at 635FD 
+;Align: CODE in "./__modi32_n" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./__divi32_n" of "CMacro1232.lib"  at 63655 
+;Align: CODE in "./__divi32_n" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "SysOn2OffHook.obj" at 6367D 
 ;Align: CODE in "SysOn2OffHook.obj" with 0 
-;Locate: CODE in "SysIntorWaitMode.obj" at 62CBE 
+;Locate: CODE in "SysIntorWaitMode.obj" at 636CA 
 ;Align: CODE in "SysIntorWaitMode.obj" with 0 
-;Locate: CODE in "lbl_xlt_fd" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62CE4 
-;Align: CODE in "lbl_xlt_fd" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "sacm" of "GPL162002_RecordPen_v001.lib" at 62D09 
-;Align: CODE in "sacm" of "GPL162002_RecordPen_v001.lib" with 0 
-;Locate: CODE in "./string/strcmp" of "CLib1232.lib" at 62D50 
-;Align: CODE in "./string/strcmp" of "CLib1232.lib" with 0 
-;Locate: CODE in "./cvu1d4" of "CMacro1232.lib" at 62D73 
-;Align: CODE in "./cvu1d4" of "CMacro1232.lib" with 0 
-;Locate: CODE in "SysIntoHighSpeed.obj" at 62D96 
+;Locate: CODE in "lbl_xlt_fd" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 636F0 
+;Align: CODE in "lbl_xlt_fd" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "sacm" of "GPL162002_RecordPen_v001.lib"  at 63715 
+;Align: CODE in "sacm" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: CODE in "./string/strcmp" of "CLib1232.lib"  at 6375C 
+;Align: CODE in "./string/strcmp" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./cvu1d4" of "CMacro1232.lib"  at 6377F 
+;Align: CODE in "./cvu1d4" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "SysIntoHighSpeed.obj" at 637A2 
 ;Align: CODE in "SysIntoHighSpeed.obj" with 0 
-;Locate: CODE in "findnext" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62DB9 
-;Align: CODE in "findnext" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "close" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62D2D 
-;Align: CODE in "close" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "fsl_get_dpb" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62DDC 
-;Align: CODE in "fsl_get_dpb" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./string/memset" of "CLib1232.lib" at 62E1F 
-;Align: CODE in "./string/memset" of "CLib1232.lib" with 0 
-;Locate: CODE in "./string/strchr" of "CLib1232.lib" at 62E40 
-;Align: CODE in "./string/strchr" of "CLib1232.lib" with 0 
-;Locate: CODE in "SysOff2OnHook.obj" at 62E61 
+;Locate: CODE in "findnext" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 637C5 
+;Align: CODE in "findnext" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "close" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 63739 
+;Align: CODE in "close" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "fsl_get_dpb" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 637E8 
+;Align: CODE in "fsl_get_dpb" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./string/memset" of "CLib1232.lib"  at 6382B 
+;Align: CODE in "./string/memset" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./string/strchr" of "CLib1232.lib"  at 6384C 
+;Align: CODE in "./string/strchr" of "CLib1232.lib"  with 0 
+;Locate: CODE in "SysOff2OnHook.obj" at 6386D 
 ;Align: CODE in "SysOff2OnHook.obj" with 0 
-;Locate: CODE in "./libm/w_pow" of "CLib1232.lib" at 62E82 
-;Align: CODE in "./libm/w_pow" of "CLib1232.lib" with 0 
-;Locate: CODE in "devicemount" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62DFE 
-;Align: CODE in "devicemount" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "fsl_getdstart" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62EA3 
-;Align: CODE in "fsl_getdstart" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "api_fs_getfattr" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62EC3 
-;Align: CODE in "api_fs_getfattr" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "api_fs_uninit" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62EE2 
-;Align: CODE in "api_fs_uninit" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./string/strlen" of "CLib1232.lib" at 62F00 
-;Align: CODE in "./string/strlen" of "CLib1232.lib" with 0 
-;Locate: CODE in "getfserrcode" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62F1E 
-;Align: CODE in "getfserrcode" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "lbl_time_encode" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62F55 
-;Align: CODE in "lbl_time_encode" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./string/strcpy" of "CLib1232.lib" at 62F70 
-;Align: CODE in "./string/strcpy" of "CLib1232.lib" with 0 
-;Locate: CODE in "lbl_swap_deleted" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62F3A 
-;Align: CODE in "lbl_swap_deleted" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "lbl_next_cluster" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62F8B 
-;Align: CODE in "lbl_next_cluster" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "fsl_setdstart" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62FA5 
-;Align: CODE in "fsl_setdstart" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "ucBS_Hook.obj" at 62FBF 
+;Locate: CODE in "./libm/w_pow" of "CLib1232.lib"  at 6388E 
+;Align: CODE in "./libm/w_pow" of "CLib1232.lib"  with 0 
+;Locate: CODE in "devicemount" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 6380A 
+;Align: CODE in "devicemount" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "fsl_getdstart" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 638AF 
+;Align: CODE in "fsl_getdstart" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "api_fs_getfattr" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 638CF 
+;Align: CODE in "api_fs_getfattr" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "api_fs_uninit" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 638EE 
+;Align: CODE in "api_fs_uninit" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./string/strlen" of "CLib1232.lib"  at 6390C 
+;Align: CODE in "./string/strlen" of "CLib1232.lib"  with 0 
+;Locate: CODE in "getfserrcode" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 6392A 
+;Align: CODE in "getfserrcode" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "lbl_time_encode" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 63961 
+;Align: CODE in "lbl_time_encode" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./string/strcpy" of "CLib1232.lib"  at 6397C 
+;Align: CODE in "./string/strcpy" of "CLib1232.lib"  with 0 
+;Locate: CODE in "lbl_swap_deleted" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 63946 
+;Align: CODE in "lbl_swap_deleted" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "lbl_next_cluster" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 63997 
+;Align: CODE in "lbl_next_cluster" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "fsl_setdstart" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 639B1 
+;Align: CODE in "fsl_setdstart" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "ucBS_Hook.obj" at 639CB 
 ;Align: CODE in "ucBS_Hook.obj" with 0 
-;Locate: CODE in "DrvStruct.obj" at 62FD7 
+;Locate: CODE in "DrvStruct.obj" at 639E3 
 ;Align: CODE in "DrvStruct.obj" with 0 
-;Locate: CODE in "fsl_media_check" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 62FEF 
-;Align: CODE in "fsl_media_check" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "./__u2fd1bit" of "CMacro1232.lib" at 6301C 
-;Align: CODE in "./__u2fd1bit" of "CMacro1232.lib" with 0 
-;Locate: CODE in "fsl_dir_write" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 63032 
-;Align: CODE in "fsl_dir_write" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "libgloss.obj" at 63006 
+;Locate: CODE in "fsl_media_check" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 639FB 
+;Align: CODE in "fsl_media_check" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "./__u2fd1bit" of "CMacro1232.lib"  at 63A28 
+;Align: CODE in "./__u2fd1bit" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "fsl_dir_write" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 63A3E 
+;Align: CODE in "fsl_dir_write" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "libgloss.obj" at 63A12 
 ;Align: CODE in "libgloss.obj" with 0 
-;Locate: CODE in "./ctype/isspace" of "CLib1232.lib" at 4FFEB 
-;Align: CODE in "./ctype/isspace" of "CLib1232.lib" with 0 
-;Locate: CODE in "./__clz32" of "CMacro1232.lib" at 6305C 
-;Align: CODE in "./__clz32" of "CMacro1232.lib" with 0 
-;Locate: CODE in "./libm/wf_pow" of "CLib1232.lib" at 63070 
-;Align: CODE in "./libm/wf_pow" of "CLib1232.lib" with 0 
-;Locate: CODE in "./__rshu2_r" of "CMacro1232.lib" at 63048 
-;Align: CODE in "./__rshu2_r" of "CMacro1232.lib" with 0 
-;Locate: CODE in "./muliu2" of "CMacro1232.lib" at 63084 
-;Align: CODE in "./muliu2" of "CMacro1232.lib" with 0 
-;Locate: CODE in "lbl_xlt_fnp" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 63096 
-;Align: CODE in "lbl_xlt_fnp" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: CODE in "BodyInit.obj" at 630A7 
+;Locate: CODE in "./ctype/isspace" of "CLib1232.lib"  at 63A54 
+;Align: CODE in "./ctype/isspace" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./__clz32" of "CMacro1232.lib"  at 63A7D 
+;Align: CODE in "./__clz32" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./libm/wf_pow" of "CLib1232.lib"  at 63A91 
+;Align: CODE in "./libm/wf_pow" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./__rshu2_r" of "CMacro1232.lib"  at 63A69 
+;Align: CODE in "./__rshu2_r" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./muliu2" of "CMacro1232.lib"  at 63AA5 
+;Align: CODE in "./muliu2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "lbl_xlt_fnp" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 63AB7 
+;Align: CODE in "lbl_xlt_fnp" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: CODE in "BodyInit.obj" at 63AC8 
 ;Align: CODE in "BodyInit.obj" with 0 
-;Locate: CODE in "./libm/copy_sign" of "CLib1232.lib" at 630B7 
-;Align: CODE in "./libm/copy_sign" of "CLib1232.lib" with 0 
-;Locate: CODE in "./ctype/isdigit" of "CLib1232.lib" at 630C4 
-;Align: CODE in "./ctype/isdigit" of "CLib1232.lib" with 0 
-;Locate: CODE in "./libm/copysignf" of "CLib1232.lib" at 630DC 
-;Align: CODE in "./libm/copysignf" of "CLib1232.lib" with 0 
-;Locate: CODE in "./__clz16" of "CMacro1232.lib" at 630E7 
-;Align: CODE in "./__clz16" of "CMacro1232.lib" with 0 
-;Locate: CODE in "Space.obj" at 630D1 
+;Locate: CODE in "./libm/copy_sign" of "CLib1232.lib"  at 63AD8 
+;Align: CODE in "./libm/copy_sign" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./ctype/isdigit" of "CLib1232.lib"  at 63AE5 
+;Align: CODE in "./ctype/isdigit" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./libm/copysignf" of "CLib1232.lib"  at 63AF2 
+;Align: CODE in "./libm/copysignf" of "CLib1232.lib"  with 0 
+;Locate: CODE in "./__clz16" of "CMacro1232.lib"  at 63AFD 
+;Align: CODE in "./__clz16" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "Space.obj" at 3F7F5 
 ;Align: CODE in "Space.obj" with 0 
-;Locate: CODE in "./lshiu2" of "CMacro1232.lib" at 630FC 
-;Align: CODE in "./lshiu2" of "CMacro1232.lib" with 0 
-;Locate: CODE in "./__divi16_n" of "CMacro1232.lib" at 63106 
-;Align: CODE in "./__divi16_n" of "CMacro1232.lib" with 0 
-;Locate: CODE in "./rshu2" of "CMacro1232.lib" at 630F2 
-;Align: CODE in "./rshu2" of "CMacro1232.lib" with 0 
-;Locate: CODE in "./rshu1" of "CMacro1232.lib" at 63118 
-;Align: CODE in "./rshu1" of "CMacro1232.lib" with 0 
-;Locate: CODE in "Resource.obj" at 63120 
+;Locate: CODE in "./lshiu2" of "CMacro1232.lib"  at 63B12 
+;Align: CODE in "./lshiu2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./__divi16_n" of "CMacro1232.lib"  at 63B1C 
+;Align: CODE in "./__divi16_n" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./rshu2" of "CMacro1232.lib"  at 63B08 
+;Align: CODE in "./rshu2" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "./rshu1" of "CMacro1232.lib"  at 63B2E 
+;Align: CODE in "./rshu1" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "Resource.obj" at 63B36 
 ;Align: CODE in "Resource.obj" with 0 
-;Locate: CODE in "./lshiu1" of "CMacro1232.lib" at 63110 
-;Align: CODE in "./lshiu1" of "CMacro1232.lib" with 0 
-;Locate: CODE in "SysException.obj" at 63128 
+;Locate: CODE in "./lshiu1" of "CMacro1232.lib"  at 63B26 
+;Align: CODE in "./lshiu1" of "CMacro1232.lib"  with 0 
+;Locate: CODE in "SysException.obj" at 63B3E 
 ;Align: CODE in "SysException.obj" with 0 
-;Locate: DrvSDCSection in "SDC_DRV" of "GLB_GP-F_0203L_SD_0.0.2_test.lib" at 4F032 
-;Align: DrvSDCSection in "SDC_DRV" of "GLB_GP-F_0203L_SD_0.0.2_test.lib" with 0 
-;Locate: FP_USB_Code_ROM in "Flash_reprog_Drv.obj" at 522F1 
+;Locate: DrvSDCSection in "SDC_DRV" of "GLB_GP-F_0203L_SD_0.0.2_test.lib"  at 509B2 
+;Align: DrvSDCSection in "SDC_DRV" of "GLB_GP-F_0203L_SD_0.0.2_test.lib"  with 0 
+;Locate: FP_USB_Code_ROM in "Flash_reprog_Drv.obj" at 4F819 
 ;Align: FP_USB_Code_ROM in "Flash_reprog_Drv.obj" with 0 
-;Locate: LIB_FAT16_CODE in "basedrive" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 5B092 
-;Align: LIB_FAT16_CODE in "basedrive" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: NB_DATA in "startup.obj" at 65B71 
+;Locate: LIB_FAT16_CODE in "basedrive" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 5BA9B 
+;Align: LIB_FAT16_CODE in "basedrive" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: NB_DATA in "startup.obj" at 66595 
 ;Align: NB_DATA in "startup.obj" with 0 
-;Locate: NB_DATA in "uni_case" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 6665F 
-;Align: NB_DATA in "uni_case" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: NB_DATA in "mainLoop.obj" at 66B3D 
+;Locate: NB_DATA in "uni_case" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 67097 
+;Align: NB_DATA in "uni_case" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: NB_DATA in "mainLoop.obj" at 67575 
 ;Align: NB_DATA in "mainLoop.obj" with 0 
-;Locate: NB_DATA in "device.obj" at 66F11 
-;Align: NB_DATA in "device.obj" with 0 
-;Locate: NB_DATA in "audio.obj" at 6712E 
-;Align: NB_DATA in "audio.obj" with 0 
-;Locate: NB_DATA in "Inbox.obj" at 67320 
-;Align: NB_DATA in "Inbox.obj" with 0 
-;Locate: NB_DATA in "stats.obj" at 674CA 
-;Align: NB_DATA in "stats.obj" with 0 
-;Locate: NB_DATA in "files.obj" at 6765C 
-;Align: NB_DATA in "files.obj" with 0 
-;Locate: NB_DATA in "testPCB.obj" at 677EA 
+;Locate: NB_DATA in "testPCB.obj" at 67949 
 ;Align: NB_DATA in "testPCB.obj" with 0 
-;Locate: NB_DATA in "containers.obj" at 67925 
+;Locate: NB_DATA in "device.obj" at 67BA9 
+;Align: NB_DATA in "device.obj" with 0 
+;Locate: NB_DATA in "audio.obj" at 67DC6 
+;Align: NB_DATA in "audio.obj" with 0 
+;Locate: NB_DATA in "Inbox.obj" at 67FB8 
+;Align: NB_DATA in "Inbox.obj" with 0 
+;Locate: NB_DATA in "stats.obj" at 68162 
+;Align: NB_DATA in "stats.obj" with 0 
+;Locate: NB_DATA in "files.obj" at 682F4 
+;Align: NB_DATA in "files.obj" with 0 
+;Locate: NB_DATA in "containers.obj" at 68482 
 ;Align: NB_DATA in "containers.obj" with 0 
-;Locate: NB_DATA in "lfn_fd32_build_fcb_name" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 67A5B 
-;Align: NB_DATA in "lfn_fd32_build_fcb_name" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: NB_DATA in "lfn_fd32_gen_short_fname" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 67B16 
-;Align: NB_DATA in "lfn_fd32_gen_short_fname" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: NB_DATA in "parsing.obj" at 67BD0 
+;Locate: NB_DATA in "lfn_fd32_build_fcb_name" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 685B8 
+;Align: NB_DATA in "lfn_fd32_build_fcb_name" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: NB_DATA in "lfn_fd32_gen_short_fname" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 68673 
+;Align: NB_DATA in "lfn_fd32_gen_short_fname" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: NB_DATA in "parsing.obj" at 6872D 
 ;Align: NB_DATA in "parsing.obj" with 0 
-;Locate: NB_DATA in "d2d_copy.obj" at 67C88 
-;Align: NB_DATA in "d2d_copy.obj" with 0 
-;Locate: NB_DATA in "macro.obj" at 67D3B 
-;Align: NB_DATA in "macro.obj" with 0 
-;Locate: NB_DATA in "sys_counters.obj" at 67DDD 
-;Align: NB_DATA in "sys_counters.obj" with 0 
-;Locate: NB_DATA in "./libm/e_pow" of "CLib1232.lib" at 67E7A 
-;Align: NB_DATA in "./libm/e_pow" of "CLib1232.lib" with 0 
-;Locate: NB_DATA in "pkg_ops.obj" at 67EFE 
-;Align: NB_DATA in "pkg_ops.obj" with 0 
-;Locate: NB_DATA in "lists.obj" at 67F80 
-;Align: NB_DATA in "lists.obj" with 0 
-;Locate: NB_DATA in "app_exception.obj" at 67FF0 
-;Align: NB_DATA in "app_exception.obj" with 0 
-;Locate: NB_DATA in "SD_reprog.obj" at 68053 
-;Align: NB_DATA in "SD_reprog.obj" with 0 
-;Locate: NB_DATA in "util.obj" at 680B0 
-;Align: NB_DATA in "util.obj" with 0 
-;Locate: NB_DATA in "./libm/ef_pow" of "CLib1232.lib" at 680FD 
-;Align: NB_DATA in "./libm/ef_pow" of "CLib1232.lib" with 0 
-;Locate: NB_DATA in "USB_ID.obj" at 6813F 
-;Align: NB_DATA in "USB_ID.obj" with 0 
-;Locate: NB_DATA in "USB_Flash_reprog.obj" at 6817F 
-;Align: NB_DATA in "USB_Flash_reprog.obj" with 0 
-;Locate: NB_DATA in "SD_reprog_finish.obj" at 681BB 
-;Align: NB_DATA in "SD_reprog_finish.obj" with 0 
-;Locate: NB_DATA in "api_fat_format" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 681E9 
-;Align: NB_DATA in "api_fat_format" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: NB_DATA in "Space.obj" at 68213 
-;Align: NB_DATA in "Space.obj" with 0 
-;Locate: NB_DATA in "main.obj" at 68234 
-;Align: NB_DATA in "main.obj" with 0 
-;Locate: NB_DATA in "SystemIntoUSB.obj" at 68255 
+;Locate: NB_DATA in "SystemIntoUSB.obj" at 687E5 
 ;Align: NB_DATA in "SystemIntoUSB.obj" with 0 
-;Locate: NB_DATA in "api_fs_sfnchangedir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 68273 
-;Align: NB_DATA in "api_fs_sfnchangedir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: NB_DATA in "SD.obj" at 6828B 
+;Locate: NB_DATA in "d2d_copy.obj" at 6889C 
+;Align: NB_DATA in "d2d_copy.obj" with 0 
+;Locate: NB_DATA in "macro.obj" at 6894F 
+;Align: NB_DATA in "macro.obj" with 0 
+;Locate: NB_DATA in "sys_counters.obj" at 689F1 
+;Align: NB_DATA in "sys_counters.obj" with 0 
+;Locate: NB_DATA in "./libm/e_pow" of "CLib1232.lib"  at 68A8E 
+;Align: NB_DATA in "./libm/e_pow" of "CLib1232.lib"  with 0 
+;Locate: NB_DATA in "pkg_ops.obj" at 68B12 
+;Align: NB_DATA in "pkg_ops.obj" with 0 
+;Locate: NB_DATA in "lists.obj" at 68B94 
+;Align: NB_DATA in "lists.obj" with 0 
+;Locate: NB_DATA in "app_exception.obj" at 68C04 
+;Align: NB_DATA in "app_exception.obj" with 0 
+;Locate: NB_DATA in "SD_reprog.obj" at 68C67 
+;Align: NB_DATA in "SD_reprog.obj" with 0 
+;Locate: NB_DATA in "util.obj" at 68CC4 
+;Align: NB_DATA in "util.obj" with 0 
+;Locate: NB_DATA in "./libm/ef_pow" of "CLib1232.lib"  at 68D11 
+;Align: NB_DATA in "./libm/ef_pow" of "CLib1232.lib"  with 0 
+;Locate: NB_DATA in "USB_ID.obj" at 68D53 
+;Align: NB_DATA in "USB_ID.obj" with 0 
+;Locate: NB_DATA in "USB_Flash_reprog.obj" at 68D93 
+;Align: NB_DATA in "USB_Flash_reprog.obj" with 0 
+;Locate: NB_DATA in "SD_reprog_finish.obj" at 68DCF 
+;Align: NB_DATA in "SD_reprog_finish.obj" with 0 
+;Locate: NB_DATA in "api_fat_format" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 68DFD 
+;Align: NB_DATA in "api_fat_format" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: NB_DATA in "Space.obj" at 68E27 
+;Align: NB_DATA in "Space.obj" with 0 
+;Locate: NB_DATA in "main.obj" at 68E48 
+;Align: NB_DATA in "main.obj" with 0 
+;Locate: NB_DATA in "api_fs_sfnchangedir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 68E69 
+;Align: NB_DATA in "api_fs_sfnchangedir" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: NB_DATA in "SD.obj" at 68E81 
 ;Align: NB_DATA in "SD.obj" with 0 
-;Locate: NB_DATA in "nls_ascii.obj" at 6829E 
+;Locate: NB_DATA in "nls_ascii.obj" at 68E94 
 ;Align: NB_DATA in "nls_ascii.obj" with 0 
-;Locate: NB_DATA in "lbl_misc" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 682AF 
-;Align: NB_DATA in "lbl_misc" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: NB_DATA in "./libm/s_scalbn" of "CLib1232.lib" at 682BF 
-;Align: NB_DATA in "./libm/s_scalbn" of "CLib1232.lib" with 0 
-;Locate: NB_DATA in "fsl_ParseDosName" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 682CF 
-;Align: NB_DATA in "fsl_ParseDosName" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: NB_DATA in "./libm/e_sqrt" of "CLib1232.lib" at 682DE 
-;Align: NB_DATA in "./libm/e_sqrt" of "CLib1232.lib" with 0 
-;Locate: NB_DATA in "./libm/sf_scalbn" of "CLib1232.lib" at 682E6 
-;Align: NB_DATA in "./libm/sf_scalbn" of "CLib1232.lib" with 0 
-;Locate: NB_DATA in "api_fs_init" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 682EE 
-;Align: NB_DATA in "api_fs_init" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: NB_DATA in "lfn_descend_path" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 682F3 
-;Align: NB_DATA in "lfn_descend_path" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: NB_DATA in "./libm/ef_sqrt" of "CLib1232.lib" at 682F8 
-;Align: NB_DATA in "./libm/ef_sqrt" of "CLib1232.lib" with 0 
-;Locate: NB_DATA in "api_fs_lfnfindnext" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 682FC 
-;Align: NB_DATA in "api_fs_lfnfindnext" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: NB_DATA in "api_fs_lfncd" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 36FFE 
-;Align: NB_DATA in "api_fs_lfncd" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: NB_DATA in "lbl_truename" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" at 68300 
-;Align: NB_DATA in "lbl_truename" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: SACM_API_ROM_BLOCK in "SACM_API" of "GPL162002_RecordPen_v001.lib" at 590FE 
-;Align: SACM_API_ROM_BLOCK in "SACM_API" of "GPL162002_RecordPen_v001.lib" with 0 
-;Locate: SACM_DECODE_ROM_BLOCK in "SACM_Decode" of "GPL162002_RecordPen_v001.lib" at 5E5C0 
-;Align: SACM_DECODE_ROM_BLOCK in "SACM_Decode" of "GPL162002_RecordPen_v001.lib" with 0 
-;Locate: SACM_ISR_Service_Section in "SACM_API" of "GPL162002_RecordPen_v001.lib" at 5CA41 
-;Align: SACM_ISR_Service_Section in "SACM_API" of "GPL162002_RecordPen_v001.lib" with 0 
-;Locate: SACM_Mask_InitCode in "Snd_Init" of "GPL162002_RecordPen_v001.lib" at 62C98 
-;Align: SACM_Mask_InitCode in "Snd_Init" of "GPL162002_RecordPen_v001.lib" with 0 
-;Locate: SACM_ROM_Block in "sacm" of "GPL162002_RecordPen_v001.lib" at 53F33 
-;Align: SACM_ROM_Block in "sacm" of "GPL162002_RecordPen_v001.lib" with 0 
-;Locate: SCSI_Table_Setion in "SCSI_Table.obj" at 6850D 
+;Locate: NB_DATA in "lbl_misc" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 68EA5 
+;Align: NB_DATA in "lbl_misc" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: NB_DATA in "./libm/s_scalbn" of "CLib1232.lib"  at 68EB5 
+;Align: NB_DATA in "./libm/s_scalbn" of "CLib1232.lib"  with 0 
+;Locate: NB_DATA in "fsl_ParseDosName" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 68EC5 
+;Align: NB_DATA in "fsl_ParseDosName" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: NB_DATA in "./libm/e_sqrt" of "CLib1232.lib"  at 68ED4 
+;Align: NB_DATA in "./libm/e_sqrt" of "CLib1232.lib"  with 0 
+;Locate: NB_DATA in "./libm/sf_scalbn" of "CLib1232.lib"  at 68EDC 
+;Align: NB_DATA in "./libm/sf_scalbn" of "CLib1232.lib"  with 0 
+;Locate: NB_DATA in "api_fs_init" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 68EE4 
+;Align: NB_DATA in "api_fs_init" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: NB_DATA in "lfn_descend_path" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 68EE9 
+;Align: NB_DATA in "lfn_descend_path" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: NB_DATA in "./libm/ef_sqrt" of "CLib1232.lib"  at 68EEE 
+;Align: NB_DATA in "./libm/ef_sqrt" of "CLib1232.lib"  with 0 
+;Locate: NB_DATA in "api_fs_lfnfindnext" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 68EF2 
+;Align: NB_DATA in "api_fs_lfnfindnext" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: NB_DATA in "api_fs_lfncd" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 36FFE 
+;Align: NB_DATA in "api_fs_lfncd" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: NB_DATA in "lbl_truename" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  at 68EF6 
+;Align: NB_DATA in "lbl_truename" of "GLB_GP-FS_02030405L_FS_3.0.1.lib"  with 0 
+;Locate: SACM_API_ROM_BLOCK in "SACM_API" of "GPL162002_RecordPen_v001.lib"  at 59B07 
+;Align: SACM_API_ROM_BLOCK in "SACM_API" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: SACM_DECODE_ROM_BLOCK in "SACM_Decode" of "GPL162002_RecordPen_v001.lib"  at 5EFC9 
+;Align: SACM_DECODE_ROM_BLOCK in "SACM_Decode" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: SACM_ISR_Service_Section in "SACM_API" of "GPL162002_RecordPen_v001.lib"  at 5D44A 
+;Align: SACM_ISR_Service_Section in "SACM_API" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: SACM_Mask_InitCode in "Snd_Init" of "GPL162002_RecordPen_v001.lib"  at 636A4 
+;Align: SACM_Mask_InitCode in "Snd_Init" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: SACM_ROM_Block in "sacm" of "GPL162002_RecordPen_v001.lib"  at 5481F 
+;Align: SACM_ROM_Block in "sacm" of "GPL162002_RecordPen_v001.lib"  with 0 
+;Locate: SCSI_Table_Setion in "SCSI_Table.obj" at 69103 
 ;Align: SCSI_Table_Setion in "SCSI_Table.obj" with 0 
-;Locate: SCSIDataSection in "OS_USB_Host_SCSI_Data" of "2002_USBH_NOS_FAR_V6_11.lib" at 589C8 
-;Align: SCSIDataSection in "OS_USB_Host_SCSI_Data" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-;Locate: System_CODE in "IOKeyScan.obj" at 61991 
+;Locate: SCSIDataSection in "OS_USB_Host_SCSI_Data" of "2002_USBH_NOS_FAR_V6_11.lib"  at 593D1 
+;Align: SCSIDataSection in "OS_USB_Host_SCSI_Data" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: System_CODE in "IOKeyScan.obj" at 623B5 
 ;Align: System_CODE in "IOKeyScan.obj" with 0 
-;Locate: USB_Code_ROM in "USBD_Drv.obj" at 52A8A 
+;Locate: USB_Code_ROM in "USBD_Drv.obj" at 52D45 
 ;Align: USB_Code_ROM in "USBD_Drv.obj" with 0 
-;Locate: USB_Host_Initial_Section in "OS_USB_Host_Initial" of "2002_USBH_NOS_FAR_V6_11.lib" at 5FCF5 
-;Align: USB_Host_Initial_Section in "OS_USB_Host_Initial" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-;Locate: USB_Host_Standard_Command_Sectio in "OS_USB_Host_Standard_CMD" of "2002_USBH_NOS_FAR_V6_11.lib" at 5BBA2 
-;Align: USB_Host_Standard_Command_Sectio in "OS_USB_Host_Standard_CMD" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-;Locate: User_SACM in "user_sacm" of "GPL162002_RecordPen_v001.lib" at 5FDE5 
-;Align: User_SACM in "user_sacm" of "GPL162002_RecordPen_v001.lib" with 0 
+;Locate: USB_Host_Initial_Section in "OS_USB_Host_Initial" of "2002_USBH_NOS_FAR_V6_11.lib"  at 60760 
+;Align: USB_Host_Initial_Section in "OS_USB_Host_Initial" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: USB_Host_Standard_Command_Sectio in "OS_USB_Host_Standard_CMD" of "2002_USBH_NOS_FAR_V6_11.lib"  at 5C5AB 
+;Align: USB_Host_Standard_Command_Sectio in "OS_USB_Host_Standard_CMD" of "2002_USBH_NOS_FAR_V6_11.lib"  with 0 
+;Locate: User_SACM in "user_sacm" of "GPL162002_RecordPen_v001.lib"  at 60850 
+;Align: User_SACM in "user_sacm" of "GPL162002_RecordPen_v001.lib"  with 0 
 ;Locate: __sn_init_table at F878 
-;Align: IRAM in "device.obj" with 0 
-;Locate: IRAM in "SD_reprog_finish.obj" at 65913 linkat 5866 
-;Align: IRAM in "SD_reprog_finish.obj" with 0 
-;Locate: IRAM in "DrvSDCInitial" of "GLB_GP-F_0203L_SD_0.0.2_test.lib" at 65914 linkat 5867 
-;Align: IRAM in "DrvSDCInitial" of "GLB_GP-F_0203L_SD_0.0.2_test.lib" with 0 
-;Locate: IRAM in "app_exception.obj" at 65915 linkat 5868 
-;Align: IRAM in "app_exception.obj" with 0 
-;Locate: IRAM in "OS_USB_Host_Control" of "2002_USBH_NOS_FAR_V6_11.lib" at 65916 linkat 5869 
-;Align: IRAM in "OS_USB_Host_Control" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-;Locate: IRAM in "Space.obj" at 650F6 linkat 5049 
-;Align: IRAM in "Space.obj" with 0 
-;Locate: IRAM in "audio.obj" at 658CB linkat 581E 
-;Align: IRAM in "audio.obj" with 0 
-;Locate: IRAM in "Inbox.obj" at 658F3 linkat 5846 
-;Align: IRAM in "Inbox.obj" with 0 
-;Locate: IRAM in "OS_USB_Host_SCSI_Data" of "2002_USBH_NOS_FAR_V6_11.lib" at 65902 linkat 5855 
-;Align: IRAM in "OS_USB_Host_SCSI_Data" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-;Locate: RAM in "fsglobalvar" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" 
-;Align: RAM in "fsglobalvar" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: RAM in "user_sacm" of "GPL162002_RecordPen_v001.lib" 
-;Align: RAM in "user_sacm" of "GPL162002_RecordPen_v001.lib" with 0 
-;Locate: RAM in "lbl_truename" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" 
-;Align: RAM in "lbl_truename" of "GLB_GP-FS_02030405L_FS_3.0.1.lib" with 0 
-;Locate: RAM in "MemPackCopy.obj" 
-;Align: RAM in "MemPackCopy.obj" with 0 
-;Locate: IRAM in "DrvUSBHMSDCInitial" of "2002_USBH_NOS_FAR_V6_11.lib" at 6590B linkat 585E 
-;Align: IRAM in "DrvUSBHMSDCInitial" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-;Locate: IRAM in "DrvUSBHLUNInit" of "2002_USBH_NOS_FAR_V6_11.lib" at 65910 linkat 5863 
-;Align: IRAM in "DrvUSBHLUNInit" of "2002_USBH_NOS_FAR_V6_11.lib" with 0 
-;Locate: IRAM in "SD_reprog.obj" at 65911 linkat 5864 
-;Align: IRAM in "SD_reprog.obj" with 0 
-;Locate: IRAM in "device.obj" at 65912 linkat 5865 
-Output: "System.S37"

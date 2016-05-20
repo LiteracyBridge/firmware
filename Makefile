@@ -1,6 +1,6 @@
 #####################################################################
 #																	 
-#	Created by u'nSP IDE		15:27:35	03/11/16
+#	Created by u'nSP IDE		12:57:00	05/20/16
 #
 #####################################################################
 
@@ -205,7 +205,7 @@ OBJFILES	= \
 "$(OUTDIR)\pkg_ops.obj": "$(OUTDIR)\pkg_ops.asm"
 	$(AS) $(CASFLAGS) $(INCLUDES) -o "$(OUTDIR)\pkg_ops.obj" "$(OUTDIR)\pkg_ops.asm" 
 
-"$(OUTDIR)\startup.asm": "C:\Users\bill\workspace\firmware\Application\TalkingBook\startup.c" ".\Application\TalkingBook\Include\talkingbook.h" ".\Application\TalkingBook\Include\files.h" ".\Application\TalkingBook\Include\device.h" ".\Application\TalkingBook\Include\containers.h" ".\Application\TalkingBook\Include\parsing.h" ".\Application\TalkingBook\Include\macro.h" ".\Application\TalkingBook\Include\sys_counters.h" ".\Application\TalkingBook\Include\Inbox.h" ".\Application\TalkingBook\Include\audio.h" ".\Application\TalkingBook\Include\SD_reprog.h" ".\Application\TalkingBook\Include\mainLoop.h" ".\Application\TalkingBook\Include\filestats.h" ".\Application\TalkingBook\Include\d2d_copy.h" ".\Application\TalkingBook\Include\startup.h" ".\Application\TalkingBook\Include\util.h" ".\Application\TalkingBook\Include\lists.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\ctype.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\_ansi.h" "Application/Talkingbook/Include/filestats.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\string.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\stddef.h" 
+"$(OUTDIR)\startup.asm": "C:\Users\bill\workspace\firmware\Application\TalkingBook\startup.c" ".\Application\TalkingBook\Include\talkingbook.h" ".\Application\TalkingBook\Include\files.h" ".\Application\TalkingBook\Include\filestats.h" ".\Application\TalkingBook\Include\device.h" ".\Application\TalkingBook\Include\containers.h" ".\Application\TalkingBook\Include\parsing.h" ".\Application\TalkingBook\Include\macro.h" ".\Application\TalkingBook\Include\sys_counters.h" ".\Application\TalkingBook\Include\Inbox.h" ".\Application\TalkingBook\Include\audio.h" ".\Application\TalkingBook\Include\SD_reprog.h" ".\Application\TalkingBook\Include\mainLoop.h" ".\Application\TalkingBook\Include\d2d_copy.h" ".\Application\TalkingBook\Include\startup.h" ".\Application\TalkingBook\Include\util.h" ".\Application\TalkingBook\Include\lists.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\ctype.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\_ansi.h" "Application/Talkingbook/Include/filestats.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\string.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\stddef.h" 
 	set PATH="$(APPDIR)\toolchain\";%PATH% & \
 	$(CC) $(CFLAGS) -o "$(OUTDIR)/startup.asm" "C:/Users/bill/workspace/firmware/Application/TalkingBook/startup.c" 
 
@@ -226,7 +226,7 @@ OBJFILES	= \
 "$(OUTDIR)\timeline.obj": "$(OUTDIR)\timeline.asm"
 	$(AS) $(CASFLAGS) $(INCLUDES) -o "$(OUTDIR)\timeline.obj" "$(OUTDIR)\timeline.asm" 
 
-"$(OUTDIR)\util.asm": "C:\Users\bill\workspace\firmware\Application\TalkingBook\util.c" ".\Application\TalkingBook\Include\app_exception.h" ".\Application\TalkingBook\Include\device.h" ".\Application\TalkingBook\Include\files.h" ".\Component\Include\FS\typedef.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\string.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\stddef.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\ctype.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\_ansi.h" "Application/Talkingbook/Include/filestats.h" 
+"$(OUTDIR)\util.asm": "C:\Users\bill\workspace\firmware\Application\TalkingBook\util.c" ".\Application\TalkingBook\Include\app_exception.h" ".\Application\TalkingBook\Include\device.h" ".\Application\TalkingBook\Include\files.h" ".\Component\Include\FS\typedef.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\string.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\stddef.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\ctype.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\_ansi.h" "Application/TalkingBook/Include/util.h" "Application/Talkingbook/Include/filestats.h" 
 	set PATH="$(APPDIR)\toolchain\";%PATH% & \
 	$(CC) $(CFLAGS) -o "$(OUTDIR)/util.asm" "C:/Users/bill/workspace/firmware/Application/TalkingBook/util.c" 
 
@@ -374,7 +374,7 @@ OBJFILES	= \
 "$(OUTDIR)\PowerOnOff.obj": "C:\Users\bill\workspace\firmware\System\PowerOnOff.asm" 
 	$(AS) $(ASFLAGS) $(INCLUDES) -o "$(OUTDIR)\PowerOnOff.obj" "C:\Users\bill\workspace\firmware\System\PowerOnOff.asm" 
 
-"$(OUTDIR)\main.asm": "C:\Users\bill\workspace\firmware\main.c" ".\system\include\system_head.h" ".\driver\include\driver_head.h" ".\component\include\component_head.h" ".\Application\TalkingBook\Include\talkingbook.h" ".\Application\TalkingBook\Include\startup.h" ".\Application\TalkingBook\Include\files.h" ".\Application\TalkingBook\Include\device.h" ".\Reprog\USB_Flash_reprog.h" ".\Application\TalkingBook\Include\util.h" "Application/Talkingbook/Include/filestats.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\string.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\stddef.h" 
+"$(OUTDIR)\main.asm": "C:\Users\bill\workspace\firmware\main.c" ".\system\include\system_head.h" ".\driver\include\driver_head.h" ".\component\include\component_head.h" ".\Application\TalkingBook\Include\talkingbook.h" ".\Application\TalkingBook\Include\startup.h" ".\Application\TalkingBook\Include\files.h" ".\Application\TalkingBook\Include\device.h" ".\Application\TalkingBook\Include\util.h" ".\Reprog\USB_Flash_reprog.h" "Application/Talkingbook/Include/filestats.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\string.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\stddef.h" 
 	set PATH="$(APPDIR)\toolchain\";%PATH% & \
 	$(CC) $(CFLAGS) -o "$(OUTDIR)/main.asm" "C:/Users/bill/workspace/firmware/main.c" 
 
@@ -453,7 +453,7 @@ OBJFILES	= \
 "$(OUTDIR)\Space.obj": "$(OUTDIR)\Space.asm"
 	$(AS) $(CASFLAGS) $(INCLUDES) -o "$(OUTDIR)\Space.obj" "$(OUTDIR)\Space.asm" 
 
-"$(OUTDIR)\testPCB.asm": "C:\Users\bill\workspace\firmware\testPCB.c" ".\system\include\system_head.h" ".\driver\include\driver_head.h" ".\component\include\component_head.h" ".\Application\TalkingBook\Include\talkingbook.h" ".\Application\TalkingBook\Include\files.h" ".\Application\TalkingBook\Include\device.h" ".\Application\TalkingBook\Include\audio.h" ".\Application\TalkingBook\Include\SD_reprog.h" ".\Application\TalkingBook\Include\startup.h" ".\Application\TalkingBook\Include\util.h" ".\Application\TalkingBook\Include\containers.h" ".\Application\TalkingBook\Include\lists.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\string.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\stddef.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\errno.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\sys\errno.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\sys/reent.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\_ansi.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\machine\_types.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\assert.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\limits.h" "Application/Talkingbook/Include/filestats.h" 
+"$(OUTDIR)\testPCB.asm": "C:\Users\bill\workspace\firmware\testPCB.c" ".\system\include\system_head.h" ".\driver\include\driver_head.h" ".\component\include\component_head.h" ".\Application\TalkingBook\Include\talkingbook.h" ".\Application\TalkingBook\Include\files.h" ".\Application\TalkingBook\Include\device.h" ".\Application\TalkingBook\Include\audio.h" ".\Application\TalkingBook\Include\SD_reprog.h" ".\Application\TalkingBook\Include\startup.h" ".\Application\TalkingBook\Include\filestats.h" ".\Application\TalkingBook\Include\util.h" ".\Application\TalkingBook\Include\containers.h" ".\Application\TalkingBook\Include\lists.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\string.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\stddef.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\errno.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\sys\errno.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\sys/reent.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\_ansi.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\machine\_types.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\assert.h" "C:\Generalplus\unSPIDE 3.0.5\library\include\limits.h" "Application/Talkingbook/Include/filestats.h" 
 	set PATH="$(APPDIR)\toolchain\";%PATH% & \
 	$(CC) $(CFLAGS) -o "$(OUTDIR)/testPCB.asm" "C:/Users/bill/workspace/firmware/testPCB.c" 
 

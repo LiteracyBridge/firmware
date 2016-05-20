@@ -824,21 +824,28 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=.\Component/Include/Component_head.h
+SOURCE=Component/Include/Component_head.h
 USEPARAM=FALSE
 PARAM=
 ID=
-EXPORT=0
+EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=.\Application/TalkingBook/Include/device.h
+SOURCE=Application/TalkingBook/Include/device.h
 USEPARAM=FALSE
 PARAM=
 ID=
-EXPORT=0
+EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=.\application/talkingbook/include/talkingbook.h
+SOURCE=application/talkingbook/include/talkingbook.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Application/TalkingBook/Include/util.h
 USEPARAM=FALSE
 PARAM=
 ID=
@@ -1665,21 +1672,28 @@ ID=
 EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=.\Component/Include/Component_head.h
+SOURCE=Component/Include/Component_head.h
 USEPARAM=FALSE
 PARAM=
 ID=
-EXPORT=0
+EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=.\Application/TalkingBook/Include/device.h
+SOURCE=Application/TalkingBook/Include/device.h
 USEPARAM=FALSE
 PARAM=
 ID=
-EXPORT=0
+EXPORT=3
 # End Source File
 # Begin Source File
-SOURCE=.\application/talkingbook/include/talkingbook.h
+SOURCE=application/talkingbook/include/talkingbook.h
+USEPARAM=FALSE
+PARAM=
+ID=
+EXPORT=3
+# End Source File
+# Begin Source File
+SOURCE=.\Application/TalkingBook/Include/util.h
 USEPARAM=FALSE
 PARAM=
 ID=
