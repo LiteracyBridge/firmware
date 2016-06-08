@@ -19,6 +19,7 @@
 #include "Include/d2d_copy.h"
 #include "Include/startup.h"
 #include "Include/mainLoop.h"
+#include "Include/util.h"
 #include <ctype.h>
 
 extern void selfTest(void);
@@ -341,6 +342,8 @@ void startUp(unsigned int bootType) {
         logStringRTCOptional((char *)"Will perform self tests.", ASAP, LOG_ALWAYS, 0);
         performSelfTests = 1;
     }
+
+    setSDVolumeSerial();
 
 	// confirm systemData structure in NORFlash matches latest version in this firmware (NOR_STRUCT_ID_SYSTEM should increment for any change in struct)
 	if (ptrsCounts.systemData->structType != NOR_STRUCT_ID_SYSTEM) {

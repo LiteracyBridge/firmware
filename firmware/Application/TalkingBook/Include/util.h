@@ -42,4 +42,6 @@ extern char* trim(char *);
 extern unsigned long rand(void);
 extern void initRandomNG(void);
 
+extern int setSDVolumeSerial();
+
 #endif
