@@ -6,6 +6,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <Application/TalkingBook/Include/util.h>
+#include <Application/TalkingBook/Include/sys_counters.h>
+#include <Application/TalkingBook/Include/audio.h>
 #include "./System/Include/System/GPL162002.h"
 #include "Include/device.h"
 #include "Include/files.h"
@@ -63,12 +65,19 @@ unsigned int compressTime (unsigned long uncompressedTime, int iBitsOfPrecision)
 }
 
 int lower (int c) {
-	if (c >= 'A' && c <= 'Z')
-		return c + 'a' - 'A';
-	else
-		return c;
+    if (c >= 'A' && c <= 'Z')
+        return c + 'a' - 'A';
+    else
+        return c;
 }
-	
+
+int upper (int c) {
+    if (c >= 'a' && c <= 'z')
+        return c + 'A' - 'a';
+    else
+        return c;
+}
+
 int strToInt (char *str) {
 	//todo: flag when NaN
 	int i;
@@ -418,16 +427,27 @@ char *trim(char *string) {
 
 #define TARGET_VOLUME_SERIAL 0x9285f050
 #define MBR_PARTITION_TYPE_OFFSET (0x1be + 4)    // offset of partition type
-#define MBR_PARTITION_SECTOR_OFFSET 454     // UINT32, count of sectors before partition
+#define MBR_PARTITION_SECTOR_OFFSET (0x1be + 8)  // UINT32, count of sectors before partition
 #define MBR_SIGNATURE_OFFSET 0x1fe          // offset of MBR signature in sector
+
 #define MBR_FAT32_PARTITION_CODE 0x0b
 #define MBR_SIGNATURE 0xaa55                // on disk, .. .. 55 aa
 
 
-#define FAT32_VOLUME_SERIAL_OFFSET 0x43     // Starting word for Volume Serial. Note: starts in high octet of the word.
-#define FAT32_SIGNATURE_OFFSET 0x52         // Starting word for "FAT32 "
-#define FAT32_LABEL_OFFSET 0x47             // Word where the label starts; starts in the high octet of the word.
+#define FAT32_RESERVED_SECTORS_OFFSET 0x0e  // Word with count of reserved sectors. Usually but not always 0x20.
+#define FAT32_NUMBER_OF_FATS_OFFSET 0x10    // Byte with count of fats, almost always 2
+#define FAT32_SECTORS_PER_FAT_OFFSET 0x24   // Dword with count of sectors per fat.
+#define FAT32_VOLUME_SERIAL_OFFSET 0x43     // Offset of dword (32-bit) Volume Serial.
+#define FAT32_FAT32_STR_OFFSET 0x52         // Starting of literal string "FAT32 "
+#define FAT32_FAT32_STR_LENGTH 5            // It should actually be longer, but sometimes it is padded with ' ', sometimes with nul.
+#define FAT32_LABEL_OFFSET 0x47             // Byte offset where the label starts
 #define FAT32_LABEL_LENGTH 11               // 11 characters long
+#define FAT32_SIGNATURE_OFFSET 0x1fe        // Word with 0xaa55 (on disk, .. .. 55 aa)
+
+#define FAT32_FAT32_STR "FAT32"             // Vs, say, "FAT" or "NTFS"
+#define FAT32_SIGNATURE 0xaa55              // on disk, .. .. 55 aa
+
+#define FAT32_DIRENT_ATTR_OFFSET 0x0b       // Byte with file attributes
 
 #define FAT32_DUPLICATE_BOOT_SECTOR_OFFSET 6    // Sectors offset to the duplicate boot sector
 
@@ -448,7 +468,7 @@ extern INT16 SD_WriteSector(UINT32 blkno , UINT16 blkcnt ,  UINT32 buf);
  * @return the value at the byte offset. Note that the type is UINT16, because that is what it
  *   really is (UINT8 is typedef'ed to unsigned int, AKA UINT16).
  */
-UINT16 getSdUI8(int byteOffset) {
+static UINT16 getSdUI8(int byteOffset) {
     int wordIndex = byteOffset >> 1;
     int isHighByte = byteOffset & 1; // odd addresses are at high byte
     UINT16 val = SDBuffer[wordIndex];
@@ -460,14 +480,14 @@ UINT16 getSdUI8(int byteOffset) {
 /**
  * Read a UINT16 by reading the low and high UINT8s.
  */
-UINT16 getSdUI16(int byteOffset) {
+static UINT16 getSdUI16(int byteOffset) {
     UINT16 result = getSdUI8(byteOffset) | (getSdUI8(byteOffset + 1) << 8);
     return result;
 }
 /**
  * Read a UINT32 by reading the low and high UINT16s.
  */
-UINT32 getSdUI32(int byteOffset) {
+static UINT32 getSdUI32(int byteOffset) {
     UINT32 result = (UINT32)(getSdUI16(byteOffset)) | (((UINT32) getSdUI16(byteOffset + 2)) << 16);
     return result;
 }
@@ -475,7 +495,7 @@ UINT32 getSdUI32(int byteOffset) {
  * Read a string from the SD buffer. The SD buffer's strings are in ASCII, while the GP chip
  * uses 16-bit characters. Deals with the conversion. No sign extension is performed.
  */
-void getSdChars(int byteOffset, int numChars, char *buffer) {
+static void getSdChars(int byteOffset, int numChars, char *buffer) {
     while (numChars-- > 0) {
         *buffer++ = getSdUI8(byteOffset++);
     }
@@ -486,7 +506,7 @@ void getSdChars(int byteOffset, int numChars, char *buffer) {
  * @param byteOffset - the byte (8-bits) offset in the SD buffer.
  * @param value - the 8-bit value to be written.
  */
-void putSdUI8(int byteOffset, UINT8 value) {
+static void putSdUI8(int byteOffset, UINT8 value) {
     int wordIndex = byteOffset >> 1;
     int isHighByte = byteOffset & 1; // odd addresses are at high byte
     UINT16 val = SDBuffer[wordIndex];
@@ -500,35 +520,33 @@ void putSdUI8(int byteOffset, UINT8 value) {
 /**
  * Writes a UINT16 by writing the low and high UINT8s.
  */
-void putSdUI16(int byteOffset, UINT16 value) {
+static void putSdUI16(int byteOffset, UINT16 value) {
     putSdUI8(byteOffset, (UINT8) (value & 0xff));
     putSdUI8(byteOffset + 1, (UINT8) ((value >> 8) & 0xff));
 }
 /**
  * Writes a UINT32 by writing the low and high UINT16s.
  */
-void putSdUI32(int byteOffset, UINT32 value) {
+static void putSdUI32(int byteOffset, UINT32 value) {
     putSdUI16(byteOffset, (UINT16) (value & 0xffff));
     putSdUI16(byteOffset + 2, (UINT16) ((value >> 16) & 0xffff));
 }
-// If we ever need to write a string back to the SD buffer, here it is.
 /**
  * Writes a string to the SD buffer. Strings in the SD buffer are ASCII, while strings
  * to the GP chip are 16-bit values.  Note that if any high bits are silently ignored.
- * /
-void putSdChars(int byteOffset, int numChars, char *buffer) {
+ */
+static void putSdChars(int byteOffset, int numChars, char *buffer) {
     while (numChars-- > 0) {
         putSdUI8(byteOffset++, *buffer++);
     }
 }
-*/
 
 /**
  * Reads a sector from the SD card, into a global buffer, SDBuffer.
  *
  * @return 0 if OK, otherwise an undocumented error code.
  */
-INT16 readSector(UINT32 sector) {
+static INT16 readSector(UINT32 sector) {
     INT16 ret = 0;
     if (sector != curSector) {
         ret = SD_ReadSector(sector, 1, (UINT32)SDBuffer);
@@ -546,7 +564,7 @@ INT16 readSector(UINT32 sector) {
  *
  * @return 0 if OK, otherwise an undocumented error code.
  */
-INT16 writeSector() {
+static INT16 writeSector() {
     INT16 ret = -1;
     if (curSector != -1) {
         ret = SD_WriteSector(curSector, 1, (UINT32) SDBuffer);
@@ -559,10 +577,10 @@ INT16 writeSector() {
  *
  * @return The boot sector address, or 0 if it can not be determined.
  */
-UINT32 findBootSector() {
+static UINT32 findBootSector() {
     int ret;
     int ok = 1;
-    UINT32 val;
+    UINT16 val;
 
     if (bootSector) {
         return bootSector;
@@ -605,9 +623,10 @@ UINT32 findBootSector() {
  * @param sector - The sector in question.
  * @return 1 if the sector is a FAT32 boot sector, 0 if not, or if can not be determined.
  */
-int isFat32Sector(UINT32 sector) {
+static int isFat32Sector(UINT32 sector) {
     int ret;
-    char sigBuffer[6];
+    char sigBuffer[FAT32_FAT32_STR_LENGTH+1];
+    UINT16 val;
     int ok = 1;
 
     ret = readSector(sector);
@@ -619,12 +638,15 @@ int isFat32Sector(UINT32 sector) {
      *   Boot sector (8-bit addressing units):
      *   | offset |  0  1  2  3  4  5  6  7   8  9  A  B  C  D  E  F
      *   |  0x50  | .. .. 46 41 54 33 32 20  20 20 .. .. .. .. .. .. |  ..FAT32   ...... |
+     *   | 0x1F0  | .. .. .. .. .. .. .. ..  .. .. .. .. .. .. 55 AA
      *
      */
 
-    getSdChars(FAT32_SIGNATURE_OFFSET, 5, sigBuffer);
-    sigBuffer[5] = 0;
-    ok = strcmp(sigBuffer, "FAT32") == 0;
+    getSdChars(FAT32_FAT32_STR_OFFSET, FAT32_FAT32_STR_LENGTH, sigBuffer);
+    sigBuffer[FAT32_FAT32_STR_LENGTH] = 0;
+    ok = strcmp(sigBuffer, FAT32_FAT32_STR) == 0;
+    val = getSdUI16(FAT32_SIGNATURE_OFFSET);
+    ok &= (val == FAT32_SIGNATURE);
 
     return ok;
 }
@@ -633,7 +655,7 @@ int isFat32Sector(UINT32 sector) {
 * Reads the Volume Serial Number from a FAT32 Boot Sector.
 * @return The volume serial, or 0 if it can not be determined.
 */
-UINT32 getVolumeSerialFromFat32(UINT32 sector) {
+static UINT32 getVolumeSerialFromFat32(UINT32 sector) {
     int ret;
     UINT32 val;
     UINT32 volumeSerial = 0;
@@ -670,7 +692,7 @@ UINT32 getVolumeSerialFromFat32(UINT32 sector) {
  * Stores a Volume Serial Number into the sector buffer. Performs no validation.
  * @return 0 if the volume serial was written successfully, an undocumented error code otherwise.
  */
-int setVolumeSerialIntoFat32(UINT32 sector, UINT32 volumeSerial) {
+static int setVolumeSerialIntoFat32(UINT32 sector, UINT32 volumeSerial) {
     int ret;
     UINT16 val;
 
@@ -683,16 +705,13 @@ int setVolumeSerialIntoFat32(UINT32 sector, UINT32 volumeSerial) {
     return writeSector(sector);
 }
 
-// It might be nice to set the volume label, if it doesn't match the TB serial number. This is a start at
-// code to read/write volume label.
-#ifdef SET_VOLUME_LABEL_IMPLEMENTED
 /**
  * Reads the Volume Label from a FAT32 Boot Sector.
  * @param sector The sector number of a FAT32 boot sector.
  * @param buffer The nul terminated label is written here.
  * @return 0 if a label was read, an undocumented error otherwise.
  */
-int getVolumeLabelFromFat32(UINT32 sector, char *labelBuffer) {
+static int getVolumeLabelFromFat32(UINT32 sector, char *labelBuffer) {
     int ret;
 
     if (ret = readSector(sector)) {
@@ -711,7 +730,7 @@ int getVolumeLabelFromFat32(UINT32 sector, char *labelBuffer) {
  * @param label The to be written.
  * @return 0 if a label was written successfully, an undocumented error otherwise.
  */
-int setVolumeLabelIntoFat32(UINT32 sector, char *label) {
+static int setVolumeLabelIntoFat32(UINT32 sector, char *label) {
     int ret;
 
     if (ret = readSector(sector)) {
@@ -724,58 +743,86 @@ int setVolumeLabelIntoFat32(UINT32 sector, char *label) {
 }
 
 /**
- * Attempts to set the volume label to the given value.
+ * Attempts to set the volume label to the given value. The volume label is actually in three locations, in
+ * the FAT32 boot sector (that's two), and in a special entry in the root directory (the third).
+ *
+ * This code assumes that the root directory is empty, and blindly writes to the first entry of the root directory.
+ *
+ * @param label - A string with the label to be set. Will be converted to upper case and truncated or space-padded
+ *   to 11 characters.
+ * @return 1 if the label was set, and < 0 if an error occurred.
  */
-int setVolumeLabel(char *label) {
+static int setSdVolumeLabel(char *label) {
     UINT32 addr1, addr2 = 0;
-    int ok1 = 0, ok2 = 0;
-    char label1[FAT32_LABEL_LENGTH+1], label2[FAT32_LABEL_LENGTH+1], target[FAT32_LABEL_LENGTH+1];
+    UINT32 rootDirectoryAddr = 0;
+    int ok1 = 0, ok2 = 0, ret = -1;
+    int ix;
+    char target[FAT32_LABEL_LENGTH+1];
 
     addr1 = findBootSector();
     if (addr1) {
         if (isFat32Sector(addr1)) {
             ok1 = 1;
-            getVolumeLabelFromFat32(addr1, label1);
             addr2 = addr1 + FAT32_DUPLICATE_BOOT_SECTOR_OFFSET;
+            // The root directory is the first actual data, after the boot sector, reserved sectors, and the FATs proper.
+            rootDirectoryAddr = addr1 + getSdUI16(FAT32_RESERVED_SECTORS_OFFSET) +
+                    (getSdUI8(FAT32_NUMBER_OF_FATS_OFFSET) * getSdUI32(FAT32_SECTORS_PER_FAT_OFFSET));
         }
     }
     if (addr2) {
         if (isFat32Sector(addr2)) {
             ok2 = 1;
-            getVolumeLabelFromFat32(addr2, label2);
         }
     }
 
     if (ok1 && ok2) {
-        strcpy(target, label);
-        while (strlen(target) < FAT32_LABEL_LENGTH) {
-            strcat(target, " ");
+        // Need exactly FAT32_LABEL_LENGTH characters, all upper case, space padded if necessary.
+        for (ix=0; ix<FAT32_LABEL_LENGTH; ix++) {
+            target[ix] = (*label) ? upper(*label++) : ' ';
         }
         // Do 2 before 1, because we read 2 most recently, so it is cached.
-        if (strcmp(label2, target)) {
-            setVolumeLabelIntoFat32(addr2, target);
-        }
-        if (strcmp(label1, target)) {
-            setVolumeLabelIntoFat32(addr1, target);
+        setVolumeLabelIntoFat32(addr2, target);
+        setVolumeLabelIntoFat32(addr1, target);
+
+        ret = readSector(rootDirectoryAddr);
+        if (ret == 0) {
+            putSdChars(0, FAT32_LABEL_LENGTH, target);
+            putSdUI8(FAT32_DIRENT_ATTR_OFFSET, D_VOLID);
+            ret = writeSector(rootDirectoryAddr);
+            if (ret == 0) {
+                ret = 1;
+            }
         }
     }
+    return ret;
 }
-#endif
+
+/**
+ * Reads the TB Serial Number (from NOR flash), and writes it to the Volume Label on the SD card.
+ *
+ * @return 1 if the label was set, 0 if volume serial was already set, and < 0 if an error occurred.
+ */
+static int setSdVolumeLabelToSrn() {
+    char *srn = getSerialNumber();
+    int ret = 0;
+
+    // If the NOR flash serial number doesn't look valid, ignore it.
+    if (strncmp(srn, "A-", 2) == 0 || strncmp(srn, "B-", 2) == 0) {
+        ret = setSdVolumeLabel(srn);
+    }
+    return ret;
+}
 
 /**
  * Attempts to set the Volume Serial to a predefined value.
+ *
+ * @return 1 if the volume serial was set, 0 if volume serial was already set, and < 0 if an error occurred.
  */
-int setSDVolumeSerial() {
+static int setSDVolumeSerial_int() {
     UINT32 addr1=0, addr2=0;
     UINT32 vs1=0, vs2=0;
     int ret;
     int updated = 0;
-
-    // Cleans up anything that may have happened to the disk.
-    ret = _deviceunmount(0);
-    if (!ret) {
-        ret = _devicemount(0);
-    }
 
     if (!ret) {
         addr1 = findBootSector();
@@ -805,16 +852,64 @@ int setSDVolumeSerial() {
                 }
             }
         }
+    }
 
-        // Cleans up, again, anything active in the disk system.
-        _deviceunmount(0);
+    // If ret has an error, return it, otherwise, the updated flag.
+    return (ret < 0) ? ret : updated;
+}
+
+/**
+ * Attempts to set the Volume Serial to a predefined value (0x9285f050).
+ *
+ * @return 1 if the volume serial was set, 0 if volume serial was already set, and < 0 if an error occurred.
+ */
+int setSDVolumeSerial() {
+    int ret;
+
+    // Cleans up anything that may have happened to the disk.
+    ret = _deviceunmount(0);
+    if (!ret) {
         ret = _devicemount(0);
+    }
 
-        if (updated) {
-            logStringRTCOptional((char *)"Updated Volume Serial Number.", BUFFER, LOG_ALWAYS, 0);
+    if (!ret) {
+        ret = setSDVolumeSerial_int();
+        if (ret == 1) {
+            logStringRTCOptional((char *) "Updated Volume Serial Number.", BUFFER, LOG_ALWAYS, 0);
         }
     }
+
+    // Cleans up, again, anything active in the disk system.
+    _deviceunmount(0);
+    _devicemount(0);
 
     return ret;
 }
 
+/**
+ * Formats the SD card. If the device has a serial number, that is used for the volume label. A constant value
+ *   0x9285f050 is used for the volume serial, so that our Android application can mount the Talking Book as
+ *   a USB drive without user prompting.
+ */
+void formatSDCard() {
+    setLED(LED_RED, 0);
+    setLED(LED_GREEN, 1);
+    playDings(2);
+
+    // The actual format.
+    _deviceunmount(0);
+    _format(0, FAT32_Type);
+    _devicemount(0);
+
+    // Set the identity.
+    setSDVolumeSerial_int();
+    setSdVolumeLabelToSrn();
+    // The TB-Loader uses the SERIALNO.srn file, so recreate that, to perserver serial numbers.
+    ensureSnOnDisk();
+
+    // This is probably not necessary, but doesn't hurt, and ensures that we're running from what was just written.
+    _deviceunmount(0);
+    _devicemount(0);
+
+    playBips(2);
+}

@@ -550,13 +550,13 @@ void coldStartNORStats(void) {
 
 void
 exportFlashStats(void) {
-	//export all flash stats
-	rebuildFlash(0);	
-	//Temporary code until transition is complete to new flash stats:
-	confirmSNonDisk();
-	writeVersionToDisk(DEFAULT_SYSTEM_PATH);  // make sure the version file is correct
-	confirmPackageNameonDisk();
-	confirmLocationonDisk();
+    //export all flash stats
+    rebuildFlash(0);
+    //Temporary code until transition is complete to new flash stats:
+    ensureSnOnDisk();
+    writeVersionToDisk(DEFAULT_SYSTEM_PATH);  // make sure the version file is correct
+    confirmPackageNameonDisk();
+    confirmLocationonDisk();
 }
 
 static int saveFlashStats(struct SystemData *sd, struct SystemCounts2 *sc, struct NORmsgMap *msgMap, struct NORallMsgStatsAllProfiles *stats) {

@@ -644,12 +644,8 @@ void housekeeping() {
 	logLowestStack();
 	setLED(LED_ALL,TRUE);
 	saveVolumeProfile();
-	//exportFlashStats();
 	write_config_bin();  // build a config.bin
-	//checkDoubleSRNprefix(); // this can be removed once the dup serial number prefixes are fixed
-	//confirmSNonDisk(); // make sure the serial number file is correct 
 	buildMyStatsCSV();
-	//buildExchgOstats();  // we aren't have devices exchange stats right now
 	clearDeleteQueue();
 	saveLogFile(0);	
 }
@@ -1137,7 +1133,7 @@ KEY_TimeBase_B_isr() {	//TimerBase B fired
 	keydown_counter += 1;
 }
 
-extern void confirmSNonDisk(void) {
+void ensureSnOnDisk(void) {
 	int exists, handle, ret;
 	char fileSN[PATH_LENGTH],filePattern[PATH_LENGTH];
 	char sysPath[PATH_LENGTH];	

@@ -43,5 +43,6 @@ extern unsigned long rand(void);
 extern void initRandomNG(void);
 
 extern int setSDVolumeSerial();
+extern void formatSDCard();
 
 #endif

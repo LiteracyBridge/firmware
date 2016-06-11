@@ -338,6 +338,13 @@ void startUp(unsigned int bootType) {
 		startUpdate((char *) "a:/system.img");
 	}
 
+    if (fileExists((LPSTR)FORMAT_SD_TRIGGER_FILE)) {
+        formatSDCard();
+        // No need to clean up -- the format does it for us.
+        SystemIntoUDisk(USB_CLIENT_SVC_LOOP_CONTINUOUS);
+        fastShutdown();
+    }
+
     if (!fileExists((LPSTR)SUPPRESS_SELF_TEST_MARKER_FILE)) {
         logStringRTCOptional((char *)"Will perform self tests.", ASAP, LOG_ALWAYS, 0);
         performSelfTests = 1;
